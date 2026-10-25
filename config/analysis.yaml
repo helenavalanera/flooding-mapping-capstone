@@ -1,13 +1,63 @@
 project: flooding-mapping
-crs: EPSG:4326
+
+# SIRGAS 2000 / UTM 22S: métrico, cobre 54°W–48°W (Porto Alegre ≈ 51,2°W).
+crs_metric: EPSG:31982
+# CRS geográfico esperado pelo r5py e usado para troca de dados.
+crs_geographic: EPSG:4326
+
+time:
+  # Definida após validar a vigência efetiva do GTFS (reports/qa/).
+  data_referencia: null
+  # PROVISÓRIO: pico da manhã em dia útil; revisar após validar o serviço.
+  horario_partida: "07:00"
+  # Janela de partida (r5py departure_time_window); NÃO é duração máxima.
+  janela_partida_min: 60
+
+accessibility:
+  limite_min: 30
+  modos: [walk, car, transit]
+
+grid:
+  espacamento_m: 1000
+
+scenarios:
+  raios_m: [50, 100, 150]
+  # PROVISÓRIO: tolerância para considerar uma aresta como intersectando a zona.
+  tolerancia_m: 0
+
+robustness:
+  n_pares: 500
+  semente: 20261025
+
+population:
+  # PROVISÓRIO: densidade uniforme dentro do setor censitário.
+  metodo_alocacao: densidade_uniforme
+  excluir_origens_sem_populacao: true
+
+osm:
+  # Margem em torno do polígono municipal para o recorte do PBF.
+  margem_recorte_m: 3000
+  tags_saude:
+    amenity: [hospital, clinic, doctors]
+
 paths:
   raw: data/raw
   interim: data/interim
   processed: data/processed
   events: data/events
+  manifest: data/raw/manifest.json
   tables: outputs/tables
   maps: outputs/maps
-analysis:
-  accessibility_threshold_minutes: 30
-  robustness_quantile: 0.9
+  qa: reports/qa
 
+sources:
+  gtfs:
+    # URL canônica obtida via API CKAN do portal (resource_show) em 2026-10-24.
+    url: https://dadosabertos.poa.br/dataset/1fe9c2c1-9fbe-48ea-841b-61e30597ecd6/resource/b3bce61f-78ee-49eb-be57-6236d82bd5e0/download/arquivo-gtfs.zip
+    url_candidata_original: https://dadosabertos.poa.br/dataset/1fe9c2c1-9fbe-48ea-841b-61e30597ecd6/resource/b3bce61f-78ee-49eb-be57-6236d82bd5e0/download/outputfiles.zip
+    destino: data/raw/gtfs_eptc.zip
+  osm:
+    url: https://download.geofabrik.de/south-america/brazil/sul-latest.osm.pbf
+    destino: data/raw/sul-latest.osm.pbf
+  ibge_setores: null
+  ibge_populacao: null
