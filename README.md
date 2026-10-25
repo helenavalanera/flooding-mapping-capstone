@@ -18,7 +18,7 @@ Dados brutos e intermediários não são versionados. Consulte
 ## Uso
 
 ```bash
-python -m pip install -r requirements.txt
+uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -e ".[dev]"
 pytest
 ```
 

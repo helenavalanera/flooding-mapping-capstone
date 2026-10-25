@@ -1,13 +1,30 @@
 __pycache__/
 *.py[cod]
+*.egg-info/
+build/
+dist/
 .pytest_cache/
 .venv/
+.DS_Store
+.ipynb_checkpoints/
+
+# Dados brutos, intermediários e processados não são versionados.
 data/raw/*
 !data/raw/manifest.json
 data/interim/*
 data/processed/*
+*.pbf
+*.zip
+*.parquet
+*.gpkg
+
+# Resultados volumosos.
 outputs/tables/*
 outputs/maps/*
-reports/qa/*
-!.gitkeep
 
+# Relatórios de QA leves (md/json) são versionados.
+reports/qa/*
+!reports/qa/*.md
+!reports/qa/*.json
+
+!.gitkeep
