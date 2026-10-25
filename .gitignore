@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+data/raw/*
+!data/raw/manifest.json
+data/interim/*
+data/processed/*
+outputs/tables/*
+outputs/maps/*
+reports/qa/*
+!.gitkeep
+

@@ -1,0 +1,13 @@
+project: flooding-mapping
+crs: EPSG:4326
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  events: data/events
+  tables: outputs/tables
+  maps: outputs/maps
+analysis:
+  accessibility_threshold_minutes: 30
+  robustness_quantile: 0.9
+
