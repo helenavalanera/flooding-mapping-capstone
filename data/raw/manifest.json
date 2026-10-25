@@ -21,6 +21,28 @@
       "final_url": "https://download.geofabrik.de/south-america/brazil/sul-261024.osm.pbf",
       "last_modified": "Sat, 24 Oct 2026 23:08:07 GMT",
       "content_length": 428367327
+    },
+    {
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/RS/RS_setores_CD2022.gpkg",
+      "path": "data/raw/RS_setores_CD2022.gpkg",
+      "downloaded_at_utc": "2026-10-25T02:22:37+00:00",
+      "sha256": "8d6c46bbc8d0690d85dfc10041e0e89ea23615b1c20ffc3cb4ab677d9536a943",
+      "size_bytes": 57962496,
+      "source_reference_date": "2024-11-13",
+      "final_url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/RS/RS_setores_CD2022.gpkg",
+      "last_modified": "Wed, 13 Nov 2024 18:23:47 GMT",
+      "content_length": 57962496
+    },
+    {
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/Dicionario_de_dados_malha_agregados.xlsx",
+      "path": "data/raw/Dicionario_de_dados_malha_agregados.xlsx",
+      "downloaded_at_utc": "2026-10-25T02:22:40+00:00",
+      "sha256": "0dffb669ee90e1ffb86a7c8666cc066d5121d44b494013cc1149e50cc75073b1",
+      "size_bytes": 18860,
+      "source_reference_date": null,
+      "final_url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/Dicionario_de_dados_malha_agregados.xlsx",
+      "last_modified": "Wed, 13 Nov 2024 21:36:56 GMT",
+      "content_length": 18860
     }
   ],
   "notes": "Registre aqui as fontes, versões, datas de acesso e checksums dos dados brutos."

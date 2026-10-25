@@ -61,5 +61,10 @@ sources:
   osm:
     url: https://download.geofabrik.de/south-america/brazil/sul-latest.osm.pbf
     destino: data/raw/sul-latest.osm.pbf
-  ibge_setores: null
-  ibge_populacao: null
+  # Malha de setores 2022 com agregados (população) na mesma referência.
+  ibge_setores:
+    url: https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/RS/RS_setores_CD2022.gpkg
+    destino: data/raw/RS_setores_CD2022.gpkg
+  ibge_dicionario:
+    url: https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/Dicionario_de_dados_malha_agregados.xlsx
+    destino: data/raw/Dicionario_de_dados_malha_agregados.xlsx
