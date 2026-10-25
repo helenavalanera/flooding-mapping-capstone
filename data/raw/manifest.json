@@ -1,5 +1,27 @@
 {
-  "sources": [],
+  "sources": [
+    {
+      "url": "https://dadosabertos.poa.br/dataset/1fe9c2c1-9fbe-48ea-841b-61e30597ecd6/resource/b3bce61f-78ee-49eb-be57-6236d82bd5e0/download/arquivo-gtfs.zip",
+      "path": "data/raw/gtfs_eptc.zip",
+      "downloaded_at_utc": "2026-10-25T02:18:01+00:00",
+      "sha256": "7ad9c99183e7a867cacdd3fa0e6f813125cf0c5b772c2188bea03f4fa6a5d76f",
+      "size_bytes": 7745077,
+      "source_reference_date": "2025-09-25",
+      "final_url": "https://dadosabertos.poa.br/dataset/1fe9c2c1-9fbe-48ea-841b-61e30597ecd6/resource/b3bce61f-78ee-49eb-be57-6236d82bd5e0/download/arquivo-gtfs.zip",
+      "last_modified": "Thu, 25 Sep 2025 15:02:11 GMT",
+      "content_length": null
+    },
+    {
+      "url": "https://download.geofabrik.de/south-america/brazil/sul-latest.osm.pbf",
+      "path": "data/raw/sul-latest.osm.pbf",
+      "downloaded_at_utc": "2026-10-25T02:19:48+00:00",
+      "sha256": "ce607e97bae91ffa7e04531f8a339325c3ff60c3320b89f2b552a8286cb506c9",
+      "size_bytes": 428367327,
+      "source_reference_date": "2026-10-24",
+      "final_url": "https://download.geofabrik.de/south-america/brazil/sul-261024.osm.pbf",
+      "last_modified": "Sat, 24 Oct 2026 23:08:07 GMT",
+      "content_length": 428367327
+    }
+  ],
   "notes": "Registre aqui as fontes, versões, datas de acesso e checksums dos dados brutos."
 }
-
