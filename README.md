@@ -59,6 +59,7 @@ src/flooding_mapping/
   robustness.py             eficiência e maior componente (NetworkX)
   clustering.py             tipologia k-means
   susceptibility.py         suscetibilidade (DEM + hidrografia) e alerta operacional
+  webmap.py                 mapa interativo HTML (Leaflet) com todas as camadas
 tests/                      pytest com dados sintéticos
 reports/qa/                 relatórios de qualidade e registros de execução
 outputs/                    tabelas e mapas (não versionados)
@@ -99,9 +100,11 @@ $PY -m flooding_mapping.accessibility --scenarios S-E20250618-04-100-all
 $PY -m flooding_mapping.robustness --scenarios S-E20250618-04-100-all
 # 7. Perdas consolidadas e mapas de perda
 $PY -m flooding_mapping.accessibility --consolidate --maps S-D20250618-100-all
-# 8. Tipologia (após calcular os cenários)
+# 8. Mapa interativo (abre no navegador; estado na URL, ex.: #indicador=L&modo=car)
+$PY -m flooding_mapping.webmap && open outputs/maps/mapa_interativo.html
+# 9. Tipologia (após calcular os cenários)
 $PY -m flooding_mapping.clustering
-# 9. Suscetibilidade, validação e alerta (chuva prevista em mm/h)
+# 10. Suscetibilidade, validação e alerta (chuva prevista em mm/h)
 $PY -m flooding_mapping.ingest dem_s30 && $PY -m flooding_mapping.ingest dem_s31
 $PY -m flooding_mapping.susceptibility --alert-rain 40
 ```
