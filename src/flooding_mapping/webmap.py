@@ -6,6 +6,7 @@ the page with textContent, never as HTML.
 
 import argparse
 import json
+import urllib.parse
 from pathlib import Path
 
 import geopandas as gpd
@@ -21,6 +22,34 @@ LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4"
 WATER_TRACT = "9"  # CD_SIT: massas de água
 ROAD_CLASS = {"motorway": 1, "motorway_link": 1, "trunk": 1, "trunk_link": 1,
               "primary": 2, "primary_link": 2, "secondary": 3, "secondary_link": 3}
+CARTO_TILES = "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key="
+CARTO_KEY_FILE = "config/carto_api_key.txt"  # git-ignored
+
+
+def carto_key() -> str | None:
+    """CARTO basemap key from $CARTO_API_KEY or the git-ignored key file."""
+    import os
+
+    key = os.environ.get("CARTO_API_KEY", "").strip()
+    path = resolve(CARTO_KEY_FILE)
+    if not key and path.is_file():
+        key = path.read_text(encoding="utf-8").strip()
+    return key or None
+
+
+def basemap_js(key: str | None = None) -> str:
+    """Basemap script: CARTO (if a key is available) as default, the embedded
+    basemap otherwise; both, plus OSM tiles, stay selectable."""
+    if not key:
+        return BASEMAP_JS
+    url = json.dumps(CARTO_TILES + urllib.parse.quote(key, safe=""))
+    return BASEMAP_JS.replace("]).addTo(map);\nconst osmTiles", "]);\nconst osmTiles").replace(
+        'L.control.layers({"Base própria (offline)": ownBase,',
+        f'const cartoTiles = L.tileLayer({url}, {{maxZoom: 20, '
+        f'attribution: "© colaboradores do OpenStreetMap, © CARTO"}}).addTo(map);\n'
+        f'L.control.layers({{"CARTO Voyager": cartoTiles, "Base própria (offline)": ownBase,')
+
+
 BASEMAP_JS = """map.createPane("base"); map.getPane("base").style.zIndex = 250;
 const ownBase = L.layerGroup([
   L.geoJSON(CONTEXT.land, {pane: "base", interactive: false,
@@ -178,7 +207,7 @@ def embed_json(data: dict) -> str:
 
 
 def build_html(data: dict) -> str:
-    return (TEMPLATE.replace("__LEAFLET__", LEAFLET).replace("__BASEMAP__", BASEMAP_JS)
+    return (TEMPLATE.replace("__LEAFLET__", LEAFLET).replace("__BASEMAP__", basemap_js(carto_key()))
             .replace("__BASE_CSS_DARK__", BASE_CSS_DARK).replace("__BASE_CSS__", BASE_CSS)
             .replace("__DATA__", embed_json(data)))
 

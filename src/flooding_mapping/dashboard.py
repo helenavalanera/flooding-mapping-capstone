@@ -17,7 +17,7 @@ import numpy as np
 
 from .config import load_config, resolve
 from .susceptibility import gtfs_routes
-from .webmap import BASE_CSS, BASE_CSS_DARK, BASEMAP_JS, LEAFLET, _features, context, embed_json
+from .webmap import BASE_CSS, BASE_CSS_DARK, LEAFLET, _features, basemap_js, carto_key, context, embed_json
 
 FORECAST_API = "https://api.open-meteo.com/v1/forecast"
 CANDIDATE_PERCENTILE = 0.90
@@ -88,7 +88,7 @@ def build_data(config: dict) -> dict:
 
 
 def build_html(data: dict) -> str:
-    return (TEMPLATE.replace("__LEAFLET__", LEAFLET).replace("__BASEMAP__", BASEMAP_JS)
+    return (TEMPLATE.replace("__LEAFLET__", LEAFLET).replace("__BASEMAP__", basemap_js(carto_key()))
             .replace("__BASE_CSS_DARK__", BASE_CSS_DARK).replace("__BASE_CSS__", BASE_CSS)
             .replace("__DATA__", embed_json(data)))
 

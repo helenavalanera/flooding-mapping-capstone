@@ -8,6 +8,10 @@ dist/
 .DS_Store
 .ipynb_checkpoints/
 
+# Credenciais locais (nunca versionar).
+.env
+config/carto_api_key.txt
+
 # Dados brutos, intermediários e processados não são versionados.
 data/raw/*
 !data/raw/manifest.json

@@ -36,6 +36,18 @@ das redes?
   `tile.openstreetmap.org` ficam só como opção no seletor de camadas: o servidor bloqueia
   páginas sem Referer válido ("403 Access blocked"), o caso de arquivos abertos do disco.
   Para usá-los, sirva a pasta: `python -m http.server -d outputs/maps 8000`.
+- **Mapa de fundo CARTO (opcional):** com uma chave, o CARTO Voyager vira o fundo padrão.
+  Informe a chave **fora do git**, por uma das opções abaixo, e gere os HTML de novo:
+
+  ```bash
+  export CARTO_API_KEY="sua-chave"                 # opção 1: só nesta sessão do terminal
+  printf '%s' "sua-chave" > config/carto_api_key.txt   # opção 2: arquivo local (no .gitignore)
+  $PY -m flooding_mapping.webmap && $PY -m flooding_mapping.dashboard
+  ```
+
+  A chave fica **embutida nos HTML gerados** (tiles são pedidos pelo navegador): não publique
+  esses arquivos sem restringir a chave a domínios no painel do CARTO. Uma restrição por
+  domínio pode bloquear páginas abertas via `file://`, que não enviam Referer.
 
 ## Fontes de dados e atribuição
 

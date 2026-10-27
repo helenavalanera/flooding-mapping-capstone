@@ -22,3 +22,31 @@ def test_html_embeds_data_and_pins_leaflet_version():
     assert json.loads(payload.group(1)) == {"meta": {"x": "</script>"}}
     # External text must never be rendered as HTML.
     assert "innerHTML" not in html
+
+
+def test_carto_key_makes_carto_the_default_basemap(monkeypatch, tmp_path):
+    from flooding_mapping import webmap
+
+    monkeypatch.setattr(webmap, "resolve", lambda rel: tmp_path / rel)
+    monkeypatch.delenv("CARTO_API_KEY", raising=False)
+    assert webmap.carto_key() is None
+    without = webmap.basemap_js(None)
+    assert "cartocdn" not in without and "]).addTo(map);\nconst osmTiles" in without
+
+    monkeypatch.setenv("CARTO_API_KEY", " chave-ficticia/123 ")
+    key = webmap.carto_key()
+    assert key == "chave-ficticia/123"
+    script = webmap.basemap_js(key)
+    assert "rastertiles/voyager/{z}/{x}/{y}.png?key=chave-ficticia%2F123" in script
+    assert '"CARTO Voyager": cartoTiles' in script and "© CARTO" in script
+    assert "]);\nconst osmTiles" in script          # embedded base no longer added by default
+
+
+def test_carto_key_file_is_used_when_env_is_absent(monkeypatch, tmp_path):
+    from flooding_mapping import webmap
+
+    monkeypatch.setattr(webmap, "resolve", lambda rel: tmp_path / rel)
+    monkeypatch.delenv("CARTO_API_KEY", raising=False)
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / "carto_api_key.txt").write_text("abc\n")
+    assert webmap.carto_key() == "abc"
