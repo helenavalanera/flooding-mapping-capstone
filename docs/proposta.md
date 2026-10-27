@@ -54,8 +54,10 @@ antecipar linhas de ônibus e serviços expostos em dias de chuva forte. Usa só
    classificam segmentos viários pela semelhança com locais já interditados (positivos e não
    rotulados), com variáveis de relevo e hidrografia; validação espacial em blocos de 2 km e
    temporal (treino 2019–2022, teste 2025), contra regras de referência.
-3. **Alerta operacional (determinístico):** se a chuva prevista superar um limiar, listar os
-   segmentos mais suscetíveis e as linhas de ônibus e serviços de saúde a até 50 m.
+3. **Dashboard de alerta (determinístico):** a partir da localização do usuário e da previsão
+   horária de chuva (Open-Meteo), atribui nível de alerta (médio/alto) aos trechos mais suscetíveis
+   e lista linhas de ônibus e serviços de saúde expostos. Limiares calibrados com a chuva prevista
+   nas datas de bloqueio (≥ 3,5 mm/h ou 26 mm/24 h: médio; ≥ 9 mm/h ou 56 mm/24 h: alto).
 4. **ML não supervisionado:** k-means (k por silhueta) sobre acesso de base e perda máxima.
 5. **Fase 2 — Deep Learning:** segmentação de áreas alagadas em Sentinel-1 (U-Net) para rotular
    eventos e ampliar a base de treino.
@@ -82,4 +84,5 @@ regras simples; DL só se justifica com rótulos em escala, o que o satélite po
 **Limitações:** destinos do OSM incompletos; GTFS de 2025; bloqueio binário; ônibus seguem a
 grade do GTFS (o bloqueio afeta a caminhada de acesso); eventos não formam inventário completo
 e refletem viés de notificação; DEM de superfície a 30 m; limiar de chuva e corte do alerta
-ainda sem calibração (no percentil 95 o alerta é amplo demais).
+calibrado só com chuva modelada (a previsão não captou o temporal de 06/03/2022); o alerta é
+nível heurístico, não probabilidade, e cobre só Porto Alegre.

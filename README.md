@@ -28,6 +28,9 @@ das redes?
   semelhança de terreno com locais já interditados; **não prevê alagamento real** e herda o viés
   de notificação. O alerta operacional é determinístico e seu limiar de chuva é provisório.
   Deep Learning (Sentinel-1) é etapa futura.
+- **Dashboard de alerta:** mostra **nível de alerta heurístico, não probabilidade**. Limiares de
+  chuva calibrados com chuva *modelada* nas datas de bloqueio (limite inferior; a previsão não
+  captou o temporal de 06/03/2022). Cobre só Porto Alegre; a localização fica no navegador.
 
 ## Fontes de dados e atribuição
 
@@ -36,6 +39,7 @@ das redes?
 | GTFS EPTC — [dadosabertos.poa.br](https://dadosabertos.poa.br/dataset/gtfs) | Rede de ônibus | Creative Commons Atribuição (portal); © EPTC/Prefeitura de Porto Alegre |
 | OpenStreetMap via [Geofabrik](https://download.geofabrik.de/south-america/brazil/sul.html) | Rede viária e destinos | ODbL — © colaboradores do OpenStreetMap |
 | IBGE — Censo 2022, malha de setores com agregados | Território e população | Fonte: IBGE, Censo Demográfico 2022 |
+| Open-Meteo (previsão e arquivo de previsões) | Chuva prevista e calibração | CC BY 4.0 — Open-Meteo.com |
 | Copernicus DEM GLO-30 (AWS Open Data) | Relevo | © DLR e.V. 2010–2014 e © Airbus Defence and Space GmbH 2014–2018, fornecido no âmbito do COPERNICUS pela União Europeia e ESA |
 | EPTC / Prefeitura de Porto Alegre; Jornal do Comércio; Sul21 | Eventos de bloqueio | Citados por URL em `data/events/events.csv` |
 
@@ -60,6 +64,8 @@ src/flooding_mapping/
   clustering.py             tipologia k-means
   susceptibility.py         suscetibilidade (DEM + hidrografia) e alerta operacional
   webmap.py                 mapa interativo HTML (Leaflet) com todas as camadas
+  rain.py                   calibração dos limiares de chuva (previsões históricas Open-Meteo)
+  dashboard.py              dashboard de alerta: localização, previsão ao vivo, nível por trecho
 tests/                      pytest com dados sintéticos
 reports/qa/                 relatórios de qualidade e registros de execução
 outputs/                    tabelas e mapas (não versionados)
@@ -107,6 +113,9 @@ $PY -m flooding_mapping.clustering
 # 10. Suscetibilidade, validação e alerta (chuva prevista em mm/h)
 $PY -m flooding_mapping.ingest dem_s30 && $PY -m flooding_mapping.ingest dem_s31
 $PY -m flooding_mapping.susceptibility --alert-rain 40
+# 11. Limiares de chuva e dashboard de alerta (previsão ao vivo no navegador)
+$PY -m flooding_mapping.rain
+$PY -m flooding_mapping.dashboard && open outputs/maps/dashboard_alerta.html
 ```
 
 Testes: `.venv/bin/python -m pytest`.

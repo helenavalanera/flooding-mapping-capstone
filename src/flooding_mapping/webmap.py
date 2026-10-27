@@ -76,7 +76,10 @@ def build_data(config: dict) -> dict:
 
     susceptibility = gpd.read_parquet(tables / "susceptibility.parquet")
     top = susceptibility[susceptibility["percentile"] >= config["susceptibility"]["alerta_percentil"]]
-    top = top.assign(percentile=top["percentile"].round(3))
+    # susceptibility.parquet stores segment midpoints; draw the segment lines.
+    top = segments[["segment_id", "geometry"]].merge(
+        top[["segment_id", "percentile"]].assign(percentile=top["percentile"].round(3)),
+        on="segment_id")
 
     area = gpd.read_parquet(processed / "municipality.parquet")
     return {
