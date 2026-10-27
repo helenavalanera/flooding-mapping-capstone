@@ -53,6 +53,7 @@ def basemap_js(key: str | None = None) -> str:
 BASEMAP_JS = """map.createPane("base"); map.getPane("base").style.zIndex = 250;
 const ownBase = L.layerGroup([
   L.geoJSON(CONTEXT.land, {pane: "base", interactive: false,
+    attribution: "Base: IBGE (setores 2022) e © colaboradores do OpenStreetMap",
     style: {stroke: false, fillColor: css("--land"), fillOpacity: 1}}),
   L.geoJSON(CONTEXT.roads, {pane: "base", interactive: false,
     style: f => ({color: css("--road"), weight: [0, 2.4, 1.6, 1][f.properties.c], opacity: 0.9})}),
@@ -60,8 +61,7 @@ const ownBase = L.layerGroup([
 const osmTiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19,
   attribution: "© colaboradores do OpenStreetMap"});
 L.control.layers({"Base própria (offline)": ownBase,
-                  "OpenStreetMap (requer servidor ou https)": osmTiles}, null, {position: "topright"}).addTo(map);
-map.attributionControl.addAttribution("Base: IBGE (setores 2022) e © colaboradores do OpenStreetMap");"""
+                  "OpenStreetMap (requer servidor ou https)": osmTiles}, null, {position: "topright"}).addTo(map);"""
 BASE_CSS = """--land:#fbfaf7; --water:#cfe2ee; --road:#c9c3b8;"""
 BASE_CSS_DARK = """--land:#2b2b28; --water:#16242e; --road:#5a564f;"""
 

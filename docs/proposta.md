@@ -52,7 +52,7 @@ antecipar linhas de ônibus e serviços expostos em dias de chuva forte. Usa só
    local e maior componente conexa.
 2. **ML preditivo — suscetibilidade:** regressão logística regularizada e random forest
    classificam segmentos viários pela semelhança com locais já interditados (positivos e não
-   rotulados), com variáveis de relevo e hidrografia; validação espacial em blocos de 2 km e
+   rotulados), com variáveis de relevo, escoamento e drenagem; validação espacial em blocos de 2 km e
    temporal (treino 2019–2022, teste 2025), contra regras de referência.
 3. **Dashboard de alerta (determinístico):** a partir da localização do usuário e da previsão
    horária de chuva (Open-Meteo), atribui nível de alerta (médio/alto) aos trechos mais suscetíveis
@@ -75,9 +75,11 @@ regras simples; DL só se justifica com rótulos em escala, o que o satélite po
   da rede cai 17% (pedestres) e 8% (viária); a global, menos de 0,5%.
 - **Bloqueios simultâneos de 18/06/2025 (100 m):** 153 origens perdem acesso de carro
   (≈ 374 mil pessoas estimadas nessas células).
-- **Suscetibilidade:** os locais interditados estão em áreas baixas — a regra “elevação baixa”
-  posiciona o evento típico no percentil 80 (espacial) e 85 (temporal); a logística atinge 73 e
-  79 e o random forest sobreajusta. Com 17 locais, o ML ainda não supera a regra simples.
+- **Suscetibilidade:** os locais interditados estão em áreas baixas. Com variáveis de
+  escoamento e drenagem (acúmulo de fluxo, índice de umidade, densidade de valas e arroios), a
+  regressão logística sobe do percentil 79 para 86 no teste temporal e empata com a regra
+  “elevação baixa” (85); o random forest sobreajusta. Bocas de lobo e limpeza urbana não têm
+  dados abertos.
 - **k-means:** dois grupos (centro com acesso alto; periferia com acesso baixo a pé e de
   ônibus); as perdas, muito localizadas, não diferenciam tipologias.
 

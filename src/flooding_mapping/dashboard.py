@@ -82,6 +82,13 @@ def build_data(config: dict) -> dict:
         "percentiles": {"alto": params["alerta_percentil"], "candidato": CANDIDATE_PERCENTILE},
         "scorer": susceptibility_report.get("selected_scorer"),
         "validation": susceptibility_report["temporal"],
+        "model": {
+            "events": susceptibility_report["n_events"],
+            "segments": susceptibility_report["n_segments"],
+            "positive_segments": susceptibility_report["n_positive_segments"],
+            "features": susceptibility_report["features"],
+            "ablation": susceptibility_report.get("ablation_base_features", {}).get("temporal", {}),
+        },
         "api": FORECAST_API,
         "context": context(config),
     }
@@ -111,83 +118,141 @@ TEMPLATE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alerta de Alagamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
 <link rel="stylesheet" href="__LEAFLET__/leaflet.min.css">
 <style>
-:root { --bg:#f7f7f5; --panel:#fff; --text:#1d1d1b; --muted:#5f5f5a; --line:#d9d9d4;
-  --none:#cfd8dc; --medio:#f39c12; --alto:#c0392b; --accent:#1f5f99; __BASE_CSS__ }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151514; --panel:#22221f;
-  --text:#ecece8; --muted:#a5a59e; --line:#3a3a36; --none:#45494b; --accent:#6aa8d1; __BASE_CSS_DARK__ } }
-:root[data-theme="dark"] { --bg:#151514; --panel:#22221f; --text:#ecece8; --muted:#a5a59e;
-  --line:#3a3a36; --none:#45494b; --accent:#6aa8d1; __BASE_CSS_DARK__ }
+:root { --ink:#1E3442; --sky:#EEF3F5; --panel:#FFFFFF; --muted:#5E7380; --rule:#D3DEE4;
+  --ok:#2E8B78; --warn:#E8A317; --high:#C62828; --focus:#1F6FB2; --chip:#E3ECF0;
+  --tint-0:#E4F1EE; --tint-1:#FDF1D8; --tint-2:#F9E0DE; __BASE_CSS__ }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ink:#E6EEF2; --sky:#14212A; --panel:#1B2B36; --muted:#9DB0BC; --rule:#2E4352; --chip:#25394A;
+  --tint-0:#173A35; --tint-1:#3D3218; --tint-2:#432221; --focus:#7DB7E8; __BASE_CSS_DARK__ } }
+:root[data-theme="dark"] { --ink:#E6EEF2; --sky:#14212A; --panel:#1B2B36; --muted:#9DB0BC;
+  --rule:#2E4352; --chip:#25394A; --tint-0:#173A35; --tint-1:#3D3218; --tint-2:#432221;
+  --focus:#7DB7E8; __BASE_CSS_DARK__ }
 * { box-sizing:border-box; }
-html, body { margin:0; height:100%; background:var(--bg); color:var(--text);
-  font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
-#app { display:flex; height:100%; }
-#panel { width:360px; flex:none; overflow:auto; padding:16px; background:var(--panel);
-  border-right:1px solid var(--line); }
-#map { flex:1; background:var(--water); }
-h1 { font-size:17px; margin:0 0 2px; } h2 { font-size:13px; margin:16px 0 6px; text-transform:uppercase;
-  letter-spacing:.04em; color:var(--muted); }
-.sub, .muted { color:var(--muted); font-size:12.5px; }
-button { font:inherit; padding:7px 10px; border-radius:6px; border:1px solid var(--line);
-  background:var(--accent); color:#fff; cursor:pointer; }
-button.secondary { background:transparent; color:var(--text); }
-.status { margin:10px 0; padding:8px 10px; border-radius:6px; background:var(--bg);
-  border:1px solid var(--line); font-size:13px; }
-.level { display:inline-block; padding:2px 8px; border-radius:10px; color:#fff; font-weight:600;
-  font-size:12px; }
-.level.n0 { background:var(--none); color:var(--text); } .level.n1 { background:var(--medio); }
-.level.n2 { background:var(--alto); }
-#timeline { width:100%; height:70px; display:block; }
-input[type=range] { width:100%; }
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.grid2 label { font-size:12px; color:var(--muted); }
-.grid2 input { width:100%; padding:5px; border:1px solid var(--line); border-radius:6px;
-  background:var(--bg); color:var(--text); font:inherit; }
-ul.list { margin:4px 0; padding-left:18px; max-height:140px; overflow:auto; font-size:13px; }
-.chips { display:flex; flex-wrap:wrap; gap:4px; max-height:110px; overflow:auto; }
-.chip { font-size:11.5px; padding:1px 6px; border:1px solid var(--line); border-radius:8px; }
-.note { margin-top:14px; padding-top:10px; border-top:1px solid var(--line); color:var(--muted);
-  font-size:12px; }
-@media (max-width: 760px) { #app { flex-direction:column; }
-  #panel { width:100%; max-height:52%; border-right:0; border-bottom:1px solid var(--line); } }
+html, body { margin:0; height:100%; background:var(--sky); color:var(--ink);
+  font:16px/1.5 "Atkinson Hyperlegible", system-ui, sans-serif; }
+#app { display:grid; grid-template-columns:420px minmax(0, 1fr); height:100%; }
+#panel { min-width:0; overflow:auto; background:var(--panel); border-right:1px solid var(--rule); }
+#map { background:var(--water); }
+.hero { padding:22px 22px 18px; background:var(--tint-0); border-bottom:1px solid var(--rule); }
+.hero[data-level="1"] { background:var(--tint-1); } .hero[data-level="2"] { background:var(--tint-2); }
+.where { margin:0; font-size:14px; color:var(--muted); }
+.hero h1 { margin:4px 0 6px; font-size:27px; line-height:1.18; font-weight:700; max-width:22ch; }
+.hero p.detail { margin:0; font-size:15px; max-width:38ch; }
+.dot { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:8px;
+  vertical-align:baseline; background:var(--ok); }
+.hero[data-level="1"] .dot { background:var(--warn); } .hero[data-level="2"] .dot { background:var(--high); }
+.actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+button { font:inherit; font-size:15px; padding:9px 14px; border-radius:8px; cursor:pointer;
+  border:1px solid var(--ink); background:var(--ink); color:var(--panel); }
+button.quiet { background:transparent; color:var(--ink); border-color:var(--rule); }
+button:focus-visible, input:focus-visible, summary:focus-visible, .bar:focus-visible {
+  outline:3px solid var(--focus); outline-offset:2px; }
+.status { margin:10px 0 0; font-size:13.5px; color:var(--muted); }
+section { padding:18px 22px; border-bottom:1px solid var(--rule); }
+h2 { margin:0 0 10px; font-size:18px; }
+h3 { margin:14px 0 6px; font-size:15px; }
+.ruler { display:block; width:100%; height:96px; }
+.ruler text { fill:var(--muted); font-size:11px; }
+.bar { cursor:pointer; }
+input[type=range] { width:100%; accent-color:var(--ink); }
+.hour { font-size:14px; color:var(--muted); margin:2px 0 0; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; }
+.chip { font-size:13px; padding:2px 9px; border-radius:12px; background:var(--chip); }
+button.link { background:none; border:0; padding:4px 0; color:var(--focus); text-decoration:underline; font-size:14px; }
+ul.plain { margin:0; padding-left:18px; font-size:14.5px; }
+.counts { display:flex; gap:18px; margin:0 0 4px; }
+.count strong { display:block; font-size:24px; line-height:1.1; }
+.count span { font-size:13px; color:var(--muted); }
+.ai ol { margin:0; padding-left:20px; }
+.ai li { margin-bottom:8px; }
+.engine { margin-top:14px; padding:12px 14px; border-left:4px solid var(--ink); background:var(--sky);
+  border-radius:0 8px 8px 0; font-size:14.5px; }
+.engine p { margin:0 0 8px; } .engine p:last-child { margin:0; }
+.tag { display:inline-block; font-size:12px; font-weight:700; padding:1px 7px; border-radius:6px;
+  background:var(--ink); color:var(--panel); margin-right:6px; vertical-align:1px; }
+details summary { cursor:pointer; font-weight:700; font-size:16px; }
+.sim { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+.sim label { font-size:13px; color:var(--muted); display:block; }
+.sim input[type=number] { width:100%; padding:7px; font:inherit; border:1px solid var(--rule);
+  border-radius:8px; background:var(--panel); color:var(--ink); }
+footer { padding:16px 22px 28px; font-size:12.5px; color:var(--muted); }
+.legend { background:var(--panel); color:var(--ink); padding:8px 10px; border-radius:8px;
+  font:13px/1.6 "Atkinson Hyperlegible", system-ui, sans-serif; box-shadow:0 1px 3px rgba(30,52,66,.25); }
+.legend i { display:inline-block; width:18px; height:4px; margin-right:6px; vertical-align:middle; }
+@media (max-width: 820px) {
+  #app { grid-template-columns:minmax(0, 1fr); grid-template-rows:auto 55vh; height:auto; }
+  #panel { border-right:0; overflow:visible; order:1; }
+  #map { order:2; height:55vh; }
+  .hero h1 { font-size:24px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 </style>
 </head>
 <body>
 <div id="app">
-<aside id="panel">
-  <h1>Alerta de alagamento em vias</h1>
-  <div class="sub">Porto Alegre · previsão horária de chuva × suscetibilidade dos trechos</div>
-  <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap">
-    <button id="locate">Usar minha localização</button>
-    <button id="reload" class="secondary">Atualizar previsão</button>
-  </div>
-  <div class="status" id="locStatus">Localização não informada: mostrando Porto Alegre.</div>
-  <div class="status" id="fcStatus">Carregando previsão…</div>
+<main id="panel">
+  <header class="hero" id="hero" data-level="0" aria-live="polite">
+    <p class="where" id="where">Porto Alegre, próximas 48 horas</p>
+    <h1 id="headline"><span class="dot" aria-hidden="true"></span>Carregando a previsão de chuva</h1>
+    <p class="detail" id="detail"></p>
+    <div class="actions">
+      <button id="locate">Usar minha localização</button>
+      <button id="reload" class="quiet">Atualizar previsão</button>
+    </div>
+    <p class="status" id="status"></p>
+  </header>
 
-  <h2>Linha do tempo (nível na cidade)</h2>
-  <svg id="timeline" role="img" aria-label="Nível de alerta por hora"></svg>
-  <input type="range" id="hour" min="0" max="0" value="0" aria-label="Hora selecionada">
-  <div id="hourInfo" class="muted"></div>
+  <section aria-labelledby="h-rain">
+    <h2 id="h-rain">Chuva prevista</h2>
+    <svg class="ruler" id="ruler" role="img" aria-label="Chuva prevista e nível de alerta por hora"></svg>
+    <label for="hour" class="hour">Hora exibida no mapa</label>
+    <input type="range" id="hour" min="0" max="0" value="0">
+    <p class="hour" id="hourInfo"></p>
+  </section>
 
-  <h2>Simulação</h2>
-  <label style="font-size:13px"><input type="checkbox" id="simulate"> Usar chuva informada (substitui a previsão)</label>
-  <div class="grid2" style="margin-top:6px">
-    <div><label for="simH">mm na hora</label><input id="simH" type="number" min="0" step="0.5" value="12"></div>
-    <div><label for="sim24">mm em 24 h</label><input id="sim24" type="number" min="0" step="1" value="60"></div>
-  </div>
+  <section aria-labelledby="h-impact">
+    <h2 id="h-impact">O que pode ser afetado</h2>
+    <div class="counts">
+      <div class="count"><strong id="nHigh">0</strong><span>trechos em alerta alto</span></div>
+      <div class="count"><strong id="nWarn">0</strong><span>trechos em atenção</span></div>
+    </div>
+    <h3>Linhas de ônibus que passam por esses trechos</h3>
+    <div class="chips" id="routes"></div>
+    <button class="link" id="moreRoutes" hidden></button>
+    <h3>Serviços de saúde a até 100 m</h3>
+    <ul class="plain" id="dests"></ul>
+    <button class="link" id="moreDests" hidden></button>
+  </section>
 
-  <h2>Trechos em alerta</h2>
-  <div id="summary"></div>
-  <h2>Perto de você</h2>
-  <div id="nearby" class="muted">Informe a localização para ver alertas num raio de 1,5 km.</div>
-  <h2>Linhas de ônibus expostas</h2>
-  <div class="chips" id="routes"></div>
-  <h2>Serviços de saúde a até 100 m de trechos em alerta</h2>
-  <ul class="list" id="dests"></ul>
-  <p class="note" id="method"></p>
-</aside>
-<div id="map"></div>
+  <section class="ai" aria-labelledby="h-ai">
+    <h2 id="h-ai">Como a IA calcula o risco</h2>
+    <ol>
+      <li><strong>Lê a previsão de chuva</strong> para a sua região, hora a hora: quanto chove em uma hora e quanto acumula em 24 horas.</li>
+      <li><strong>Consulta o mapa de propensão</strong>: um modelo de aprendizado de máquina deu a cada trecho de via uma nota, aprendida com os locais onde a EPTC já registrou bloqueio por água.</li>
+      <li><strong>Cruza as duas coisas</strong>: com chuva forte, os trechos com nota mais alta entram em atenção ou alerta alto.</li>
+    </ol>
+    <div class="engine" id="engine"></div>
+  </section>
+
+  <section>
+    <details>
+      <summary>Testar com outra chuva</summary>
+      <p class="status">Substitui a previsão pelos valores abaixo, para ver como o alerta reage.</p>
+      <label style="font-size:15px"><input type="checkbox" id="simulate"> Usar estes valores</label>
+      <div class="sim">
+        <div><label for="simH">Chuva em uma hora (mm)</label><input id="simH" type="number" min="0" step="0.5" value="12"></div>
+        <div><label for="sim24">Chuva em 24 horas (mm)</label><input id="sim24" type="number" min="0" step="1" value="60"></div>
+      </div>
+    </details>
+  </section>
+
+  <footer id="footer"></footer>
+</main>
+<div id="map" aria-label="Mapa dos trechos em alerta"></div>
 </div>
 <script src="__LEAFLET__/leaflet.min.js"></script>
 <script id="data" type="application/json">__DATA__</script>
@@ -196,94 +261,136 @@ const D = JSON.parse(document.getElementById("data").textContent);
 const T = D.thresholds, P = D.percentiles;
 const $ = id => document.getElementById(id);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const LEVEL = ["sem alerta", "médio", "alto"];
+const LEVEL = ["Sem alerta", "Atenção", "Alerta alto"];
+const FEATURE_NAMES = {
+  elev: "altitude do terreno", rel_elev_250: "se o trecho fica abaixo do entorno (250 m)",
+  rel_elev_500: "se o trecho fica abaixo do entorno (500 m)", slope: "inclinação da via",
+  dist_water: "distância a arroios e valas", height_above_water: "altura acima do curso d'água mais próximo",
+  log_flow_acc: "quanta água da chuva escoa até o ponto", twi: "tendência do terreno a acumular umidade",
+  drainage_density_250: "quantidade de valas e arroios ao redor"};
+const hourFmt = new Intl.DateTimeFormat("pt-BR", {weekday: "short", hour: "2-digit", minute: "2-digit"});
+const dayFmt = new Intl.DateTimeFormat("pt-BR", {weekday: "short"});
+const num = v => Number(v).toLocaleString("pt-BR", {maximumFractionDigits: 1});
 
 const map = L.map("map", {preferCanvas: true});
 const CONTEXT = D.context;
 __BASEMAP__
-map.attributionControl.addAttribution("previsão: Open-Meteo");
-const area = L.geoJSON(D.area, {style: {color: "#55554f", weight: 1, fillOpacity: 0}}).addTo(map);
+map.attributionControl.addAttribution("Previsão: Open-Meteo");
+const area = L.geoJSON(D.area, {style: {color: css("--ink"), weight: 1.2, fillOpacity: 0}}).addTo(map);
 map.fitBounds(area.getBounds());
-const segLayer = L.geoJSON(null, {style: f => ({color: f.properties.level === 2 ? css("--alto") : css("--medio"),
-  weight: f.properties.level === 2 ? 3 : 2})}).addTo(map);
-let userMarker = null, user = null;
+const segLayer = L.geoJSON(null, {style: f => ({color: f.properties.level === 2 ? css("--high") : css("--warn"),
+  weight: f.properties.level === 2 ? 4 : 3})}).addTo(map);
+const legend = L.control({position: "bottomleft"});
+legend.onAdd = () => {
+  const box = L.DomUtil.create("div", "legend");
+  for (const [color, text] of [[css("--high"), "Alerta alto"], [css("--warn"), "Atenção"]]) {
+    const row = document.createElement("div"); const swatch = document.createElement("i");
+    swatch.style.background = color; row.append(swatch, document.createTextNode(text)); box.append(row);
+  }
+  return box;
+};
+legend.addTo(map);
 
-// Rain level from hourly intensity and 24 h accumulation (calibrated thresholds).
+let forecast = null, user = null, userMarker = null, nearby = null, showAllRoutes = false, showAllDests = false;
+const ROUTES_SHOWN = 24, DESTS_SHOWN = 10;
+
 function rainLevel(h1, h24) {
   if (h1 >= T.alto_max_1h_mm || h24 >= T.alto_total_24h_mm) return 2;
   if (h1 >= T.medio_max_1h_mm || h24 >= T.medio_total_24h_mm) return 1;
   return 0;
 }
-// Segment alert: rain level combined with the susceptibility percentile.
 function segmentLevel(rain, pct) {
   if (rain === 2) return pct >= P.alto ? 2 : 1;
   if (rain === 1) return pct >= P.alto ? 1 : 0;
   return 0;
 }
+const simulating = () => $("simulate").checked || !forecast;
+const hours = () => simulating() ? 1 : forecast.times.length - forecast.start;
+function rainAt(point, k) {
+  if (simulating()) return [Number($("simH").value) || 0, Number($("sim24").value) || 0];
+  const i = forecast.start + k;
+  return [forecast.h1[point][i], forecast.h24[point][i]];
+}
+function levelsAt(k) {
+  const rain = D.points.map((_, p) => rainLevel(...rainAt(p, k)));
+  return D.segments.features.map(f => segmentLevel(rain[f.properties.point], f.properties.pct));
+}
+// Level of the area in focus: segments near the user, or the whole city.
+function focusLevel(levels) {
+  const ids = nearby || levels.keys();
+  let worst = 0; for (const i of ids) worst = Math.max(worst, levels[i]);
+  return worst;
+}
+function timeLabel(k) { return simulating() ? "Simulação" : hourFmt.format(new Date(forecast.times[forecast.start + k])); }
 
-let forecast = null;   // {times: [...], h1: [[point][hour]], h24: [[point][hour]], start}
 async function loadForecast() {
-  $("fcStatus").textContent = "Carregando previsão…";
-  const params = new URLSearchParams({
-    latitude: D.points.map(p => p[0]).join(","), longitude: D.points.map(p => p[1]).join(","),
-    hourly: "precipitation", past_days: "1", forecast_days: "2", timezone: "America/Sao_Paulo"});
+  $("status").textContent = "Buscando a previsão de chuva…";
+  const params = new URLSearchParams({latitude: D.points.map(p => p[0]).join(","),
+    longitude: D.points.map(p => p[1]).join(","), hourly: "precipitation", past_days: "1",
+    forecast_days: "2", timezone: "America/Sao_Paulo"});
   try {
     const response = await fetch(`${D.api}?${params}`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    let json = await response.json();
-    if (!Array.isArray(json)) json = [json];
+    if (!response.ok) throw new Error(`o serviço respondeu ${response.status}`);
+    let json = await response.json(); if (!Array.isArray(json)) json = [json];
     const times = json[0].hourly.time;
     const h1 = json.map(j => j.hourly.precipitation.map(v => v ?? 0));
-    const h24 = h1.map(series => series.map((_, i) =>
-      series.slice(Math.max(0, i - 23), i + 1).reduce((a, b) => a + b, 0)));
-    const now = new Date();
-    const start = Math.max(0, times.findIndex(t => new Date(t) >= new Date(now.getTime() - 3600e3)));
-    forecast = {times, h1, h24, start};
-    $("hour").max = String(times.length - 1 - start);
-    $("hour").value = "0";
-    $("fcStatus").textContent = `Previsão Open-Meteo carregada (${D.points.length} pontos, até ${times.at(-1).replace("T", " ")}).`;
+    const h24 = h1.map(s => s.map((_, i) => s.slice(Math.max(0, i - 23), i + 1).reduce((a, b) => a + b, 0)));
+    const now = Date.now() - 3600e3;
+    forecast = {times, h1, h24, start: Math.max(0, times.findIndex(t => new Date(t).getTime() >= now))};
+    $("hour").max = String(forecast.times.length - 1 - forecast.start); $("hour").value = "0";
+    $("status").textContent = `Previsão atualizada às ${new Date().toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"})}.`;
   } catch (error) {
     forecast = null;
-    $("fcStatus").textContent = `Não foi possível obter a previsão (${error.message}). Use a simulação.`;
-    $("simulate").checked = true;
+    $("status").textContent = `Não foi possível buscar a previsão (${error.message}). Tente "Atualizar previsão" ou teste com outra chuva.`;
   }
   render();
 }
 
-function rainAt(point, hourIndex) {
-  if ($("simulate").checked || !forecast) return [Number($("simH").value) || 0, Number($("sim24").value) || 0];
-  const i = forecast.start + hourIndex;
-  return [forecast.h1[point][i], forecast.h24[point][i]];
-}
-function levelsAt(hourIndex) {
-  const rain = D.points.map((_, p) => rainLevel(...rainAt(p, hourIndex)));
-  return D.segments.features.map(f => segmentLevel(rain[f.properties.point], f.properties.pct));
+function headline() {
+  const n = hours(), perHour = [];
+  for (let k = 0; k < n; k++) perHour.push(focusLevel(levelsAt(k)));
+  const worst = Math.max(...perHour);
+  const place = nearby ? "perto de você" : "em Porto Alegre";
+  if (simulating()) return {level: worst, title: worst ? `${LEVEL[worst]} ${place} com essa chuva` :
+    `Sem alerta ${place} com essa chuva`, detail: "Resultado da simulação, não da previsão."};
+  if (!worst) {
+    const maxRain = Math.max(...forecast.h1.map(s => Math.max(...s.slice(forecast.start))));
+    return {level: 0, title: `Sem alerta de alagamento ${place} nas próximas 48 horas`,
+      detail: maxRain > 0 ? `A previsão indica até ${num(maxRain)} mm de chuva em uma hora, abaixo do que costuma bloquear vias.`
+                          : "Não há chuva prevista."};
+  }
+  const first = perHour.findIndex(l => l === worst);
+  let last = first; while (last + 1 < n && perHour[last + 1] === worst) last++;
+  const span = first === last ? timeLabel(first) : `de ${timeLabel(first)} a ${timeLabel(last)}`;
+  return {level: worst, title: `${LEVEL[worst]} ${place}: ${span}`,
+    detail: "Trechos propensos a acumular água podem ficar bloqueados. Veja no mapa e evite-os, se puder."};
 }
 
-function drawTimeline() {
-  const svg = $("timeline"); svg.replaceChildren();
-  if (!forecast || $("simulate").checked) return;
-  const n = forecast.times.length - forecast.start, w = svg.clientWidth || 320, h = 70;
-  const bw = w / n, maxRain = Math.max(1, ...forecast.h1.flat());
-  if (Math.max(...forecast.h1.map(s => Math.max(...s.slice(forecast.start)))) === 0) {
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", 4); text.setAttribute("y", 38); text.setAttribute("fill", css("--muted"));
-    text.setAttribute("font-size", "12"); text.textContent = "Sem chuva prevista nas próximas 48 h.";
-    svg.append(text); return;
+function drawRuler() {
+  const svg = $("ruler"); svg.replaceChildren();
+  const ns = "http://www.w3.org/2000/svg", w = svg.clientWidth || 360, h = 96, base = h - 18;
+  const add = (tag, attrs, text) => { const el = document.createElementNS(ns, tag);
+    for (const [a, v] of Object.entries(attrs)) el.setAttribute(a, v); if (text) el.textContent = text; svg.append(el); return el; };
+  if (simulating()) { add("text", {x: 0, y: 40}, "Simulação ativa: a régua mostra a previsão quando desligada."); return; }
+  const n = hours(), bw = w / n;
+  const rain = k => Math.max(...forecast.h1.map(s => s[forecast.start + k]));
+  const maxRain = 1.25 * Math.max(T.alto_max_1h_mm, ...Array.from({length: n}, (_, k) => rain(k)));
+  for (const [value, label] of [[T.medio_max_1h_mm, "atenção"], [T.alto_max_1h_mm, "alerta alto"]]) {
+    const y = base - (base - 8) * value / maxRain;
+    add("line", {x1: 0, x2: w, y1: y, y2: y, stroke: css("--rule"), "stroke-dasharray": "3 3"});
+    add("text", {x: w - 2, y: y - 3, "text-anchor": "end"}, `${num(value)} mm/h ${label}`);
   }
   for (let k = 0; k < n; k++) {
-    const i = forecast.start + k;
-    const city = Math.max(...D.points.map((_, p) => rainLevel(forecast.h1[p][i], forecast.h24[p][i])));
-    const rain = Math.max(...forecast.h1.map(s => s[i]));
-    const bar = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    const bh = Math.max(2, (h - 14) * rain / maxRain);
-    bar.setAttribute("x", k * bw); bar.setAttribute("y", h - 12 - bh);
-    bar.setAttribute("width", Math.max(1, bw - 1)); bar.setAttribute("height", bh);
-    bar.setAttribute("fill", city === 2 ? css("--alto") : city === 1 ? css("--medio") : css("--none"));
-    if (k === Number($("hour").value)) { bar.setAttribute("stroke", css("--text")); bar.setAttribute("stroke-width", "1.5"); }
-    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-    title.textContent = `${forecast.times[i].replace("T", " ")} · ${rain.toFixed(1)} mm/h (máx. entre pontos) · ${LEVEL[city]}`;
-    bar.append(title); svg.append(bar);
+    const level = focusLevel(levelsAt(k)), r = rain(k), bh = Math.max(2, (base - 8) * r / maxRain);
+    const bar = add("rect", {x: k * bw + 0.5, y: base - bh, width: Math.max(1, bw - 1), height: bh, class: "bar",
+      fill: level === 2 ? css("--high") : level === 1 ? css("--warn") : css("--ok"),
+      opacity: k === Number($("hour").value) ? 1 : 0.6});
+    add("title", {}).textContent = `${timeLabel(k)}: ${num(r)} mm/h, ${LEVEL[level].toLowerCase()}`;
+    bar.append(svg.lastChild);
+    bar.addEventListener("click", () => { $("hour").value = String(k); render(); });
+    const date = new Date(forecast.times[forecast.start + k]);
+    if (date.getHours() % 6 === 0) add("text", {x: k * bw, y: h - 4},
+      date.getHours() === 0 ? dayFmt.format(date) : `${date.getHours()}h`);
   }
 }
 
@@ -298,98 +405,103 @@ function insideArea(lat, lon) {
       const [xi, yi] = ring[i], [xj, yj] = ring[j];
       if ((yi > lat) !== (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside; }
     return inside; };
-  return D.area.features.some(f => {
-    const polys = f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
-    return polys.some(poly => inRing(poly[0]) && !poly.slice(1).some(inRing));
-  });
+  return D.area.features.some(f => (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates)
+    .some(poly => inRing(poly[0]) && !poly.slice(1).some(inRing)));
 }
-function li(list, text) { const item = document.createElement("li"); item.textContent = text; list.append(item); }
 
 function render() {
-  const k = Number($("hour").value);
-  const levels = levelsAt(k);
-  segLayer.clearLayers();
+  const k = Math.min(Number($("hour").value), hours() - 1), levels = levelsAt(k);
   const active = D.segments.features.map((f, i) => ({...f, properties: {...f.properties, level: levels[i]}}))
-                                   .filter(f => f.properties.level > 0);
-  segLayer.addData({type: "FeatureCollection", features: active});
-  const counts = [0, 0, 0]; levels.forEach(l => counts[l]++);
-  const summary = $("summary"); summary.replaceChildren();
-  for (const l of [2, 1]) {
-    const span = document.createElement("span"); span.className = `level n${l}`;
-    span.textContent = `${LEVEL[l]}: ${counts[l].toLocaleString("pt-BR")} trechos`;
-    summary.append(span, document.createTextNode(" "));
-  }
-  if (!counts[1] && !counts[2]) { const s = document.createElement("span"); s.className = "level n0";
-    s.textContent = "nenhum trecho em alerta"; summary.append(s); }
-
+    .filter(f => f.properties.level > 0);
+  segLayer.clearLayers(); segLayer.addData({type: "FeatureCollection", features: active});
+  $("nHigh").textContent = active.filter(f => f.properties.level === 2).length.toLocaleString("pt-BR");
+  $("nWarn").textContent = active.filter(f => f.properties.level === 1).length.toLocaleString("pt-BR");
   const routeIds = new Set(), destIds = new Set();
   active.forEach(f => { f.properties.routes.forEach(r => routeIds.add(r)); f.properties.dests.forEach(d => destIds.add(d)); });
   const routes = $("routes"); routes.replaceChildren();
-  [...routeIds].map(r => D.routes[r]).sort().forEach(name => {
+  const names = [...routeIds].map(r => D.routes[r]).sort((a, b) => a.localeCompare(b, "pt-BR", {numeric: true}));
+  (showAllRoutes ? names : names.slice(0, ROUTES_SHOWN)).forEach(name => {
     const chip = document.createElement("span"); chip.className = "chip"; chip.textContent = name; routes.append(chip); });
-  if (!routeIds.size) routes.textContent = "nenhuma";
+  if (!routeIds.size) routes.textContent = "Nenhuma nesta hora.";
+  const more = $("moreRoutes");
+  more.hidden = names.length <= ROUTES_SHOWN;
+  more.textContent = showAllRoutes ? "Mostrar menos" : `Ver todas as ${names.length} linhas`;
   const dests = $("dests"); dests.replaceChildren();
-  [...destIds].forEach(d => { const p = D.destinations.features[d].properties;
-    li(dests, `${p.name || "(sem nome no OSM)"} — ${p.category}`); });
-  if (!destIds.size) li(dests, "nenhum");
+  const destNames = [...destIds].map(d => D.destinations.features[d].properties.name || "Estabelecimento sem nome no mapa")
+    .sort((a, b) => a.localeCompare(b, "pt-BR"));
+  (showAllDests ? destNames : destNames.slice(0, DESTS_SHOWN)).forEach(name => {
+    const li = document.createElement("li"); li.textContent = name; dests.append(li); });
+  if (!destIds.size) { const li = document.createElement("li"); li.textContent = "Nenhum nesta hora."; dests.append(li); }
+  const moreDests = $("moreDests");
+  moreDests.hidden = destNames.length <= DESTS_SHOWN;
+  moreDests.textContent = showAllDests ? "Mostrar menos" : `Ver todos os ${destNames.length} serviços`;
 
-  const label = $("simulate").checked || !forecast ? `Simulação: ${$("simH").value} mm/h, ${$("sim24").value} mm em 24 h`
-    : (() => { const i = forecast.start + k;
-        const r1 = Math.max(...forecast.h1.map(s => s[i])), r24 = Math.max(...forecast.h24.map(s => s[i]));
-        return `${forecast.times[i].replace("T", " ")} · até ${r1.toFixed(1)} mm/h · até ${r24.toFixed(1)} mm em 24 h`; })();
-  $("hourInfo").textContent = label;
-  $("hour").disabled = $("simulate").checked || !forecast;
-
-  const nearby = $("nearby");
-  if (user && user.inside) {
-    const close = active.filter(f => f.geometry.coordinates.some(c => distanceKm(user.latlon, [c[1], c[0]]) <= 1.5));
-    const worst = Math.max(0, ...close.map(f => f.properties.level));
-    let nearest = null;
-    D.destinations.features.forEach(f => { const [lon, lat] = f.geometry.coordinates;
-      const d = distanceKm(user.latlon, [lat, lon]); if (!nearest || d < nearest.d) nearest = {d, p: f.properties}; });
-    nearby.replaceChildren();
-    const badge = document.createElement("span"); badge.className = `level n${worst}`;
-    badge.textContent = `${close.length} trechos em alerta a até 1,5 km (${LEVEL[worst]})`;
-    nearby.append(badge, document.createElement("br"));
-    if (nearest) nearby.append(document.createTextNode(
-      `Serviço de saúde mais próximo (linha reta): ${nearest.p.name || "(sem nome)"} — ${nearest.d.toFixed(1)} km`));
-  }
-  drawTimeline();
+  const head = headline();
+  $("hero").dataset.level = String(head.level);
+  const h1 = $("headline"); h1.replaceChildren();
+  const dot = document.createElement("span"); dot.className = "dot"; dot.setAttribute("aria-hidden", "true");
+  h1.append(dot, document.createTextNode(head.title));
+  $("detail").textContent = head.detail;
+  if (simulating()) $("hourInfo").textContent = `Simulação: ${$("simH").value} mm em uma hora e ${$("sim24").value} mm em 24 horas.`;
+  else { const i = forecast.start + k;
+    $("hourInfo").textContent = `${timeLabel(k)}: até ${num(Math.max(...forecast.h1.map(s => s[i])))} mm nesta hora e ${num(Math.max(...forecast.h24.map(s => s[i])))} mm nas últimas 24 horas.`; }
+  $("hour").disabled = simulating();
+  drawRuler();
 }
 
 $("locate").addEventListener("click", () => {
-  if (!navigator.geolocation) { $("locStatus").textContent = "Este navegador não oferece geolocalização."; return; }
-  $("locStatus").textContent = "Obtendo localização…";
+  if (!navigator.geolocation) { $("status").textContent = "Este navegador não permite usar a localização."; return; }
+  $("status").textContent = "Obtendo sua localização…";
   navigator.geolocation.getCurrentPosition(pos => {
     const lat = pos.coords.latitude, lon = pos.coords.longitude;
-    const inside = insideArea(lat, lon);
-    user = {latlon: [lat, lon], inside};
     if (userMarker) userMarker.remove();
-    userMarker = L.circleMarker([lat, lon], {radius: 7, color: "#fff", weight: 2, fillColor: css("--accent"), fillOpacity: 1}).addTo(map);
-    if (inside) { map.setView([lat, lon], 14);
-      $("locStatus").textContent = "Você está em Porto Alegre: alertas próximos abaixo. A localização fica só no navegador.";
+    userMarker = L.circleMarker([lat, lon], {radius: 8, color: "#fff", weight: 3, fillColor: css("--focus"), fillOpacity: 1})
+      .addTo(map).bindTooltip("Você está aqui");
+    if (insideArea(lat, lon)) {
+      user = [lat, lon];
+      nearby = D.segments.features.flatMap((f, i) =>
+        f.geometry.coordinates.some(c => distanceKm(user, [c[1], c[0]]) <= 1.5) ? [i] : []);
+      map.setView(user, 14);
+      $("where").textContent = "Perto de você (1,5 km), próximas 48 horas";
+      $("status").textContent = "Sua localização é usada só neste navegador; ela não é enviada a nenhum serviço.";
     } else {
-      $("locStatus").textContent = "Fora de Porto Alegre: área não coberta pelo modelo (treinado só com dados da cidade).";
-      $("nearby").textContent = "Área não coberta.";
+      user = null; nearby = null; map.setView([lat, lon], 10);
+      $("where").textContent = "Porto Alegre, próximas 48 horas";
+      $("status").textContent = "Você está fora de Porto Alegre. O modelo foi treinado só com dados da cidade, então mostramos o alerta de Porto Alegre.";
     }
     render();
-  }, error => { $("locStatus").textContent = `Localização indisponível (${error.message}). Mostrando Porto Alegre.`; },
+  }, error => { $("status").textContent = `Não foi possível obter a localização (${error.message}). Mostrando Porto Alegre inteira.`; },
   {enableHighAccuracy: false, timeout: 10000, maximumAge: 600000});
 });
 $("reload").addEventListener("click", loadForecast);
+$("moreRoutes").addEventListener("click", () => { showAllRoutes = !showAllRoutes; render(); });
+$("moreDests").addEventListener("click", () => { showAllDests = !showAllDests; render(); });
 for (const id of ["hour", "simulate", "simH", "sim24"]) $(id).addEventListener("input", render);
-window.addEventListener("resize", drawTimeline);
+window.addEventListener("resize", drawRuler);
 
-const v = D.validation[D.scorer] || {};
-$("method").textContent =
-  `Nível de alerta heurístico, não probabilidade. Chuva: médio a partir de ${T.medio_max_1h_mm} mm/h ou ` +
-  `${T.medio_total_24h_mm} mm em 24 h; alto a partir de ${T.alto_max_1h_mm} mm/h ou ${T.alto_total_24h_mm} mm ` +
-  `(chuva modelada em datas com bloqueio informado; limite inferior). Trechos: percentil de suscetibilidade ` +
-  `≥ ${P.alto} (alto) ou ≥ ${P.candidato} com chuva de nível alto (médio), pelo critério "${D.scorer}", ` +
-  `que melhor ordenou os eventos de 2025 (percentil mediano ${v.median_percentile}). ` +
-  (D.missed.length ? `A previsão não captou a chuva em ${D.missed.join(", ")}: temporais curtos podem não aparecer. ` : "") +
-  `Suscetibilidade = semelhança com locais já interditados (viés de notificação), não previsão de alagamento. ` +
-  `Cobertura: só Porto Alegre.`;
+// Model card in plain language.
+(function engineCard() {
+  const v = D.validation, m = D.model, ai = D.scorer === "logistic";
+  const box = $("engine"); box.replaceChildren();
+  const para = (...parts) => { const p = document.createElement("p"); parts.forEach(x => p.append(x)); box.append(p); return p; };
+  const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = ai ? "IA" : "Regra";
+  para(tag, ai ? "Motor em uso: modelo de aprendizado de máquina (regressão logística)."
+               : "Motor em uso: regra de relevo, porque nesta versão a IA não superou a regra nos testes.");
+  para(`Aprendeu com ${m.events} locais onde a EPTC registrou bloqueio por acúmulo de água entre 2019 e 2025, comparando-os com ${m.segments.toLocaleString("pt-BR")} trechos de via da cidade.`);
+  para("Observa, em cada trecho: " + m.features.map(f => FEATURE_NAMES[f] || f).join("; ") + ".");
+  const t = v.logistic || {}, r = v.elevacao_baixa || {};
+  para(`Como foi testado: escondemos os bloqueios de 2025 e pedimos à IA que os encontrasse. ` +
+       `Em ${Math.round((t.share_top20 || 0) * 100)}% deles, o trecho estava entre os 20% que ela considera mais propensos ` +
+       `(uma regra simples de "terreno mais baixo" acertou ${Math.round((r.share_top20 || 0) * 100)}%; um sorteio, ${Math.round(((v.aleatorio || {}).share_top20 || 0) * 100)}%). ` +
+       `Pela posição típica desses trechos na lista, a IA fica um pouco à frente (${Math.round((t.median_percentile || 0) * 100)} contra ${Math.round((r.median_percentile || 0) * 100)} de 100). ` +
+       `Com só ${t.events || 0} casos de teste, consideramos IA e regra empatadas.`);
+  para("Limites: não é uma probabilidade; não há dados abertos de bocas de lobo nem de limpeza urbana; " +
+       "a previsão de chuva pode não captar temporais curtos" + (D.missed.length ? ` (não captou o de ${D.missed.map(d => d.split("-").reverse().join("/")).join(", ")})` : "") + ".");
+})();
+$("footer").textContent = `Níveis: atenção a partir de ${num(T.medio_max_1h_mm)} mm em uma hora ou ${num(T.medio_total_24h_mm)} mm em 24 horas; ` +
+  `alerta alto a partir de ${num(T.alto_max_1h_mm)} mm ou ${num(T.alto_total_24h_mm)} mm, calibrados com a chuva prevista nos dias de bloqueio. ` +
+  `Fontes: EPTC e Prefeitura de Porto Alegre (bloqueios), Copernicus DEM (relevo), OpenStreetMap (vias e drenagem), ` +
+  `IBGE (limites), Open-Meteo (previsão), GTFS da EPTC de 2025 (linhas). Protótipo de pesquisa; não substitui os avisos da Defesa Civil (199).`;
 loadForecast();
 </script>
 </body>
