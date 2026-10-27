@@ -23,8 +23,11 @@ das redes?
   simulados. Primeira versão bloqueia o mesmo trecho para todos os modos; há modo `driving`
   para sensibilidade só para automóveis.
 - **População:** alocada às células da grade por densidade uniforme dentro de cada setor.
-- **ML:** apenas tipologia descritiva (k-means). Não há modelo preditivo de alagamento: faltam
-  eventos suficientes e definição confiável de exemplos negativos.
+- **ML:** tipologia descritiva (k-means) e protótipo de **suscetibilidade** de segmentos viários
+  (positivos = locais de bloqueio informados; demais não rotulados). O modelo ordena trechos por
+  semelhança de terreno com locais já interditados; **não prevê alagamento real** e herda o viés
+  de notificação. O alerta operacional é determinístico e seu limiar de chuva é provisório.
+  Deep Learning (Sentinel-1) é etapa futura.
 
 ## Fontes de dados e atribuição
 
@@ -33,6 +36,7 @@ das redes?
 | GTFS EPTC — [dadosabertos.poa.br](https://dadosabertos.poa.br/dataset/gtfs) | Rede de ônibus | Creative Commons Atribuição (portal); © EPTC/Prefeitura de Porto Alegre |
 | OpenStreetMap via [Geofabrik](https://download.geofabrik.de/south-america/brazil/sul.html) | Rede viária e destinos | ODbL — © colaboradores do OpenStreetMap |
 | IBGE — Censo 2022, malha de setores com agregados | Território e população | Fonte: IBGE, Censo Demográfico 2022 |
+| Copernicus DEM GLO-30 (AWS Open Data) | Relevo | © DLR e.V. 2010–2014 e © Airbus Defence and Space GmbH 2014–2018, fornecido no âmbito do COPERNICUS pela União Europeia e ESA |
 | EPTC / Prefeitura de Porto Alegre; Jornal do Comércio; Sul21 | Eventos de bloqueio | Citados por URL em `data/events/events.csv` |
 
 URLs, hashes SHA-256, tamanhos e datas ficam em `data/raw/manifest.json`. Os dados externos
@@ -54,6 +58,7 @@ src/flooding_mapping/
   metrics.py                perdas L e P
   robustness.py             eficiência e maior componente (NetworkX)
   clustering.py             tipologia k-means
+  susceptibility.py         suscetibilidade (DEM + hidrografia) e alerta operacional
 tests/                      pytest com dados sintéticos
 reports/qa/                 relatórios de qualidade e registros de execução
 outputs/                    tabelas e mapas (não versionados)
@@ -92,8 +97,13 @@ $PY -m flooding_mapping.scenarios candidates --review E20250618-04
 # 6. Um cenário: A_s, perdas e robustez
 $PY -m flooding_mapping.accessibility --scenarios S-E20250618-04-100-all
 $PY -m flooding_mapping.robustness --scenarios S-E20250618-04-100-all
-# 7. Tipologia (após calcular os cenários)
+# 7. Perdas consolidadas e mapas de perda
+$PY -m flooding_mapping.accessibility --consolidate --maps S-D20250618-100-all
+# 8. Tipologia (após calcular os cenários)
 $PY -m flooding_mapping.clustering
+# 9. Suscetibilidade, validação e alerta (chuva prevista em mm/h)
+$PY -m flooding_mapping.ingest dem_s30 && $PY -m flooding_mapping.ingest dem_s31
+$PY -m flooding_mapping.susceptibility --alert-rain 40
 ```
 
 Testes: `.venv/bin/python -m pytest`.
@@ -109,9 +119,12 @@ Testes: `.venv/bin/python -m pytest`.
   fixa de pares (semente em config); pares sem caminho contribuem 0. **R_E = E_s / E_0**,
   global e local (nós a até 1 km da zona).
 - **Maior componente:** proporção de nós na maior componente (fracamente) conexa.
-- **Tipologia:** k-means sobre log(1 + A0) e perda relativa máxima por modo; k por silhueta.
+- **Tipologia:** k-means sobre log(1 + A0) e perda relativa máxima por modo; k por silhueta,
+  exigindo ao menos 2% das origens por grupo.
+- **Suscetibilidade:** avaliada pelo percentil, na cidade, do segmento mais próximo de cada
+  evento retido (aleatório ≈ 0,5), em blocos espaciais de 2 km e no teste temporal (2025).
 
 ## Versões relevantes
 
 Python 3.12.13 · Java OpenJDK 21.0.13 · r5py 1.1.7 · GeoPandas 1.1.4 · Pyrosm 0.24.0 ·
-NetworkX 3.7 · pyosmium 4.3.2 · osmium-tool 1.19.1 · scikit-learn 1.9.1
+NetworkX 3.7 · pyosmium 4.3.2 · osmium-tool 1.19.1 · scikit-learn 1.9.1 · rasterio 1.5.2
