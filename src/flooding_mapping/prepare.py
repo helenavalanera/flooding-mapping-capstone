@@ -72,3 +72,57 @@ def clip_osm(
         "seconds": round(time.perf_counter() - started, 1),
         "output_bytes": output.stat().st_size,
     }
+
+
+def make_grid(area: gpd.GeoDataFrame, spacing_m: float) -> gpd.GeoDataFrame:
+    """Square cells of ``spacing_m`` covering ``area`` (metric CRS).
+
+    Cells are clipped to the area, so together they tile it exactly. Each
+    cell gets a stable id from its lower-left corner and an origin point:
+    the cell centroid when it lies inside the area, otherwise a point on the
+    clipped cell.
+    """
+    xmin, ymin, xmax, ymax = area.total_bounds
+    x0 = np.floor(xmin / spacing_m) * spacing_m
+    y0 = np.floor(ymin / spacing_m) * spacing_m
+    xs = np.arange(x0, xmax, spacing_m)
+    ys = np.arange(y0, ymax, spacing_m)
+    cells = gpd.GeoDataFrame(
+        {"origin_id": [f"g{int(x)}_{int(y)}" for x in xs for y in ys]},
+        geometry=[box(x, y, x + spacing_m, y + spacing_m) for x in xs for y in ys],
+        crs=area.crs,
+    )
+    territory = area.union_all()
+    cells["geometry"] = cells.intersection(territory)
+    cells = cells[~cells.is_empty & (cells.area > 0)].reset_index(drop=True)
+    centroids = cells.centroid
+    inside = centroids.within(territory)
+    cells["origin"] = centroids.where(inside, cells.representative_point())
+    cells["centroid_inside"] = inside
+    return cells
+
+
+def allocate_population(cells: gpd.GeoDataFrame, tracts: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """Allocate tract population to cells assuming uniform density per tract."""
+    tracts = tracts[["CD_SETOR", "population", "geometry"]].copy()
+    tracts["tract_area"] = tracts.area
+    pieces = gpd.overlay(cells[["origin_id", "geometry"]], tracts, how="intersection",
+                         keep_geom_type=True)
+    pieces["population"] = pieces["population"] * pieces.area / pieces["tract_area"]
+    totals = pieces.groupby("origin_id")["population"].sum()
+    result = cells.copy()
+    result["population"] = result["origin_id"].map(totals).fillna(0.0)
+    return result
+
+
+def origins(config: dict) -> gpd.GeoDataFrame:
+    """Build origin points with allocated population from the configuration."""
+    tracts = load_tracts(resolve(config["sources"]["ibge_setores"]["destino"]),
+                         CD_MUN_POA, config["crs_metric"])
+    cells = make_grid(municipality_polygon(tracts), config["grid"]["espacamento_m"])
+    cells = allocate_population(cells, tracts)
+    cells["has_population"] = cells["population"] > 0
+    return gpd.GeoDataFrame(
+        cells[["origin_id", "population", "has_population", "centroid_inside"]],
+        geometry=cells["origin"], crs=cells.crs,
+    )
