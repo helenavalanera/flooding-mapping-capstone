@@ -1,0 +1,222 @@
+{
+  "source": "https://historical-forecast-api.open-meteo.com/v1/forecast",
+  "timezone": "America/Sao_Paulo",
+  "retrieved_at_utc": "2026-10-27T20:28:47+00:00",
+  "queries": [
+    {
+      "event_date": "2019-09-17",
+      "start": "2019-09-16",
+      "end": "2019-09-17",
+      "points": 2
+    },
+    {
+      "event_date": "2021-09-08",
+      "start": "2021-09-07",
+      "end": "2021-09-08",
+      "points": 1
+    },
+    {
+      "event_date": "2022-03-06",
+      "start": "2022-03-05",
+      "end": "2022-03-06",
+      "points": 6
+    },
+    {
+      "event_date": "2025-06-18",
+      "start": "2025-06-17",
+      "end": "2025-06-18",
+      "points": 10
+    }
+  ],
+  "per_date": [
+    {
+      "event_date": "2019-09-17",
+      "max_1h_mm": 3.5,
+      "total_24h_mm": 26.2,
+      "captured": true
+    },
+    {
+      "event_date": "2021-09-08",
+      "max_1h_mm": 9.0,
+      "total_24h_mm": 55.9,
+      "captured": true
+    },
+    {
+      "event_date": "2022-03-06",
+      "max_1h_mm": 3.4,
+      "total_24h_mm": 5.6,
+      "captured": false
+    },
+    {
+      "event_date": "2025-06-18",
+      "max_1h_mm": 10.5,
+      "total_24h_mm": 86.5,
+      "captured": true
+    }
+  ],
+  "missed_by_model": [
+    "2022-03-06"
+  ],
+  "missed_rule_24h_mm": 10,
+  "events": [
+    {
+      "event_id": "E20190917-02",
+      "event_date": "2019-09-17",
+      "report_hour": 18,
+      "max_1h_mm": 3.5,
+      "total_24h_mm": 26.2,
+      "hours": 24
+    },
+    {
+      "event_id": "E20190917-03",
+      "event_date": "2019-09-17",
+      "report_hour": 18,
+      "max_1h_mm": 3.5,
+      "total_24h_mm": 26.2,
+      "hours": 24
+    },
+    {
+      "event_id": "E20210908-01",
+      "event_date": "2021-09-08",
+      "report_hour": 7,
+      "max_1h_mm": 9.0,
+      "total_24h_mm": 55.9,
+      "hours": 24
+    },
+    {
+      "event_id": "E20220306-01",
+      "event_date": "2022-03-06",
+      "report_hour": 17,
+      "max_1h_mm": 2.5,
+      "total_24h_mm": 3.7,
+      "hours": 24
+    },
+    {
+      "event_id": "E20220306-02",
+      "event_date": "2022-03-06",
+      "report_hour": 17,
+      "max_1h_mm": 3.4,
+      "total_24h_mm": 5.6,
+      "hours": 24
+    },
+    {
+      "event_id": "E20220306-03",
+      "event_date": "2022-03-06",
+      "report_hour": 17,
+      "max_1h_mm": 3.4,
+      "total_24h_mm": 5.6,
+      "hours": 24
+    },
+    {
+      "event_id": "E20220306-04",
+      "event_date": "2022-03-06",
+      "report_hour": 17,
+      "max_1h_mm": 3.4,
+      "total_24h_mm": 5.6,
+      "hours": 24
+    },
+    {
+      "event_id": "E20220306-05",
+      "event_date": "2022-03-06",
+      "report_hour": 17,
+      "max_1h_mm": 1.5,
+      "total_24h_mm": 3.0,
+      "hours": 24
+    },
+    {
+      "event_id": "E20220306-06",
+      "event_date": "2022-03-06",
+      "report_hour": 17,
+      "max_1h_mm": 1.5,
+      "total_24h_mm": 3.0,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-02",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 5.9,
+      "total_24h_mm": 70.5,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-03",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 5.9,
+      "total_24h_mm": 70.5,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-04",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 5.9,
+      "total_24h_mm": 70.5,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-05",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 5.9,
+      "total_24h_mm": 70.5,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-06",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 6.2,
+      "total_24h_mm": 69.5,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-07",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 5.9,
+      "total_24h_mm": 70.5,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-08",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 5.9,
+      "total_24h_mm": 70.5,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-09",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 6.8,
+      "total_24h_mm": 79.7,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-10",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 10.5,
+      "total_24h_mm": 86.5,
+      "hours": 24
+    },
+    {
+      "event_id": "E20250618-12",
+      "event_date": "2025-06-18",
+      "report_hour": 21,
+      "max_1h_mm": 6.8,
+      "total_24h_mm": 79.7,
+      "hours": 24
+    }
+  ],
+  "thresholds": {
+    "medio_max_1h_mm": 3.5,
+    "medio_total_24h_mm": 26.2,
+    "alto_max_1h_mm": 9.0,
+    "alto_total_24h_mm": 55.9
+  },
+  "note": "Limite inferior: menor chuva (por data) que coincidiu com bloqueios informados (nível médio) e mediana entre datas (nível alto), excluindo datas em que o modelo não capturou a chuva. Dado modelado; não é probabilidade nem substitui pluviômetro; temporais curtos podem não aparecer na previsão."
+}

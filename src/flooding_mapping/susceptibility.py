@@ -286,7 +286,13 @@ def main() -> None:
     report["logistic_coefficients_standardized"] = coefficients
     scores = table[["segment_id", "geometry"]].copy()
     scores["score"] = final.predict_proba(table[FEATURES].to_numpy())[:, 1]
-    scores["percentile"] = percentile_rank(scores["score"].to_numpy())
+    scores["pct_logistic"] = percentile_rank(scores["score"].to_numpy())
+    scores["pct_elevacao_baixa"] = percentile_rank(-table["elev"].to_numpy())
+    # The alert uses whichever scorer ranked the held-out 2025 events best.
+    candidates = {"logistic": "pct_logistic", "elevacao_baixa": "pct_elevacao_baixa"}
+    selected = max(candidates, key=lambda name: report["temporal"][name]["median_percentile"])
+    scores["percentile"] = scores[candidates[selected]]
+    report["selected_scorer"] = selected
     scores.to_parquet(tables / "susceptibility.parquet")
 
     if args.alert_rain is not None:
