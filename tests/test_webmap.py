@@ -11,7 +11,10 @@ def test_embedded_json_cannot_close_the_script_element():
     assert json.loads(text) == data
 
 
-def test_html_embeds_data_and_pins_leaflet_version():
+def test_html_embeds_data_and_pins_leaflet_version(monkeypatch):
+    from flooding_mapping import webmap
+
+    monkeypatch.setattr(webmap, "carto_key", lambda: None)   # independent of a local key file
     html = build_html({"meta": {"x": "</script>"}})
     assert not re.search(r"__[A-Z_]+__", html)        # every placeholder replaced
     # The embedded basemap is the default; OSM tiles are only an option (they

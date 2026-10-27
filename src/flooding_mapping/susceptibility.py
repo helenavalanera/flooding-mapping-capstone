@@ -30,7 +30,10 @@ from sklearn.preprocessing import StandardScaler
 
 from .config import load_config, resolve
 
-FEATURES = ["elev", "rel_elev_250", "rel_elev_500", "slope", "dist_water", "height_above_water"]
+BASE_FEATURES = ["elev", "rel_elev_250", "rel_elev_500", "slope", "dist_water", "height_above_water"]
+# Drainage features: flow paths and wetness from the DEM, density of OSM drainage lines.
+FEATURES = BASE_FEATURES + ["log_flow_acc", "twi", "drainage_density_250"]
+FEATURES_VERSION = 2
 WATERWAYS = {"stream", "canal", "drain", "river", "ditch"}
 
 
@@ -55,6 +58,64 @@ def build_dem(tiles: list, area: gpd.GeoDataFrame, crs: str, margin_m: float = 1
     return dem, dst_transform
 
 
+def fill_depressions(dem: np.ndarray, epsilon: float = 1e-4) -> np.ndarray:
+    """Priority-flood depression filling (with a tiny gradient so flats drain).
+
+    Cells on the raster edge or next to NaN are outlets.
+    """
+    import heapq
+
+    rows, cols = dem.shape
+    filled = np.where(np.isnan(dem), -np.inf, dem).astype("float64")
+    done = np.zeros(dem.shape, bool)
+    heap = []
+    nan = np.isnan(dem)
+    edge = np.zeros(dem.shape, bool)
+    edge[0, :] = edge[-1, :] = edge[:, 0] = edge[:, -1] = True
+    edge |= ndimage.binary_dilation(nan) & ~nan
+    for r, c in zip(*np.nonzero(edge & ~nan)):
+        heapq.heappush(heap, (filled[r, c], r, c))
+        done[r, c] = True
+    done |= nan
+    offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+    while heap:
+        z, r, c = heapq.heappop(heap)
+        for dr, dc in offsets:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < rows and 0 <= nc < cols and not done[nr, nc]:
+                done[nr, nc] = True
+                filled[nr, nc] = max(filled[nr, nc], z + epsilon)
+                heapq.heappush(heap, (filled[nr, nc], nr, nc))
+    filled[nan] = np.nan
+    return filled
+
+
+def flow_accumulation(filled: np.ndarray) -> np.ndarray:
+    """D8 flow accumulation (number of upstream cells, including the cell)."""
+    rows, cols = filled.shape
+    z = np.where(np.isnan(filled), np.inf, filled)
+    padded = np.pad(z, 1, constant_values=np.inf)
+    offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+    best_drop = np.zeros(z.shape)
+    receiver = np.full(z.shape, -1, dtype=np.int64)
+    index = np.arange(z.size).reshape(z.shape)
+    for dr, dc in offsets:
+        neighbour = padded[1 + dr:1 + dr + rows, 1 + dc:1 + dc + cols]
+        drop = (z - neighbour) / np.hypot(dr, dc)
+        better = np.isfinite(neighbour) & (drop > best_drop)
+        best_drop[better] = drop[better]
+        target = np.roll(np.roll(index, -dr, axis=0), -dc, axis=1)
+        receiver[better] = target[better]
+    accumulation = np.ones(z.size)
+    flat_receiver = receiver.ravel()
+    for cell in np.argsort(-z.ravel(), kind="stable"):
+        if np.isfinite(z.flat[cell]) and flat_receiver[cell] >= 0:
+            accumulation[flat_receiver[cell]] += accumulation[cell]
+    result = accumulation.reshape(z.shape)
+    result[np.isnan(filled)] = np.nan
+    return result
+
+
 def terrain_rasters(dem: np.ndarray, resolution: float = 30) -> dict[str, np.ndarray]:
     """Elevation, elevation relative to 250/500 m neighbourhood means, slope (deg)."""
     filled = np.where(np.isnan(dem), np.nanmean(dem), dem)
@@ -64,7 +125,23 @@ def terrain_rasters(dem: np.ndarray, resolution: float = 30) -> dict[str, np.nda
         rasters[f"rel_elev_{radius}"] = dem - ndimage.uniform_filter(filled, size=size)
     dy, dx = np.gradient(filled, resolution)
     rasters["slope"] = np.degrees(np.arctan(np.hypot(dx, dy)))
+    accumulation = flow_accumulation(fill_depressions(dem))
+    # Flow paths are one cell wide: take the strongest path within 3 × 3 cells.
+    rasters["log_flow_acc"] = ndimage.maximum_filter(np.log1p(np.nan_to_num(accumulation)), size=3)
+    tan_slope = np.maximum(np.tan(np.radians(rasters["slope"])), 0.001)
+    rasters["twi"] = np.log(np.nan_to_num(accumulation, nan=1.0) * resolution / tan_slope)
     return rasters
+
+
+def drainage_density(waterways: gpd.GeoDataFrame, shape: tuple, transform,
+                     radius_m: float = 250, resolution: float = 30) -> np.ndarray:
+    """Share of raster cells within ``radius_m`` crossed by drainage lines."""
+    from rasterio.features import rasterize
+
+    lines = rasterize(((g, 1) for g in waterways.geometry), out_shape=shape, transform=transform,
+                      fill=0, all_touched=True, dtype="uint8")
+    size = int(2 * radius_m / resolution) + 1
+    return ndimage.uniform_filter(lines.astype("float32"), size=size)
 
 
 def sample(raster: np.ndarray, transform, points: gpd.GeoSeries) -> np.ndarray:
@@ -164,9 +241,9 @@ def summarize_ranks(ranks: pd.Series) -> dict:
             "share_top20": round(float((ranks >= 0.80).mean()), 3)}
 
 
-def evaluate(table: pd.DataFrame, seed: int, block_m: float) -> dict:
+def evaluate(table: pd.DataFrame, seed: int, block_m: float, features: list[str] = FEATURES) -> dict:
     """Spatial block CV and temporal hold-out (train < 2025, test 2025)."""
-    x = table[FEATURES].to_numpy()
+    x = table[features].to_numpy()
     y = table["positive"].to_numpy()
     blocks = (table.geometry.x // block_m).astype(int).astype(str) + "_" + (
         table.geometry.y // block_m).astype(int).astype(str)
@@ -259,7 +336,7 @@ def main() -> None:
     tables, qa = resolve(config["paths"]["tables"]), resolve(config["paths"]["qa"])
     area = gpd.read_parquet(processed / "municipality.parquet")
 
-    features_path = interim / "susceptibility_features.parquet"
+    features_path = interim / f"susceptibility_features_v{FEATURES_VERSION}.parquet"
     if features_path.exists():
         table = gpd.read_parquet(features_path)
     else:
@@ -270,7 +347,9 @@ def main() -> None:
         segments = segments[segments.geometry.interpolate(0.5, normalized=True).within(
             area.union_all())]
         waterways = read_waterways(interim / "poa.osm.pbf", crs)
-        table = segment_features(segments, terrain_rasters(dem), transform, waterways)
+        rasters = terrain_rasters(dem)
+        rasters["drainage_density_250"] = drainage_density(waterways, dem.shape, transform)
+        table = segment_features(segments, rasters, transform, waterways)
         table.to_parquet(features_path)
     events = load_events(resolve(config["paths"]["events"]) / "events.csv")
     table = label_segments(table, events, params["raio_positivo_m"]).dropna(subset=FEATURES)
@@ -280,6 +359,11 @@ def main() -> None:
               "n_events": int(table.loc[table["positive"], "event_id"].nunique()),
               "features": FEATURES, "seed": seed,
               **evaluate(table, seed, params["bloco_validacao_m"])}
+    # Same evaluation with the original features only, to show the gain.
+    base = evaluate(table, seed, params["bloco_validacao_m"], BASE_FEATURES)
+    report["ablation_base_features"] = {
+        part: {m: base[part][m] for m in ("logistic", "random_forest")}
+        for part in ("spatial_cv", "temporal")}
 
     final = models(seed)["logistic"].fit(table[FEATURES].to_numpy(), table["positive"].to_numpy())
     coefficients = dict(zip(FEATURES, final[-1].coef_[0].round(3).tolist()))

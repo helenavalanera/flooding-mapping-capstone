@@ -63,3 +63,39 @@ def test_alert_respects_rain_threshold_and_percentile():
     assert result["triggered"] and result["segments"] == 1
     assert result["routes"] == ["R1"]
     assert [d["dest_id"] for d in result["destinations"]] == ["d1"]
+
+
+def test_fill_depressions_removes_pits_and_keeps_drainage():
+    from flooding_mapping.susceptibility import fill_depressions
+
+    dem = np.array([[5, 5, 5, 5, 5],
+                    [5, 3, 3, 3, 5],
+                    [5, 3, 1, 3, 5],
+                    [5, 3, 3, 3, 0],
+                    [5, 5, 5, 5, 5]], dtype="float32")
+    filled = fill_depressions(dem)
+    assert filled[2, 2] >= 3            # the pit is filled up to its spill level
+    assert filled[3, 4] == 0            # the outlet is untouched
+    assert (filled >= dem).all()
+
+
+def test_flow_accumulation_counts_upstream_cells():
+    from flooding_mapping.susceptibility import fill_depressions, flow_accumulation
+
+    # A tilted plane draining to the right edge: accumulation grows downslope.
+    dem = np.tile(np.array([4.0, 3.0, 2.0, 1.0, 0.0]), (3, 1))
+    acc = flow_accumulation(fill_depressions(dem))
+    assert acc[1, 0] == 1
+    assert (np.diff(acc[1]) >= 0).all()
+    assert acc.max() >= 5
+
+
+def test_drainage_density_is_one_on_lines_and_zero_far_away():
+    import rasterio
+    from flooding_mapping.susceptibility import drainage_density
+
+    transform = rasterio.transform.from_origin(0, 3000, 30, 30)
+    lines = gpd.GeoDataFrame(geometry=[LineString([(0, 1500), (3000, 1500)])], crs=CRS)
+    density = drainage_density(lines, (100, 100), transform, radius_m=30)
+    assert density[50, 50] > 0.3
+    assert density[5, 5] == 0

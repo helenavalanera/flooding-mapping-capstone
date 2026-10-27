@@ -8,7 +8,10 @@
     "rel_elev_500",
     "slope",
     "dist_water",
-    "height_above_water"
+    "height_above_water",
+    "log_flow_acc",
+    "twi",
+    "drainage_density_250"
   ],
   "seed": 20261025,
   "spatial_cv": {
@@ -35,31 +38,31 @@
     },
     "logistic": {
       "events": 17,
-      "median_percentile": 0.732,
+      "median_percentile": 0.754,
       "share_top10": 0.059,
       "share_top20": 0.353,
-      "auc_pu": 0.619
+      "auc_pu": 0.603
     },
     "random_forest": {
       "events": 17,
-      "median_percentile": 0.664,
-      "share_top10": 0.235,
-      "share_top20": 0.412,
-      "auc_pu": 0.564
+      "median_percentile": 0.82,
+      "share_top10": 0.412,
+      "share_top20": 0.529,
+      "auc_pu": 0.633
     }
   },
   "temporal": {
     "logistic": {
       "events": 9,
-      "median_percentile": 0.794,
-      "share_top10": 0.0,
-      "share_top20": 0.333
+      "median_percentile": 0.862,
+      "share_top10": 0.333,
+      "share_top20": 0.556
     },
     "random_forest": {
       "events": 9,
-      "median_percentile": 0.28,
+      "median_percentile": 0.281,
       "share_top10": 0.0,
-      "share_top20": 0.111
+      "share_top20": 0.0
     },
     "depressao_500m": {
       "events": 9,
@@ -80,13 +83,48 @@
       "share_top20": 0.222
     }
   },
-  "logistic_coefficients_standardized": {
-    "elev": -3.768,
-    "rel_elev_250": 0.367,
-    "rel_elev_500": -2.248,
-    "slope": -0.138,
-    "dist_water": 0.277,
-    "height_above_water": 0.545
+  "ablation_base_features": {
+    "spatial_cv": {
+      "logistic": {
+        "events": 17,
+        "median_percentile": 0.732,
+        "share_top10": 0.059,
+        "share_top20": 0.353,
+        "auc_pu": 0.619
+      },
+      "random_forest": {
+        "events": 17,
+        "median_percentile": 0.664,
+        "share_top10": 0.235,
+        "share_top20": 0.412,
+        "auc_pu": 0.564
+      }
+    },
+    "temporal": {
+      "logistic": {
+        "events": 9,
+        "median_percentile": 0.794,
+        "share_top10": 0.0,
+        "share_top20": 0.333
+      },
+      "random_forest": {
+        "events": 9,
+        "median_percentile": 0.28,
+        "share_top10": 0.0,
+        "share_top20": 0.111
+      }
+    }
   },
-  "selected_scorer": "elevacao_baixa"
+  "logistic_coefficients_standardized": {
+    "elev": -3.584,
+    "rel_elev_250": 0.576,
+    "rel_elev_500": -2.234,
+    "slope": 0.002,
+    "dist_water": 0.189,
+    "height_above_water": 0.566,
+    "log_flow_acc": 0.286,
+    "twi": 0.007,
+    "drainage_density_250": -0.345
+  },
+  "selected_scorer": "logistic"
 }
