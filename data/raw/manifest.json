@@ -43,6 +43,28 @@
       "final_url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/Dicionario_de_dados_malha_agregados.xlsx",
       "last_modified": "Wed, 13 Nov 2024 21:36:56 GMT",
       "content_length": 18860
+    },
+    {
+      "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S30_00_W052_00_DEM/Copernicus_DSM_COG_10_S30_00_W052_00_DEM.tif",
+      "path": "data/raw/dem/Copernicus_DSM_COG_10_S30_00_W052_00_DEM.tif",
+      "downloaded_at_utc": "2026-10-27T19:28:20+00:00",
+      "sha256": "a14a8e082378e26e650e00a11dbcca5f33e6f90140fac840d095d168d31f4ed2",
+      "size_bytes": 49045637,
+      "source_reference_date": "2022-05-09",
+      "final_url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S30_00_W052_00_DEM/Copernicus_DSM_COG_10_S30_00_W052_00_DEM.tif",
+      "last_modified": "Mon, 09 May 2022 15:03:24 GMT",
+      "content_length": 49045637
+    },
+    {
+      "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S31_00_W052_00_DEM/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif",
+      "path": "data/raw/dem/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif",
+      "downloaded_at_utc": "2026-10-27T19:28:29+00:00",
+      "sha256": "831fe8364925237b2dfea9032d614ef215490175de6748e3e35875fea0a29ea6",
+      "size_bytes": 36409491,
+      "source_reference_date": "2022-05-09",
+      "final_url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S31_00_W052_00_DEM/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif",
+      "last_modified": "Mon, 09 May 2022 15:03:41 GMT",
+      "content_length": 36409491
     }
   ],
   "notes": "Registre aqui as fontes, versões, datas de acesso e checksums dos dados brutos."

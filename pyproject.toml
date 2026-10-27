@@ -24,6 +24,7 @@ dependencies = [
     "matplotlib>=3.9",
     "osmium>=4,<5",
     "scikit-learn>=1.5",
+    "rasterio>=1.4",
 ]
 
 [project.optional-dependencies]
