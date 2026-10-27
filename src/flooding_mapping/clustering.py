@@ -22,23 +22,31 @@ def features(baseline: pd.DataFrame, losses: pd.DataFrame) -> pd.DataFrame:
     """One row per origin with valid values in every mode.
 
     Columns: ``log_A0_<mode>`` = log(1 + A0) and ``P_max_<mode>`` = maximum
-    relative loss over scenarios (0 when A0 = 0, since nothing can be lost).
+    relative loss over scenarios (0 when A0 = 0, since nothing can be lost;
+    negative values — small gains from R5 stop relinking — count as 0).
     """
     valid = baseline[baseline["status"] == "ok"]
     a0 = valid.pivot(index="origin_id", columns="mode", values="n_destinations").astype(float)
-    p = losses.assign(P=losses["P"].fillna(0)).groupby(["origin_id", "mode"])["P"].max()
+    p = losses.assign(P=losses["P"].fillna(0).clip(lower=0)).groupby(["origin_id", "mode"])["P"].max()
     p_max = p.unstack("mode").reindex(index=a0.index, columns=a0.columns).fillna(0)
     table = pd.concat([np.log1p(a0).add_prefix("log_A0_"), p_max.add_prefix("P_max_")], axis=1)
     return table.dropna()
 
 
-def choose_k(x: np.ndarray, k_values: range, seed: int) -> tuple[int, dict]:
-    """k with the highest silhouette score (ties: smaller k)."""
+def choose_k(x: np.ndarray, k_values: range, seed: int,
+             min_cluster_share: float = 0.02) -> tuple[int, dict]:
+    """k with the highest silhouette among solutions whose smallest cluster
+    holds at least ``min_cluster_share`` of the points (ties: smaller k).
+
+    The size rule keeps typologies substantive instead of isolating outliers.
+    """
     scores = {}
     for k in k_values:
         if k >= len(x):
             break
         labels = KMeans(n_clusters=k, n_init=20, random_state=seed).fit_predict(x)
+        if np.bincount(labels).min() < min_cluster_share * len(x):
+            continue
         scores[k] = float(silhouette_score(x, labels))
     if not scores:
         raise ValueError("Not enough origins to cluster")

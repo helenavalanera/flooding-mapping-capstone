@@ -1,0 +1,32 @@
+{
+  "k": 2,
+  "silhouette": {
+    "2": 0.4196406949196315
+  },
+  "seed": 20261025,
+  "n_origins": 563,
+  "profile": [
+    {
+      "cluster": 0,
+      "origins": 372,
+      "population": 264855.414,
+      "log_A0_car": 3.288,
+      "log_A0_transit": 0.225,
+      "log_A0_walk": 0.07,
+      "P_max_car": 0.024,
+      "P_max_transit": 0.0,
+      "P_max_walk": 0.0
+    },
+    {
+      "cluster": 1,
+      "origins": 191,
+      "population": 1067925.923,
+      "log_A0_car": 5.115,
+      "log_A0_transit": 3.276,
+      "log_A0_walk": 1.391,
+      "P_max_car": 0.016,
+      "P_max_transit": 0.005,
+      "P_max_walk": 0.018
+    }
+  ]
+}

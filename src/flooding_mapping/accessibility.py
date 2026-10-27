@@ -245,6 +245,8 @@ def main() -> None:
                         help="scenario_ids a calcular (A_s); sem isso, calcula A0")
     parser.add_argument("--consolidate", action="store_true",
                         help="só consolida perdas dos cenários já calculados")
+    parser.add_argument("--maps", nargs="*", default=[],
+                        help="scenario_ids para mapas de perda L (escala comum entre modos)")
     args = parser.parse_args()
     config = load_config()
     modes = args.modes or config["accessibility"]["modos"]
@@ -252,6 +254,15 @@ def main() -> None:
         if args.scenarios:
             run_scenarios(config, args.scenarios, modes)
         print(consolidate(config).to_string(index=False))
+        table = pd.read_parquet(resolve(config["paths"]["tables"]) / "losses.parquet")
+        for scenario_id in args.maps:
+            subset = table[table["scenario_id"] == scenario_id]
+            if subset.empty:
+                raise SystemExit(f"Cenário sem resultados: {scenario_id}")
+            accessibility_map(subset, config,
+                              resolve(config["paths"]["maps"]) / f"loss_{scenario_id}.png",
+                              column="L", cmap="Reds", vmin=0,
+                              title=f"Perda de destinos acessíveis (L = A0 − A_s) — {scenario_id}")
         return
     origins, destinations = load_inputs(config)
     started = time.perf_counter()

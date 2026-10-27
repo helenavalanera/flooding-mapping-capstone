@@ -173,6 +173,9 @@ def main() -> None:
     segments = load_or_build_segments(interim / "poa.osm.pbf", interim / "segments.parquet",
                                       config["crs_metric"])
     scenarios = load_scenarios(resolve(config["paths"]["events"]) / "scenarios.csv")
+    unknown = sorted(set(args.scenarios) - set(scenarios["scenario_id"]))
+    if unknown:
+        raise SystemExit(f"Cenários inexistentes em scenarios.csv: {unknown}")
     scenarios = scenarios[scenarios["scenario_id"].isin(args.scenarios)]
     table = robustness_table(segments, scenarios, config)
     tables = resolve(config["paths"]["tables"])

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from flooding_mapping.clustering import features, typology
+from flooding_mapping.clustering import choose_k, features, typology
 
 
 def test_features_use_max_loss_and_skip_invalid_origins():
@@ -33,3 +33,13 @@ def test_typology_is_reproducible_and_separates_groups():
     assert info["k"] == 2
     assert first["cluster"].tolist() == second["cluster"].tolist()
     assert (first["cluster"].iloc[:20] == 0).all() and (first["cluster"].iloc[20:] == 1).all()
+
+
+def test_choose_k_rejects_solutions_that_isolate_outliers():
+    rng = np.random.default_rng(0)
+    # Two large groups and a tiny one (2 of 102 points) that k=3 would isolate.
+    x = np.vstack([rng.normal(0, 0.1, (50, 2)), rng.normal(5, 0.1, (50, 2)),
+                   rng.normal(7, 0.1, (2, 2))])
+    k, scores = choose_k(x, range(2, 4), seed=1, min_cluster_share=0.05)
+    assert k == 2
+    assert 3 not in scores
