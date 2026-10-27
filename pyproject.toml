@@ -22,6 +22,8 @@ dependencies = [
     "pyrosm>=0.6.2",
     "r5py>=1.1,<1.2",
     "matplotlib>=3.9",
+    "osmium>=4,<5",
+    "scikit-learn>=1.5",
 ]
 
 [project.optional-dependencies]
