@@ -1,2 +1,1 @@
-scenario_id,event_id,name,weight,description
-
+scenario_id,event_id,radius_m,network_type,affected_edge_ids,validation_status,validated_by,validation_date,notes
