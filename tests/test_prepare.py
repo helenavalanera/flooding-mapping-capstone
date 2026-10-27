@@ -1,8 +1,8 @@
 import geopandas as gpd
 import pytest
-from shapely.geometry import Polygon, box
+from shapely.geometry import Point, Polygon, box
 
-from flooding_mapping.prepare import allocate_population, make_grid
+from flooding_mapping.prepare import allocate_population, make_grid, normalize_destinations
 
 CRS = "EPSG:31982"
 
@@ -35,3 +35,22 @@ def test_population_is_conserved(tracts):
     # Cell g0_0 lies fully inside tract A (3,0 km²): 1/3 of its population.
     g00 = allocated.set_index("origin_id").loc["g0_0", "population"]
     assert g00 == pytest.approx(1000 / 3)
+
+
+def test_destinations_flag_node_polygon_duplicates_and_clip_to_area():
+    area = gpd.GeoDataFrame(geometry=[box(0, 0, 1000, 1000)], crs=CRS)
+    pois = gpd.GeoDataFrame(
+        {
+            "id": [1, 2, 3, 4],
+            "osm_type": ["node", "way", "node", "node"],
+            "name": ["Hospital X", "hospital x ", "Hospital X", "Clínica Y"],
+            "amenity": ["hospital", "hospital", "hospital", "clinic"],
+        },
+        geometry=[Point(510, 510), box(450, 450, 550, 550), Point(900, 100), Point(2000, 2000)],
+        crs=CRS,
+    )
+    table = normalize_destinations(pois, area).set_index("dest_id")
+    assert set(table.index) == {"w2", "n1", "n3"}  # n4 is outside the area
+    assert table.loc["n1", "duplicate"]
+    assert not table.loc["w2", "duplicate"] and not table.loc["n3", "duplicate"]
+    assert table.loc["w2"].geometry.within(box(450, 450, 550, 550))
