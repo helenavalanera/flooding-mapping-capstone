@@ -180,14 +180,80 @@ def accessibility_map(result: pd.DataFrame, config: dict, path: str | Path, colu
     plt.close(fig)
 
 
+def run_scenarios(config: dict, scenario_ids: list[str], modes: list[str]) -> None:
+    """Compute A_s for each scenario on its derived PBF, one Parquet per scenario.
+
+    Scenarios already computed are skipped, so an interrupted run can resume.
+    Only the street network changes; GTFS, origins, destinations and timing
+    parameters are those of the baseline.
+    """
+    import gc
+
+    from .network import write_blocked_pbf
+    from .scenarios import load_scenarios
+
+    scenarios = load_scenarios(resolve(config["paths"]["events"]) / "scenarios.csv")
+    scenarios = scenarios.set_index("scenario_id")
+    origins, destinations = load_inputs(config)
+    interim = resolve(config["paths"]["interim"])
+    out_dir = resolve(config["paths"]["tables"]) / "scenarios"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    log_path = resolve(config["paths"]["qa"]) / "accessibility_scenarios_run.json"
+    log = json.loads(log_path.read_text()) if log_path.exists() else {}
+    for scenario_id in scenario_ids:
+        target = out_dir / f"{scenario_id}.parquet"
+        if target.exists():
+            print(f"{scenario_id}: já calculado")
+            continue
+        row = scenarios.loc[scenario_id]
+        pbf = interim / "scenarios" / f"{scenario_id}.osm.pbf"
+        started = time.perf_counter()
+        stats = write_blocked_pbf(interim / "poa.osm.pbf", pbf,
+                                  set(row["affected_edge_ids"].split(";")), row["network_type"])
+        network = build_network(pbf, [resolve(config["sources"]["gtfs"]["destino"])])
+        build_seconds = round(time.perf_counter() - started, 1)
+        result, seconds = accessibility(network, origins, destinations, modes, config, scenario_id)
+        result.to_parquet(target, index=False)
+        log[scenario_id] = {"validation_status": row["validation_status"], **stats,
+                            "seconds": {"pbf_and_network": build_seconds, **seconds}}
+        log_path.write_text(json.dumps(log, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(scenario_id, log[scenario_id])
+        del network
+        gc.collect()
+
+
+def consolidate(config: dict) -> pd.DataFrame:
+    """Losses of every computed scenario against the baseline."""
+    from .metrics import losses, summarize
+
+    tables = resolve(config["paths"]["tables"])
+    baseline = pd.read_parquet(tables / "accessibility_baseline.parquet")
+    frames = [losses(baseline, pd.read_parquet(path))
+              for path in sorted((tables / "scenarios").glob("*.parquet"))]
+    table = pd.concat(frames, ignore_index=True)
+    table.to_parquet(tables / "losses.parquet", index=False)
+    origins = gpd.read_parquet(resolve(config["paths"]["processed"]) / "origins.parquet")
+    summary = summarize(table, origins.set_index("origin_id")["population"])
+    summary.to_csv(tables / "losses_summary.csv", index=False)
+    return summary
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Calcula a linha de base A0 de acessibilidade")
+    parser = argparse.ArgumentParser(description="Acessibilidade de linha de base e de cenários")
     parser.add_argument("--modes", nargs="+", default=None, choices=sorted(MODES))
+    parser.add_argument("--scenarios", nargs="+", default=None,
+                        help="scenario_ids a calcular (A_s); sem isso, calcula A0")
+    parser.add_argument("--consolidate", action="store_true",
+                        help="só consolida perdas dos cenários já calculados")
     args = parser.parse_args()
     config = load_config()
     modes = args.modes or config["accessibility"]["modos"]
+    if args.consolidate or args.scenarios:
+        if args.scenarios:
+            run_scenarios(config, args.scenarios, modes)
+        print(consolidate(config).to_string(index=False))
+        return
     origins, destinations = load_inputs(config)
-
     started = time.perf_counter()
     network = build_network(resolve(config["paths"]["interim"]) / "poa.osm.pbf",
                             [resolve(config["sources"]["gtfs"]["destino"])])
