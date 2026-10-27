@@ -17,7 +17,7 @@ import numpy as np
 
 from .config import load_config, resolve
 from .susceptibility import gtfs_routes
-from .webmap import LEAFLET, _features, embed_json
+from .webmap import BASE_CSS, BASE_CSS_DARK, BASEMAP_JS, LEAFLET, _features, context, embed_json
 
 FORECAST_API = "https://api.open-meteo.com/v1/forecast"
 CANDIDATE_PERCENTILE = 0.90
@@ -83,11 +83,14 @@ def build_data(config: dict) -> dict:
         "scorer": susceptibility_report.get("selected_scorer"),
         "validation": susceptibility_report["temporal"],
         "api": FORECAST_API,
+        "context": context(config),
     }
 
 
 def build_html(data: dict) -> str:
-    return TEMPLATE.replace("__LEAFLET__", LEAFLET).replace("__DATA__", embed_json(data))
+    return (TEMPLATE.replace("__LEAFLET__", LEAFLET).replace("__BASEMAP__", BASEMAP_JS)
+            .replace("__BASE_CSS_DARK__", BASE_CSS_DARK).replace("__BASE_CSS__", BASE_CSS)
+            .replace("__DATA__", embed_json(data)))
 
 
 def main() -> None:
@@ -111,18 +114,18 @@ TEMPLATE = """<!doctype html>
 <link rel="stylesheet" href="__LEAFLET__/leaflet.min.css">
 <style>
 :root { --bg:#f7f7f5; --panel:#fff; --text:#1d1d1b; --muted:#5f5f5a; --line:#d9d9d4;
-  --none:#cfd8dc; --medio:#f39c12; --alto:#c0392b; --accent:#1f5f99; }
+  --none:#cfd8dc; --medio:#f39c12; --alto:#c0392b; --accent:#1f5f99; __BASE_CSS__ }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151514; --panel:#22221f;
-  --text:#ecece8; --muted:#a5a59e; --line:#3a3a36; --none:#45494b; --accent:#6aa8d1; } }
+  --text:#ecece8; --muted:#a5a59e; --line:#3a3a36; --none:#45494b; --accent:#6aa8d1; __BASE_CSS_DARK__ } }
 :root[data-theme="dark"] { --bg:#151514; --panel:#22221f; --text:#ecece8; --muted:#a5a59e;
-  --line:#3a3a36; --none:#45494b; --accent:#6aa8d1; }
+  --line:#3a3a36; --none:#45494b; --accent:#6aa8d1; __BASE_CSS_DARK__ }
 * { box-sizing:border-box; }
 html, body { margin:0; height:100%; background:var(--bg); color:var(--text);
   font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
 #app { display:flex; height:100%; }
 #panel { width:360px; flex:none; overflow:auto; padding:16px; background:var(--panel);
   border-right:1px solid var(--line); }
-#map { flex:1; }
+#map { flex:1; background:var(--water); }
 h1 { font-size:17px; margin:0 0 2px; } h2 { font-size:13px; margin:16px 0 6px; text-transform:uppercase;
   letter-spacing:.04em; color:var(--muted); }
 .sub, .muted { color:var(--muted); font-size:12.5px; }
@@ -196,8 +199,9 @@ const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).
 const LEVEL = ["sem alerta", "médio", "alto"];
 
 const map = L.map("map", {preferCanvas: true});
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19,
-  attribution: "© colaboradores do OpenStreetMap · previsão: Open-Meteo"}).addTo(map);
+const CONTEXT = D.context;
+__BASEMAP__
+map.attributionControl.addAttribution("previsão: Open-Meteo");
 const area = L.geoJSON(D.area, {style: {color: "#55554f", weight: 1, fillOpacity: 0}}).addTo(map);
 map.fitBounds(area.getBounds());
 const segLayer = L.geoJSON(null, {style: f => ({color: f.properties.level === 2 ? css("--alto") : css("--medio"),

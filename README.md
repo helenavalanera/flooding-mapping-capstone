@@ -31,6 +31,11 @@ das redes?
 - **Dashboard de alerta:** mostra **nível de alerta heurístico, não probabilidade**. Limiares de
   chuva calibrados com chuva *modelada* nas datas de bloqueio (limite inferior; a previsão não
   captou o temporal de 06/03/2022). Cobre só Porto Alegre; a localização fica no navegador.
+- **Mapas HTML:** o mapa de fundo é embutido (terra dos setores do IBGE menos a água do OSM,
+  vias principais do OSM), então abre de `file://` e offline. Os tiles de
+  `tile.openstreetmap.org` ficam só como opção no seletor de camadas: o servidor bloqueia
+  páginas sem Referer válido ("403 Access blocked"), o caso de arquivos abertos do disco.
+  Para usá-los, sirva a pasta: `python -m http.server -d outputs/maps 8000`.
 
 ## Fontes de dados e atribuição
 

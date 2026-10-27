@@ -14,6 +14,76 @@ import pandas as pd
 from .config import load_config, resolve
 
 LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4"
+# Own basemap embedded in the page (land from IBGE tracts, main roads from the OSM
+# extract): no tile server, so it works from file:// and offline. OSM tiles stay
+# available as an option for pages served over http(s) — tile.openstreetmap.org
+# blocks requests without a valid Referer, which is the file:// case.
+WATER_TRACT = "9"  # CD_SIT: massas de água
+ROAD_CLASS = {"motorway": 1, "motorway_link": 1, "trunk": 1, "trunk_link": 1,
+              "primary": 2, "primary_link": 2, "secondary": 3, "secondary_link": 3}
+BASEMAP_JS = """map.createPane("base"); map.getPane("base").style.zIndex = 250;
+const ownBase = L.layerGroup([
+  L.geoJSON(CONTEXT.land, {pane: "base", interactive: false,
+    style: {stroke: false, fillColor: css("--land"), fillOpacity: 1}}),
+  L.geoJSON(CONTEXT.roads, {pane: "base", interactive: false,
+    style: f => ({color: css("--road"), weight: [0, 2.4, 1.6, 1][f.properties.c], opacity: 0.9})}),
+]).addTo(map);
+const osmTiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19,
+  attribution: "© colaboradores do OpenStreetMap"});
+L.control.layers({"Base própria (offline)": ownBase,
+                  "OpenStreetMap (requer servidor ou https)": osmTiles}, null, {position: "topright"}).addTo(map);
+map.attributionControl.addAttribution("Base: IBGE (setores 2022) e © colaboradores do OpenStreetMap");"""
+BASE_CSS = """--land:#fbfaf7; --water:#cfe2ee; --road:#c9c3b8;"""
+BASE_CSS_DARK = """--land:#2b2b28; --water:#16242e; --road:#5a564f;"""
+
+
+def water_polygons(config: dict, bbox: tuple) -> gpd.GeoSeries:
+    """OSM water areas (lake, rivers) around the city, cached in data/interim.
+
+    Read from the raw regional PBF with osmium's ``smart`` strategy so large
+    multipolygons such as Lago Guaíba stay complete (the municipal clip cuts
+    them).
+    """
+    import subprocess
+
+    from pyrosm import OSM
+
+    interim = resolve(config["paths"]["interim"])
+    cache = interim / "water.parquet"
+    if cache.exists():
+        return gpd.read_parquet(cache).geometry
+    filtered, local = interim / "water_sul.osm.pbf", interim / "water_poa.osm.pbf"
+    subprocess.run(["osmium", "tags-filter", "-O", "-o", str(filtered),
+                    str(resolve(config["sources"]["osm"]["destino"])),
+                    "nwr/natural=water", "nwr/water", "nwr/waterway=riverbank"],
+                   check=True, capture_output=True)
+    subprocess.run(["osmium", "extract", "-O", "--strategy", "smart", "--bbox",
+                    ",".join(f"{v:.4f}" for v in bbox), "-o", str(local), str(filtered)],
+                   check=True, capture_output=True)
+    water = OSM(str(local)).get_data_by_custom_criteria(custom_filter={"natural": ["water"]},
+                                                         keep_nodes=False)
+    water = gpd.GeoDataFrame(geometry=water.geometry.make_valid(), crs=water.crs)
+    water.to_parquet(cache)
+    return water.geometry
+
+
+def context(config: dict) -> dict:
+    """Land (IBGE tracts minus OSM water) and main roads around the city."""
+    area = gpd.read_parquet(resolve(config["paths"]["processed"]) / "municipality.parquet")
+    bbox_sirgas = tuple(area.buffer(15000).to_crs("EPSG:4674").total_bounds)
+    tracts = gpd.read_file(resolve(config["sources"]["ibge_setores"]["destino"]), bbox=bbox_sirgas,
+                           columns=["CD_SIT"])
+    land = tracts[tracts["CD_SIT"] != WATER_TRACT].to_crs(area.crs).union_all()
+    # Neighbouring tracts extend over Lago Guaíba, so water comes from OSM.
+    water = water_polygons(config, tuple(area.buffer(15000).to_crs("EPSG:4326").total_bounds))
+    land = land.difference(water.to_crs(area.crs).union_all()).simplify(25)
+    segments = gpd.read_parquet(resolve(config["paths"]["interim"]) / "segments.parquet")
+    major = segments[segments["highway"].isin(ROAD_CLASS)].assign(
+        c=lambda f: f["highway"].map(ROAD_CLASS))
+    roads = major.dissolve(by=["c"]).reset_index()[["c", "geometry"]]
+    roads["geometry"] = roads.geometry.line_merge().simplify(10)
+    return {"land": _features(gpd.GeoDataFrame(geometry=[land], crs=area.crs), []),
+            "roads": _features(roads, ["c"])}
 MODES = ["walk", "car", "transit"]
 DIGITS = 5
 
@@ -91,6 +161,7 @@ def build_data(config: dict) -> dict:
         "destinations": _features(destinations, ["name", "category"]),
         "susceptibility": _features(top, ["percentile"]),
         "boundary": _features(gpd.GeoDataFrame(geometry=area.boundary, crs=area.crs), []),
+        "context": context(config),
         "meta": {
             "data_referencia": config["time"]["data_referencia"],
             "horario_partida": config["time"]["horario_partida"],
@@ -107,7 +178,9 @@ def embed_json(data: dict) -> str:
 
 
 def build_html(data: dict) -> str:
-    return TEMPLATE.replace("__LEAFLET__", LEAFLET).replace("__DATA__", embed_json(data))
+    return (TEMPLATE.replace("__LEAFLET__", LEAFLET).replace("__BASEMAP__", BASEMAP_JS)
+            .replace("__BASE_CSS_DARK__", BASE_CSS_DARK).replace("__BASE_CSS__", BASE_CSS)
+            .replace("__DATA__", embed_json(data)))
 
 
 def main() -> None:
@@ -131,19 +204,19 @@ TEMPLATE = """<!doctype html>
 <link rel="stylesheet" href="__LEAFLET__/leaflet.min.css">
 <style>
 :root { --bg:#f7f7f5; --panel:#ffffff; --text:#1d1d1b; --muted:#5f5f5a; --line:#d9d9d4;
-        --accent:#b2182b; --na:#c9c9c4; }
+        --accent:#b2182b; --na:#c9c9c4; __BASE_CSS__ }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --bg:#151514; --panel:#22221f; --text:#ecece8;
-        --muted:#a5a59e; --line:#3a3a36; --accent:#ef6f6c; --na:#55554f; } }
+        --muted:#a5a59e; --line:#3a3a36; --accent:#ef6f6c; --na:#55554f; __BASE_CSS_DARK__ } }
 :root[data-theme="dark"] { --bg:#151514; --panel:#22221f; --text:#ecece8; --muted:#a5a59e;
-        --line:#3a3a36; --accent:#ef6f6c; --na:#55554f; }
+        --line:#3a3a36; --accent:#ef6f6c; --na:#55554f; __BASE_CSS_DARK__ }
 * { box-sizing:border-box; }
 html, body { margin:0; height:100%; background:var(--bg); color:var(--text);
   font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
 #app { display:flex; height:100%; }
 #panel { width:330px; flex:none; overflow:auto; padding:16px; background:var(--panel);
   border-right:1px solid var(--line); }
-#map { flex:1; }
+#map { flex:1; background:var(--water); }
 h1 { font-size:17px; margin:0 0 4px; }
 .sub { color:var(--muted); font-size:12.5px; margin:0 0 14px; }
 label.field { display:block; font-weight:600; font-size:12.5px; margin:12px 0 4px; }
@@ -212,8 +285,8 @@ const meta = DATA.meta;
 $("subtitle").textContent = `Destinos de saúde alcançáveis em até ${meta.limite_min} min · partida ${meta.horario_partida} de ${meta.data_referencia} (GTFS histórico)`;
 
 const map = L.map("map", {preferCanvas: true});
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19,
-  attribution: "© colaboradores do OpenStreetMap"}).addTo(map);
+const CONTEXT = DATA.context;
+__BASEMAP__
 const boundary = L.geoJSON(DATA.boundary, {style: {color: "#55554f", weight: 1, fill: false}}).addTo(map);
 map.fitBounds(boundary.getBounds());
 

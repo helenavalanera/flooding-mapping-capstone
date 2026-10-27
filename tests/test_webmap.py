@@ -13,7 +13,10 @@ def test_embedded_json_cannot_close_the_script_element():
 
 def test_html_embeds_data_and_pins_leaflet_version():
     html = build_html({"meta": {"x": "</script>"}})
-    assert "__DATA__" not in html and "__LEAFLET__" not in html
+    assert not re.search(r"__[A-Z_]+__", html)        # every placeholder replaced
+    # The embedded basemap is the default; OSM tiles are only an option (they
+    # block file:// pages) and no keyed tile provider is used.
+    assert '"Base própria (offline)": ownBase' in html and "cartocdn" not in html
     assert "leaflet/1.9.4/leaflet.min.js" in html
     payload = re.search(r'<script id="data" type="application/json">(.*?)</script>', html, re.S)
     assert json.loads(payload.group(1)) == {"meta": {"x": "</script>"}}
