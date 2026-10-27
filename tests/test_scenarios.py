@@ -8,6 +8,7 @@ from flooding_mapping.scenarios import (
     intersection_point,
     load_events,
     nearest_to_landmark,
+    segment_between,
     street_midpoint,
 )
 
@@ -72,3 +73,20 @@ def test_load_events_rejects_duplicates_and_bad_confidence(tmp_path):
     pd.DataFrame([{**base, "confidence": "certeza"}]).to_csv(path, index=False)
     with pytest.raises(ValueError, match="confidence"):
         load_events(path)
+
+
+def test_segment_between_two_cross_streets():
+    nodes = gpd.GeoDataFrame(
+        {"id": [1, 2, 3, 4, 5, 6]},
+        geometry=[Point(0, 0), Point(1000, 0), Point(2000, 0), Point(0, 500), Point(2000, 500),
+                  Point(1000, 500)],
+        crs=CRS,
+    )
+    edges = gpd.GeoDataFrame(
+        {"name": ["Main", "Main", "West", "East"], "u": [1, 2, 1, 3], "v": [2, 3, 4, 5]},
+        geometry=[LineString([(0, 0), (1000, 0)]), LineString([(1000, 0), (2000, 0)]),
+                  LineString([(0, 0), (0, 500)]), LineString([(2000, 0), (2000, 500)])],
+        crs=CRS,
+    )
+    assert segment_between(edges, nodes, "Main", "West;East", CRS).equals(Point(1000, 0))
+    assert segment_between(edges, nodes, "Main", "West;Nowhere", CRS) is None

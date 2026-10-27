@@ -70,6 +70,19 @@ def intersection_point(edges, nodes, street_a: str, street_b: str, crs: str):
     return hull.centroid
 
 
+def segment_between(edges, nodes, street: str, ends: str, crs: str):
+    """Point of ``street`` closest to the middle of its intersections with the
+    two ';'-separated cross streets in ``ends``, or None if either is missing."""
+    first, second = ends.split(";")
+    a = intersection_point(edges, nodes, street, first, crs)
+    b = intersection_point(edges, nodes, street, second, crs)
+    if a is None or b is None:
+        return None
+    line = _streets(edges, street).to_crs(crs).union_all()
+    middle = MultiPoint([a, b]).centroid
+    return nearest_points(line, middle)[0]
+
+
 def street_midpoint(edges, street: str, crs: str):
     """Midpoint along the longest merged part of a named street."""
     lines = linemerge(_streets(edges, street).to_crs(crs).union_all())
@@ -100,6 +113,8 @@ def geocode_events(events: pd.DataFrame, edges, nodes, landmarks: dict, crs: str
         point = None
         if method == "osm_intersection":
             point = intersection_point(edges, nodes, row["osm_street_a"], row["osm_street_b"], crs)
+        elif method == "osm_segment_between":
+            point = segment_between(edges, nodes, row["osm_street_a"], row["osm_street_b"], crs)
         elif method == "osm_street_midpoint":
             point = street_midpoint(edges, row["osm_street_a"], crs)
         elif method == "osm_street_nearest_landmark" and row["osm_street_b"] in landmarks:
