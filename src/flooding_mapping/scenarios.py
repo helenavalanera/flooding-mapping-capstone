@@ -189,6 +189,86 @@ def scenario_rows(events: pd.DataFrame, zones: gpd.GeoDataFrame, segments: gpd.G
     return pd.DataFrame(rows)
 
 
+def blockage_count_fit(per_date: pd.DataFrame, events: pd.DataFrame) -> dict:
+    """Linear fit of total blockages reported per date against 24 h rain.
+
+    ``per_date`` comes from the rain calibration (event_date, total_24h_mm,
+    captured); dates whose rain the model missed are left out.
+    """
+    import numpy as np
+
+    totals = events[events["event_type"] == "bloqueio_total_acumulo_agua"].groupby("event_date").size()
+    data = per_date.assign(blockages=per_date["event_date"].map(totals).fillna(0).astype(int))
+    fit = data[data["captured"]]
+    if len(fit) < 2:
+        raise ValueError("At least two dates with captured rain are needed")
+    slope, intercept = np.polyfit(fit["total_24h_mm"], fit["blockages"], 1)
+    return {"intercept": float(intercept), "slope": float(slope), "dates": int(len(fit)),
+            "points": fit[["event_date", "total_24h_mm", "blockages"]].to_dict(orient="records")}
+
+
+def extra_points(fit: dict, rain_mm: float, factor: float = 1) -> int:
+    """Number of extra blockages expected for ``rain_mm`` (never negative)."""
+    return max(0, round(factor * (fit["intercept"] + fit["slope"] * rain_mm)))
+
+
+def model_hotspots(scores: gpd.GeoDataFrame, n: int, exclude: gpd.GeoSeries,
+                   min_distance_m: float) -> gpd.GeoDataFrame:
+    """The ``n`` most susceptible segments, each at least ``min_distance_m``
+    from the excluded points and from each other (greedy, by score)."""
+    chosen = []
+    taken = list(exclude.geometry) if len(exclude) else []
+    for row in scores.sort_values("percentile", ascending=False).itertuples():
+        if len(chosen) >= n:
+            break
+        if all(row.geometry.distance(g) >= min_distance_m for g in taken):
+            chosen.append(row.Index)
+            taken.append(row.geometry)
+    return scores.loc[chosen]
+
+
+def rain_scenario_rows(events: pd.DataFrame, segments: gpd.GeoDataFrame, scores: gpd.GeoDataFrame,
+                       fit: dict, threshold_mm: float, config: dict) -> pd.DataFrame:
+    """Closure sets along the rain scale.
+
+    Below ``threshold_mm`` (least 24 h rain that ever coincided with a reported
+    blockage) nothing closes. From it on, the documented total blockages close,
+    plus ``extra_points`` model hotspots for the rain and precariousness factor.
+    """
+    params = config["mobility"]
+    crs = config["crs_metric"]
+    documented = events[(events["event_type"] == "bloqueio_total_acumulo_agua")].dropna(
+        subset=["latitude", "longitude"])
+    doc_points = gpd.GeoSeries.from_xy(documented["longitude"], documented["latitude"],
+                                       crs="EPSG:4326").to_crs(crs)
+    doc_zone = doc_points.buffer(params["raio_m"]).union_all()
+    usable = segments[segments["walk"] | segments["drive"]]
+    doc_ids = set(usable.loc[usable.intersects(doc_zone), "segment_id"])
+    rows = []
+    for factor in params["fatores_precariedade"]:
+        for rain in params["chuva_24h_mm"]:
+            if rain < threshold_mm:
+                continue
+            n = extra_points(fit, rain, factor)
+            hotspots = model_hotspots(scores, n, doc_points, params["distancia_minima_m"])
+            ids = set(doc_ids)
+            if len(hotspots):
+                zone = hotspots.geometry.buffer(params["raio_m"]).union_all()
+                ids |= set(usable.loc[usable.intersects(zone), "segment_id"])
+            rows.append({
+                "scenario_id": f"S-C{rain:g}-F{factor:g}", "event_id": "documentados+modelo",
+                "radius_m": params["raio_m"], "network_type": "all",
+                "affected_edge_ids": ";".join(sorted(ids)),
+                "validation_status": "hipotetico" if n else "candidato",
+                "validated_by": "", "validation_date": "",
+                "notes": (f"Chuva {rain:g} mm/24h, fator de precariedade {factor:g}: "
+                          f"{len(doc_points)} pontos documentados + {n} pontos do modelo "
+                          f"({', '.join(hotspots['segment_id']) or 'nenhum'})."),
+                "rain_24h_mm": rain, "factor": factor, "extra_points": n,
+            })
+    return pd.DataFrame(rows)
+
+
 def review_map(event_id: str, events: pd.DataFrame, zones: gpd.GeoDataFrame,
                segments: gpd.GeoDataFrame, path: str | Path) -> None:
     """Zones and candidate segments of one event, for human review."""

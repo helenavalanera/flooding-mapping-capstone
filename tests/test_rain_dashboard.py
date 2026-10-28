@@ -41,3 +41,14 @@ def test_forecast_points_fall_inside_the_area():
     points = forecast_points(area, n=3)
     assert len(points) == 9
     assert points.within(area.union_all()).all()
+
+
+def test_frequency_counts_days_per_year():
+    index = pd.date_range("2020-01-01", "2021-12-31", freq="D")
+    daily = pd.Series(0.0, index=index)
+    daily["2020-03-01"] = daily["2020-07-01"] = 30.0
+    daily["2021-05-01"] = 50.0
+    rows = {r["threshold_mm"]: r for r in rain.frequency(daily, [26.2, 45])}
+    assert rows[26.2]["days_per_year_mean"] == 1.5
+    assert (rows[26.2]["days_per_year_min"], rows[26.2]["days_per_year_max"]) == (1, 2)
+    assert rows[45]["days_per_year_mean"] == 0.5

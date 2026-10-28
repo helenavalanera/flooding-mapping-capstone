@@ -37,6 +37,18 @@ susceptibility:
   alerta_percentil: 0.95
   alerta_raio_m: 50
 
+mobility:
+  # Escala de chuva acumulada em 24 h (mm). Medida: população da cidade alcançável
+  # em até accessibility.limite_min a partir de cada origem, por modo.
+  chuva_24h_mm: [10, 20, 30, 35, 40, 45]
+  # Zona de busca em torno de cada ponto que fecha (documentado ou do modelo).
+  raio_m: 100
+  # Pontos extras do modelo ficam a pelo menos esta distância entre si e dos documentados.
+  distancia_minima_m: 500
+  # Multiplica o número de pontos extras previsto pelo ajuste chuva × bloqueios:
+  # 1 = condição observada; valores maiores simulam drenagem mais precária.
+  fatores_precariedade: [1, 3]
+
 robustness:
   n_pares: 500
   semente: 20261025
@@ -49,8 +61,6 @@ population:
 osm:
   # Margem em torno do polígono municipal para o recorte do PBF.
   margem_recorte_m: 3000
-  tags_saude:
-    amenity: [hospital, clinic, doctors]
 
 paths:
   raw: data/raw

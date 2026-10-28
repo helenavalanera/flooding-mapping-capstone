@@ -1,4 +1,4 @@
-"""Preparation of the study area, origins and destinations."""
+"""Preparation of the study area and of the origin grid (with population)."""
 
 import argparse
 import json
@@ -128,47 +128,8 @@ def origins(config: dict) -> gpd.GeoDataFrame:
     )
 
 
-def normalize_destinations(
-    pois: gpd.GeoDataFrame, area: gpd.GeoDataFrame, duplicate_distance_m: float = 100
-) -> gpd.GeoDataFrame:
-    """Normalize OSM health POIs into one point per facility inside ``area``.
-
-    Polygons become representative points. A POI is marked as a duplicate
-    when an earlier record (polygons first) has the same normalized name and
-    category within ``duplicate_distance_m``. Duplicates are flagged, not
-    dropped, so their impact can be audited.
-    """
-    pois = pois.to_crs(area.crs)
-    table = gpd.GeoDataFrame(
-        {
-            "dest_id": pois["osm_type"].str[0] + pois["id"].astype(str),
-            "name": pois["name"],
-            "category": pois["amenity"],
-            "osm_geometry_type": pois.geometry.geom_type,
-            "source": "OpenStreetMap",
-        },
-        geometry=pois.geometry.representative_point(),
-        crs=area.crs,
-    )
-    table = table[table.within(area.union_all())]
-    table["_is_node"] = table["osm_geometry_type"].eq("Point")
-    table = table.sort_values(["_is_node", "dest_id"]).drop(columns="_is_node")
-    table = table.reset_index(drop=True)
-    key = table["name"].str.casefold().str.strip() + "|" + table["category"]
-    duplicate = pd.Series(False, index=table.index)
-    for _, group in table[table["name"].notna()].groupby(key):
-        kept = []
-        for index, point in group.geometry.items():
-            if any(point.distance(table.geometry[k]) <= duplicate_distance_m for k in kept):
-                duplicate[index] = True
-            else:
-                kept.append(index)
-    table["duplicate"] = duplicate
-    return table
-
-
-def audit_map(area, origins_, destinations, path: str | Path) -> None:
-    """Plot origins (sized by population) and destinations by category."""
+def audit_map(area, origins_, path: str | Path) -> None:
+    """Plot origins sized by population."""
     import matplotlib
 
     matplotlib.use("Agg")
@@ -177,24 +138,19 @@ def audit_map(area, origins_, destinations, path: str | Path) -> None:
     fig, ax = plt.subplots(figsize=(8, 10))
     area.boundary.plot(ax=ax, color="0.4", linewidth=0.6)
     populated = origins_[origins_["has_population"]]
-    populated.plot(ax=ax, color="0.65", markersize=2 + 40 * populated["population"]
-                   / populated["population"].max(), label="origem (área ∝ população)")
-    for category, marker in (("hospital", "P"), ("clinic", "o"), ("doctors", "^")):
-        subset = destinations[destinations["category"] == category]
-        subset.plot(ax=ax, marker=marker, markersize=18, label=f"{category} ({len(subset)})")
+    populated.plot(ax=ax, color="#1F6FB2", markersize=2 + 40 * populated["population"]
+                   / populated["population"].max())
     ax.set_axis_off()
-    ax.legend(loc="lower left", fontsize=8)
-    ax.set_title("Origens (grade 1 km) e destinos de saúde OSM — Porto Alegre")
+    ax.set_title("Origens (grade de 1 km), área proporcional à população — Porto Alegre")
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Recorta o OSM e prepara origens e destinos")
+    parser = argparse.ArgumentParser(description="Recorta o OSM e prepara a grade de origens")
     parser.add_argument("--skip-clip", action="store_true", help="reutiliza o PBF recortado")
     args = parser.parse_args()
-    from pyrosm import OSM
 
     config = load_config()
     paths = config["paths"]
@@ -208,19 +164,14 @@ def main() -> None:
         print(json.dumps(log, indent=2))
 
     origins_ = origins(config)
-    pois = OSM(str(clipped)).get_pois(custom_filter=config["osm"]["tags_saude"])
-    destinations = normalize_destinations(pois, area)
-
     processed = resolve(paths["processed"])
     processed.mkdir(parents=True, exist_ok=True)
     origins_.to_parquet(processed / "origins.parquet")
-    destinations.to_parquet(processed / "destinations.parquet")
     area.to_parquet(processed / "municipality.parquet")
-    audit_map(area, origins_, destinations, resolve(paths["maps"]) / "origins_destinations.png")
+    audit_map(area, origins_, resolve(paths["maps"]) / "origins.png")
 
-    kept = destinations[~destinations["duplicate"]]
     summary = [
-        "# Origens e destinos de saúde",
+        "# Origens",
         "",
         f"- Setores censitários: {len(tracts)} (população total {tracts['population'].sum():,})",
         f"- Origens (grade de {config['grid']['espacamento_m']} m): {len(origins_)}; "
@@ -228,26 +179,13 @@ def main() -> None:
         f"população alocada: {origins_['population'].sum():,.1f}",
         f"- Origens cujo centroide caiu fora do município (ponto deslocado para dentro): "
         f"{int((~origins_['centroid_inside']).sum())}",
-        f"- POIs OSM na área recortada: {len(pois)}; dentro do município: {len(destinations)}; "
-        f"marcados como duplicados: {int(destinations['duplicate'].sum())}; usados: {len(kept)}",
-        f"- Sem nome: {int(destinations['name'].isna().sum())}",
-        "",
-        "| Categoria | Destinos usados |",
-        "|---|---|",
-        *[f"| {k} | {v} |" for k, v in kept["category"].value_counts().items()],
-        "",
-        "Duplicados marcados (mesmo nome e categoria a ≤ 100 m):",
-        "",
-        *([f"- {r.dest_id}: {r.name} ({r.category})"
-           for r in destinations[destinations["duplicate"]].itertuples()] or ["- nenhum"]),
-        "",
-        "Limitação: a cobertura de estabelecimentos de saúde no OSM é incompleta e",
-        "heterogênea; a contagem de destinos não equivale ao cadastro oficial (CNES).",
+        "- As mesmas células com população são os destinos da medida de mobilidade",
+        "  (população alcançável em até 30 minutos).",
         "",
     ]
     qa = resolve(paths["qa"])
     qa.mkdir(parents=True, exist_ok=True)
-    (qa / "origins_destinations.md").write_text("\n".join(summary), encoding="utf-8")
+    (qa / "origins.md").write_text("\n".join(summary), encoding="utf-8")
     print("\n".join(summary))
 
 

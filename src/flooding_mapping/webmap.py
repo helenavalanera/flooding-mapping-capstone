@@ -129,6 +129,13 @@ def _int_or_none(value):
     return None if pd.isna(value) else int(value)
 
 
+def scenario_label(scenario_id: str) -> str:
+    """Human label for rain scenarios (S-C45-F1 -> 45 mm em 24 h, condição observada)."""
+    rain, factor = scenario_id.removeprefix("S-C").split("-F")
+    condition = "condição observada" if factor == "1" else f"drenagem precária (fator {factor})"
+    return f"{rain} mm em 24 h, {condition}"
+
+
 def build_data(config: dict) -> dict:
     """Collect every layer of the map from the pipeline outputs."""
     processed = resolve(config["paths"]["processed"])
@@ -136,24 +143,26 @@ def build_data(config: dict) -> dict:
     spacing = config["grid"]["espacamento_m"]
 
     origins = gpd.read_parquet(processed / "origins.parquet")
-    baseline = pd.read_parquet(tables / "accessibility_baseline.parquet")
-    a0 = baseline.pivot(index="origin_id", columns="mode", values="n_destinations")
+    baseline = pd.read_parquet(tables / "mobility_baseline.parquet")
+    a0 = baseline.pivot(index="origin_id", columns="mode", values="reachable_weight")
     origins = origins[origins["origin_id"].isin(a0.index)].reset_index(drop=True)
     cells = origins.set_geometry(origins.buffer(spacing / 2, cap_style="square"))
+    total_population = float(cells["population"].sum())
     cells["population"] = cells["population"].round(0).astype(int)
     for mode in MODES:
         cells[f"a0_{mode}"] = cells["origin_id"].map(a0[mode]).map(_int_or_none)
     order = cells["origin_id"]
 
-    losses = pd.read_parquet(tables / "losses.parquet")
+    losses = pd.read_parquet(tables / "mobility_losses.parquet")
     scenario_table = pd.read_csv(resolve(config["paths"]["events"]) / "scenarios.csv")
-    computed = sorted(losses["scenario_id"].unique())
+    computed = sorted(losses["scenario_id"].unique(),
+                      key=lambda sid: (int(sid.split("-F")[1]), float(sid.removeprefix("S-C").split("-F")[0])))
     scenarios, segments_by_scenario = {}, {}
     for scenario_id in computed:
         subset = losses[losses["scenario_id"] == scenario_id]
         row = scenario_table.set_index("scenario_id").loc[scenario_id]
         scenarios[scenario_id] = {
-            "event_id": row["event_id"], "radius_m": int(row["radius_m"]),
+            "label": scenario_label(scenario_id), "notes": row["notes"],
             "status": row["validation_status"],
             "L": {mode: [_int_or_none(v) for v in order.map(
                 subset[subset["mode"] == mode].set_index("origin_id")["L"])] for mode in MODES},
@@ -170,9 +179,6 @@ def build_data(config: dict) -> dict:
     events = gpd.GeoDataFrame(events, geometry=gpd.points_from_xy(
         events["longitude"], events["latitude"]), crs="EPSG:4326")
 
-    destinations = gpd.read_parquet(processed / "destinations.parquet")
-    destinations = destinations[~destinations["duplicate"]]
-
     susceptibility = gpd.read_parquet(tables / "susceptibility.parquet")
     top = susceptibility[susceptibility["percentile"] >= config["susceptibility"]["alerta_percentil"]]
     # susceptibility.parquet stores segment midpoints; draw the segment lines.
@@ -187,7 +193,6 @@ def build_data(config: dict) -> dict:
         "blocked": _features(blocked, ["segment_id", "scenarios"]),
         "events": _features(events, ["event_id", "event_date", "event_type", "location_text",
                                      "confidence", "verification_status", "source_url"]),
-        "destinations": _features(destinations, ["name", "category"]),
         "susceptibility": _features(top, ["percentile"]),
         "boundary": _features(gpd.GeoDataFrame(geometry=area.boundary, crs=area.crs), []),
         "context": context(config),
@@ -196,6 +201,7 @@ def build_data(config: dict) -> dict:
             "horario_partida": config["time"]["horario_partida"],
             "limite_min": config["accessibility"]["limite_min"],
             "alerta_percentil": config["susceptibility"]["alerta_percentil"],
+            "total_population": round(total_population),
         },
     }
 
@@ -272,9 +278,9 @@ select { width:100%; padding:6px 8px; border:1px solid var(--line); border-radiu
     <p class="sub" id="subtitle"></p>
     <label class="field" for="indicator">Indicador</label>
     <select id="indicator">
-      <option value="a0">Acessibilidade de base (A0)</option>
-      <option value="L">Perda absoluta no cenário (L)</option>
-      <option value="P">Perda relativa no cenário (P)</option>
+      <option value="a0">Cidade alcançável sem chuva (A0)</option>
+      <option value="L">Pessoas que deixam de ser alcançáveis (L)</option>
+      <option value="P">Parcela da cidade alcançável perdida (P)</option>
     </select>
     <label class="field" for="mode">Modo</label>
     <select id="mode">
@@ -282,12 +288,11 @@ select { width:100%; padding:6px 8px; border:1px solid var(--line); border-radiu
       <option value="car">Carro</option>
       <option value="transit">Ônibus</option>
     </select>
-    <label class="field" for="scenario">Cenário</label>
+    <label class="field" for="scenario">Chuva</label>
     <select id="scenario"></select>
     <div style="margin-top:12px">
       <label class="check"><input type="checkbox" id="showEvents" checked> Eventos de bloqueio</label>
       <label class="check"><input type="checkbox" id="showBlocked" checked> Trechos bloqueados do cenário</label>
-      <label class="check"><input type="checkbox" id="showDest"> Destinos de saúde</label>
       <label class="check"><input type="checkbox" id="showSusc"> Suscetibilidade (topo)</label>
     </div>
     <div class="legend" id="legend"></div>
@@ -301,17 +306,19 @@ select { width:100%; padding:6px 8px; border:1px solid var(--line); border-radiu
 const DATA = JSON.parse(document.getElementById("data").textContent);
 const MODES = {walk: "a pé", car: "carro", transit: "ônibus"};
 const SCALES = {
-  a0: {bins: [0, 1, 6, 21, 51, 101, 151], labels: ["0", "1–5", "6–20", "21–50", "51–100", "101–150", "> 150"],
+  a0: {bins: [0, 0.0001, 0.01, 0.05, 0.10, 0.25, 0.50], labels: ["0%", "< 1%", "1–5%", "5–10%", "10–25%", "25–50%", "> 50%"],
        colors: ["#f7f4f0", "#d6e6f0", "#a6cbe3", "#6aa8d1", "#3a82bc", "#1d5a9a", "#0b3369"]},
-  L:  {bins: [0, 1, 2, 3, 6, 11], labels: ["0", "1", "2", "3–5", "6–10", "> 10"],
+  L:  {bins: [0, 1, 1000, 10000, 50000, 100000], labels: ["0", "até 1 mil", "1–10 mil", "10–50 mil", "50–100 mil", "> 100 mil"],
        colors: ["#f7f4f0", "#fdd9c4", "#fbab8a", "#f2715a", "#d1352e", "#8f0c1f"]},
-  P:  {bins: [0, 0.0001, 0.10, 0.25, 0.50, 0.75], labels: ["0%", "≤ 10%", "10–25%", "25–50%", "50–75%", "> 75%"],
+  P:  {bins: [0, 0.0001, 0.01, 0.05, 0.10, 0.25], labels: ["0%", "até 1%", "1–5%", "5–10%", "10–25%", "> 25%"],
        colors: ["#f7f4f0", "#fdd9c4", "#fbab8a", "#f2715a", "#d1352e", "#8f0c1f"]},
 };
+const TOTAL = meta.total_population;
+const pct = v => `${(100 * v).toLocaleString("pt-BR", {maximumFractionDigits: 1})}%`;
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const $ = id => document.getElementById(id);
 const meta = DATA.meta;
-$("subtitle").textContent = `Destinos de saúde alcançáveis em até ${meta.limite_min} min · partida ${meta.horario_partida} de ${meta.data_referencia} (GTFS histórico)`;
+$("subtitle").textContent = `Quanto da cidade (população) cada célula alcança em até ${meta.limite_min} min, e quanto perde com a chuva. Ônibus: GTFS de ${meta.data_referencia}, partida ${meta.horario_partida}.`;
 
 const map = L.map("map", {preferCanvas: true});
 const CONTEXT = DATA.context;
@@ -324,7 +331,7 @@ for (const id of scenarioIds) {
   const s = DATA.scenarios[id];
   const option = document.createElement("option");
   option.value = id;
-  option.textContent = `${id} (${s.radius_m} m, ${s.status})`;
+  option.textContent = s.label;
   $("scenario").appendChild(option);
 }
 // Initial view: hash state (#indicador=L&modo=car&cenario=...) or the main finding.
@@ -333,12 +340,12 @@ const pick = (value, allowed, fallback) => allowed.includes(value) ? value : fal
 $("indicator").value = pick(hash.get("indicador"), ["a0", "L", "P"], "L");
 $("mode").value = pick(hash.get("modo"), Object.keys(MODES), "car");
 $("scenario").value = pick(hash.get("cenario"), scenarioIds,
-  scenarioIds.includes("S-D20250618-100-all") ? "S-D20250618-100-all" : scenarioIds[0]);
+  scenarioIds.includes("S-C45-F1") ? "S-C45-F1" : scenarioIds[0]);
 
 const index = new Map(DATA.cells.features.map((f, i) => [f.properties.origin_id, i]));
 function value(props, indicator, mode, scenario) {
   const a0 = props[`a0_${mode}`];
-  if (indicator === "a0") return a0;
+  if (indicator === "a0") return a0 === null ? null : a0 / TOTAL;
   const loss = DATA.scenarios[scenario].L[mode][index.get(props.origin_id)];
   if (indicator === "L") return loss;
   return (loss === null || !a0) ? null : loss / a0;
@@ -363,7 +370,8 @@ function cellPopup(props) {
     const a0 = props[`a0_${m}`];
     const l = DATA.scenarios[state.scenario].L[m][index.get(props.origin_id)];
     const text = a0 === null ? "sem ligação à rede" :
-      `A0 = ${a0}` + (l === null ? "" : ` · L = ${l}` + (a0 > 0 ? ` (${Math.round(100 * l / a0)}%)` : ""));
+      `alcança ${pct(a0 / TOTAL)} da cidade` + (l === null || l === 0 ? "" :
+        `; com a chuva perde ${l.toLocaleString("pt-BR")} pessoas (${pct(a0 > 0 ? l / a0 : 0)})`);
     addRow(box, MODES[m], text);
   }
   return box;
@@ -389,15 +397,6 @@ const events = L.geoJSON(DATA.events, {
     return box;
   }),
 }).addTo(map);
-const destinations = L.geoJSON(DATA.destinations, {
-  pointToLayer: (f, ll) => L.circleMarker(ll, {radius: 4, color: "#fff", weight: 1,
-    fillColor: {hospital: "#1b7837", clinic: "#5aae61", doctors: "#a6dba0"}[f.properties.category], fillOpacity: 1}),
-  onEachFeature: (f, layer) => layer.bindPopup(() => {
-    const box = document.createElement("dl"); box.className = "popup";
-    addRow(box, f.properties.category, f.properties.name || "(sem nome no OSM)");
-    return box;
-  }),
-});
 const susceptibility = L.geoJSON(DATA.susceptibility, {style: {color: "#6a3d9a", weight: 2}});
 
 function current() {
@@ -416,13 +415,14 @@ function render() {
   if ($("showBlocked").checked) blocked.addData({type: "FeatureCollection",
     features: DATA.blocked.features.filter(f => f.properties.scenarios.includes(state.scenario))});
   for (const [box, layer] of [["showBlocked", blocked], ["showEvents", events],
-                              ["showDest", destinations], ["showSusc", susceptibility]]) {
+                              ["showSusc", susceptibility]]) {
     if ($(box).checked) layer.addTo(map); else layer.remove();
   }
   const legend = $("legend"); legend.replaceChildren();
   const title = document.createElement("strong");
-  title.textContent = {a0: `A0 — ${MODES[state.mode]}`, L: `Perda L — ${MODES[state.mode]}`,
-                       P: `Perda relativa P — ${MODES[state.mode]}`}[state.indicator];
+  title.textContent = {a0: `Cidade alcançável em ${meta.limite_min} min, ${MODES[state.mode]}`,
+                       L: `Pessoas que deixam de ser alcançáveis, ${MODES[state.mode]}`,
+                       P: `Parcela da cidade perdida, ${MODES[state.mode]}`}[state.indicator];
   legend.append(title);
   const rows = scale.labels.map((t, i) => [scale.colors[i], t]).concat([[css("--na"), "sem valor"]]);
   for (const [c, t] of rows) {
@@ -432,12 +432,12 @@ function render() {
     row.append(sw, label); legend.append(row);
   }
   const s = DATA.scenarios[state.scenario];
-  $("note").textContent = `Cenário ${state.scenario}: eventos ${s.event_id.replaceAll(";", ", ")}; trechos com status "${s.status}" ` +
-    `(ainda não validados). Ônibus seguem o GTFS de 2025; variações de até 2 destinos no ônibus ` +
-    `estão dentro do ruído de religamento. Suscetibilidade: segmentos acima do percentil ` +
-    `${Math.round(meta.alerta_percentil * 100)} — semelhança de terreno com locais já interditados, não previsão de alagamento.`;
+  $("note").textContent = `${s.label}: ${s.notes} Trechos documentados ainda sem validação humana. ` +
+    `Ônibus seguem o GTFS de 2025 (o bloqueio de ruas afeta as caminhadas de acesso). ` +
+    `Suscetibilidade: trechos acima do percentil ${Math.round(meta.alerta_percentil * 100)}, ` +
+    `semelhança de terreno com locais já interditados.`;
 }
-for (const id of ["indicator", "mode", "scenario", "showEvents", "showBlocked", "showDest", "showSusc"])
+for (const id of ["indicator", "mode", "scenario", "showEvents", "showBlocked", "showSusc"])
   $(id).addEventListener("change", render);
 render();
 </script>

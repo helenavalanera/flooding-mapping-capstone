@@ -277,13 +277,12 @@ def evaluate(table: pd.DataFrame, seed: int, block_m: float, features: list[str]
     return report
 
 
-def alert(scores: pd.DataFrame, rain_mm_h: float, config: dict, routes: gpd.GeoDataFrame,
-          destinations: gpd.GeoDataFrame) -> dict:
+def alert(scores: pd.DataFrame, rain_mm_h: float, config: dict, routes: gpd.GeoDataFrame) -> dict:
     """Deterministic operational alert for a forecast rain intensity.
 
     Below the (provisional) rain threshold nothing is flagged. Otherwise the
     segments above the configured susceptibility percentile are flagged, with
-    the bus routes and health destinations within ``alerta_raio_m`` of them.
+    the bus routes within ``alerta_raio_m`` of them.
     """
     params = config["susceptibility"]
     if rain_mm_h < params["alerta_chuva_mm_h"]:
@@ -291,13 +290,11 @@ def alert(scores: pd.DataFrame, rain_mm_h: float, config: dict, routes: gpd.GeoD
     flagged = scores[scores["percentile"] >= params["alerta_percentil"]]
     zone = flagged.buffer(params["alerta_raio_m"]).union_all()
     hit_routes = routes[routes.intersects(zone)]
-    hit_destinations = destinations[destinations.intersects(zone)]
     return {
         "rain_mm_h": rain_mm_h, "triggered": True,
         "threshold_mm_h": params["alerta_chuva_mm_h"], "percentile": params["alerta_percentil"],
         "segments": int(len(flagged)),
         "routes": sorted(hit_routes["route_short_name"].astype(str).unique().tolist()),
-        "destinations": hit_destinations[["dest_id", "name", "category"]].to_dict(orient="records"),
     }
 
 
@@ -381,9 +378,7 @@ def main() -> None:
 
     if args.alert_rain is not None:
         routes = gtfs_routes(resolve(config["sources"]["gtfs"]["destino"]), crs)
-        destinations = gpd.read_parquet(processed / "destinations.parquet")
-        destinations = destinations[~destinations["duplicate"]]
-        report["alert"] = alert(scores, args.alert_rain, config, routes, destinations)
+        report["alert"] = alert(scores, args.alert_rain, config, routes)
     (qa / "susceptibility_run.json").write_text(
         json.dumps(report, indent=2, ensure_ascii=False, default=float) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, ensure_ascii=False, default=float))

@@ -8,7 +8,7 @@ def test_features_use_max_loss_and_skip_invalid_origins():
     baseline = pd.DataFrame({
         "origin_id": ["a", "a", "b", "b", "c", "c"],
         "mode": ["walk", "car"] * 3,
-        "n_destinations": [4, 100, 0, 50, None, None],
+        "reachable_weight": [4, 100, 0, 50, None, None],
         "status": ["ok"] * 4 + ["not_linked"] * 2,
     })
     losses = pd.DataFrame({
