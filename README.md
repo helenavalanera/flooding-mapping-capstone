@@ -1,20 +1,37 @@
 # Flooding Mapping
 
-Avaliação de como interdições localizadas associadas a alagamentos pluviais alteram a
-acessibilidade a serviços de saúde em Porto Alegre/RS, a pé, de automóvel e de ônibus, e
-como afetam a conectividade das redes viária e de pedestres.
+Alagamentos pluviais fecham cruzamentos e trechos de vias em Porto Alegre várias vezes por ano.
+O projeto mede **quanto da mobilidade urbana — a pé, de ônibus e de carro — deixa de ser
+alcançável com até 45 mm de chuva em 24 horas**, diante das condições precárias de drenagem da
+cidade, quando trechos documentados são interditados.
 
-**Pergunta:** como interdições localizadas associadas a alagamentos pluviais alteram a
-quantidade de destinos de saúde acessíveis em até 30 minutos, e como afetam a conectividade
-das redes?
+**Pergunta:** com chuvas de até 45 mm em 24 h, quanto da cidade (população alcançável em até
+30 minutos) cada pessoa perde, a pé, de ônibus e de carro, quando os trechos documentados e os
+mais propensos a alagar são interditados? Complementa-se com a perda de conectividade das redes
+viária e de pedestres.
+
+**Por que importa:** o menor acumulado que já coincidiu com bloqueios registrados (~26 mm em
+24 h) ocorre em média **14 dias por ano** em Porto Alegre (`reports/qa/rain_frequency.json`):
+chuvas comuns, não extremas, já desorganizam o deslocamento e o acesso a tudo na cidade.
+
+**Como a chuva vira bloqueio:** abaixo do menor acumulado em que a EPTC já registrou bloqueio
+(limiar calibrado em `reports/qa/rain_calibration.json`), nada fecha; a partir dele, fecham os
+pontos documentados de bloqueio total e mais N pontos apontados pelo modelo de suscetibilidade,
+com N vindo de um ajuste linear entre chuva acumulada e número de bloqueios registrados por data,
+multiplicado por um fator de precariedade (1 = condição observada).
 
 ## Escopo e limitações
 
 - **Ônibus:** GTFS oficial da EPTC com vigência set–dez/2025 (vencido; único publicado). Os
   resultados representam a oferta desse período, não o serviço atual. No R5 os ônibus seguem
   a grade do GTFS; o bloqueio de ruas afeta só as caminhadas de acesso, egresso e transferência.
-- **Destinos:** estabelecimentos `amenity=hospital|clinic|doctors` do OSM — cobertura
-  incompleta e heterogênea (rara na zona sul); não equivale ao CNES.
+- **Medida de mobilidade:** destinos = células da grade com população; cada origem "alcança"
+  a população das células a até 30 min. Representa o acesso à cidade como um todo (pessoas,
+  trabalho, serviços e comércio onde as pessoas estão), não a um tipo de destino.
+- **Chuva → bloqueio:** regra explícita e configurável (`mobility` em `config/analysis.yaml`);
+  o ajuste chuva × número de bloqueios usa só 3 datas e é provisório. Abaixo de ~26 mm em 24 h
+  nenhum bloqueio é atribuído, embora temporais curtos possam fechar vias com acumulados menores
+  (06/03/2022).
 - **Eventos:** pontos de bloqueio informados pela EPTC (portal da Prefeitura e imprensa). Não
   são um inventário completo. Locais são transcritos e as coordenadas, derivadas no OSM.
 - **Zonas:** o buffer (50/100/150 m) é uma zona de busca; não prova que todos os trechos nela
@@ -54,9 +71,9 @@ das redes?
 | Fonte | Uso | Licença / atribuição |
 |---|---|---|
 | GTFS EPTC — [dadosabertos.poa.br](https://dadosabertos.poa.br/dataset/gtfs) | Rede de ônibus | Creative Commons Atribuição (portal); © EPTC/Prefeitura de Porto Alegre |
-| OpenStreetMap via [Geofabrik](https://download.geofabrik.de/south-america/brazil/sul.html) | Rede viária e destinos | ODbL — © colaboradores do OpenStreetMap |
+| OpenStreetMap via [Geofabrik](https://download.geofabrik.de/south-america/brazil/sul.html) | Rede viária e drenagem | ODbL — © colaboradores do OpenStreetMap |
 | IBGE — Censo 2022, malha de setores com agregados | Território e população | Fonte: IBGE, Censo Demográfico 2022 |
-| Open-Meteo (previsão e arquivo de previsões) | Chuva prevista e calibração | CC BY 4.0 — Open-Meteo.com |
+| Open-Meteo (previsão, arquivo de previsões e reanálise) | Chuva prevista, calibração e frequência | CC BY 4.0 — Open-Meteo.com |
 | Copernicus DEM GLO-30 (AWS Open Data) | Relevo | © DLR e.V. 2010–2014 e © Airbus Defence and Space GmbH 2014–2018, fornecido no âmbito do COPERNICUS pela União Europeia e ESA |
 | EPTC / Prefeitura de Porto Alegre; Jornal do Comércio; Sul21 | Eventos de bloqueio | Citados por URL em `data/events/events.csv` |
 
@@ -72,16 +89,17 @@ data/events/                events.csv e scenarios.csv (contrato em docs/events_
 src/flooding_mapping/
   ingest.py                 download atômico + manifesto
   validate.py               vigência efetiva do GTFS
-  prepare.py                recorte OSM, grade de origens, população, destinos
-  accessibility.py          A0 e A_s com r5py
+  prepare.py                recorte OSM, grade de origens com população
+  accessibility.py          cidade alcançável (A0 e A_s) com r5py
   network.py                segmentos OSM e PBF derivado por cenário
   scenarios.py              eventos, geocodificação, zonas e trechos candidatos
-  metrics.py                perdas L e P
+  metrics.py                perdas L e P e mobilidade perdida
+  mobility.py               escala de chuva, cidade alcançável e mobilidade perdida
   robustness.py             eficiência e maior componente (NetworkX)
   clustering.py             tipologia k-means
   susceptibility.py         suscetibilidade (DEM + hidrografia) e alerta operacional
   webmap.py                 mapa interativo HTML (Leaflet) com todas as camadas
-  rain.py                   calibração dos limiares de chuva (previsões históricas Open-Meteo)
+  rain.py                   limiares de chuva calibrados e frequência anual das chuvas
   dashboard.py              dashboard de alerta: localização, previsão ao vivo, nível por trecho
 tests/                      pytest com dados sintéticos
 reports/qa/                 relatórios de qualidade e registros de execução
@@ -105,33 +123,31 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@21   # obrigatório para o r5py
 
 ```bash
 PY=.venv/bin/python
-# 1. Downloads (registra no manifesto)
+# 1. Downloads (registram no manifesto)
 $PY -m flooding_mapping.ingest gtfs --source-date 2025-09-25
 $PY -m flooding_mapping.ingest osm
 $PY -m flooding_mapping.ingest ibge_setores
+$PY -m flooding_mapping.ingest dem_s30 && $PY -m flooding_mapping.ingest dem_s31
 # 2. Vigência do GTFS -> reports/qa/gtfs_validation.md (data_referencia em config)
 $PY -m flooding_mapping.validate
-# 3. Recorte do OSM, origens e destinos
+# 3. Recorte do OSM e grade de origens com população
 $PY -m flooding_mapping.prepare
-# 4. Linha de base A0 (três modos)
-$PY -m flooding_mapping.accessibility
-# 5. Eventos: geocodificação e trechos candidatos (+ mapa de revisão)
+# 4. Eventos: geocodificação e trechos candidatos (+ mapa de revisão)
 $PY -m flooding_mapping.scenarios geocode
 $PY -m flooding_mapping.scenarios candidates --review E20250618-04
-# 6. Um cenário: A_s, perdas e robustez
-$PY -m flooding_mapping.accessibility --scenarios S-E20250618-04-100-all
-$PY -m flooding_mapping.robustness --scenarios S-E20250618-04-100-all
-# 7. Perdas consolidadas e mapas de perda
-$PY -m flooding_mapping.accessibility --consolidate --maps S-D20250618-100-all
-# 8. Mapa interativo (abre no navegador; estado na URL, ex.: #indicador=L&modo=car)
-$PY -m flooding_mapping.webmap && open outputs/maps/mapa_interativo.html
-# 9. Tipologia (após calcular os cenários)
-$PY -m flooding_mapping.clustering
-# 10. Suscetibilidade, validação e alerta (chuva prevista em mm/h)
-$PY -m flooding_mapping.ingest dem_s30 && $PY -m flooding_mapping.ingest dem_s31
-$PY -m flooding_mapping.susceptibility --alert-rain 40
-# 11. Limiares de chuva e dashboard de alerta (previsão ao vivo no navegador)
+# 5. Suscetibilidade dos trechos (modelo e validação)
+$PY -m flooding_mapping.susceptibility
+# 6. Chuva: limiares calibrados e frequência anual
 $PY -m flooding_mapping.rain
+# 7. Cidade alcançável sem chuva (A0) e mobilidade perdida na escala de chuva (até 45 mm/24h)
+$PY -m flooding_mapping.accessibility
+$PY -m flooding_mapping.mobility
+# 8. Robustez das redes (exemplo: um bloqueio documentado)
+$PY -m flooding_mapping.robustness --scenarios S-E20250618-04-100-all
+# 9. Tipologia das áreas (k-means)
+$PY -m flooding_mapping.clustering
+# 10. Mapa interativo e dashboard de alerta
+$PY -m flooding_mapping.webmap && open outputs/maps/mapa_interativo.html
 $PY -m flooding_mapping.dashboard && open outputs/maps/dashboard_alerta.html
 ```
 
@@ -139,11 +155,14 @@ Testes: `.venv/bin/python -m pytest`.
 
 ## Indicadores
 
-- **A0 / A_s:** destinos de saúde alcançáveis em até 30 min (inclusivo), mediana dos tempos
-  numa janela de partida de 60 min a partir das 07:00 da data de referência. `status`
-  diferencia zero destinos (`ok`), origem sem ligação à rede do modo (`not_linked`) e falha
-  (`missing`).
-- **L = A0 − A_s** e **P = L / A0** (ausente quando A0 = 0).
+- **A0 / A_s:** população da cidade alcançável em até 30 min (inclusivo) a partir de cada origem,
+  sem chuva e no cenário de chuva; mediana dos tempos numa janela de partida de 60 min a partir
+  das 07:00 da data de referência. `status` diferencia `ok`, origem sem ligação à rede do modo
+  (`not_linked`) e falha (`missing`).
+- **L = A0 − A_s** (pessoas que deixam de ser alcançáveis) e **P = L / A0**.
+- **Mobilidade perdida** (por modo e nível de chuva): 1 − Σ pop·A_s / Σ pop·A0, ou seja, a parte
+  de todos os deslocamentos possíveis em 30 min que a chuva elimina. **Instabilidade local:**
+  maior P entre as origens e população das células que perdem pelo menos 10% da cidade.
 - **Eficiência:** média de 1/d (d = caminho mínimo ponderado pelo comprimento) numa amostra
   fixa de pares (semente em config); pares sem caminho contribuem 0. **R_E = E_s / E_0**,
   global e local (nós a até 1 km da zona).
