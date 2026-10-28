@@ -32,3 +32,6 @@ reports/qa/*
 !reports/qa/*.json
 
 !.gitkeep
+
+# Travas temporárias do Word/Office.
+~$*
