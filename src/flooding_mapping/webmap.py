@@ -313,7 +313,7 @@ const SCALES = {
   P:  {bins: [0, 0.0001, 0.01, 0.05, 0.10, 0.25], labels: ["0%", "até 1%", "1–5%", "5–10%", "10–25%", "> 25%"],
        colors: ["#f7f4f0", "#fdd9c4", "#fbab8a", "#f2715a", "#d1352e", "#8f0c1f"]},
 };
-const TOTAL = meta.total_population;
+const TOTAL = DATA.meta.total_population;
 const pct = v => `${(100 * v).toLocaleString("pt-BR", {maximumFractionDigits: 1})}%`;
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const $ = id => document.getElementById(id);
