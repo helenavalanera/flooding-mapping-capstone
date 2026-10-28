@@ -1,4 +1,4 @@
-"""Unsupervised typology of origins by baseline access and interdiction loss.
+"""Unsupervised typology of origins by baseline mobility and rain-scenario loss.
 
 Descriptive only: k-means groups origins with similar access (A0) and
 maximum relative loss across simulated scenarios. It does not predict
@@ -26,7 +26,7 @@ def features(baseline: pd.DataFrame, losses: pd.DataFrame) -> pd.DataFrame:
     negative values — small gains from R5 stop relinking — count as 0).
     """
     valid = baseline[baseline["status"] == "ok"]
-    a0 = valid.pivot(index="origin_id", columns="mode", values="n_destinations").astype(float)
+    a0 = valid.pivot(index="origin_id", columns="mode", values="reachable_weight").astype(float)
     p = losses.assign(P=losses["P"].fillna(0).clip(lower=0)).groupby(["origin_id", "mode"])["P"].max()
     p_max = p.unstack("mode").reindex(index=a0.index, columns=a0.columns).fillna(0)
     table = pd.concat([np.log1p(a0).add_prefix("log_A0_"), p_max.add_prefix("P_max_")], axis=1)
@@ -69,8 +69,8 @@ def main() -> None:
     argparse.ArgumentParser(description="Tipologia k-means das origens").parse_args()
     config = load_config()
     tables = resolve(config["paths"]["tables"])
-    baseline = pd.read_parquet(tables / "accessibility_baseline.parquet")
-    losses = pd.read_parquet(tables / "losses.parquet")
+    baseline = pd.read_parquet(tables / "mobility_baseline.parquet")
+    losses = pd.read_parquet(tables / "mobility_losses.parquet")
     table = features(baseline, losses)
     result, info = typology(table, config["robustness"]["semente"])
     origins = gpd.read_parquet(resolve(config["paths"]["processed"]) / "origins.parquet")

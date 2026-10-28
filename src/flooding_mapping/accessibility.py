@@ -1,4 +1,9 @@
-"""Accessibility to health destinations within a travel-time limit."""
+"""Accessibility to the city: population reachable within a travel-time limit.
+
+Destinations are the populated grid cells, weighted by their population, so the
+measure is how much of the city (people, and everything they stand for) each
+origin reaches by mode.
+"""
 
 import argparse
 import datetime as dt
@@ -34,7 +39,8 @@ def classify_accessibility(
 
 
 def count_accessible(
-    times: pd.DataFrame, origin_ids: pd.Series, limit_min: float, unlinked_ids=()
+    times: pd.DataFrame, origin_ids: pd.Series, limit_min: float, unlinked_ids=(),
+    weights: pd.Series | None = None,
 ) -> pd.DataFrame:
     """Count destinations reachable within ``limit_min`` (inclusive) per origin.
 
@@ -43,16 +49,25 @@ def count_accessible(
     ``ok`` (a count, possibly 0), ``not_linked`` (origin cannot be linked to
     the street network of the mode) or ``missing`` (no result rows: a
     calculation failure). Only ``ok`` origins get a count; others get <NA>.
+
+    With ``weights`` (indexed by destination id), ``reachable_weight`` adds
+    the summed weight of the reachable destinations (e.g. their population).
     """
     reachable = times["travel_time"].notna() & (times["travel_time"] <= limit_min)
     counts = reachable.groupby(times["from_id"]).sum()
     result = pd.DataFrame({"origin_id": origin_ids.to_numpy()})
     result["n_destinations"] = result["origin_id"].map(counts).astype("Int64")
+    if weights is not None:
+        reached = times.loc[reachable, "to_id"].map(weights).fillna(0)
+        totals = reached.groupby(times.loc[reachable, "from_id"]).sum()
+        result["reachable_weight"] = result["origin_id"].map(totals).fillna(0.0)
     result["status"] = "ok"
     result.loc[result["n_destinations"].isna(), "status"] = "missing"
     unlinked = result["origin_id"].isin(set(unlinked_ids))
     result.loc[unlinked, "status"] = "not_linked"
     result.loc[unlinked, "n_destinations"] = pd.NA
+    if weights is not None:
+        result.loc[result["status"] != "ok", "reachable_weight"] = float("nan")
     return result
 
 
@@ -96,27 +111,31 @@ def travel_times(network, origins: gpd.GeoDataFrame, destinations: gpd.GeoDataFr
     return pd.DataFrame(matrix)
 
 
+BASELINE_TABLE = "mobility_baseline.parquet"
+SCENARIO_DIR = "mobility"
+
+
 def load_inputs(config: dict) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
-    """Origins (populated ones, if configured) and non-duplicate destinations."""
+    """Origins (populated cells, if configured) and the same cells as destinations."""
     processed = resolve(config["paths"]["processed"])
     origins = gpd.read_parquet(processed / "origins.parquet")
     if config["population"]["excluir_origens_sem_populacao"]:
         origins = origins[origins["has_population"]]
-    destinations = gpd.read_parquet(processed / "destinations.parquet")
-    destinations = destinations[~destinations["duplicate"]]
-    return (origins.rename(columns={"origin_id": "id"}),
-            destinations.rename(columns={"dest_id": "id"}))
+    origins = origins.rename(columns={"origin_id": "id"})
+    return origins, origins[["id", "population", "geometry"]].copy()
 
 
 def accessibility(network, origins, destinations, modes, config, label: str) -> tuple[pd.DataFrame, dict]:
     """Count accessible destinations per origin and mode for one network."""
     limit = config["accessibility"]["limite_min"]
+    weights = (destinations.set_index("id")["population"]
+               if "population" in destinations.columns else None)
     frames, seconds = [], {}
     for mode in modes:
         started = time.perf_counter()
         times = travel_times(network, origins, destinations, mode, config)
         counts = count_accessible(times, origins["id"], limit,
-                                  unlinked_origins(network, origins, mode))
+                                  unlinked_origins(network, origins, mode), weights)
         counts["mode"] = mode
         counts["scenario_id"] = label
         frames.append(counts)
@@ -145,8 +164,8 @@ def run_log(config: dict, seconds: dict, n_origins: int, n_destinations: int) ->
     }
 
 
-def accessibility_map(result: pd.DataFrame, config: dict, path: str | Path, column="n_destinations",
-                      title="Destinos de saúde acessíveis em até 30 min (A0)", cmap="viridis",
+def accessibility_map(result: pd.DataFrame, config: dict, path: str | Path, column="reachable_weight",
+                      title="Pessoas alcançáveis em até 30 min (A0)", cmap="viridis",
                       vmin=None, vmax=None) -> None:
     """One panel per mode on a shared colour scale; grey marks origins without a value."""
     import matplotlib
@@ -170,7 +189,7 @@ def accessibility_map(result: pd.DataFrame, config: dict, path: str | Path, colu
         data[data[column].isna()].plot(ax=ax, color="0.85")
         data[data[column].notna()].astype({column: float}).plot(
             ax=ax, column=column, cmap=cmap, vmin=vmin, vmax=vmax)
-        ax.set_title(mode)
+        ax.set_title({"walk": "A pé", "car": "Carro", "transit": "Ônibus"}.get(mode, mode))
         ax.set_axis_off()
     mappable = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin, vmax))
     fig.colorbar(mappable, ax=axes[0].tolist(), shrink=0.6)
@@ -196,9 +215,9 @@ def run_scenarios(config: dict, scenario_ids: list[str], modes: list[str]) -> No
     scenarios = scenarios.set_index("scenario_id")
     origins, destinations = load_inputs(config)
     interim = resolve(config["paths"]["interim"])
-    out_dir = resolve(config["paths"]["tables"]) / "scenarios"
+    out_dir = resolve(config["paths"]["tables"]) / SCENARIO_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
-    log_path = resolve(config["paths"]["qa"]) / "accessibility_scenarios_run.json"
+    log_path = resolve(config["paths"]["qa"]) / "mobility_scenarios_run.json"
     log = json.loads(log_path.read_text()) if log_path.exists() else {}
     for scenario_id in scenario_ids:
         target = out_dir / f"{scenario_id}.parquet"
@@ -222,48 +241,22 @@ def run_scenarios(config: dict, scenario_ids: list[str], modes: list[str]) -> No
         gc.collect()
 
 
-def consolidate(config: dict) -> pd.DataFrame:
-    """Losses of every computed scenario against the baseline."""
-    from .metrics import losses, summarize
-
-    tables = resolve(config["paths"]["tables"])
-    baseline = pd.read_parquet(tables / "accessibility_baseline.parquet")
-    frames = [losses(baseline, pd.read_parquet(path))
-              for path in sorted((tables / "scenarios").glob("*.parquet"))]
-    table = pd.concat(frames, ignore_index=True)
-    table.to_parquet(tables / "losses.parquet", index=False)
-    origins = gpd.read_parquet(resolve(config["paths"]["processed"]) / "origins.parquet")
-    summary = summarize(table, origins.set_index("origin_id")["population"])
-    summary.to_csv(tables / "losses_summary.csv", index=False)
-    return summary
-
-
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Acessibilidade de linha de base e de cenários")
+    parser = argparse.ArgumentParser(description="Cidade alcançável: linha de base e cenários")
     parser.add_argument("--modes", nargs="+", default=None, choices=sorted(MODES))
     parser.add_argument("--scenarios", nargs="+", default=None,
-                        help="scenario_ids a calcular (A_s); sem isso, calcula A0")
-    parser.add_argument("--consolidate", action="store_true",
-                        help="só consolida perdas dos cenários já calculados")
-    parser.add_argument("--maps", nargs="*", default=[],
-                        help="scenario_ids para mapas de perda L (escala comum entre modos)")
+                        help="scenario_ids a calcular (A_s); sem isso, calcula a linha de base A0")
     args = parser.parse_args()
     config = load_config()
     modes = args.modes or config["accessibility"]["modos"]
-    if args.consolidate or args.scenarios:
-        if args.scenarios:
-            run_scenarios(config, args.scenarios, modes)
-        print(consolidate(config).to_string(index=False))
-        table = pd.read_parquet(resolve(config["paths"]["tables"]) / "losses.parquet")
-        for scenario_id in args.maps:
-            subset = table[table["scenario_id"] == scenario_id]
-            if subset.empty:
-                raise SystemExit(f"Cenário sem resultados: {scenario_id}")
-            accessibility_map(subset, config,
-                              resolve(config["paths"]["maps"]) / f"loss_{scenario_id}.png",
-                              column="L", cmap="Reds", vmin=0,
-                              title=f"Perda de destinos acessíveis (L = A0 − A_s) — {scenario_id}")
-        return
+    if args.scenarios:
+        run_scenarios(config, args.scenarios, modes)
+    else:
+        run_baseline(config, modes)
+
+
+def run_baseline(config: dict, modes: list[str]) -> pd.DataFrame:
+    """Baseline (A0): table, map and run log."""
     origins, destinations = load_inputs(config)
     started = time.perf_counter()
     network = build_network(resolve(config["paths"]["interim"]) / "poa.osm.pbf",
@@ -274,19 +267,18 @@ def main() -> None:
 
     tables = resolve(config["paths"]["tables"])
     tables.mkdir(parents=True, exist_ok=True)
-    result.to_parquet(tables / "accessibility_baseline.parquet", index=False)
-    accessibility_map(result, config, resolve(config["paths"]["maps"]) / "accessibility_baseline.png")
+    result.to_parquet(tables / BASELINE_TABLE, index=False)
+    accessibility_map(result, config, resolve(config["paths"]["maps"]) / "mobility_baseline.png")
     log = run_log(config, seconds, len(origins), len(destinations))
-    log["summary"] = (result.groupby("mode")["n_destinations"]
-                      .agg(["mean", "median", "min", "max", lambda s: int((s == 0).sum())])
-                      .set_axis(["mean", "median", "min", "max", "zero"], axis=1)
-                      .round(2).to_dict(orient="index"))
+    log["summary"] = (result.groupby("mode")["reachable_weight"]
+                      .agg(["mean", "median", "min", "max"]).round(0).to_dict(orient="index"))
     log["status"] = result.groupby(["mode", "status"]).size().unstack(fill_value=0).to_dict(
         orient="index")
-    path = resolve(config["paths"]["qa"]) / "accessibility_baseline_run.json"
+    path = resolve(config["paths"]["qa"]) / "mobility_baseline_run.json"
     path.write_text(json.dumps(log, indent=2, ensure_ascii=False, default=float) + "\n",
                     encoding="utf-8")
     print(json.dumps(log, indent=2, ensure_ascii=False, default=float))
+    return result
 
 
 if __name__ == "__main__":

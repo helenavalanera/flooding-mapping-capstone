@@ -14,6 +14,7 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 
 from .config import load_config, resolve
 from .susceptibility import gtfs_routes
@@ -61,20 +62,22 @@ def build_data(config: dict) -> dict:
         lambda names: sorted({route_names.index(str(n)) for n in names})).reindex(segments.index)
     segments["routes"] = segments["routes"].apply(lambda v: v if isinstance(v, list) else [])
 
-    destinations = gpd.read_parquet(processed / "destinations.parquet")
-    destinations = destinations[~destinations["duplicate"]].reset_index(drop=True)
-    near_dest = gpd.sjoin(segments.set_geometry(segments.buffer(100))[["geometry"]],
-                          destinations[["geometry"]], predicate="intersects")
-    segments["dests"] = near_dest.groupby(level=0)["index_right"].apply(
-        lambda ids: sorted(set(int(i) for i in ids))).reindex(segments.index)
-    segments["dests"] = segments["dests"].apply(lambda v: v if isinstance(v, list) else [])
     segments["pct"] = segments["percentile"].round(3)
+
+    # Mobility lost along the rain scale (observed condition) and how often each rain happens.
+    curve = pd.read_csv(tables / "mobility_curve.csv")
+    curve = curve[curve["factor"] == 1]
+    mobility = [{"rain": float(r.rain_24h_mm), "mode": r.mode, "lost": round(float(r.mobility_lost), 5),
+                 "max_local": round(float(r.max_origin_loss), 4),
+                 "people_10pct": round(float(r.population_losing_10pct))} for r in curve.itertuples()]
+    frequency = json.loads((qa / "rain_frequency.json").read_text())
 
     points_wgs = points.to_crs("EPSG:4326")
     return {
-        "segments": _features(segments, ["pct", "point", "routes", "dests"]),
+        "segments": _features(segments, ["pct", "point", "routes"]),
         "routes": route_names,
-        "destinations": _features(destinations, ["name", "category"]),
+        "mobility": mobility,
+        "frequency": frequency["frequency"],
         "area": _features(area, []),
         "points": [[round(p.y, 4), round(p.x, 4)] for p in points_wgs.geometry],
         "thresholds": calibration["thresholds"],
@@ -223,9 +226,9 @@ footer { padding:16px 22px 28px; font-size:12.5px; color:var(--muted); }
     <h3>Linhas de ônibus que passam por esses trechos</h3>
     <div class="chips" id="routes"></div>
     <button class="link" id="moreRoutes" hidden></button>
-    <h3>Serviços de saúde a até 100 m</h3>
-    <ul class="plain" id="dests"></ul>
-    <button class="link" id="moreDests" hidden></button>
+    <h3>Quanto da cidade deixa de ser alcançável em 30 minutos</h3>
+    <ul class="plain" id="mobility"></ul>
+    <p class="status" id="mobilityNote"></p>
   </section>
 
   <section class="ai" aria-labelledby="h-ai">
@@ -291,8 +294,9 @@ legend.onAdd = () => {
 };
 legend.addTo(map);
 
-let forecast = null, user = null, userMarker = null, nearby = null, showAllRoutes = false, showAllDests = false;
-const ROUTES_SHOWN = 24, DESTS_SHOWN = 10;
+let forecast = null, user = null, userMarker = null, nearby = null, showAllRoutes = false;
+const ROUTES_SHOWN = 24;
+const MODE_LABEL = {walk: "A pé", transit: "De ônibus", car: "De carro"};
 
 function rainLevel(h1, h24) {
   if (h1 >= T.alto_max_1h_mm || h24 >= T.alto_total_24h_mm) return 2;
@@ -409,6 +413,31 @@ function insideArea(lat, lon) {
     .some(poly => inRing(poly[0]) && !poly.slice(1).some(inRing)));
 }
 
+// Mobility lost for the 24 h rain of the selected hour (largest computed step at or below it).
+function mobilityStep(rain24) {
+  const steps = [...new Set(D.mobility.map(m => m.rain))].sort((a, b) => a - b);
+  let step = null; for (const s of steps) if (rain24 >= s) step = s;
+  return {step, above: rain24 > steps.at(-1)};
+}
+function renderMobility(k) {
+  const rain24 = simulating() ? (Number($("sim24").value) || 0)
+    : Math.max(...forecast.h24.map(s => s[forecast.start + k]));
+  const {step, above} = mobilityStep(rain24);
+  const list = $("mobility"); list.replaceChildren();
+  const rows = D.mobility.filter(m => m.rain === step);
+  const freq = D.frequency.find(f => f.threshold_mm === step);
+  for (const mode of ["walk", "transit", "car"]) {
+    const m = rows.find(r => r.mode === mode), li = document.createElement("li");
+    li.textContent = !m || m.lost === 0 ? `${MODE_LABEL[mode]}: sem perda calculada para essa chuva.`
+      : `${MODE_LABEL[mode]}: a cidade perde ${num(100 * m.lost)}% da mobilidade; perto dos bloqueios, até ${num(100 * m.max_local)}% para quem mora ali.`;
+    list.append(li);
+  }
+  $("mobilityNote").textContent = step === null || !rows.some(r => r.lost > 0)
+    ? `Chuva de até ${num(rain24)} mm em 24 horas: abaixo do menor acumulado em que já houve bloqueio registrado.`
+    : `Calculado para ${num(step)} mm em 24 horas${above ? " (a previsão passa do topo da escala; a perda real tende a ser maior)" : ""}. ` +
+      (freq ? `Chuvas assim ocorrem em média ${num(freq.days_per_year_mean)} dias por ano em Porto Alegre.` : "");
+}
+
 function render() {
   const k = Math.min(Number($("hour").value), hours() - 1), levels = levelsAt(k);
   const active = D.segments.features.map((f, i) => ({...f, properties: {...f.properties, level: levels[i]}}))
@@ -416,8 +445,8 @@ function render() {
   segLayer.clearLayers(); segLayer.addData({type: "FeatureCollection", features: active});
   $("nHigh").textContent = active.filter(f => f.properties.level === 2).length.toLocaleString("pt-BR");
   $("nWarn").textContent = active.filter(f => f.properties.level === 1).length.toLocaleString("pt-BR");
-  const routeIds = new Set(), destIds = new Set();
-  active.forEach(f => { f.properties.routes.forEach(r => routeIds.add(r)); f.properties.dests.forEach(d => destIds.add(d)); });
+  const routeIds = new Set();
+  active.forEach(f => f.properties.routes.forEach(r => routeIds.add(r)));
   const routes = $("routes"); routes.replaceChildren();
   const names = [...routeIds].map(r => D.routes[r]).sort((a, b) => a.localeCompare(b, "pt-BR", {numeric: true}));
   (showAllRoutes ? names : names.slice(0, ROUTES_SHOWN)).forEach(name => {
@@ -426,15 +455,7 @@ function render() {
   const more = $("moreRoutes");
   more.hidden = names.length <= ROUTES_SHOWN;
   more.textContent = showAllRoutes ? "Mostrar menos" : `Ver todas as ${names.length} linhas`;
-  const dests = $("dests"); dests.replaceChildren();
-  const destNames = [...destIds].map(d => D.destinations.features[d].properties.name || "Estabelecimento sem nome no mapa")
-    .sort((a, b) => a.localeCompare(b, "pt-BR"));
-  (showAllDests ? destNames : destNames.slice(0, DESTS_SHOWN)).forEach(name => {
-    const li = document.createElement("li"); li.textContent = name; dests.append(li); });
-  if (!destIds.size) { const li = document.createElement("li"); li.textContent = "Nenhum nesta hora."; dests.append(li); }
-  const moreDests = $("moreDests");
-  moreDests.hidden = destNames.length <= DESTS_SHOWN;
-  moreDests.textContent = showAllDests ? "Mostrar menos" : `Ver todos os ${destNames.length} serviços`;
+  renderMobility(k);
 
   const head = headline();
   $("hero").dataset.level = String(head.level);
@@ -475,7 +496,6 @@ $("locate").addEventListener("click", () => {
 });
 $("reload").addEventListener("click", loadForecast);
 $("moreRoutes").addEventListener("click", () => { showAllRoutes = !showAllRoutes; render(); });
-$("moreDests").addEventListener("click", () => { showAllDests = !showAllDests; render(); });
 for (const id of ["hour", "simulate", "simH", "sim24"]) $(id).addEventListener("input", render);
 window.addEventListener("resize", drawRuler);
 
@@ -501,7 +521,7 @@ window.addEventListener("resize", drawRuler);
 $("footer").textContent = `Níveis: atenção a partir de ${num(T.medio_max_1h_mm)} mm em uma hora ou ${num(T.medio_total_24h_mm)} mm em 24 horas; ` +
   `alerta alto a partir de ${num(T.alto_max_1h_mm)} mm ou ${num(T.alto_total_24h_mm)} mm, calibrados com a chuva prevista nos dias de bloqueio. ` +
   `Fontes: EPTC e Prefeitura de Porto Alegre (bloqueios), Copernicus DEM (relevo), OpenStreetMap (vias e drenagem), ` +
-  `IBGE (limites), Open-Meteo (previsão), GTFS da EPTC de 2025 (linhas). Protótipo de pesquisa; não substitui os avisos da Defesa Civil (199).`;
+  `IBGE (limites e população), Open-Meteo (previsão e frequência da chuva), GTFS da EPTC de 2025 (linhas). Protótipo de pesquisa; não substitui os avisos da Defesa Civil (199).`;
 loadForecast();
 </script>
 </body>

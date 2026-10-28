@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "flooding-mapping"
 version = "0.1.0"
-description = "Impacto de interdições por alagamento pluvial na acessibilidade a serviços de saúde em Porto Alegre/RS"
+description = "Mobilidade urbana perdida com chuvas de até 45 mm em Porto Alegre quando trechos alagáveis são interditados"
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Helena de Oliveira Valanera", email = "helena.valanera@gmail.com" }]

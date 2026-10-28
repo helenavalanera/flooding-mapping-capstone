@@ -1,0 +1,60 @@
+{
+  "source": "https://archive-api.open-meteo.com/v1/archive",
+  "point": [
+    -30.05,
+    -51.18
+  ],
+  "period": "2015-2024",
+  "annual_mean_mm": 1508,
+  "note": "Totais por dia de calendário de reanálise (modelada), não pluviômetro.",
+  "frequency": [
+    {
+      "threshold_mm": 10,
+      "days_per_year_mean": 49.2,
+      "days_per_year_min": 40,
+      "days_per_year_max": 60
+    },
+    {
+      "threshold_mm": 20,
+      "days_per_year_mean": 21.8,
+      "days_per_year_min": 13,
+      "days_per_year_max": 31
+    },
+    {
+      "threshold_mm": 26.2,
+      "days_per_year_mean": 14.1,
+      "days_per_year_min": 8,
+      "days_per_year_max": 21
+    },
+    {
+      "threshold_mm": 30,
+      "days_per_year_mean": 10.3,
+      "days_per_year_min": 4,
+      "days_per_year_max": 17
+    },
+    {
+      "threshold_mm": 35,
+      "days_per_year_mean": 6.9,
+      "days_per_year_min": 2,
+      "days_per_year_max": 12
+    },
+    {
+      "threshold_mm": 40,
+      "days_per_year_mean": 5.5,
+      "days_per_year_min": 1,
+      "days_per_year_max": 10
+    },
+    {
+      "threshold_mm": 45,
+      "days_per_year_mean": 4.3,
+      "days_per_year_min": 1,
+      "days_per_year_max": 7
+    },
+    {
+      "threshold_mm": 55.9,
+      "days_per_year_mean": 2.0,
+      "days_per_year_min": 0,
+      "days_per_year_max": 6
+    }
+  ]
+}

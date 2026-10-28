@@ -56,13 +56,10 @@ def test_alert_respects_rain_threshold_and_percentile():
     routes = gpd.GeoDataFrame({"route_short_name": ["R1", "R2"]},
                               geometry=[LineString([(50, -20), (50, 20)]),
                                         LineString([(50, 980), (50, 1020)])], crs=CRS)
-    destinations = gpd.GeoDataFrame({"dest_id": ["d1"], "name": ["H"], "category": ["hospital"]},
-                                    geometry=[Point(50, 30)], crs=CRS)
-    assert alert(scores, 10, config, routes, destinations) == {"rain_mm_h": 10, "triggered": False}
-    result = alert(scores, 45, config, routes, destinations)
+    assert alert(scores, 10, config, routes) == {"rain_mm_h": 10, "triggered": False}
+    result = alert(scores, 45, config, routes)
     assert result["triggered"] and result["segments"] == 1
     assert result["routes"] == ["R1"]
-    assert [d["dest_id"] for d in result["destinations"]] == ["d1"]
 
 
 def test_fill_depressions_removes_pits_and_keeps_drainage():

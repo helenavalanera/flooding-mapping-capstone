@@ -18,6 +18,8 @@ import pandas as pd
 from .config import load_config, resolve
 
 ARCHIVE = "https://historical-forecast-api.open-meteo.com/v1/forecast"
+# Reanalysis archive (daily totals) used for how often each rain level happens.
+REANALYSIS = "https://archive-api.open-meteo.com/v1/archive"
 TIMEZONE = "America/Sao_Paulo"
 # Hour of the official list each event comes from (see source_name in events.csv).
 REPORT_HOUR = {"2025-06-18": 21, "2022-03-06": 17, "2021-09-08": 7, "2019-09-17": 18}
@@ -93,6 +95,27 @@ def calibrate(events: pd.DataFrame) -> dict:
     }
 
 
+def daily_rain(lat: float, lon: float, start: str, end: str) -> pd.Series:
+    """Daily precipitation totals (mm) from the reanalysis archive."""
+    query = urllib.parse.urlencode({"latitude": f"{lat:.4f}", "longitude": f"{lon:.4f}",
+                                    "start_date": start, "end_date": end,
+                                    "daily": "precipitation_sum", "timezone": TIMEZONE})
+    with urllib.request.urlopen(f"{REANALYSIS}?{query}", timeout=120) as response:
+        payload = json.load(response)
+    return pd.Series(payload["daily"]["precipitation_sum"],
+                     index=pd.to_datetime(payload["daily"]["time"]), dtype=float).dropna()
+
+
+def frequency(daily: pd.Series, thresholds: list[float]) -> list[dict]:
+    """Days per year with at least each threshold (mean, min, max over full years)."""
+    rows = []
+    for threshold in thresholds:
+        per_year = (daily >= threshold).groupby(daily.index.year).sum()
+        rows.append({"threshold_mm": threshold, "days_per_year_mean": round(float(per_year.mean()), 1),
+                     "days_per_year_min": int(per_year.min()), "days_per_year_max": int(per_year.max())})
+    return rows
+
+
 def main() -> None:
     argparse.ArgumentParser(description="Calibra limiares de chuva com o arquivo do Open-Meteo").parse_args()
     from .scenarios import load_events
@@ -104,6 +127,17 @@ def main() -> None:
     path.write_text(json.dumps(result, indent=2, ensure_ascii=False, default=str) + "\n",
                     encoding="utf-8")
     print(json.dumps({k: result[k] for k in ("per_date", "thresholds")}, indent=2, ensure_ascii=False))
+    # How often these rains happen (reanalysis, city centre, full years).
+    daily = daily_rain(-30.05, -51.18, "2015-01-01", "2024-12-31")
+    steps = sorted({*config["mobility"]["chuva_24h_mm"], result["thresholds"]["medio_total_24h_mm"],
+                    result["thresholds"]["alto_total_24h_mm"]})
+    freq = {"source": REANALYSIS, "point": [-30.05, -51.18], "period": "2015-2024",
+            "annual_mean_mm": round(float(daily.groupby(daily.index.year).sum().mean())),
+            "note": "Totais por dia de calendário de reanálise (modelada), não pluviômetro.",
+            "frequency": frequency(daily, steps)}
+    (resolve(config["paths"]["qa"]) / "rain_frequency.json").write_text(
+        json.dumps(freq, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(json.dumps(freq["frequency"], ensure_ascii=False))
     errors = [e for e in result["events"] if e.get("error")]
     if errors:
         print("datas sem dados:", sorted({e["event_date"] for e in errors}))
