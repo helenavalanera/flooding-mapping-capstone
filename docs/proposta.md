@@ -34,15 +34,12 @@ Estudos de acessibilidade sob inundação combinam simulação de inundação e 
 
 ## 4. Dados
 
-Tabela 1 — Fontes de dados, situação atual e defasagem.
-
-| Dado | Fonte e formato | Defasagem ou lacuna |
-|---|---|---|
-
 Os dados são abertos e apresentam defasagens que motivam a abordagem proposta (Tabela 1).
 
 Tabela 1 — Fontes de dados, situação atual e defasagem.
 
+| Dado | Fonte e formato | Defasagem ou lacuna |
+|---|---|---|
 | Ônibus | GTFS da EPTC (ZIP/CSV), vigência até 12/12/2025 | Cerca de 10 meses vencido; único publicado |
 | Vias e drenagem | OpenStreetMap, 24/10/2026 (PBF): 176.836 segmentos | Sem bocas de lobo nem microdrenagem |
 | População | IBGE, Censo 2022, setores (GPKG): 1.332.845 pessoas | Quatro anos; densidade uniforme no setor |
