@@ -156,6 +156,7 @@ def robustness_table(segments: gpd.GeoDataFrame, scenarios: pd.DataFrame, config
                 "RE_global": relative_efficiency(es_global, e0_global), "E0_local": e0_local,
                 "Es_local": es_local, "RE_local": relative_efficiency(es_local, e0_local),
                 "LCC0": lcc0, "LCCs": lcc_share(after),
+                "LCC_ratio": lcc_share(after) / lcc0 if lcc0 else float("nan"),
                 "seconds": round(time.perf_counter() - started, 1), "base_seconds": base_seconds,
             })
     return pd.DataFrame(rows)
