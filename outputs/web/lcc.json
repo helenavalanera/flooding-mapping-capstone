@@ -1,0 +1,92 @@
+[
+  {
+    "scenario_id": "S-C26.2-F1",
+    "network": "walk",
+    "nodes": 150729,
+    "LCC0": 0.952829,
+    "LCCs": 0.951018,
+    "LCC_ratio": 0.998099,
+    "RE_global": 0.993995
+  },
+  {
+    "scenario_id": "S-C40-F1",
+    "network": "walk",
+    "nodes": 150729,
+    "LCC0": 0.952829,
+    "LCCs": 0.950859,
+    "LCC_ratio": 0.997932,
+    "RE_global": 0.991217
+  },
+  {
+    "scenario_id": "S-C45-F1",
+    "network": "walk",
+    "nodes": 150729,
+    "LCC0": 0.952829,
+    "LCCs": 0.950819,
+    "LCC_ratio": 0.99789,
+    "RE_global": 0.991217
+  },
+  {
+    "scenario_id": "S-C40-F3",
+    "network": "walk",
+    "nodes": 150729,
+    "LCC0": 0.952829,
+    "LCCs": 0.950647,
+    "LCC_ratio": 0.997709,
+    "RE_global": 0.991124
+  },
+  {
+    "scenario_id": "S-C45-F3",
+    "network": "walk",
+    "nodes": 150729,
+    "LCC0": 0.952829,
+    "LCCs": 0.950288,
+    "LCC_ratio": 0.997333,
+    "RE_global": 0.99082
+  },
+  {
+    "scenario_id": "S-C26.2-F1",
+    "network": "drive",
+    "nodes": 119403,
+    "LCC0": 0.978744,
+    "LCCs": 0.97691,
+    "LCC_ratio": 0.998126,
+    "RE_global": 0.986838
+  },
+  {
+    "scenario_id": "S-C40-F1",
+    "network": "drive",
+    "nodes": 119403,
+    "LCC0": 0.978744,
+    "LCCs": 0.97629,
+    "LCC_ratio": 0.997493,
+    "RE_global": 0.977256
+  },
+  {
+    "scenario_id": "S-C45-F1",
+    "network": "drive",
+    "nodes": 119403,
+    "LCC0": 0.978744,
+    "LCCs": 0.976274,
+    "LCC_ratio": 0.997476,
+    "RE_global": 0.977256
+  },
+  {
+    "scenario_id": "S-C40-F3",
+    "network": "drive",
+    "nodes": 119403,
+    "LCC0": 0.978744,
+    "LCCs": 0.975964,
+    "LCC_ratio": 0.997159,
+    "RE_global": 0.97718
+  },
+  {
+    "scenario_id": "S-C45-F3",
+    "network": "drive",
+    "nodes": 119403,
+    "LCC0": 0.978744,
+    "LCCs": 0.975545,
+    "LCC_ratio": 0.996731,
+    "RE_global": 0.976111
+  }
+]
