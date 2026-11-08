@@ -1,0 +1,37 @@
+{
+  "gerado_em": "2026-11-08T20:03:16Z",
+  "fonte": "file ativos_20261108T195639Z.json",
+  "parametros": {
+    "km_tolerancia": 1.0,
+    "dist_ok_m": 1000.0,
+    "dist_so_coordenada_m": 300.0
+  },
+  "registros": 17,
+  "por_status": {
+    "ok": 16,
+    "distante_da_coordenada": 1
+  },
+  "por_tipo": {
+    "pontual": 9,
+    "intervalo": 8
+  },
+  "associados": 17,
+  "cobertura_associados": 1.0,
+  "associados_confiaveis": 16,
+  "distancia_coordenada_m": {
+    "mediana": 2.2,
+    "p90": 278.3,
+    "max": 8559.5
+  },
+  "rodovias_sem_correspondencia": [],
+  "problemas": [
+    {
+      "id": 29,
+      "rodovia": "ERS-463",
+      "km": 22.0,
+      "km_fim": null,
+      "status": "distante_da_coordenada",
+      "sugestao_segmento": null
+    }
+  ]
+}

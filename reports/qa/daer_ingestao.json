@@ -1,0 +1,71 @@
+{
+  "trechos_arcgis": 1683,
+  "trechos_planilha": 1686,
+  "codigos_repetidos_arcgis": [
+    "118ERS0165",
+    "330ERS0195",
+    "330ERS0200",
+    "466ERS0040",
+    "506ERS0010",
+    "539ERS0010",
+    "539MRS0020",
+    "550ERS0030"
+  ],
+  "codigos_repetidos_planilha": [],
+  "juncao": {
+    "codigo": 1668,
+    "sem planilha": 10,
+    "aproximada (letra do tipo)": 5
+  },
+  "juncao_aproximada": [
+    "030ERS0150",
+    "126ERS0110",
+    "126ERS0120",
+    "126ERS0130",
+    "849ERS0010"
+  ],
+  "so_no_arcgis": [
+    "386BRS9130",
+    "386BRS9140",
+    "386BRS9145",
+    "386BRS9160",
+    "386BRS9165",
+    "386BRS9175",
+    "386BRS9180",
+    "386BRS9185",
+    "386BRS9195",
+    "477ERS9050"
+  ],
+  "so_na_planilha": [
+    "330MRS0030",
+    "330MRS0040",
+    "386ARS1005",
+    "386ARS2005",
+    "386ARS3005",
+    "386ARS4005",
+    "386ARS5005",
+    "386ARS6005",
+    "386ARS7005",
+    "386ARS8005",
+    "386ARS9005",
+    "424ERS0030",
+    "424MRS0020",
+    "424MRS0040",
+    "472MRS0020",
+    "472MRS0025",
+    "477ARS1005",
+    "477ARS1010",
+    "706MRS0027",
+    "849MRS0005",
+    "874MRS0005"
+  ],
+  "gid_divergente_em_codigo_exato": 8,
+  "cobertura": {
+    "vdm": 0.371,
+    "iri_2018": 0.393,
+    "iri_2022": 0.415,
+    "iri_2025": 0.373,
+    "ano_pavimentacao": 0.424,
+    "faixa_dominio_m": 0.445
+  }
+}

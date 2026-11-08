@@ -95,3 +95,15 @@ sources:
   ibge_dicionario:
     url: https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/Dicionario_de_dados_malha_agregados.xlsx
     destino: data/raw/Dicionario_de_dados_malha_agregados.xlsx
+
+# Malha rodoviária estadual (DAER). A camada ArcGIS tem a geometria (1.683 trechos, linhas
+# densas: o serviço responde 500 a uma consulta única, por isso a paginação); a planilha do
+# Sistema Rodoviário Estadual traz os atributos (VDM, IRI etc.) e é baixada manualmente.
+daer:
+  camada_arcgis: https://iede.rs.gov.br/server/rest/services/DAER/Rodovias_RS_por_Administracao/MapServer/0
+  geojson: data/raw/daer/rodovias_arcgis.geojson
+  planilha: data/raw/daer/relatorio_sre.xls
+  # SIRGAS 2000 / Brazil Polyconic: um CRS métrico único para todo o RS (o estado cruza
+  # os fusos UTM 21S e 22S). Usado só para comprimentos e posições ao longo da linha.
+  crs_metrico: EPSG:5880
+  segmento_km: 1.0
