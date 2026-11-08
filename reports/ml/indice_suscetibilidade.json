@@ -1,0 +1,47 @@
+{
+  "natureza": "índice físico relativo, NÃO é probabilidade nem foi validado em nível de segmento",
+  "componentes": [
+    "baixa_altitude",
+    "baixa_cota_local",
+    "perto_da_agua"
+  ],
+  "pesos": "iguais",
+  "segmentos": 18730,
+  "sem_terreno": 0,
+  "waterways_osm": 494132,
+  "correlacao_entre_componentes": {
+    "baixa_altitude": {
+      "baixa_altitude": 1.0,
+      "baixa_cota_local": 0.08,
+      "perto_da_agua": 0.08
+    },
+    "baixa_cota_local": {
+      "baixa_altitude": 0.08,
+      "baixa_cota_local": 1.0,
+      "perto_da_agua": 0.23
+    },
+    "perto_da_agua": {
+      "baixa_altitude": 0.08,
+      "baixa_cota_local": 0.23,
+      "perto_da_agua": 1.0
+    }
+  },
+  "segmentos_com_bloqueio_observado": {
+    "segmentos_rotulados": 57,
+    "indice": {
+      "mediana": 78.9,
+      "no_top_20pct": 0.456
+    },
+    "regra_so_elevacao": {
+      "mediana": 51.3,
+      "no_top_20pct": 0.404
+    },
+    "aviso": "poucos segmentos rotulados: descritivo, sem valor estatístico"
+  },
+  "verificacao_municipal_fraca": {
+    "municipios": 487,
+    "spearman_indice_x_registros_por_km": 0.151,
+    "spearman_so_elevacao_x_registros_por_km": 0.038,
+    "aviso": "correlação com o número de registros municipais por km de rodovia; confundida pela chuva, pela população e pelo hábito de notificar. Não valida o índice como probabilidade."
+  }
+}

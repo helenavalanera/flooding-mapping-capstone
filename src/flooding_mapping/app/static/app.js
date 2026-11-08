@@ -72,7 +72,8 @@
       style: function (f) { return { color: Lg.vdmColor(f.properties.vdm), weight: 1.8, opacity: 0.9 }; },
       onEachFeature: function (f, layer) {
         var p = f.properties;
-        layer.bindTooltip(Lg.esc(p.nome) + " · " + (p.vdm == null ? "VDM sem dado" : "VDM " + Math.round(p.vdm).toLocaleString("pt-BR") + " veíc./dia"), { sticky: true });
+        layer.bindTooltip(Lg.esc(p.nome) + " · " + (p.vdm == null ? "VDM sem dado" : "VDM " + Math.round(p.vdm).toLocaleString("pt-BR") + " veíc./dia") +
+          (p.indice_fisico == null ? "" : " · índice físico (relativo, não é probabilidade): percentil " + p.indice_fisico), { sticky: true });
       } });
     var top = {};
     var imp = state.impact || {};

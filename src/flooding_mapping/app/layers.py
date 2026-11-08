@@ -41,14 +41,19 @@ def municipalities(towns: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return layer
 
 
-def roads(trechos: gpd.GeoDataFrame, stretches: pd.DataFrame) -> gpd.GeoDataFrame:
-    """Built stretches with the simulated impact and the traffic, for the map."""
+def roads(trechos: gpd.GeoDataFrame, stretches: pd.DataFrame, physical: pd.Series | None = None) -> gpd.GeoDataFrame:
+    """Built stretches with the simulated impact, the traffic and the physical index, for the map.
+
+    ``physical`` is the median percentile of the physical index of each stretch (``objectid``
+    -> 0-100), a relative ranking and not a probability."""
     built = trechos[~trechos["situacao_fisica"].str.upper().eq("PLANEJADA")]
     keep = ["codigo_sre", "nome", "rede", "vdm", "km_inicio", "km_final", "geometry"]
     layer = built[["objectid"] + keep].merge(
         stretches[["objectid", "ponte", "pop_isolada", "desvio_km"]], on="objectid", how="left")
     layer["desvio_km"] = layer["desvio_km"].where(layer["desvio_km"].map(lambda v: pd.notna(v) and v < 1e9))
     layer["ponte"] = layer["ponte"].fillna(False).astype(bool)
+    if physical is not None:
+        layer["indice_fisico"] = layer["objectid"].map(physical).round(0)
     layer["geometry"] = layer.geometry.simplify(ROAD_TOLERANCE_DEG, preserve_topology=True)
     return gpd.GeoDataFrame(layer.drop(columns="objectid"), geometry="geometry", crs=trechos.crs)
 
@@ -83,7 +88,9 @@ def main() -> None:
 
     stretches = impact_module.by_stretch(impact, trechos.drop(columns="geometry"))
     _write_geojson(municipalities(towns), STATIC_DATA / "municipios.geojson")
-    _write_geojson(roads(trechos, stretches), STATIC_DATA / "rodovias.geojson")
+    index_path = resolve("data/interim/indice_fisico_segmentos.parquet")
+    physical = (pd.read_parquet(index_path).groupby("objectid")["percentil"].median() if index_path.exists() else None)
+    _write_geojson(roads(trechos, stretches, physical), STATIC_DATA / "rodovias.geojson")
     BUILD_DATA.mkdir(parents=True, exist_ok=True)
     segment_index(segments).to_parquet(BUILD_DATA / "segmentos_indice.parquet")
     impact[["segmento_id", "ponte", "pop_isolada", "desvio_km", "vdm", "veiculos_km_dia"]].replace(

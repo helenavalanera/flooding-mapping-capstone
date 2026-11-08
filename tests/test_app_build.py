@@ -105,3 +105,23 @@ def test_free_text_from_the_source_is_escaped_by_the_page_not_trusted():
     js = (build.STATIC / "app.js").read_text()
     assert "Lg.esc(b.informacoes" in js and "innerHTML" in js
     assert "Lg.esc(" in js and js.count("Lg.esc(") > 20
+
+
+def test_the_site_refuses_a_model_that_its_card_does_not_document():
+    artifact = {"versao": "gatilho-estrito-20261108"}
+    build.check_card(artifact, {"artefato": {"versao": "gatilho-estrito-20261108"}})
+    with pytest.raises(SystemExit, match="does not|not the one"):
+        build.check_card(artifact, {"artefato": {"versao": "gatilho-estrito-20260101"}})
+
+
+def test_roads_layer_carries_the_physical_index_as_a_percentile_and_keeps_missing_vdm_missing():
+    from flooding_mapping.app import layers
+
+    line = LineString([(-51.0, -30.0), (-51.0, -29.9)])
+    trechos = gpd.GeoDataFrame({"objectid": [1, 2], "codigo_sre": ["a", "b"], "nome": ["ERS-1", "ERS-2"], "rede": "R",
+                                "vdm": [1500.0, None], "km_inicio": 0.0, "km_final": 5.0,
+                                "situacao_fisica": ["PAVIMENTADA", "PLANEJADA"], "geometry": [line, line]}, crs="EPSG:4674")
+    stretches = pd.DataFrame({"objectid": [1], "ponte": [True], "pop_isolada": [900.0], "desvio_km": [float("inf")]})
+    out = layers.roads(trechos, stretches, pd.Series({1: 83.4}))
+    assert list(out["codigo_sre"]) == ["a"]                       # planned roads are not drawn
+    assert out["indice_fisico"].iloc[0] == 83.0 and out["ponte"].iloc[0] and pd.isna(out["desvio_km"].iloc[0])
