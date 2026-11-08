@@ -23,15 +23,16 @@ jobs:
     # Interruptor: Settings > Secrets and variables > Actions > Variables:
     # defina COLETOR_ATIVO = false para pausar sem editar código.
     if: github.repository == 'helenavalanera/flooding-mapping-capstone' && vars.COLETOR_ATIVO != 'false'
-    runs-on: ubuntu-latest
+    # Sistema fixo: "ubuntu-latest" migra para o Ubuntu 26 e pode mudar o Python disponível.
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       # Ações fixadas pelo hash do commit (o job tem segredos de escrita no R2).
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.12"
           cache: pip
