@@ -10,6 +10,7 @@ repeats a request. Years are fetched from the most recent to the oldest.
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import sys
 import time
@@ -53,10 +54,10 @@ def cache_path(root: Path, variable: str, chunk: dict) -> Path:
     return root / f"{variable}_{chunk['year']}_{chunk['batch']:02d}.json"
 
 
-def request(params: dict, opener: Callable = urllib.request.urlopen):
-    """GET the archive API; return (payload, headers) or raise HTTPError."""
-    url = f"{ARCHIVE_URL}?{urllib.parse.urlencode(params, safe=',')}"
-    with opener(urllib.request.Request(url, headers={"User-Agent": USER_AGENT}), timeout=120) as r:
+def request(url: str, params: dict, opener: Callable = urllib.request.urlopen):
+    """GET an Open-Meteo endpoint; return (payload, headers) or raise HTTPError."""
+    full = f"{url}?{urllib.parse.urlencode(params, safe=',')}"
+    with opener(urllib.request.Request(full, headers={"User-Agent": USER_AGENT}), timeout=120) as r:
         return json.loads(r.read()), dict(r.headers)
 
 
@@ -70,27 +71,32 @@ def wait_for(reason: str, sleep: Callable[[float], None]) -> None:
     sleep(seconds)
 
 
-def fetch(towns: pd.DataFrame, chunk: dict, variable: str,
-          opener: Callable = urllib.request.urlopen, sleep: Callable = time.sleep):
-    """Download one chunk, waiting out minute/hour limits (at most 3 times)."""
-    rows = towns.set_index("ibge").loc[chunk["ibge"]]
-    params = {"latitude": ",".join(map(str, rows["lat"])),
-              "longitude": ",".join(map(str, rows["lon"])),
-              "start_date": chunk["start"].isoformat(), "end_date": chunk["end"].isoformat(),
-              "daily": variable, "timezone": TIMEZONE}
+def get(params: dict, opener: Callable = urllib.request.urlopen, sleep: Callable = time.sleep,
+        url: str = ARCHIVE_URL):
+    """GET with retries: waits out minute/hour limits and network hiccups (at most 3 times)."""
     for attempt in range(4):
         try:
-            return request(params, opener)
+            return request(url, params, opener)
         except urllib.error.HTTPError as exc:
             if exc.code != 429 or attempt == 3:
                 raise
             wait_for(json.loads(exc.read() or b"{}").get("reason", "minutely"), sleep)
-        except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
-            # Network hiccup (for example a TLS handshake timeout): not a rate limit.
+        except (OSError, http.client.HTTPException, json.JSONDecodeError) as exc:
+            # Network hiccup (TLS timeout, reset, truncated body): not a rate limit.
             if attempt == 3:
                 raise
             print(f"falha de rede ({type(exc).__name__}); nova tentativa em {30 * (attempt + 1)}s", flush=True)
             sleep(30 * (attempt + 1))
+
+
+def fetch(towns: pd.DataFrame, chunk: dict, variable: str,
+          opener: Callable = urllib.request.urlopen, sleep: Callable = time.sleep):
+    """Download one chunk of the archive."""
+    rows = towns.set_index("ibge").loc[chunk["ibge"]]
+    return get({"latitude": ",".join(map(str, rows["lat"])),
+                "longitude": ",".join(map(str, rows["lon"])),
+                "start_date": chunk["start"].isoformat(), "end_date": chunk["end"].isoformat(),
+                "daily": variable, "timezone": TIMEZONE}, opener, sleep)
 
 
 def compact(payload, chunk: dict, variable: str) -> dict:

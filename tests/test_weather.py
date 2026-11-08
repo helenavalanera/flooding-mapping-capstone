@@ -134,3 +134,17 @@ def test_network_errors_are_retried_with_a_growing_wait_and_then_raised(tmp_path
     with pytest.raises(urllib.error.URLError):
         weather.download(TOWNS.head(5), date(2022, 1, 1), date(2022, 1, 3), root=tmp_path,
                          opener=down, sleep=lambda _: None)
+
+
+def test_a_truncated_response_is_retried_like_any_network_error(tmp_path):
+    state = {"n": 0}
+
+    def cut_short(request, timeout):
+        state["n"] += 1
+        if state["n"] == 1:
+            return FakeResponse(b'[{"latitude": 1.5, "daily": {"time": [')  # connection died mid-body
+        return api(request, timeout)
+
+    summary = weather.download(TOWNS.head(5), date(2023, 1, 1), date(2023, 1, 3), root=tmp_path,
+                               opener=cut_short, sleep=lambda _: None)
+    assert summary["parou"] == "concluído" and state["n"] == 2
