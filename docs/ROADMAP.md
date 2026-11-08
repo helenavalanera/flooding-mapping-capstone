@@ -97,7 +97,7 @@ Tarefas:
 **S2iD consolidado:** 6.487 registros do RS (2017 a 2026, 497 municípios); relevantes (enxurrada, inundação, alagamento, chuvas intensas): 2.395 registros, 492 municípios, 479 datas, **136 episódios** independentes. Os dois maiores episódios concentram cerca de 40% dos registros (abr–mai/2024: 522; set–dez/2023: 492).
 - [ ] **Validar a data do evento** (a data do protocolo coincidiu com o pico de chuva em dois casos de Porto Alegre em 2017; testar com uma amostra maior).
 - [ ] Coordenadas dos 497 municípios (a partir da malha do IBGE) e chuva diária, com cache local; respeitar os limites de uso da API.
-- [ ] **Decidir a fonte de chuva do treino:** reanálise (série longa) contra previsões históricas (igual ao que será usado em operação). Treinar em uma e medir a diferença na outra.
+- [x] **Fonte de chuva do treino:** reanálise ERA5 (série longa). O endpoint de "previsão histórica" do Open-Meteo devolve a **mesma série da reanálise** (diferença de 0,00 mm/dia em 2019–2026), então não é um arquivo de previsões; previsões reais arquivadas existem só desde meados de 2024 (API de execuções anteriores). A perda ao operar com previsão é medida no teste (2025 em diante) em `reports/ml/skew_estrito.json`.
 - [ ] Definir os códigos COBRADE do rótulo (12100, 12200, 12300; decidir sobre 13214 "Chuvas Intensas", que é ampla) e o uso do status (Reconhecido, Registro, Não reconhecido) como confiança.
 - [ ] **Tratar a mudança de notificação a partir de 2023** (aumento de "Chuvas Intensas"), que pode confundir a validação no tempo.
 - [ ] Avaliar as colunas de danos em obras de infraestrutura pública (58% dos relevantes têm valor): indício, não rótulo de trecho.
