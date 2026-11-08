@@ -65,6 +65,123 @@
       "final_url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S31_00_W052_00_DEM/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif",
       "last_modified": "Mon, 09 May 2022 15:03:41 GMT",
       "content_length": 36409491
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20170101_20180101.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "c963cbfe7874a4f2a65b845b916d9ee2476fc86d6b90c061881f7f979ffef0dd",
+      "size_bytes": 114238,
+      "source_reference_date": "20170101/20180101",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20180101_20190101.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "d6f8df8a39a1d76907846dcfc824dc6423d9f3cc8dbb448c7360d883b64bbbc8",
+      "size_bytes": 41204,
+      "source_reference_date": "20180101/20190101",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20190101_20200101.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "e10d4d7e55ccb05ed3ada24e34e2343402eb4182305f93e2c416e635bc439842",
+      "size_bytes": 46331,
+      "source_reference_date": "20190101/20200101",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20200101_20201231.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "53b267b95eb7a98bb7bfb3e7f7ba7be471885ee3032f08ec4e030ed9702b0748",
+      "size_bytes": 232748,
+      "source_reference_date": "20200101/20201231",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20210101_20220101.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "2e60bcd11a739dd4ffc382b7f8ea0b0311563d91b2907b66fa841e1ca3b071d8",
+      "size_bytes": 182581,
+      "source_reference_date": "20210101/20220101",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20220101_20230101.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "44ea809c944a509aeecf0592fd2b2144192b1d1465cfdc74edeba55c7accee8f",
+      "size_bytes": 119157,
+      "source_reference_date": "20220101/20230101",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20230101_20230101.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "b8b64552564fa097dd78877fa8c53f10fe08fd60c91ebb994658e9765cc6f72b",
+      "size_bytes": 2094,
+      "source_reference_date": "20230101/20230101",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20230101_20240101.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "19f6b6c043f5427df36408ea4d0d8890d4a6b544e98c422fe22211f29525d5ea",
+      "size_bytes": 308326,
+      "source_reference_date": "20230101/20240101",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20240101_20241231.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "69bdff77b10b12826c7ad828872524269a3e4d75f92b8684929df70dcbce3326",
+      "size_bytes": 229958,
+      "source_reference_date": "20240101/20241231",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20250101_20260101.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "7975f4e665f0e4ff1d42c1488b3397e465cad82252ce5e2010a076b130a3fd8c",
+      "size_bytes": 199965,
+      "source_reference_date": "20250101/20260101",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": null,
+      "path": "data/raw/s2id/danos_informados_20260101_20261107.csv",
+      "downloaded_at_utc": "2026-11-08T19:39:44+00:00",
+      "sha256": "9de670a5c63118e44c6a5e4b579dab66c02a4c820471e2b3a94d043d571327f0",
+      "size_bytes": 225295,
+      "source_reference_date": "20260101/20261107",
+      "origin": "S2iD/MIDR, Relatório Gerencial - Danos Informados (exportação manual, UF=RS)"
+    },
+    {
+      "url": "https://iede.rs.gov.br/server/rest/services/DAER/Rodovias_RS_por_Administracao/MapServer/0/query (paginado, 500 por página, outSR=4674, f=geojson)",
+      "path": "data/raw/daer/rodovias_arcgis.geojson",
+      "downloaded_at_utc": "2026-11-08T19:42:41+00:00",
+      "sha256": "9dd27aeeb0a30c1ea92efad1beac208b1b0ec739c87367f350c915d729057071",
+      "size_bytes": 28988433,
+      "source_reference_date": null,
+      "features": 1683
+    },
+    {
+      "url": null,
+      "path": "data/raw/daer/relatorio_sre.xls",
+      "downloaded_at_utc": "2026-11-08T19:42:42+00:00",
+      "sha256": "3c80dc87e12c979655f26311281b3514912a910eb0afc3e30e3a184a6ac19607",
+      "size_bytes": 9215488,
+      "source_reference_date": null,
+      "origin": "DAER, Relatório do Sistema Rodoviário Estadual do RS (download manual)"
     }
   ],
   "notes": "Registre aqui as fontes, versões, datas de acesso e checksums dos dados brutos."
