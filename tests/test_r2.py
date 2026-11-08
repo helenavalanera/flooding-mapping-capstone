@@ -27,6 +27,14 @@ class FakeClient:
             raise self.put_failures.pop(0)
         self.objects[Key] = Body
 
+    def list_objects_v2(self, Bucket, Prefix, ContinuationToken=None):
+        keys = sorted(k for k in self.objects if k.startswith(Prefix))
+        start = int(ContinuationToken or 0)
+        page = keys[start:start + 2]  # tiny pages to exercise pagination
+        more = start + 2 < len(keys)
+        return {"Contents": [{"Key": k} for k in page], "IsTruncated": more,
+                **({"NextContinuationToken": str(start + 2)} if more else {})}
+
     def get_object(self, Bucket, Key):
         self.get_calls += 1
         if Key not in self.objects:
@@ -120,3 +128,10 @@ def test_boto3_client_does_not_retry_on_its_own():
     )
     assert store.client.meta.config.retries["total_max_attempts"] == 1
     assert store.client.meta.endpoint_url == "https://abc123.r2.cloudflarestorage.com"
+
+
+def test_list_keys_follows_pagination_and_charges_each_page():
+    client = FakeClient(objects={f"a/{i}": b"{}" for i in range(5)} | {"b/0": b"{}"})
+    store = make_store(client)
+    assert store.list_keys("a/") == [f"a/{i}" for i in range(5)]
+    assert store.budget.class_a == 3  # 5 keys in pages of 2

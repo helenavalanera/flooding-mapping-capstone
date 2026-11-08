@@ -6,7 +6,9 @@ from flooding_mapping.collector import (
     STATE_KEY,
     diff,
     main,
+    read_events,
     record_hash,
+    records_from_events,
     run,
     snapshot_key,
     validate,
@@ -110,3 +112,23 @@ def test_hash_ignores_key_order_and_diff_uses_it():
     b = {"y": 2, "id": 1, "x": 1}
     assert record_hash(a) == record_hash(b)
     assert diff({"1": record_hash(a)}, [b]) == {"novos": [], "alterados": [], "removidos": []}
+
+
+def test_history_is_replayed_into_one_row_per_blockage():
+    store = MemoryStore()
+    run(store, payload(rec(1), rec(2)), T0)
+    run(store, payload(rec(1, tipo="parcial"), rec(3)), T1)  # 1 changes, 2 leaves, 3 arrives
+    rows = {r["id"]: r for r in records_from_events(read_events(store))}
+    assert set(rows) == {1, 2, 3}
+    assert rows[1]["tipo"] == "parcial" and rows[1]["visto_primeira_vez"] == "2026-11-08T12:07:05Z"
+    assert rows[1]["ultima_alteracao"] == "2026-11-08T12:37:05Z" and rows[1]["removido_em"] is None
+    assert rows[2]["removido_em"] == "2026-11-08T12:37:05Z"
+    assert rows[3]["visto_primeira_vez"] == "2026-11-08T12:37:05Z"
+
+
+def test_reading_history_skips_the_state_object_and_counts_the_listing():
+    store = MemoryStore()
+    run(store, payload(rec(1)), T0)
+    reader = clone(store)
+    assert len(read_events(reader)) == 1
+    assert (reader.budget.class_a, reader.budget.class_b) == (1, 1)

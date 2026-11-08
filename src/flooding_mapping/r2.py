@@ -131,6 +131,22 @@ class R2Store:
             raise
         return json.loads(response["Body"].read())
 
+    def list_keys(self, prefix: str) -> list[str]:
+        """Keys under ``prefix``, one Class A operation per page of 1,000.
+
+        For analysis jobs only: the collector itself never lists the bucket.
+        """
+        keys: list[str] = []
+        token = None
+        while True:
+            self.budget.charge("A")
+            extra = {"ContinuationToken": token} if token else {}
+            page = self.client.list_objects_v2(Bucket=self.bucket, Prefix=prefix, **extra)
+            keys += [item["Key"] for item in page.get("Contents", [])]
+            if not page.get("IsTruncated"):
+                return sorted(keys)
+            token = page["NextContinuationToken"]
+
     def put_json(self, key: str, obj: Any) -> None:
         """Write the object, retrying only transient failures, within the cap."""
         body = _dump(obj)
@@ -162,3 +178,7 @@ class MemoryStore:
     def put_json(self, key: str, obj: Any) -> None:
         self.budget.charge("A")
         self.objects[key] = _dump(obj)
+
+    def list_keys(self, prefix: str) -> list[str]:
+        self.budget.charge("A")
+        return sorted(k for k in self.objects if k.startswith(prefix))
