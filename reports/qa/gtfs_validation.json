@@ -1,0 +1,57 @@
+{
+  "file": "/Users/helenaoliveirav/flooding-mapping/data/raw/gtfs_eptc.zip",
+  "zip_ok": true,
+  "files": [
+    "agency.txt",
+    "calendar.txt",
+    "calendar_dates.txt",
+    "fare_attributes.txt",
+    "feed_info.txt",
+    "routes.txt",
+    "shapes.txt",
+    "stop_times.txt",
+    "stops.txt",
+    "trips.txt"
+  ],
+  "missing_required": [],
+  "issues": [
+    "feed_end_date (2025-12-18) difere do último dia com viagens (2025-12-12)",
+    "feed_start_date (2025-09-18) difere do primeiro dia com viagens (2025-09-12)"
+  ],
+  "declared": {
+    "calendar_start": "2025-09-12",
+    "calendar_end": "2025-12-12",
+    "feed_start_date": "20250918",
+    "feed_end_date": "20251218",
+    "feed_version": "3.5@20250918"
+  },
+  "effective": {
+    "first_service_date": "2025-09-12",
+    "last_service_date": "2025-12-12",
+    "days_with_service": 92,
+    "days_without_service_inside_range": [],
+    "trips_per_weekday_median": {
+      "friday": 13085.0,
+      "monday": 13085.0,
+      "saturday": 7174.0,
+      "sunday": 4502.0,
+      "thursday": 13085.0,
+      "tuesday": 13085.0,
+      "wednesday": 13085.0
+    },
+    "reference_date": "2025-10-30",
+    "reference_trips": 13085
+  },
+  "checked_on": "2026-10-24",
+  "expired": true,
+  "counts": {
+    "calendar": 660,
+    "calendar_dates": 3150,
+    "trips": 29457,
+    "stops": 5909,
+    "routes": 395,
+    "stop_times": 1761758,
+    "feed_info": 1,
+    "shapes": 223654
+  }
+}

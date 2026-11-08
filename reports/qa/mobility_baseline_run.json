@@ -1,0 +1,60 @@
+{
+  "run_at": "2026-10-28T00:29:51+00:00",
+  "data_referencia": "2025-10-30",
+  "horario_partida": "07:00",
+  "janela_partida_min": 60,
+  "limite_min": 30,
+  "percentile": 50,
+  "speed_walking_kmh": 3.6,
+  "n_origins": 579,
+  "n_destinations": 579,
+  "seconds": {
+    "walk": 4.6,
+    "car": 46.9,
+    "transit": 24.0,
+    "network": 4.7
+  },
+  "versions": {
+    "python": "3.12.13",
+    "r5py": "1.1.7",
+    "geopandas": "1.1.4"
+  },
+  "measure": "mobility",
+  "summary": {
+    "car": {
+      "mean": 229.18,
+      "median": 246.0,
+      "min": 1,
+      "max": 373,
+      "zero": 0
+    },
+    "transit": {
+      "mean": 14.58,
+      "median": 5.0,
+      "min": 1,
+      "max": 108,
+      "zero": 0
+    },
+    "walk": {
+      "mean": 3.7,
+      "median": 4.0,
+      "min": 1,
+      "max": 8,
+      "zero": 0
+    }
+  },
+  "status": {
+    "car": {
+      "not_linked": 16,
+      "ok": 563
+    },
+    "transit": {
+      "not_linked": 16,
+      "ok": 563
+    },
+    "walk": {
+      "not_linked": 16,
+      "ok": 563
+    }
+  }
+}

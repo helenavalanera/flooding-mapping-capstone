@@ -1,0 +1,27 @@
+{
+"type": "FeatureCollection",
+"name": "critical_segments",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "segment_id": "1467271893:2521095161:7384033037", "rank": 1, "via": "Avenida Ipiranga" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.1751117, -30.0569856 ], [ -51.1758815, -30.0573164 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "288047934:448799487:7034101693", "rank": 2, "via": "Avenida Chuí" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2412555, -30.083963 ], [ -51.2410507, -30.0842828 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "126304092:8674928046:1400467725", "rank": 3, "via": "Beco do Retiro" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.1013597, -30.1534021 ], [ -51.1012713, -30.1536049 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "134809950:8608051595:2381974232", "rank": 4, "via": "Avenida Érico Veríssimo" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2167473, -30.0592752 ], [ -51.2168899, -30.0591566 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "356686656:297360232:2270169444", "rank": 5, "via": "Rua Sarmento Leite" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2222765, -30.034927 ], [ -51.2222041, -30.0348167 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "316709658:4784882810:356073075", "rank": 6, "via": "Rua Vasco da Gama" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2072307, -30.0321021 ], [ -51.2073946, -30.0320691 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "444002070:834378695:1403286725", "rank": 7, "via": "Avenida Júlio de Castilhos" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2272189, -30.0267561 ], [ -51.2269653, -30.026683099999989 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "108692733:313561162:2511598467", "rank": 8, "via": "Avenida Praia de Belas" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2275579, -30.0445207 ], [ -51.227602, -30.044239499999989 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "275303487:2799413088:2799413046", "rank": 9, "via": "(sem nome no OSM)" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.200782, -30.1531077 ], [ -51.2002329, -30.152785 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "27090613:3618664149:8623300760", "rank": 10, "via": "(sem nome no OSM)" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2191128, -30.025084 ], [ -51.2191789, -30.0250038 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "131984122:3329365559:295523700", "rank": 11, "via": "Avenida Setembrina" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2153941, -30.0334406 ], [ -51.2153665, -30.0333314 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "275303433:2799413614:2799413613", "rank": 12, "via": "(sem nome no OSM)" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.1991347, -30.1574084 ], [ -51.1990459, -30.157193 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "927826414:8425095706:8425095702", "rank": 13, "via": "(sem nome no OSM)" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.198293, -30.0147395 ], [ -51.1983329, -30.014841 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "128873596:9056704203:1422933265", "rank": 14, "via": "Rua Agenor Mendes Ouriques" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2134311, -30.1627709 ], [ -51.2134938, -30.162289 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "1414071177:12994199292:12994199291", "rank": 15, "via": "(sem nome no OSM)" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2139498, -30.0264263 ], [ -51.2139129, -30.0264781 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "917257808:297123705:8519628321", "rank": 16, "via": "(sem nome no OSM)" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2489905, -30.1229951 ], [ -51.248966, -30.1228843 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "29220974:321401117:1164132137", "rank": 17, "via": "(sem nome no OSM)" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.1381821, -30.0714341 ], [ -51.1383836, -30.0712991 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "927850285:8607768524:4463340782", "rank": 18, "via": "Condomínio Residencial Leblon" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.21407210000001, -30.14452240000001 ], [ -51.2141015, -30.1445819 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "38856071:461503481:2437086881", "rank": 19, "via": "Rua Manoel Cabeda Perez" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.2367582, -30.1247858 ], [ -51.2372697, -30.1249382 ] ] } },
+{ "type": "Feature", "properties": { "segment_id": "451653482:842660524:842660526", "rank": 20, "via": "Rua Jaime Telles" }, "geometry": { "type": "LineString", "coordinates": [ [ -51.1918995, -30.038539 ], [ -51.1918823, -30.0392964 ] ] } }
+]
+}

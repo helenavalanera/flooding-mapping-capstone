@@ -1,5 +1,71 @@
 {
-  "sources": [],
+  "sources": [
+    {
+      "url": "https://dadosabertos.poa.br/dataset/1fe9c2c1-9fbe-48ea-841b-61e30597ecd6/resource/b3bce61f-78ee-49eb-be57-6236d82bd5e0/download/arquivo-gtfs.zip",
+      "path": "data/raw/gtfs_eptc.zip",
+      "downloaded_at_utc": "2026-10-25T02:18:01+00:00",
+      "sha256": "7ad9c99183e7a867cacdd3fa0e6f813125cf0c5b772c2188bea03f4fa6a5d76f",
+      "size_bytes": 7745077,
+      "source_reference_date": "2025-09-25",
+      "final_url": "https://dadosabertos.poa.br/dataset/1fe9c2c1-9fbe-48ea-841b-61e30597ecd6/resource/b3bce61f-78ee-49eb-be57-6236d82bd5e0/download/arquivo-gtfs.zip",
+      "last_modified": "Thu, 25 Sep 2025 15:02:11 GMT",
+      "content_length": null
+    },
+    {
+      "url": "https://download.geofabrik.de/south-america/brazil/sul-latest.osm.pbf",
+      "path": "data/raw/sul-latest.osm.pbf",
+      "downloaded_at_utc": "2026-10-25T02:19:48+00:00",
+      "sha256": "ce607e97bae91ffa7e04531f8a339325c3ff60c3320b89f2b552a8286cb506c9",
+      "size_bytes": 428367327,
+      "source_reference_date": "2026-10-24",
+      "final_url": "https://download.geofabrik.de/south-america/brazil/sul-261024.osm.pbf",
+      "last_modified": "Sat, 24 Oct 2026 23:08:07 GMT",
+      "content_length": 428367327
+    },
+    {
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/RS/RS_setores_CD2022.gpkg",
+      "path": "data/raw/RS_setores_CD2022.gpkg",
+      "downloaded_at_utc": "2026-10-25T02:22:37+00:00",
+      "sha256": "8d6c46bbc8d0690d85dfc10041e0e89ea23615b1c20ffc3cb4ab677d9536a943",
+      "size_bytes": 57962496,
+      "source_reference_date": "2024-11-13",
+      "final_url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/RS/RS_setores_CD2022.gpkg",
+      "last_modified": "Wed, 13 Nov 2024 18:23:47 GMT",
+      "content_length": 57962496
+    },
+    {
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/Dicionario_de_dados_malha_agregados.xlsx",
+      "path": "data/raw/Dicionario_de_dados_malha_agregados.xlsx",
+      "downloaded_at_utc": "2026-10-25T02:22:40+00:00",
+      "sha256": "0dffb669ee90e1ffb86a7c8666cc066d5121d44b494013cc1149e50cc75073b1",
+      "size_bytes": 18860,
+      "source_reference_date": null,
+      "final_url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/Dicionario_de_dados_malha_agregados.xlsx",
+      "last_modified": "Wed, 13 Nov 2024 21:36:56 GMT",
+      "content_length": 18860
+    },
+    {
+      "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S30_00_W052_00_DEM/Copernicus_DSM_COG_10_S30_00_W052_00_DEM.tif",
+      "path": "data/raw/dem/Copernicus_DSM_COG_10_S30_00_W052_00_DEM.tif",
+      "downloaded_at_utc": "2026-10-27T19:28:20+00:00",
+      "sha256": "a14a8e082378e26e650e00a11dbcca5f33e6f90140fac840d095d168d31f4ed2",
+      "size_bytes": 49045637,
+      "source_reference_date": "2022-05-09",
+      "final_url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S30_00_W052_00_DEM/Copernicus_DSM_COG_10_S30_00_W052_00_DEM.tif",
+      "last_modified": "Mon, 09 May 2022 15:03:24 GMT",
+      "content_length": 49045637
+    },
+    {
+      "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S31_00_W052_00_DEM/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif",
+      "path": "data/raw/dem/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif",
+      "downloaded_at_utc": "2026-10-27T19:28:29+00:00",
+      "sha256": "831fe8364925237b2dfea9032d614ef215490175de6748e3e35875fea0a29ea6",
+      "size_bytes": 36409491,
+      "source_reference_date": "2022-05-09",
+      "final_url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S31_00_W052_00_DEM/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif",
+      "last_modified": "Mon, 09 May 2022 15:03:41 GMT",
+      "content_length": 36409491
+    }
+  ],
   "notes": "Registre aqui as fontes, versões, datas de acesso e checksums dos dados brutos."
 }
-

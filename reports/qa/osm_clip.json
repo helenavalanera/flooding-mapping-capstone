@@ -1,0 +1,18 @@
+{
+  "source": "data/raw/sul-latest.osm.pbf",
+  "source_sha256": "ce607e97bae91ffa7e04531f8a339325c3ff60c3320b89f2b552a8286cb506c9",
+  "source_osm_timestamp": "2026-10-24T20:20:51Z",
+  "output": "data/interim/poa.osm.pbf",
+  "area": "União dos 2744 setores censitários 2022 de CD_MUN 4314902 (495,0 km² em EPSG:31982)",
+  "margin_m": 3000,
+  "strategy": "complete_ways",
+  "osmium_version": "1.19.1",
+  "seconds": 17.7,
+  "output_bytes": 28142468,
+  "header_bounds": [-51.3343335, -30.2964811, -50.9807858, -29.9052334],
+  "nodes": 3876166,
+  "ways": 589962,
+  "nodes_outside_header_bounds": 1420,
+  "highway_ways": 47566,
+  "highway_ways_outside_header_bounds": 0
+}

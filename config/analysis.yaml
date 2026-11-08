@@ -1,13 +1,97 @@
 project: flooding-mapping
-crs: EPSG:4326
+
+# SIRGAS 2000 / UTM 22S: métrico, cobre 54°W–48°W (Porto Alegre ≈ 51,2°W).
+crs_metric: EPSG:31982
+# CRS geográfico esperado pelo r5py e usado para troca de dados.
+crs_geographic: EPSG:4326
+
+time:
+  # Quinta-feira típica dentro da vigência declarada do feed (ver
+  # reports/qa/gtfs_validation.md). O feed está VENCIDO desde 2025-12-12:
+  # referência histórica, não o serviço atual.
+  data_referencia: "2025-10-30"
+  # PROVISÓRIO: pico da manhã em dia útil; revisar após validar o serviço.
+  horario_partida: "07:00"
+  # Janela de partida (r5py departure_time_window); NÃO é duração máxima.
+  janela_partida_min: 60
+
+accessibility:
+  limite_min: 30
+  modos: [walk, car, transit]
+
+grid:
+  espacamento_m: 1000
+
+scenarios:
+  raios_m: [50, 100, 150]
+  # PROVISÓRIO: tolerância para considerar uma aresta como intersectando a zona.
+  tolerancia_m: 0
+
+susceptibility:
+  # Positivo: segmento viário a até esta distância de um bloqueio geocodificado.
+  raio_positivo_m: 50
+  bloco_validacao_m: 2000
+  # Alerta operacional — PROVISÓRIO: limiar de chuva e fração de segmentos em alerta
+  # ainda sem calibração com dados observados.
+  alerta_chuva_mm_h: 30
+  alerta_percentil: 0.95
+  alerta_raio_m: 50
+
+mobility:
+  # Escala de chuva acumulada em 24 h (mm). Medida: população da cidade alcançável
+  # em até accessibility.limite_min a partir de cada origem, por modo.
+  chuva_24h_mm: [10, 20, 30, 35, 40, 45]
+  # Zona de busca em torno de cada ponto que fecha (documentado ou do modelo).
+  raio_m: 100
+  # Pontos extras do modelo ficam a pelo menos esta distância entre si e dos documentados.
+  distancia_minima_m: 500
+  # Multiplica o número de pontos extras previsto pelo ajuste chuva × bloqueios:
+  # 1 = condição observada; valores maiores simulam drenagem mais precária.
+  fatores_precariedade: [1, 3]
+
+robustness:
+  n_pares: 500
+  semente: 20261025
+
+population:
+  # PROVISÓRIO: densidade uniforme dentro do setor censitário.
+  metodo_alocacao: densidade_uniforme
+  excluir_origens_sem_populacao: true
+
+osm:
+  # Margem em torno do polígono municipal para o recorte do PBF.
+  margem_recorte_m: 3000
+
 paths:
   raw: data/raw
   interim: data/interim
   processed: data/processed
   events: data/events
+  manifest: data/raw/manifest.json
   tables: outputs/tables
   maps: outputs/maps
-analysis:
-  accessibility_threshold_minutes: 30
-  robustness_quantile: 0.9
+  qa: reports/qa
 
+sources:
+  gtfs:
+    # URL canônica obtida via API CKAN do portal (resource_show) em 2026-10-24.
+    url: https://dadosabertos.poa.br/dataset/1fe9c2c1-9fbe-48ea-841b-61e30597ecd6/resource/b3bce61f-78ee-49eb-be57-6236d82bd5e0/download/arquivo-gtfs.zip
+    url_candidata_original: https://dadosabertos.poa.br/dataset/1fe9c2c1-9fbe-48ea-841b-61e30597ecd6/resource/b3bce61f-78ee-49eb-be57-6236d82bd5e0/download/outputfiles.zip
+    destino: data/raw/gtfs_eptc.zip
+  osm:
+    url: https://download.geofabrik.de/south-america/brazil/sul-latest.osm.pbf
+    destino: data/raw/sul-latest.osm.pbf
+  # Malha de setores 2022 com agregados (população) na mesma referência.
+  ibge_setores:
+    url: https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/RS/RS_setores_CD2022.gpkg
+    destino: data/raw/RS_setores_CD2022.gpkg
+  # Copernicus DEM GLO-30 (DSM, inclui edificações). Tiles cobrindo -31..-29 lat, -52..-51 lon.
+  dem_s30:
+    url: https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S30_00_W052_00_DEM/Copernicus_DSM_COG_10_S30_00_W052_00_DEM.tif
+    destino: data/raw/dem/Copernicus_DSM_COG_10_S30_00_W052_00_DEM.tif
+  dem_s31:
+    url: https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S31_00_W052_00_DEM/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif
+    destino: data/raw/dem/Copernicus_DSM_COG_10_S31_00_W052_00_DEM.tif
+  ibge_dicionario:
+    url: https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/Dicionario_de_dados_malha_agregados.xlsx
+    destino: data/raw/Dicionario_de_dados_malha_agregados.xlsx
