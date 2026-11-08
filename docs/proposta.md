@@ -4,9 +4,7 @@
 
 **Candidata:** Helena de Oliveira Valanera — helena.valanera@gmail.com
 
-**Repositório:** https://github.com/helenavalanera/flooding-mapping-capstone/tree/entrega
-
-Versão em Word (2 páginas): `docs/Proposta_Projeto_Final.docx`.
+**Repositório:** https://github.com/helenavalanera/flooding-mapping-capstone/tree/develop
 
 ## 1. Ideia do projeto
 
