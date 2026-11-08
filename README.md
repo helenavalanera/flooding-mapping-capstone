@@ -20,6 +20,17 @@ pontos documentados de bloqueio total e mais N pontos apontados pelo modelo de s
 com N vindo de um ajuste linear entre chuva acumulada e número de bloqueios registrados por data,
 multiplicado por um fator de precariedade (1 = condição observada).
 
+## Evolução: escopo estadual (em andamento)
+
+O projeto está sendo ampliado de Porto Alegre para o Rio Grande do Sul, em duas camadas: uma de
+**gatilho e suscetibilidade estaduais** (malha do DAER, registros de desastres do S2iD e
+bloqueios da CPRv BM) e o **estudo de caso urbano de Porto Alegre**, já implementado e descrito
+nas seções seguintes.
+
+- Plano, ordem de execução e riscos: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+- Coletor agendado que cria o histórico dos bloqueios rodoviários, que a fonte não guarda:
+  [`docs/coletor_crbm.md`](docs/coletor_crbm.md).
+
 ## Escopo e limitações
 
 - **Ônibus:** GTFS oficial da EPTC com vigência set–dez/2025 (vencido; único publicado). Os
@@ -101,6 +112,11 @@ src/flooding_mapping/
   webmap.py                 mapa interativo HTML (Leaflet) com todas as camadas
   rain.py                   limiares de chuva calibrados e frequência anual das chuvas
   dashboard.py              dashboard de alerta: localização, previsão ao vivo, nível por trecho
+  collector.py              coletor dos bloqueios ativos da CPRv BM (arquiva só as mudanças)
+  r2.py                     armazenamento no Cloudflare R2 com orçamento de operações
+Makefile                    pipeline em um comando (`make help`)
+.github/workflows/          coletor agendado dos bloqueios (coletor-crbm.yml)
+docs/                       ROADMAP.md, coletor_crbm.md, events_contract.md, proposta.md
 tests/                      pytest com dados sintéticos
 reports/qa/                 relatórios de qualidade e registros de execução
 outputs/                    tabelas e mapas (não versionados)
@@ -120,6 +136,15 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@21   # obrigatório para o r5py
 ```
 
 ## Execução
+
+Com um único comando (roda as etapas 1 a 10 abaixo, na ordem):
+
+```bash
+make          # pipeline completo; `make help` lista as etapas
+make abrir    # abre o mapa interativo e o dashboard
+```
+
+Passo a passo, equivalente ao `make` (útil para rodar só uma etapa):
 
 ```bash
 PY=.venv/bin/python
@@ -151,7 +176,7 @@ $PY -m flooding_mapping.webmap && open outputs/maps/mapa_interativo.html
 $PY -m flooding_mapping.dashboard && open outputs/maps/dashboard_alerta.html
 ```
 
-Testes: `.venv/bin/python -m pytest`.
+Testes: `make test` (ou `.venv/bin/python -m pytest`).
 
 ## Indicadores
 
