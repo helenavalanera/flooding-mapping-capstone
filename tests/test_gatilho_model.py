@@ -39,19 +39,38 @@ def test_training_rows_keep_all_positives_and_a_fixed_ratio_of_negatives():
     assert np.array_equal(rows, model.training_rows(frame, np.ones(len(y), bool)))  # seeded
 
 
-def test_the_simplest_family_within_the_tolerance_is_chosen_and_baselines_gate_the_status():
+def test_the_simplest_family_within_the_tolerance_is_chosen_and_the_margin_is_relative():
     tuned = pd.DataFrame([
         {"familia": "logistica", "parametros": {"C": 1}, "pr_auc": 0.30},
         {"familia": "hgb", "parametros": {"learning_rate": 0.1}, "pr_auc": 0.31},
         {"familia": "rf", "parametros": {"min_samples_leaf": 20}, "pr_auc": 0.32}])
     clear = model.choose(tuned, baseline_best=0.20)
-    assert clear["familia"] == "logistica" and clear["estado"].startswith("validado")
-    weak = model.choose(tuned, baseline_best=0.30)
-    assert weak["estado"].startswith("experimental")
+    assert clear["familia"] == "logistica" and clear["passa_margem_validacao"]
+    assert not model.choose(tuned, baseline_best=0.30)["passa_margem_validacao"]
     # the tolerance is relative: at a PR-AUC near 0.02 a gap of 0.002 is a 10% difference
     tiny = pd.DataFrame([{"familia": "logistica", "parametros": {}, "pr_auc": 0.010},
                          {"familia": "rf", "parametros": {}, "pr_auc": 0.020}])
     assert model.choose(tiny, baseline_best=0.005)["familia"] == "rf"
+
+
+def years(model_wins):
+    rows = []
+    for year, wins in zip(range(2020, 2025), model_wins):
+        rows.append({"ano": year, "pr_auc_modelo": 0.02 if wins else 0.005, "pr_auc_regra_p3d": 0.01,
+                     "pr_auc_regra_rel_p3d": 0.01, "pr_auc_logistica_chuva": 0.01})
+    return rows
+
+
+def test_validated_needs_all_three_independent_checks_and_names_the_failures():
+    decision = {"familia": "hgb", "parametros": {}, "pr_auc_val": 0.03, "melhor_baseline_pr_auc_val": 0.02, "passa_margem_validacao": True}
+    ok = model.validation_gate(decision, years([1, 1, 1, 0, 0]), {"modelo": 0.40, "regra_p3d": 0.35, "logistica_chuva": 0.30})
+    assert ok["estado"].startswith("validado") and "passa_margem_validacao" not in ok
+    lost_events = model.validation_gate(decision, years([1, 1, 1, 0, 0]), {"modelo": 0.30, "logistica_chuva": 0.35})
+    assert lost_events["estado"].startswith("experimental") and "eventos_fora_da_amostra" in lost_events["estado"]
+    few_years = model.validation_gate(decision, years([1, 0, 0, 0, 0]), {"modelo": 0.40, "logistica_chuva": 0.30})
+    assert "anos_da_janela_movel_vencidos" in few_years["estado"]
+    weak = model.validation_gate({**decision, "passa_margem_validacao": False}, years([1] * 5), {"modelo": 0.4, "x": 0.1})
+    assert weak["estado"].startswith("experimental") and not weak["criterios"]["margem_pr_auc_na_validacao"]["passa"]
 
 
 def test_full_protocol_on_synthetic_storms(tmp_path, monkeypatch):

@@ -5,8 +5,11 @@ Protocol (see ``evaluation.splits`` for the dates)
        model; the smallest set within ``TOLERANCE`` (relative) PR-AUC of the best wins.
     2. Hyperparameters of each family are tuned on the validation years only.
     3. The family is the simplest one within ``TOLERANCE`` of the best PR-AUC. It is called
-       *validated* only if it beats the best baseline by ``MARGIN`` (relative); otherwise it is reported
-       as experimental and the baseline stays the reference.
+       *validated* only if it passes three independent checks, all measured before the test
+       years: it beats the best baseline by ``MARGIN`` (relative) in validation PR-AUC; it beats
+       the best baseline in at least ``WIN_SHARE`` of the rolling-origin years; and it catches at
+       least as many out-of-sample events as the best baseline with the same alert budget.
+       Otherwise it is reported as experimental and the baseline stays the reference.
     4. A rolling origin (train on the past, predict one year, 2020-2026) gives out-of-sample
        scores. Those of 2020-2024 fit the probability calibration (isotonic) and the
        operating thresholds; the test years are never used for either.
@@ -51,6 +54,8 @@ NEG_PER_POS = 50
 CLIMATOLOGY_UNTIL = "2019-12-31"
 TOLERANCE = 0.10  # relative: PR-AUC is tiny at this prevalence, so absolute gaps mean nothing
 MARGIN = 0.10
+WIN_SHARE = 0.6
+GATE_BUDGET = 0.02
 ROLLING_YEARS = range(2020, 2027)
 CALIBRATION_YEARS = range(2020, 2025)
 LABELS = {"estrito": s2id.HYDRO_STRICT, "amplo": s2id.HYDRO_BROAD}
@@ -139,16 +144,40 @@ def baseline_scores(frame: pd.DataFrame, train: np.ndarray) -> dict:
 
 
 def choose(tuned: pd.DataFrame, baseline_best: float) -> dict:
-    """Simplest family within the tolerance of the best, and whether it beats the baselines."""
+    """Simplest family within the tolerance of the best, and whether it clears the validation margin."""
     best_by_family = tuned.loc[tuned.groupby("familia")["pr_auc"].idxmax()]
     top = best_by_family["pr_auc"].max()
     tied = best_by_family[best_by_family["pr_auc"] >= top * (1 - TOLERANCE)]
     pick = tied.assign(rank=tied["familia"].map(SIMPLICITY)).sort_values("rank").iloc[0]
-    validated = bool(pick["pr_auc"] >= baseline_best * (1 + MARGIN))
     return {"familia": pick["familia"], "parametros": pick["parametros"], "pr_auc_val": float(pick["pr_auc"]),
             "melhor_baseline_pr_auc_val": round(float(baseline_best), 4),
-            "estado": "validado frente aos baselines" if validated else
-            f"experimental: não supera o melhor baseline em {MARGIN:.0%} (relativo) de PR-AUC na validação"}
+            "passa_margem_validacao": bool(pick["pr_auc"] >= baseline_best * (1 + MARGIN))}
+
+
+def oof_events(frame: pd.DataFrame, rows: pd.Series, scores: dict[str, np.ndarray], budget: float = GATE_BUDGET) -> dict:
+    """Events caught out of sample by each scorer with the same alert budget (``budget`` of the days)."""
+    subset = frame.iloc[rows].reset_index(drop=True)
+    return {name: metrics.event_recall(subset, s, float(np.quantile(s, 1 - budget)))["recall_eventos"]
+            for name, s in scores.items()}
+
+
+def validation_gate(decision: dict, by_year: list[dict], events: dict) -> dict:
+    """Validated only if the model beats the baselines in three independent ways; says which failed."""
+    years = [r for r in by_year if r["ano"] in CALIBRATION_YEARS]
+    wins = sum(r["pr_auc_modelo"] > max(r["pr_auc_regra_p3d"], r["pr_auc_regra_rel_p3d"], r["pr_auc_logistica_chuva"]) for r in years)
+    best_base = max(v for k, v in events.items() if k != "modelo")
+    criteria = {
+        "margem_pr_auc_na_validacao": {"passa": decision["passa_margem_validacao"],
+                                       "detalhe": f"{decision['pr_auc_val']:.4f} contra {decision['melhor_baseline_pr_auc_val']:.4f} (margem {MARGIN:.0%})"},
+        "anos_da_janela_movel_vencidos": {"passa": bool(years) and wins / len(years) >= WIN_SHARE,
+                                          "detalhe": f"{wins} de {len(years)} anos (mínimo {WIN_SHARE:.0%})"},
+        "eventos_fora_da_amostra_no_mesmo_orcamento": {"passa": events["modelo"] >= best_base,
+                                                       "detalhe": f"modelo {events['modelo']:.3f} contra melhor baseline {best_base:.3f} com {GATE_BUDGET:.0%} dos dias em alerta"}}
+    failed = [k for k, v in criteria.items() if not v["passa"]]
+    decision = {k: v for k, v in decision.items() if k != "passa_margem_validacao"}
+    return {**decision, "criterios": criteria,
+            "estado": "validado frente aos baselines (validação, janela móvel e eventos)" if not failed
+            else "experimental: não passa em " + ", ".join(failed)}
 
 
 def rolling_oof(frame: pd.DataFrame, family: str, params: dict, cols: list[str]) -> pd.DataFrame:
@@ -270,7 +299,12 @@ def run(label_name: str, quick: bool = False) -> dict:
         by_year.append({"ano": year, "positivos": int(yy.sum()),
                         "pr_auc_modelo": metrics.ranking(yy, oof["score"][rows])["pr_auc"],
                         "pr_auc_regra_p3d": metrics.ranking(yy, base_oof["regra_p3d"][rows])["pr_auc"],
+                        "pr_auc_regra_rel_p3d": metrics.ranking(yy, base_oof["regra_rel_p3d"][rows])["pr_auc"],
                         "pr_auc_logistica_chuva": metrics.ranking(yy, base_oof["logistica_chuva"][rows])["pr_auc"]})
+    calibration_rows = oof.loc[calib_rows, "linha"].to_numpy()
+    gate_events = oof_events(frame, calibration_rows, {"modelo": oof["score"].to_numpy()[calib_rows],
+                                                       **{n: base_oof[n][calib_rows] for n in base_oof if n != "prior"}})
+    decision = validation_gate(decision, by_year, gate_events)
     blocks = splits.spatial_blocks(towns)
     spatial = []
     for block in sorted(blocks.unique()):
@@ -293,7 +327,7 @@ def run(label_name: str, quick: bool = False) -> dict:
     card.update({
         "selecao_de_variaveis": {"ablacao_val": ablation.to_dict("records"), "escolhido": feature_set, "variaveis": cols},
         "ajuste_de_hiperparametros_val": tuned.assign(parametros=tuned["parametros"].map(json.dumps)).to_dict("records"),
-        "baselines_val": base_val, "decisao": decision,
+        "baselines_val": base_val, "decisao": decision, "eventos_oof_no_orcamento_do_portao": gate_events,
         "limiares_pontuacao_bruta_(oof_2020_2024)": thresholds,
         "probabilidade_calibrada_nos_limiares": {k: round(float(calibrator.predict([v])[0]), 5) for k, v in thresholds.items()},
         "teste_2025_em_diante": {
@@ -312,6 +346,11 @@ def run(label_name: str, quick: bool = False) -> dict:
             key=lambda r: -r["queda_media"]),
     })
 
+    # The model that was tested (trained before 2025), kept for the forecast-skew evaluation.
+    tested_artifact = {"modelo": tested, "calibrador": calibrator, "limiares": thresholds, "colunas": cols,
+                       "quantis": quantiles, "municipios": towns[["ibge", "nome", "lat", "lon", "area_km2", "populacao", "regiao_imediata"]].copy(),
+                       "grade": grid[["ibge", "altitude_m"]].copy(), "sklearn": sklearn.__version__,
+                       "treinado_ate": str(frame.loc[final_train, "data"].max().date())}
     operational = fit(frame, ~frame["excluido"].to_numpy(), family, params, cols)
     version = f"gatilho-{label_name}-{datetime.now(timezone.utc):%Y%m%d}"
     artifact = {"versao": version, "rotulo": label_name, "familia": family, "parametros": params,
@@ -326,6 +365,7 @@ def run(label_name: str, quick: bool = False) -> dict:
     path = resolve(f"artifacts/models/{version}/modelo.joblib")
     path.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(artifact, path)
+    joblib.dump(tested_artifact, path.with_name("modelo_teste.joblib"))
     card["artefato"] = {"versao": version, "caminho_local": str(path.relative_to(resolve("."))),
                         "sha256": sha256(path), "treinado_desde": artifact["treinado_desde"],
                         "treinado_ate": artifact["treinado_ate"], "versionado_no_git": False,
@@ -336,6 +376,10 @@ def run(label_name: str, quick: bool = False) -> dict:
     resolve("data/processed").mkdir(parents=True, exist_ok=True)
     frame.to_parquet(resolve(f"data/processed/gatilho_{label_name}.parquet"))
     oof.assign(y=oof_y).to_parquet(resolve(f"data/processed/gatilho_{label_name}_oof.parquet"))
+    test[["ibge", "data", "y"]].assign(
+        score=raw, probabilidade=probability,
+        **{n: fn(test) for n, fn in scorers.items() if n != "prior"}).to_parquet(
+        resolve(f"data/processed/gatilho_{label_name}_teste.parquet"))
     return card
 
 
