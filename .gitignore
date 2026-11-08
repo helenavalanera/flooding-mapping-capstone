@@ -40,7 +40,7 @@ reports/qa/*
 *.doc
 *.docx
 *.dotx
-models/
+/models/
 *.pkl
 *.pickle
 *.joblib
