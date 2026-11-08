@@ -25,6 +25,7 @@ dependencies = [
     "osmium>=4,<5",
     "scikit-learn>=1.5",
     "rasterio>=1.4",
+    "xlrd>=2.0.1",  # planilha .xls do DAER
 ]
 
 [project.optional-dependencies]
