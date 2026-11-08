@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Risco de alagamentos no RS</title>
+  <meta name="description" content="Estimativa experimental, por município, do risco de registro de desastre hídrico nas próximas 72 horas no Rio Grande do Sul.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Risco de alagamentos no Rio Grande do Sul <span class="badge" id="status-badge">experimental</span></h1>
+      <p class="sub">Estimativa por município para as próximas 72 horas · <strong id="updated">carregando…</strong></p>
+    </div>
+  </header>
+  <div id="banner" role="alert" hidden></div>
+  <div class="layout">
+    <div id="map" role="application" aria-label="Mapa do Rio Grande do Sul com o risco estimado por município"></div>
+    <aside id="panel" aria-label="Controles e informações">
+      <section aria-labelledby="h-day">
+        <h2 id="h-day">Dia</h2>
+        <div id="days" role="radiogroup" aria-label="Dia da estimativa"></div>
+      </section>
+      <section aria-labelledby="h-layers">
+        <h2 id="h-layers">Camadas</h2>
+        <label><input type="checkbox" id="l-risk" checked> Risco municipal <em>(estimativa do modelo)</em></label>
+        <label><input type="checkbox" id="l-block" checked> Bloqueios ativos <em>(observado, CPRv BM)</em></label>
+        <label><input type="checkbox" id="l-occ"> Ocorrências recentes <em>(observado, S2iD)</em></label>
+        <label><input type="checkbox" id="l-road"> Rodovias por tráfego VDM <em>(DAER)</em></label>
+        <label><input type="checkbox" id="l-crit"> Trechos críticos <em>(simulação)</em></label>
+      </section>
+      <section aria-labelledby="h-legend">
+        <h2 id="h-legend">Legenda</h2>
+        <ul class="legend" id="legend"></ul>
+      </section>
+      <section id="detail" aria-live="polite" aria-labelledby="h-detail">
+        <h2 id="h-detail">Município</h2>
+        <p class="muted">Clique em um município no mapa.</p>
+      </section>
+      <section aria-labelledby="h-kinds">
+        <h2 id="h-kinds">Como ler</h2>
+        <ul class="kinds">
+          <li><b>Estimativa</b>: o que o modelo calcula a partir da previsão de chuva.</li>
+          <li><b>Observado</b>: bloqueio ativo ou registro de desastre, com atraso e viés de notificação.</li>
+          <li><b>Simulação</b>: impacto do fechamento de um trecho na malha mapeada, não uma ocorrência.</li>
+        </ul>
+      </section>
+      <section id="model" aria-labelledby="h-model"><h2 id="h-model">Modelo</h2></section>
+      <section id="limits" aria-labelledby="h-limits"><h2 id="h-limits">Limites</h2></section>
+    </aside>
+  </div>
+  <footer>
+    Projeto acadêmico de código aberto. Não substitui os alertas oficiais da Defesa Civil.
+    Fontes: Open-Meteo (chuva), CPRv BM (bloqueios), S2iD/MIDR (registros), DAER (rodovias), IBGE (municípios).
+    Mapa © colaboradores do OpenStreetMap.
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="logic.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

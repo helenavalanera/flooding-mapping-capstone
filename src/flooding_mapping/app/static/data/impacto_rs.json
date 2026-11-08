@@ -1,0 +1,3918 @@
+{
+ "natureza": "impacto SIMULADO do fechamento de cada segmento de 1 km na malha mapeada do DAER; não é ocorrência observada nem previsão",
+ "criterios": {
+  "ponte": "o fechamento divide a rede; pop_isolada = população do lado menor",
+  "desvio_km": "distância extra entre as pontas do segmento pela melhor rota alternativa (teto de 300 km)",
+  "veiculos_km_dia": "VDM x desvio_km; só onde há VDM"
+ },
+ "limites": [
+  "Estradas municipais e urbanas estão ausentes da camada: muitas 'pontes' são falta de alternativa mapeada, não isolamento real.",
+  "VDM existe em cerca de 38% dos segmentos; VDM ausente não é tráfego zero e esses segmentos ficam fora do ranking ponderado."
+ ],
+ "cobertura": {
+  "segmentos": 17611,
+  "com_vdm": 6739,
+  "fracao_com_vdm": 0.383
+ },
+ "com_x_sem_peso_do_vdm": {
+  "trechos_com_vdm_e_desvio": 361,
+  "spearman_desvio_x_ponderado": 0.422,
+  "sobreposicao_top50": 9
+ },
+ "ranking_pontes_populacao_isolada": [
+  {
+   "codigo_sre": "118ERS0150",
+   "nome": "ERS-118",
+   "km_inicio": 38.23,
+   "km_final": 39.52,
+   "local_inicio": "ENTR. ERS-040 (P/ VIAMÃO)",
+   "local_final": "PASSO DO FIÚZA",
+   "vdm": null,
+   "pop_isolada": 517266.22222222236
+  },
+  {
+   "codigo_sre": "118ERS0160",
+   "nome": "ERS-118",
+   "km_inicio": 39.52,
+   "km_final": 42.52,
+   "local_inicio": "PASSO DO FIÚZA",
+   "local_final": "ENTR. RUA MANOEL SANTANA (VIAMÃO)",
+   "vdm": 2108.0,
+   "pop_isolada": 515191.11111111124
+  },
+  {
+   "codigo_sre": "448BRS0010",
+   "nome": "BRS-448F",
+   "km_inicio": 0.0,
+   "km_final": 0.6,
+   "local_inicio": "ENTR. BRS-116(A)/ERS-118 (SAPUCAIA DO SUL)",
+   "local_final": "INÍCIO DA CONCESSÃO (DIVISA MUNICIPAL SAPUCAIA DO SUL/ESTEIO)",
+   "vdm": null,
+   "pop_isolada": 250568.30519688653
+  },
+  {
+   "codigo_sre": "448BRS0012",
+   "nome": "BRS-448F",
+   "km_inicio": 0.6,
+   "km_final": 6.8,
+   "local_inicio": "INÍCIO DA CONCESSÃO (DIVISA MUNICIPAL SAPUCAIA DO SUL/ESTEIO)",
+   "local_final": "ENTR. CONTORNO PLANEJADO BRS-116 (ESTEIO)",
+   "vdm": null,
+   "pop_isolada": 240406.2282738096
+  },
+  {
+   "codigo_sre": "118ERS0170",
+   "nome": "ERS-118",
+   "km_inicio": 58.42,
+   "km_final": 62.99,
+   "local_inicio": "LAMI",
+   "local_final": "PASSO DO VAREJÃO",
+   "vdm": 3855.0,
+   "pop_isolada": 196151.0476190476
+  },
+  {
+   "codigo_sre": "448BRS0015",
+   "nome": "BRS-448F",
+   "km_inicio": 6.8,
+   "km_final": 9.7,
+   "local_inicio": "ENTR. CONTORNO PLANEJADO BRS-116 (ESTEIO)",
+   "local_final": "ENTR. BRS-386 (CANOAS)",
+   "vdm": null,
+   "pop_isolada": 194724.02827380953
+  },
+  {
+   "codigo_sre": "448BRS0020",
+   "nome": "BRS-448F",
+   "km_inicio": 9.7,
+   "km_final": 22.3,
+   "local_inicio": "ENTR. BRS-386 (CANOAS)",
+   "local_final": "ENTR. BRS-116(B)/290 (PORTO ALEGRE)",
+   "vdm": null,
+   "pop_isolada": 162131.18452380953
+  },
+  {
+   "codigo_sre": "116ARS1005",
+   "nome": "116ARS1005",
+   "km_inicio": 0.0,
+   "km_final": 3.0,
+   "local_inicio": "ENTR. BRS-116/290 (PORTO ALEGRE)",
+   "local_final": "ENTR. RUA EDU CHAVES (PORTO ALEGRE)",
+   "vdm": null,
+   "pop_isolada": 95279.42857142857
+  },
+  {
+   "codigo_sre": "471BRS0230",
+   "nome": "BRS-471",
+   "km_inicio": 465.05,
+   "km_final": 556.49,
+   "local_inicio": "ENTR. RSC-473 (VILA SARANDI)",
+   "local_final": "CURRAL ALTO",
+   "vdm": null,
+   "pop_isolada": 90715.03955911197
+  },
+  {
+   "codigo_sre": "239ARS2005",
+   "nome": "239ARS2005",
+   "km_inicio": 0.0,
+   "km_final": 4.6,
+   "local_inicio": "ENTR. ERS-239 (CAMPO BOM - INÍCIO TRV-MUN)",
+   "local_final": "ENTR. AV. PRESIDENTE VARGAS (AV. DOS MUNICÍPIOS - CAMPO BOM - TRV-MUN)",
+   "vdm": 13052.0,
+   "pop_isolada": 82031.00000000001
+  },
+  {
+   "codigo_sre": "118ARS1005",
+   "nome": "118ARS1005",
+   "km_inicio": 0.0,
+   "km_final": 4.5600000000000005,
+   "local_inicio": "ENTR. ERS-118",
+   "local_final": "ALVORADA",
+   "vdm": 8053.0,
+   "pop_isolada": 74393.34722222222
+  },
+  {
+   "codigo_sre": "239ARS2010",
+   "nome": "239ARS2010",
+   "km_inicio": 4.6,
+   "km_final": 7.79,
+   "local_inicio": "ENTR. AV. PRESIDENTE VARGAS (AV. DOS MUNICÍPIOS - CAMPO BOM - TRV-MUN)",
+   "local_final": "DIVISA MUNICIPAL CAMPO BOM/NOVO HAMBURGO (AV. DOS MUNICÍPIOS - FIM TRV-MUN)",
+   "vdm": 9001.0,
+   "pop_isolada": 59571.71428571429
+  },
+  {
+   "codigo_sre": "737ERS0010",
+   "nome": "ERS-737",
+   "km_inicio": 0.0,
+   "km_final": 16.4,
+   "local_inicio": "ENTR. BRS-116(P/ PELOTAS)",
+   "local_final": "DIVISA MUNICIPAL PELOTAS/ARROIO DO PADRE",
+   "vdm": 990.0,
+   "pop_isolada": 56879.833333333314
+  },
+  {
+   "codigo_sre": "406ERS0030",
+   "nome": "ERS-406",
+   "km_inicio": 17.96,
+   "km_final": 27.42,
+   "local_inicio": "ENTR. ERS-487 (NONOAI)",
+   "local_final": "ENTR. ERS-324 (SERRARIA)",
+   "vdm": 3922.0,
+   "pop_isolada": 42326.53347171769
+  },
+  {
+   "codigo_sre": "239MRS0007",
+   "nome": "MRS-239",
+   "km_inicio": 10.88,
+   "km_final": 13.23,
+   "local_inicio": "AV. PRESIDENTE VARGAS (ESTÂNCIA VELHA - TRV-MUN)",
+   "local_final": "ENTR. BRS-116 (P/ NOVO HAMBURGO - FIM TRV-MUN)",
+   "vdm": 20836.0,
+   "pop_isolada": 41933.5
+  }
+ ],
+ "ranking_desvio_sem_vdm": [
+  {
+   "codigo_sre": "101ERS4455",
+   "nome": "RSC-101",
+   "km_inicio": 128.71,
+   "km_final": 139.75,
+   "local_inicio": "ENTR. ERS-040 (CAPIVARI DO SUL)",
+   "local_final": "ENTR. ERS-776 (P/ PALMARES DO SUL)",
+   "vdm": 3576.0,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4460",
+   "nome": "RSC-101",
+   "km_inicio": 139.75,
+   "km_final": 167.79,
+   "local_inicio": "ENTR. ERS-776 (P/ PALMARES DO SUL)",
+   "local_final": "BACUPARI (PALMARES DO SUL)",
+   "vdm": 1807.0,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4465",
+   "nome": "RSC-101",
+   "km_inicio": 167.79,
+   "km_final": 252.27,
+   "local_inicio": "BACUPARI (PALMARES DO SUL)",
+   "local_final": "ENTR. AV. PADRE SIMÃO (MOSTARDAS)",
+   "vdm": 620.0,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4470",
+   "nome": "RSC-101",
+   "km_inicio": 252.27,
+   "km_final": 278.81,
+   "local_inicio": "ENTR. AV. PADRE SIMÃO (MOSTARDAS)",
+   "local_final": "ENTR. R. ISIDORO TEIXEIRA MACHADO (TAVARES)",
+   "vdm": 1276.0,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4480",
+   "nome": "RSC-101",
+   "km_inicio": 278.81,
+   "km_final": 331.0,
+   "local_inicio": "ENTR. R. ISIDORO TEIXEIRA MACHADO (TAVARES)",
+   "local_final": "BOJURU (SÃO JOSÉ DO NORTE)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4490",
+   "nome": "RSC-101",
+   "km_inicio": 331.0,
+   "km_final": 369.5,
+   "local_inicio": "BOJURU (SÃO JOSÉ DO NORTE)",
+   "local_final": "ESTREITO (SÃO JOSÉ DO NORTE)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101BRS4500",
+   "nome": "BRS-101",
+   "km_inicio": 369.5,
+   "km_final": 404.8,
+   "local_inicio": "ESTREITO (SÃO JOSÉ DO NORTE)",
+   "local_final": "ENTR. R. LUIZ GAUTÉRIO (SÃO JOSÉ DO NORTE)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101BRS4510",
+   "nome": "BRS-101",
+   "km_inicio": 404.8,
+   "km_final": 409.3,
+   "local_inicio": "ENTR. R. LUIZ GAUTÉRIO (SÃO JOSÉ DO NORTE)",
+   "local_final": "RIO GRANDE",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3277",
+   "nome": "BRS-116",
+   "km_inicio": 299.4,
+   "km_final": 318.1,
+   "local_inicio": "ENTR. ERS-703 (P/ GUAÍBA)",
+   "local_final": "ENTR. BRS-470 (BARRA DO RIBEIRO)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3280",
+   "nome": "BRS-116",
+   "km_inicio": 318.1,
+   "km_final": 319.4,
+   "local_inicio": "ENTR. BRS-470 (BARRA DO RIBEIRO)",
+   "local_final": "ENTR. ERS-709 (P/ BARRA DO RIBEIRO)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3290",
+   "nome": "BRS-116",
+   "km_inicio": 319.4,
+   "km_final": 328.7,
+   "local_inicio": "ENTR. ERS-709 (P/ BARRA DO RIBEIRO)",
+   "local_final": "ENTR. ERS-711 (P/ MARIANA PIMENTEL)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3295",
+   "nome": "BRS-116",
+   "km_inicio": 328.7,
+   "km_final": 336.7,
+   "local_inicio": "ENTR. ERS-711 (P/ MARIANA PIMENTEL)",
+   "local_final": "ENTR. ERS-713 (P/ SERTÃO SANTANA)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3297",
+   "nome": "BRS-116",
+   "km_inicio": 336.7,
+   "km_final": 362.7,
+   "local_inicio": "ENTR. ERS-713 (P/ SERTÃO SANTANA)",
+   "local_final": "ENTR. ERS-715/717 (P/ TAPES)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3310",
+   "nome": "BRS-116",
+   "km_inicio": 362.7,
+   "km_final": 397.5,
+   "local_inicio": "ENTR. ERS-715/717 (P/ TAPES)",
+   "local_final": "ENTR. ERS-350(A) (CAMAQUÃ)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3320",
+   "nome": "BRS-116",
+   "km_inicio": 397.5,
+   "km_final": 399.9,
+   "local_inicio": "ENTR. ERS-350(A) (CAMAQUÃ)",
+   "local_final": "FIM DA PONTE S/ARROIO DURO (CAMAQUÃ)",
+   "vdm": null,
+   "desvio_km": 300.0
+  }
+ ],
+ "ranking_veiculos_km_dia_com_vdm": [
+  {
+   "codigo_sre": "453ERS0190",
+   "nome": "RSC-453",
+   "km_inicio": 121.41,
+   "km_final": 130.57,
+   "local_inicio": "ENTR. ERS-122(A) (P/ FARROUPILHA)",
+   "local_final": "ACESSO A CAXIAS DO SUL",
+   "vdm": 39094.0,
+   "desvio_km": 98.44920290660924,
+   "veiculos_km_dia": 3848773.138430982
+  },
+  {
+   "codigo_sre": "118ERS0110",
+   "nome": "ERS-118",
+   "km_inicio": 22.23,
+   "km_final": 27.2,
+   "local_inicio": "ENTR. BRS-290 (P/ PORTO ALEGRE)",
+   "local_final": "ACESSO A ALVORADA",
+   "vdm": 19524.0,
+   "desvio_km": 173.11036817488323,
+   "veiculos_km_dia": 3379806.8282464202
+  },
+  {
+   "codigo_sre": "392MRS0400",
+   "nome": "MRS-392",
+   "km_inicio": 588.86,
+   "km_final": 591.55,
+   "local_inicio": "ENTR. BRS-285/ERS-344(A) (ENTRE-IJUÍS - INÍCIO TRV-MUN)",
+   "local_final": "INÍCIO DA PONTE S/ RIO IJUÍ (ENTRE-IJUÍS - FIM TRV-MUN)",
+   "vdm": 11382.0,
+   "desvio_km": 201.40531313803967,
+   "veiculos_km_dia": 2292395.2741371677
+  },
+  {
+   "codigo_sre": "392ERS0410",
+   "nome": "RSC-392",
+   "km_inicio": 591.55,
+   "km_final": 598.19,
+   "local_inicio": "INÍCIO DA PONTE S/ RIO IJUÍ (ENTRE-IJUÍS - FIM TRV-MUN)",
+   "local_final": "ENTR. ERS-218 (SANTO ÂNGELO)",
+   "vdm": 11382.0,
+   "desvio_km": 201.30123133483383,
+   "veiculos_km_dia": 2291210.6150530786
+  },
+  {
+   "codigo_sre": "118ERS0120",
+   "nome": "ERS-118",
+   "km_inicio": 27.2,
+   "km_final": 34.68,
+   "local_inicio": "ACESSO A ALVORADA",
+   "local_final": "ENTR. ERS-762 (P/ AUTÓDROMO DE TARUMÃ)",
+   "vdm": 10592.0,
+   "desvio_km": 173.2155569612733,
+   "veiculos_km_dia": 1834699.179333807
+  },
+  {
+   "codigo_sre": "118ERS0130",
+   "nome": "ERS-118",
+   "km_inicio": 34.68,
+   "km_final": 38.23,
+   "local_inicio": "ENTR. ERS-762 (P/ AUTÓDROMO DE TARUMÃ)",
+   "local_final": "ENTR. ERS-040 (P/ VIAMÃO)",
+   "vdm": 10102.0,
+   "desvio_km": 173.3195504579244,
+   "veiculos_km_dia": 1750874.0987259524
+  },
+  {
+   "codigo_sre": "453ERS0180",
+   "nome": "RSC-453",
+   "km_inicio": 119.39,
+   "km_final": 121.41,
+   "local_inicio": "ACESSO A CARAVAGGIO",
+   "local_final": "ENTR. ERS-122(A) (P/ FARROUPILHA)",
+   "vdm": 26717.0,
+   "desvio_km": 64.03162795176414,
+   "veiculos_km_dia": 1710733.0039872825
+  },
+  {
+   "codigo_sre": "324ERS0210",
+   "nome": "ERS-324",
+   "km_inicio": 217.82,
+   "km_final": 224.75,
+   "local_inicio": "ACESSO SUL A MARAU",
+   "local_final": "ENTR. ERS-132 (P/ CAMARGO)",
+   "vdm": 10400.0,
+   "desvio_km": 162.91728785065644,
+   "veiculos_km_dia": 1694339.7936468269
+  },
+  {
+   "codigo_sre": "287ERS0010",
+   "nome": "RSC-287",
+   "km_inicio": 0.0,
+   "km_final": 3.23,
+   "local_inicio": "ENTR. RSC-470(A)/ERS-124(A)/240 (MONTENEGRO)",
+   "local_final": "ENTR. RSC-470(B) (P/ TRIUNFO)",
+   "vdm": 17251.0,
+   "desvio_km": 98.0677121171402,
+   "veiculos_km_dia": 1691766.1017327856
+  },
+  {
+   "codigo_sre": "342ERS0020",
+   "nome": "ERS-342",
+   "km_inicio": 32.59,
+   "km_final": 35.06,
+   "local_inicio": "ENTR. BRS-472 (P/ TRÊS DE MAIO)",
+   "local_final": "ACESSO A TRÊS DE MAIO",
+   "vdm": 8539.0,
+   "desvio_km": 193.93609519268227,
+   "veiculos_km_dia": 1656020.316850314
+  },
+  {
+   "codigo_sre": "287ERS0174",
+   "nome": "RSC-287",
+   "km_inicio": 184.49,
+   "km_final": 187.13,
+   "local_inicio": "ENTR. ERS-348(A) (P/ PORTO ALVES)",
+   "local_final": "ENTR. ERS-348(B) (P/ AGUDO)",
+   "vdm": 6852.0,
+   "desvio_km": 241.4763052824013,
+   "veiculos_km_dia": 1654595.643795014
+  },
+  {
+   "codigo_sre": "324ERS0190",
+   "nome": "ERS-324",
+   "km_inicio": 212.04,
+   "km_final": 217.82,
+   "local_inicio": "ACESSO NORTE A MARAU",
+   "local_final": "ACESSO SUL A MARAU",
+   "vdm": 9599.0,
+   "desvio_km": 162.95713581039405,
+   "veiculos_km_dia": 1564225.5466439724
+  },
+  {
+   "codigo_sre": "129ERS0190",
+   "nome": "ERS-129",
+   "km_inicio": 163.34,
+   "km_final": 165.81,
+   "local_inicio": "ENTR. ERS-324(A) (P/ NOVA ARAÇÁ)",
+   "local_final": "ENTR. ERS-324(B) (CASCA)",
+   "vdm": 7355.0,
+   "desvio_km": 209.39302571717852,
+   "veiculos_km_dia": 1540085.704149848
+  },
+  {
+   "codigo_sre": "020ERS0050",
+   "nome": "ERS-020",
+   "km_inicio": 3.95,
+   "km_final": 18.13,
+   "local_inicio": "ENTR. ERS-118 (P/ GRAVATAÍ)",
+   "local_final": "MORUNGAVA",
+   "vdm": 13151.0,
+   "desvio_km": 116.55694073119523,
+   "veiculos_km_dia": 1532840.3275559484
+  },
+  {
+   "codigo_sre": "472ERS0100",
+   "nome": "RSC-472",
+   "km_inicio": 162.91,
+   "km_final": 165.34,
+   "local_inicio": "ENTR. ERS-344(A) (P/ TUPARENDI)",
+   "local_final": "ENTR. ERS-344(B) (P/ SANTA ROSA)",
+   "vdm": 6392.0,
+   "desvio_km": 204.42160303593758,
+   "veiculos_km_dia": 1306662.886605713
+  }
+ ],
+ "municipios": {
+  "4300034": {
+   "km_rede": 57.0,
+   "km_com_vdm": 12.8,
+   "segmentos_ponte": 57,
+   "maior_pop_isolada": 4098,
+   "trecho_critico": "BRS-153 (153BRS1930)"
+  },
+  "4300059": {
+   "km_rede": 28.7,
+   "km_com_vdm": 16.2,
+   "segmentos_ponte": 18,
+   "maior_pop_isolada": 2607,
+   "trecho_critico": "ERS-428 (428ERS0060)"
+  },
+  "4300109": {
+   "km_rede": 28.2,
+   "km_com_vdm": 27.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4300208": {
+   "km_rede": 26.2,
+   "km_com_vdm": 8.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4300307": {
+   "km_rede": 8.0,
+   "km_com_vdm": 8.0,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 5442,
+   "trecho_critico": "ERS-540 (540ERS0010)"
+  },
+  "4300406": {
+   "km_rede": 244.9,
+   "km_com_vdm": 58.7,
+   "segmentos_ponte": 87,
+   "maior_pop_isolada": 24234,
+   "trecho_critico": "ERS-566 (566ERS0040)"
+  },
+  "4300455": {
+   "km_rede": 3.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 3651,
+   "trecho_critico": "ERS-520 (520ERS0010)"
+  },
+  "4300471": {
+   "km_rede": 41.3,
+   "km_com_vdm": 19.3,
+   "segmentos_ponte": 19,
+   "maior_pop_isolada": 912,
+   "trecho_critico": "VRS-801 (801ERS0010)"
+  },
+  "4300505": {
+   "km_rede": 6.7,
+   "km_com_vdm": 6.7,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 7116,
+   "trecho_critico": "ERS-504 (504ERS0010)"
+  },
+  "4300554": {
+   "km_rede": 17.7,
+   "km_com_vdm": 16.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4300570": {
+   "km_rede": 11.3,
+   "km_com_vdm": 4.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4300604": {
+   "km_rede": 4.9,
+   "km_com_vdm": 4.9,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 25489,
+   "trecho_critico": "118ARS1005 (118ARS1005)"
+  },
+  "4300638": {
+   "km_rede": 14.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 15,
+   "maior_pop_isolada": 4978,
+   "trecho_critico": "ERS-354 (354ERS0010)"
+  },
+  "4300646": {
+   "km_rede": 12.7,
+   "km_com_vdm": 3.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4300661": {
+   "km_rede": 20.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4300703": {
+   "km_rede": 17.7,
+   "km_com_vdm": 17.7,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 2508,
+   "trecho_critico": "ERS-432 (432ERS0010)"
+  },
+  "4300802": {
+   "km_rede": 39.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4300851": {
+   "km_rede": 36.7,
+   "km_com_vdm": 21.8,
+   "segmentos_ponte": 22,
+   "maior_pop_isolada": 2349,
+   "trecho_critico": "ERS-350 (350ERS0010)"
+  },
+  "4300877": {
+   "km_rede": 4.7,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4300901": {
+   "km_rede": 45.1,
+   "km_com_vdm": 15.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4301008": {
+   "km_rede": 43.2,
+   "km_com_vdm": 11.3,
+   "segmentos_ponte": 25,
+   "maior_pop_isolada": 8948,
+   "trecho_critico": "VRS-811 (811ERS0010)"
+  },
+  "4301057": {
+   "km_rede": 23.9,
+   "km_com_vdm": 23.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4301073": {
+   "km_rede": 8.9,
+   "km_com_vdm": 8.9,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 2339,
+   "trecho_critico": "ERS-737 (737ERS0020)"
+  },
+  "4301107": {
+   "km_rede": 11.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4301206": {
+   "km_rede": 21.7,
+   "km_com_vdm": 21.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4301305": {
+   "km_rede": 124.5,
+   "km_com_vdm": 23.9,
+   "segmentos_ponte": 18,
+   "maior_pop_isolada": 29151,
+   "trecho_critico": "BRS-116 (116BRS3450)"
+  },
+  "4301404": {
+   "km_rede": 17.9,
+   "km_com_vdm": 17.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4301503": {
+   "km_rede": 21.3,
+   "km_com_vdm": 21.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4301552": {
+   "km_rede": 13.5,
+   "km_com_vdm": 2.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4301602": {
+   "km_rede": 144.0,
+   "km_com_vdm": 4.9,
+   "segmentos_ponte": 15,
+   "maior_pop_isolada": 12475,
+   "trecho_critico": "BRS-153 (153BRS1930)"
+  },
+  "4301636": {
+   "km_rede": 34.3,
+   "km_com_vdm": 1.9,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 4399,
+   "trecho_critico": "ERS-786 (786ERS0110)"
+  },
+  "4301651": {
+   "km_rede": 10.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4301701": {
+   "km_rede": 41.0,
+   "km_com_vdm": 13.1,
+   "segmentos_ponte": 41,
+   "maior_pop_isolada": 21178,
+   "trecho_critico": "RSC-480 (480ERS0176)"
+  },
+  "4301750": {
+   "km_rede": 15.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 16,
+   "maior_pop_isolada": 5542,
+   "trecho_critico": "ERS-711 (711ERS0020)"
+  },
+  "4301800": {
+   "km_rede": 46.2,
+   "km_com_vdm": 10.1,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 925,
+   "trecho_critico": "BRS-470 (470BRS0330)"
+  },
+  "4301859": {
+   "km_rede": 12.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 2917,
+   "trecho_critico": "RSC-163 (163ERS0030)"
+  },
+  "4301875": {
+   "km_rede": 39.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 39,
+   "maior_pop_isolada": 4134,
+   "trecho_critico": "BRS-472 (472BRS0230)"
+  },
+  "4301909": {
+   "km_rede": 51.1,
+   "km_com_vdm": 10.8,
+   "segmentos_ponte": 19,
+   "maior_pop_isolada": 7780,
+   "trecho_critico": "ERS-713 (713ERS0010)"
+  },
+  "4301925": {
+   "km_rede": 5.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 2329,
+   "trecho_critico": "ERS-137 (137ERS0010)"
+  },
+  "4301958": {
+   "km_rede": 9.1,
+   "km_com_vdm": 9.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302006": {
+   "km_rede": 55.3,
+   "km_com_vdm": 36.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302055": {
+   "km_rede": 16.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 16,
+   "maior_pop_isolada": 4471,
+   "trecho_critico": "ERS-487 (487ERS0010)"
+  },
+  "4302105": {
+   "km_rede": 79.0,
+   "km_com_vdm": 28.4,
+   "segmentos_ponte": 23,
+   "maior_pop_isolada": 20448,
+   "trecho_critico": "MRS-444 (444MRS0030)"
+  },
+  "4302154": {
+   "km_rede": 23.7,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 168,
+   "trecho_critico": "ERS-323 (323ERS0070)"
+  },
+  "4302204": {
+   "km_rede": 23.8,
+   "km_com_vdm": 11.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302220": {
+   "km_rede": 15.0,
+   "km_com_vdm": 15.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302238": {
+   "km_rede": 23.2,
+   "km_com_vdm": 23.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302253": {
+   "km_rede": 13.2,
+   "km_com_vdm": 2.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302303": {
+   "km_rede": 81.4,
+   "km_com_vdm": 19.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302352": {
+   "km_rede": 26.6,
+   "km_com_vdm": 8.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302378": {
+   "km_rede": 15.6,
+   "km_com_vdm": 3.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302402": {
+   "km_rede": 22.4,
+   "km_com_vdm": 4.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302451": {
+   "km_rede": 31.3,
+   "km_com_vdm": 9.1,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 26052,
+   "trecho_critico": "ERS-422 (422ERS0017)"
+  },
+  "4302501": {
+   "km_rede": 45.2,
+   "km_com_vdm": 39.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302584": {
+   "km_rede": 16.7,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302600": {
+   "km_rede": 6.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302659": {
+   "km_rede": 9.7,
+   "km_com_vdm": 9.7,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 7436,
+   "trecho_critico": "ERS-411 (411ERS0020)"
+  },
+  "4302709": {
+   "km_rede": 19.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 1004,
+   "trecho_critico": "290ARS1305 (290ARS1305)"
+  },
+  "4302808": {
+   "km_rede": 226.5,
+   "km_com_vdm": 46.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4302907": {
+   "km_rede": 46.2,
+   "km_com_vdm": 33.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4303004": {
+   "km_rede": 200.7,
+   "km_com_vdm": 12.9,
+   "segmentos_ponte": 34,
+   "maior_pop_isolada": 8128,
+   "trecho_critico": "ERS-403 (403ERS0030)"
+  },
+  "4303103": {
+   "km_rede": 7.1,
+   "km_com_vdm": 5.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4303202": {
+   "km_rede": 38.8,
+   "km_com_vdm": 26.6,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4303301": {
+   "km_rede": 20.0,
+   "km_com_vdm": 14.4,
+   "segmentos_ponte": 14,
+   "maior_pop_isolada": 5087,
+   "trecho_critico": "ERS-536 (536ERS0010)"
+  },
+  "4303400": {
+   "km_rede": 11.6,
+   "km_com_vdm": 11.6,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 9098,
+   "trecho_critico": "ERS-150 (150ERS0010)"
+  },
+  "4303509": {
+   "km_rede": 54.2,
+   "km_com_vdm": 23.9,
+   "segmentos_ponte": 21,
+   "maior_pop_isolada": 17053,
+   "trecho_critico": "ERS-354 (354ERS0010)"
+  },
+  "4303558": {
+   "km_rede": 13.3,
+   "km_com_vdm": 13.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4303608": {
+   "km_rede": 90.3,
+   "km_com_vdm": 48.2,
+   "segmentos_ponte": 24,
+   "maior_pop_isolada": 1677,
+   "trecho_critico": "MRS-427 (427MRS0010)"
+  },
+  "4303673": {
+   "km_rede": 52.3,
+   "km_com_vdm": 14.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4303707": {
+   "km_rede": 18.8,
+   "km_com_vdm": 11.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4303806": {
+   "km_rede": 22.3,
+   "km_com_vdm": 5.6,
+   "segmentos_ponte": 20,
+   "maior_pop_isolada": 14527,
+   "trecho_critico": "ERS-211 (211ERS0005)"
+  },
+  "4303905": {
+   "km_rede": 14.5,
+   "km_com_vdm": 7.8,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 82031,
+   "trecho_critico": "239ARS2005 (239ARS2005)"
+  },
+  "4304002": {
+   "km_rede": 29.4,
+   "km_com_vdm": 3.5,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304101": {
+   "km_rede": 16.3,
+   "km_com_vdm": 16.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304200": {
+   "km_rede": 91.4,
+   "km_com_vdm": 42.1,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 9163,
+   "trecho_critico": "ERS-403 (403ERS0030)"
+  },
+  "4304309": {
+   "km_rede": 20.7,
+   "km_com_vdm": 17.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304358": {
+   "km_rede": 22.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304408": {
+   "km_rede": 24.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 6,
+   "maior_pop_isolada": 13611,
+   "trecho_critico": "ERS-466 (466ERS0080)"
+  },
+  "4304507": {
+   "km_rede": 143.4,
+   "km_com_vdm": 65.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304606": {
+   "km_rede": 32.6,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 14,
+   "maior_pop_isolada": 183859,
+   "trecho_critico": "BRS-448F (448BRS0015)"
+  },
+  "4304614": {
+   "km_rede": 8.9,
+   "km_com_vdm": 8.9,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 1656,
+   "trecho_critico": "ERS-424 (424ERS0015)"
+  },
+  "4304622": {
+   "km_rede": 37.5,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304630": {
+   "km_rede": 23.8,
+   "km_com_vdm": 23.8,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 5529,
+   "trecho_critico": "ERS-407 (407ERS0030)"
+  },
+  "4304655": {
+   "km_rede": 43.5,
+   "km_com_vdm": 43.5,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 831,
+   "trecho_critico": "ERS-533 (533ERS0010)"
+  },
+  "4304663": {
+   "km_rede": 53.4,
+   "km_com_vdm": 1.8,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 981,
+   "trecho_critico": "293BRS9130 (293BRS9130)"
+  },
+  "4304671": {
+   "km_rede": 41.1,
+   "km_com_vdm": 17.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304689": {
+   "km_rede": 18.8,
+   "km_com_vdm": 4.0,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 2349,
+   "trecho_critico": "240ARS1005 (240ARS1005)"
+  },
+  "4304697": {
+   "km_rede": 5.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 2434,
+   "trecho_critico": "ERS-482 (482ERS0010)"
+  },
+  "4304705": {
+   "km_rede": 96.9,
+   "km_com_vdm": 22.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304713": {
+   "km_rede": 3.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 7394,
+   "trecho_critico": "030ARS1010 (030ARS1010)"
+  },
+  "4304804": {
+   "km_rede": 37.1,
+   "km_com_vdm": 18.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304853": {
+   "km_rede": 1.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 1368,
+   "trecho_critico": "ERS-477 (477ERS0050)"
+  },
+  "4304903": {
+   "km_rede": 49.9,
+   "km_com_vdm": 47.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4304952": {
+   "km_rede": 36.5,
+   "km_com_vdm": 3.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 14070,
+   "trecho_critico": "ERS-126 (126ERS0170)"
+  },
+  "4305009": {
+   "km_rede": 38.7,
+   "km_com_vdm": 35.6,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 2282,
+   "trecho_critico": "ERS-218 (218ERS0040)"
+  },
+  "4305108": {
+   "km_rede": 151.7,
+   "km_com_vdm": 98.0,
+   "segmentos_ponte": 17,
+   "maior_pop_isolada": 24235,
+   "trecho_critico": "VRS-815 (815ERS0020)"
+  },
+  "4305116": {
+   "km_rede": 5.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305124": {
+   "km_rede": 32.1,
+   "km_com_vdm": 2.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305132": {
+   "km_rede": 31.7,
+   "km_com_vdm": 10.6,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305157": {
+   "km_rede": 8.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305173": {
+   "km_rede": 10.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 8343,
+   "trecho_critico": "ERS-715 (715ERS0030)"
+  },
+  "4305207": {
+   "km_rede": 27.7,
+   "km_com_vdm": 12.7,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 1417,
+   "trecho_critico": "VRS-839 (839ERS0010)"
+  },
+  "4305306": {
+   "km_rede": 62.9,
+   "km_com_vdm": 8.1,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 4258,
+   "trecho_critico": "ERS-508 (508ERS0010)"
+  },
+  "4305355": {
+   "km_rede": 22.0,
+   "km_com_vdm": 19.1,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 1667,
+   "trecho_critico": "401ERS9060 (401ERS9060)"
+  },
+  "4305371": {
+   "km_rede": 27.6,
+   "km_com_vdm": 7.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305405": {
+   "km_rede": 18.4,
+   "km_com_vdm": 17.0,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 8196,
+   "trecho_critico": "ERS-571 (571ERS0010)"
+  },
+  "4305439": {
+   "km_rede": 20.4,
+   "km_com_vdm": 6.2,
+   "segmentos_ponte": 20,
+   "maior_pop_isolada": 6801,
+   "trecho_critico": "BRS-471 (471BRS0270)"
+  },
+  "4305447": {
+   "km_rede": 15.7,
+   "km_com_vdm": 15.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305454": {
+   "km_rede": 24.3,
+   "km_com_vdm": 16.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305504": {
+   "km_rede": 24.0,
+   "km_com_vdm": 15.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305587": {
+   "km_rede": 10.8,
+   "km_com_vdm": 6.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305603": {
+   "km_rede": 45.4,
+   "km_com_vdm": 29.4,
+   "segmentos_ponte": 21,
+   "maior_pop_isolada": 1591,
+   "trecho_critico": "VRS-819 (819ERS0010)"
+  },
+  "4305702": {
+   "km_rede": 18.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305801": {
+   "km_rede": 28.4,
+   "km_com_vdm": 23.5,
+   "segmentos_ponte": 19,
+   "maior_pop_isolada": 12371,
+   "trecho_critico": "ERS-143 (143ERS0010)"
+  },
+  "4305835": {
+   "km_rede": 5.7,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 1290,
+   "trecho_critico": "ERS-425 (425ERS0020)"
+  },
+  "4305850": {
+   "km_rede": 3.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305871": {
+   "km_rede": 13.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305900": {
+   "km_rede": 36.9,
+   "km_com_vdm": 12.5,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305934": {
+   "km_rede": 4.1,
+   "km_com_vdm": 4.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4305959": {
+   "km_rede": 10.9,
+   "km_com_vdm": 6.1,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 3845,
+   "trecho_critico": "ERS-359 (359ERS0010)"
+  },
+  "4305975": {
+   "km_rede": 40.9,
+   "km_com_vdm": 11.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306007": {
+   "km_rede": 43.2,
+   "km_com_vdm": 11.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306056": {
+   "km_rede": 48.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 11,
+   "maior_pop_isolada": 19666,
+   "trecho_critico": "ERS-354 (354ERS0010)"
+  },
+  "4306072": {
+   "km_rede": 9.9,
+   "km_com_vdm": 9.9,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 16659,
+   "trecho_critico": "ERS-587 (587ERS0010)"
+  },
+  "4306106": {
+   "km_rede": 105.2,
+   "km_com_vdm": 49.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306130": {
+   "km_rede": 13.7,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306205": {
+   "km_rede": 31.5,
+   "km_com_vdm": 2.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306304": {
+   "km_rede": 12.2,
+   "km_com_vdm": 12.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306320": {
+   "km_rede": 8.1,
+   "km_com_vdm": 8.1,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 2751,
+   "trecho_critico": "ERS-330 (330ERS0020)"
+  },
+  "4306353": {
+   "km_rede": 23.3,
+   "km_com_vdm": 22.4,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 8333,
+   "trecho_critico": "ERS-561 (561ERS0020)"
+  },
+  "4306379": {
+   "km_rede": 33.5,
+   "km_com_vdm": 1.5,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 80,
+   "trecho_critico": "ERS-530 (530ERS0110)"
+  },
+  "4306403": {
+   "km_rede": 11.8,
+   "km_com_vdm": 1.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306429": {
+   "km_rede": 20.3,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306452": {
+   "km_rede": 18.2,
+   "km_com_vdm": 3.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306502": {
+   "km_rede": 67.6,
+   "km_com_vdm": 11.4,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 5705,
+   "trecho_critico": "ERS-354 (354ERS0010)"
+  },
+  "4306551": {
+   "km_rede": 8.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306601": {
+   "km_rede": 154.6,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 16,
+   "maior_pop_isolada": 3792,
+   "trecho_critico": "MRS-634 (634MRS0010)"
+  },
+  "4306700": {
+   "km_rede": 4.9,
+   "km_com_vdm": 4.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306734": {
+   "km_rede": 4.2,
+   "km_com_vdm": 4.2,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 3576,
+   "trecho_critico": "ERS-342 (342ERS0003)"
+  },
+  "4306759": {
+   "km_rede": 24.6,
+   "km_com_vdm": 24.6,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 2821,
+   "trecho_critico": "ERS-432 (432ERS0010)"
+  },
+  "4306767": {
+   "km_rede": 55.8,
+   "km_com_vdm": 2.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306809": {
+   "km_rede": 43.7,
+   "km_com_vdm": 26.4,
+   "segmentos_ponte": 14,
+   "maior_pop_isolada": 7067,
+   "trecho_critico": "ERS-425 (425ERS0040)"
+  },
+  "4306908": {
+   "km_rede": 95.6,
+   "km_com_vdm": 87.2,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 736,
+   "trecho_critico": "ERS-350 (350ERS0090)"
+  },
+  "4306932": {
+   "km_rede": 37.8,
+   "km_com_vdm": 2.7,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 4413,
+   "trecho_critico": "ERS-551 (551ERS0020)"
+  },
+  "4306957": {
+   "km_rede": 8.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4306973": {
+   "km_rede": 36.1,
+   "km_com_vdm": 4.2,
+   "segmentos_ponte": 23,
+   "maior_pop_isolada": 2214,
+   "trecho_critico": "VRS-828 (828ERS0010)"
+  },
+  "4307005": {
+   "km_rede": 79.3,
+   "km_com_vdm": 40.7,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 6445,
+   "trecho_critico": "BRS-480 (480BRS0178)"
+  },
+  "4307054": {
+   "km_rede": 18.0,
+   "km_com_vdm": 18.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4307104": {
+   "km_rede": 66.0,
+   "km_com_vdm": 23.5,
+   "segmentos_ponte": 65,
+   "maior_pop_isolada": 3973,
+   "trecho_critico": "RSC-473 (473ERS0170)"
+  },
+  "4307203": {
+   "km_rede": 32.0,
+   "km_com_vdm": 32.0,
+   "segmentos_ponte": 32,
+   "maior_pop_isolada": 34153,
+   "trecho_critico": "RSC-480 (480ERS0171)"
+  },
+  "4307302": {
+   "km_rede": 11.5,
+   "km_com_vdm": 11.5,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 6264,
+   "trecho_critico": "ERS-585 (585ERS0020)"
+  },
+  "4307401": {
+   "km_rede": 27.9,
+   "km_com_vdm": 15.0,
+   "segmentos_ponte": 28,
+   "maior_pop_isolada": 5222,
+   "trecho_critico": "ERS-456 (456ERS0010)"
+  },
+  "4307450": {
+   "km_rede": 12.0,
+   "km_com_vdm": 12.0,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 2977,
+   "trecho_critico": "VRS-822 (822ERS0010)"
+  },
+  "4307500": {
+   "km_rede": 34.8,
+   "km_com_vdm": 31.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4307559": {
+   "km_rede": 21.3,
+   "km_com_vdm": 18.2,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 2834,
+   "trecho_critico": "VRS-828 (828ERS0010)"
+  },
+  "4307609": {
+   "km_rede": 9.4,
+   "km_com_vdm": 4.4,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 41933,
+   "trecho_critico": "MRS-239 (239MRS0007)"
+  },
+  "4307708": {
+   "km_rede": 11.5,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 240406,
+   "trecho_critico": "BRS-448F (448BRS0012)"
+  },
+  "4307807": {
+   "km_rede": 58.8,
+   "km_com_vdm": 16.6,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4307815": {
+   "km_rede": 12.0,
+   "km_com_vdm": 12.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4307831": {
+   "km_rede": 13.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 14,
+   "maior_pop_isolada": 2457,
+   "trecho_critico": "ERS-551 (551ERS0020)"
+  },
+  "4307864": {
+   "km_rede": 7.4,
+   "km_com_vdm": 6.9,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 2280,
+   "trecho_critico": "ERS-355 (355ERS0010)"
+  },
+  "4307906": {
+   "km_rede": 104.9,
+   "km_com_vdm": 87.9,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 27670,
+   "trecho_critico": "453RSC9145 (453RSC9145)"
+  },
+  "4308003": {
+   "km_rede": 29.3,
+   "km_com_vdm": 14.8,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 11239,
+   "trecho_critico": "ERS-149 (149ERS0130)"
+  },
+  "4308078": {
+   "km_rede": 14.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308102": {
+   "km_rede": 21.1,
+   "km_com_vdm": 12.6,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 7478,
+   "trecho_critico": "MRS-843 (843MRS0003)"
+  },
+  "4308201": {
+   "km_rede": 25.5,
+   "km_com_vdm": 4.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308250": {
+   "km_rede": 7.0,
+   "km_com_vdm": 7.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308300": {
+   "km_rede": 19.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308409": {
+   "km_rede": 46.9,
+   "km_com_vdm": 44.8,
+   "segmentos_ponte": 15,
+   "maior_pop_isolada": 3409,
+   "trecho_critico": "VRS-808 (808ERS0010)"
+  },
+  "4308433": {
+   "km_rede": 21.4,
+   "km_com_vdm": 11.2,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 2384,
+   "trecho_critico": "MRS-424 (424MRS0010)"
+  },
+  "4308458": {
+   "km_rede": 28.1,
+   "km_com_vdm": 22.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308508": {
+   "km_rede": 55.0,
+   "km_com_vdm": 19.8,
+   "segmentos_ponte": 6,
+   "maior_pop_isolada": 12522,
+   "trecho_critico": "ERS-150 (150ERS0010)"
+  },
+  "4308607": {
+   "km_rede": 34.1,
+   "km_com_vdm": 10.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308656": {
+   "km_rede": 24.3,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 24,
+   "maior_pop_isolada": 3074,
+   "trecho_critico": "ERS-176 (176ERS0003)"
+  },
+  "4308706": {
+   "km_rede": 15.1,
+   "km_com_vdm": 13.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308805": {
+   "km_rede": 63.6,
+   "km_com_vdm": 34.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308854": {
+   "km_rede": 4.0,
+   "km_com_vdm": 3.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4308904": {
+   "km_rede": 45.5,
+   "km_com_vdm": 27.6,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4309001": {
+   "km_rede": 45.3,
+   "km_com_vdm": 34.2,
+   "segmentos_ponte": 11,
+   "maior_pop_isolada": 4433,
+   "trecho_critico": "VRS-867 (867ERS0010)"
+  },
+  "4309050": {
+   "km_rede": 39.8,
+   "km_com_vdm": 22.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4309100": {
+   "km_rede": 40.1,
+   "km_com_vdm": 6.5,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 7971,
+   "trecho_critico": "ERS-466 (466ERS0080)"
+  },
+  "4309126": {
+   "km_rede": 12.9,
+   "km_com_vdm": 12.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4309159": {
+   "km_rede": 21.1,
+   "km_com_vdm": 20.1,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 1217,
+   "trecho_critico": "153ARS2005 (153ARS2005)"
+  },
+  "4309209": {
+   "km_rede": 75.7,
+   "km_com_vdm": 49.2,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 13951,
+   "trecho_critico": "ERS-020 (020ERS0030)"
+  },
+  "4309258": {
+   "km_rede": 13.5,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 15,
+   "maior_pop_isolada": 4039,
+   "trecho_critico": "ERS-126 (126ERS0220)"
+  },
+  "4309308": {
+   "km_rede": 26.5,
+   "km_com_vdm": 3.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4309407": {
+   "km_rede": 31.9,
+   "km_com_vdm": 17.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4309506": {
+   "km_rede": 33.7,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 6,
+   "maior_pop_isolada": 3117,
+   "trecho_critico": "392BRS9110 (392BRS9110)"
+  },
+  "4309555": {
+   "km_rede": 5.4,
+   "km_com_vdm": 5.4,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 5378,
+   "trecho_critico": "ERS-124 (124ERS0010)"
+  },
+  "4309571": {
+   "km_rede": 15.7,
+   "km_com_vdm": 15.7,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 342,
+   "trecho_critico": "153ARS3005 (153ARS3005)"
+  },
+  "4309605": {
+   "km_rede": 44.2,
+   "km_com_vdm": 23.3,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 7228,
+   "trecho_critico": "ERS-342 (342ERS0003)"
+  },
+  "4309654": {
+   "km_rede": 41.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4309704": {
+   "km_rede": 30.0,
+   "km_com_vdm": 14.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4309753": {
+   "km_rede": 5.5,
+   "km_com_vdm": 4.1,
+   "segmentos_ponte": 6,
+   "maior_pop_isolada": 3198,
+   "trecho_critico": "ERS-347 (347ERS0050)"
+  },
+  "4309803": {
+   "km_rede": 25.9,
+   "km_com_vdm": 24.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4309902": {
+   "km_rede": 25.8,
+   "km_com_vdm": 13.5,
+   "segmentos_ponte": 26,
+   "maior_pop_isolada": 13476,
+   "trecho_critico": "ERS-126 (126ERS0170)"
+  },
+  "4309951": {
+   "km_rede": 11.1,
+   "km_com_vdm": 11.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310009": {
+   "km_rede": 95.1,
+   "km_com_vdm": 42.9,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 245,
+   "trecho_critico": "ERS-506 (506ERS0010)"
+  },
+  "4310108": {
+   "km_rede": 22.0,
+   "km_com_vdm": 11.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310207": {
+   "km_rede": 108.4,
+   "km_com_vdm": 81.6,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310306": {
+   "km_rede": 21.9,
+   "km_com_vdm": 21.9,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 5201,
+   "trecho_critico": "ERS-435 (435ERS0010)"
+  },
+  "4310330": {
+   "km_rede": 12.1,
+   "km_com_vdm": 7.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310363": {
+   "km_rede": 7.7,
+   "km_com_vdm": 7.7,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 3080,
+   "trecho_critico": "453RSC9130 (453RSC9130)"
+  },
+  "4310405": {
+   "km_rede": 23.8,
+   "km_com_vdm": 23.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310413": {
+   "km_rede": 9.0,
+   "km_com_vdm": 4.0,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 5463,
+   "trecho_critico": "ERS-520 (520ERS0030)"
+  },
+  "4310439": {
+   "km_rede": 30.5,
+   "km_com_vdm": 29.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310462": {
+   "km_rede": 17.8,
+   "km_com_vdm": 6.7,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 430,
+   "trecho_critico": "ERS-469 (469ERS0030)"
+  },
+  "4310504": {
+   "km_rede": 31.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 482,
+   "trecho_critico": "BRS-158 (158BRS1110)"
+  },
+  "4310538": {
+   "km_rede": 19.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310553": {
+   "km_rede": 21.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 21,
+   "maior_pop_isolada": 2858,
+   "trecho_critico": "ERS-541 (541ERS0050)"
+  },
+  "4310579": {
+   "km_rede": 23.3,
+   "km_com_vdm": 16.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310603": {
+   "km_rede": 158.1,
+   "km_com_vdm": 4.4,
+   "segmentos_ponte": 22,
+   "maior_pop_isolada": 29254,
+   "trecho_critico": "ERS-566 (566ERS0060)"
+  },
+  "4310652": {
+   "km_rede": 33.6,
+   "km_com_vdm": 32.5,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 77,
+   "trecho_critico": "ERS-417 (417ERS0020)"
+  },
+  "4310702": {
+   "km_rede": 14.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 14,
+   "maior_pop_isolada": 4674,
+   "trecho_critico": "ERS-137 (137ERS0010)"
+  },
+  "4310751": {
+   "km_rede": 14.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310801": {
+   "km_rede": 16.0,
+   "km_com_vdm": 15.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310850": {
+   "km_rede": 17.9,
+   "km_com_vdm": 11.9,
+   "segmentos_ponte": 11,
+   "maior_pop_isolada": 2477,
+   "trecho_critico": "ERS-323 (323ERS0030)"
+  },
+  "4310876": {
+   "km_rede": 18.6,
+   "km_com_vdm": 18.6,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4310900": {
+   "km_rede": 9.0,
+   "km_com_vdm": 9.0,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 10123,
+   "trecho_critico": "ERS-211 (211ERS0020)"
+  },
+  "4311007": {
+   "km_rede": 30.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 31,
+   "maior_pop_isolada": 26602,
+   "trecho_critico": "BRS-116 (116BRS3450)"
+  },
+  "4311106": {
+   "km_rede": 24.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311122": {
+   "km_rede": 56.5,
+   "km_com_vdm": 53.6,
+   "segmentos_ponte": 11,
+   "maior_pop_isolada": 738,
+   "trecho_critico": "ERS-439 (439ERS0010)"
+  },
+  "4311130": {
+   "km_rede": 1.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311155": {
+   "km_rede": 44.3,
+   "km_com_vdm": 39.4,
+   "segmentos_ponte": 31,
+   "maior_pop_isolada": 4948,
+   "trecho_critico": "RSC-392 (392ERS0370)"
+  },
+  "4311205": {
+   "km_rede": 75.3,
+   "km_com_vdm": 1.0,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 1970,
+   "trecho_critico": "MRS-527 (527MRS0030)"
+  },
+  "4311239": {
+   "km_rede": 13.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 1332,
+   "trecho_critico": "400ARS1005 (400ARS1005)"
+  },
+  "4311254": {
+   "km_rede": 17.3,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 18,
+   "maior_pop_isolada": 5770,
+   "trecho_critico": "ERS-347 (347ERS0010)"
+  },
+  "4311270": {
+   "km_rede": 9.0,
+   "km_com_vdm": 9.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311304": {
+   "km_rede": 83.0,
+   "km_com_vdm": 9.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311403": {
+   "km_rede": 35.1,
+   "km_com_vdm": 14.9,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 21991,
+   "trecho_critico": "MRS-413 (413MRS0010)"
+  },
+  "4311429": {
+   "km_rede": 21.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311502": {
+   "km_rede": 98.6,
+   "km_com_vdm": 12.9,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 72,
+   "trecho_critico": "357ERS9020 (357ERS9020)"
+  },
+  "4311601": {
+   "km_rede": 7.6,
+   "km_com_vdm": 7.6,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 4781,
+   "trecho_critico": "ERS-143 (143ERS0040)"
+  },
+  "4311627": {
+   "km_rede": 4.9,
+   "km_com_vdm": 4.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311643": {
+   "km_rede": 4.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 1346,
+   "trecho_critico": "VRS-843 (843ERS0010)"
+  },
+  "4311700": {
+   "km_rede": 25.6,
+   "km_com_vdm": 12.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311718": {
+   "km_rede": 78.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311734": {
+   "km_rede": 10.7,
+   "km_com_vdm": 9.5,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 2817,
+   "trecho_critico": "ERS-494 (494ERS0050)"
+  },
+  "4311759": {
+   "km_rede": 59.8,
+   "km_com_vdm": 19.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311775": {
+   "km_rede": 86.0,
+   "km_com_vdm": 13.1,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 258,
+   "trecho_critico": "101CRS1005 (101CRS1005)"
+  },
+  "4311791": {
+   "km_rede": 1.9,
+   "km_com_vdm": 1.9,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 2470,
+   "trecho_critico": "ERS-411 (411ERS0010)"
+  },
+  "4311809": {
+   "km_rede": 18.7,
+   "km_com_vdm": 18.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4311908": {
+   "km_rede": 79.9,
+   "km_com_vdm": 15.6,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 392,
+   "trecho_critico": "BRS-153 (153BRS1650)"
+  },
+  "4311981": {
+   "km_rede": 26.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 27,
+   "maior_pop_isolada": 9805,
+   "trecho_critico": "ERS-711 (711ERS0010)"
+  },
+  "4312005": {
+   "km_rede": 2.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 1238,
+   "trecho_critico": "ERS-426 (426ERS0010)"
+  },
+  "4312054": {
+   "km_rede": 35.9,
+   "km_com_vdm": 6.9,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 6001,
+   "trecho_critico": "ERS-423 (423ERS0010)"
+  },
+  "4312104": {
+   "km_rede": 9.6,
+   "km_com_vdm": 9.6,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 4698,
+   "trecho_critico": "ERS-532 (532ERS0010)"
+  },
+  "4312138": {
+   "km_rede": 20.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312153": {
+   "km_rede": 5.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312179": {
+   "km_rede": 3.1,
+   "km_com_vdm": 3.1,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 1795,
+   "trecho_critico": "ERS-536 (536ERS0005)"
+  },
+  "4312203": {
+   "km_rede": 35.4,
+   "km_com_vdm": 23.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312252": {
+   "km_rede": 15.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 1501,
+   "trecho_critico": "290ARS2305 (290ARS2305)"
+  },
+  "4312302": {
+   "km_rede": 10.1,
+   "km_com_vdm": 10.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312351": {
+   "km_rede": 8.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 1499,
+   "trecho_critico": "ERS-447 (447ERS0030)"
+  },
+  "4312385": {
+   "km_rede": 7.0,
+   "km_com_vdm": 5.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 2715,
+   "trecho_critico": "ERS-444 (444ERS0050)"
+  },
+  "4312401": {
+   "km_rede": 90.0,
+   "km_com_vdm": 48.1,
+   "segmentos_ponte": 17,
+   "maior_pop_isolada": 16308,
+   "trecho_critico": "ERS-411 (411ERS0020)"
+  },
+  "4312427": {
+   "km_rede": 18.3,
+   "km_com_vdm": 14.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312443": {
+   "km_rede": 18.1,
+   "km_com_vdm": 16.0,
+   "segmentos_ponte": 18,
+   "maior_pop_isolada": 6202,
+   "trecho_critico": "ERS-494 (494ERS0020)"
+  },
+  "4312450": {
+   "km_rede": 19.2,
+   "km_com_vdm": 8.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312476": {
+   "km_rede": 19.9,
+   "km_com_vdm": 9.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312500": {
+   "km_rede": 95.3,
+   "km_com_vdm": 95.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312609": {
+   "km_rede": 10.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312617": {
+   "km_rede": 63.8,
+   "km_com_vdm": 24.0,
+   "segmentos_ponte": 24,
+   "maior_pop_isolada": 6516,
+   "trecho_critico": "ERS-456 (456ERS0010)"
+  },
+  "4312625": {
+   "km_rede": 15.5,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312658": {
+   "km_rede": 43.2,
+   "km_com_vdm": 29.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312674": {
+   "km_rede": 3.8,
+   "km_com_vdm": 3.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312708": {
+   "km_rede": 45.2,
+   "km_com_vdm": 38.4,
+   "segmentos_ponte": 29,
+   "maior_pop_isolada": 42326,
+   "trecho_critico": "ERS-406 (406ERS0030)"
+  },
+  "4312757": {
+   "km_rede": 12.6,
+   "km_com_vdm": 2.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312807": {
+   "km_rede": 16.9,
+   "km_com_vdm": 8.9,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 2331,
+   "trecho_critico": "ERS-126 (126ERS0240)"
+  },
+  "4312906": {
+   "km_rede": 11.7,
+   "km_com_vdm": 11.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4312955": {
+   "km_rede": 4.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313003": {
+   "km_rede": 12.9,
+   "km_com_vdm": 8.6,
+   "segmentos_ponte": 13,
+   "maior_pop_isolada": 4116,
+   "trecho_critico": "ERS-425 (425ERS0040)"
+  },
+  "4313011": {
+   "km_rede": 5.7,
+   "km_com_vdm": 3.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313037": {
+   "km_rede": 10.1,
+   "km_com_vdm": 10.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313060": {
+   "km_rede": 5.0,
+   "km_com_vdm": 5.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 20088,
+   "trecho_critico": "ERS-464 (464ERS0010)"
+  },
+  "4313102": {
+   "km_rede": 26.3,
+   "km_com_vdm": 5.0,
+   "segmentos_ponte": 26,
+   "maior_pop_isolada": 9390,
+   "trecho_critico": "ERS-149 (149ERS0130)"
+  },
+  "4313201": {
+   "km_rede": 50.6,
+   "km_com_vdm": 6.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313300": {
+   "km_rede": 34.2,
+   "km_com_vdm": 4.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313334": {
+   "km_rede": 21.1,
+   "km_com_vdm": 6.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313359": {
+   "km_rede": 27.1,
+   "km_com_vdm": 15.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313375": {
+   "km_rede": 12.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313391": {
+   "km_rede": 29.6,
+   "km_com_vdm": 1.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313409": {
+   "km_rede": 17.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 37941,
+   "trecho_critico": "239ARS2015 (239ARS2015)"
+  },
+  "4313425": {
+   "km_rede": 2.0,
+   "km_com_vdm": 2.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313441": {
+   "km_rede": 2.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 1430,
+   "trecho_critico": "ERS-325 (325ERS0010)"
+  },
+  "4313466": {
+   "km_rede": 8.7,
+   "km_com_vdm": 8.7,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 731,
+   "trecho_critico": "143ARS2010 (143ARS2010)"
+  },
+  "4313490": {
+   "km_rede": 14.1,
+   "km_com_vdm": 12.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313508": {
+   "km_rede": 113.4,
+   "km_com_vdm": 69.7,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 885,
+   "trecho_critico": "030ARS2005 (030ARS2005)"
+  },
+  "4313607": {
+   "km_rede": 25.0,
+   "km_com_vdm": 12.8,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 2751,
+   "trecho_critico": "ERS-477 (477ERS0050)"
+  },
+  "4313656": {
+   "km_rede": 40.3,
+   "km_com_vdm": 37.2,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 896,
+   "trecho_critico": "ERS-786 (786ERS0110)"
+  },
+  "4313706": {
+   "km_rede": 162.1,
+   "km_com_vdm": 17.8,
+   "segmentos_ponte": 24,
+   "maior_pop_isolada": 7644,
+   "trecho_critico": "ERS-508 (508ERS0010)"
+  },
+  "4313805": {
+   "km_rede": 25.9,
+   "km_com_vdm": 15.8,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 7479,
+   "trecho_critico": "ERS-528 (528ERS0010)"
+  },
+  "4313904": {
+   "km_rede": 48.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4313953": {
+   "km_rede": 61.1,
+   "km_com_vdm": 30.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314001": {
+   "km_rede": 11.3,
+   "km_com_vdm": 11.3,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 2616,
+   "trecho_critico": "ERS-438 (438ERS0010)"
+  },
+  "4314027": {
+   "km_rede": 37.0,
+   "km_com_vdm": 6.8,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 1676,
+   "trecho_critico": "ERS-502 (502ERS0005)"
+  },
+  "4314035": {
+   "km_rede": 11.7,
+   "km_com_vdm": 11.7,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 10674,
+   "trecho_critico": "ERS-124 (124ERS0050)"
+  },
+  "4314050": {
+   "km_rede": 13.0,
+   "km_com_vdm": 2.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314068": {
+   "km_rede": 16.7,
+   "km_com_vdm": 11.8,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 1171,
+   "trecho_critico": "400ARS1005 (400ARS1005)"
+  },
+  "4314076": {
+   "km_rede": 26.0,
+   "km_com_vdm": 14.1,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 6244,
+   "trecho_critico": "ERS-244 (244ERS0110)"
+  },
+  "4314100": {
+   "km_rede": 116.9,
+   "km_com_vdm": 56.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314134": {
+   "km_rede": 23.7,
+   "km_com_vdm": 19.2,
+   "segmentos_ponte": 20,
+   "maior_pop_isolada": 6785,
+   "trecho_critico": "ERS-211 (211ERS0030)"
+  },
+  "4314159": {
+   "km_rede": 8.9,
+   "km_com_vdm": 6.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314175": {
+   "km_rede": 39.3,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 39,
+   "maior_pop_isolada": 4278,
+   "trecho_critico": "ERS-608 (608ERS0010)"
+  },
+  "4314209": {
+   "km_rede": 86.7,
+   "km_com_vdm": 12.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314308": {
+   "km_rede": 44.7,
+   "km_com_vdm": 21.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314407": {
+   "km_rede": 96.8,
+   "km_com_vdm": 16.4,
+   "segmentos_ponte": 21,
+   "maior_pop_isolada": 56879,
+   "trecho_critico": "ERS-737 (737ERS0010)"
+  },
+  "4314423": {
+   "km_rede": 21.1,
+   "km_com_vdm": 4.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314456": {
+   "km_rede": 19.9,
+   "km_com_vdm": 13.4,
+   "segmentos_ponte": 20,
+   "maior_pop_isolada": 7582,
+   "trecho_critico": "ERS-323 (323ERS0010)"
+  },
+  "4314464": {
+   "km_rede": 11.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 2248,
+   "trecho_critico": "ERS-456 (456ERS0005)"
+  },
+  "4314472": {
+   "km_rede": 10.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 3795,
+   "trecho_critico": "ERS-149 (149ERS0150)"
+  },
+  "4314498": {
+   "km_rede": 8.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 4035,
+   "trecho_critico": "ERS-528 (528ERS0010)"
+  },
+  "4314506": {
+   "km_rede": 80.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 22,
+   "maior_pop_isolada": 7401,
+   "trecho_critico": "ERS-608 (608ERS0010)"
+  },
+  "4314548": {
+   "km_rede": 10.6,
+   "km_com_vdm": 10.2,
+   "segmentos_ponte": 11,
+   "maior_pop_isolada": 2496,
+   "trecho_critico": "VRS-855 (855ERS0030)"
+  },
+  "4314605": {
+   "km_rede": 148.7,
+   "km_com_vdm": 34.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314704": {
+   "km_rede": 35.1,
+   "km_com_vdm": 17.6,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 8273,
+   "trecho_critico": "ERS-504 (504ERS0020)"
+  },
+  "4314753": {
+   "km_rede": 2.5,
+   "km_com_vdm": 2.5,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 1447,
+   "trecho_critico": "ERS-419 (419ERS0010)"
+  },
+  "4314779": {
+   "km_rede": 31.0,
+   "km_com_vdm": 31.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314787": {
+   "km_rede": 5.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 1575,
+   "trecho_critico": "480RSC9120 (480RSC9120)"
+  },
+  "4314803": {
+   "km_rede": 13.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4314902": {
+   "km_rede": 45.7,
+   "km_com_vdm": 6.2,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 196151,
+   "trecho_critico": "ERS-118 (118ERS0170)"
+  },
+  "4315008": {
+   "km_rede": 24.8,
+   "km_com_vdm": 24.8,
+   "segmentos_ponte": 25,
+   "maior_pop_isolada": 8234,
+   "trecho_critico": "RSC-472 (472ERS0120)"
+  },
+  "4315057": {
+   "km_rede": 10.0,
+   "km_com_vdm": 8.2,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 2142,
+   "trecho_critico": "ERS-344 (344ERS0010)"
+  },
+  "4315073": {
+   "km_rede": 8.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 1560,
+   "trecho_critico": "ERS-575 (575ERS0010)"
+  },
+  "4315107": {
+   "km_rede": 26.3,
+   "km_com_vdm": 10.3,
+   "segmentos_ponte": 26,
+   "maior_pop_isolada": 5889,
+   "trecho_critico": "BRS-392 (392BRS0470)"
+  },
+  "4315131": {
+   "km_rede": 20.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4315149": {
+   "km_rede": 6.1,
+   "km_com_vdm": 6.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4315156": {
+   "km_rede": 15.7,
+   "km_com_vdm": 15.7,
+   "segmentos_ponte": 16,
+   "maior_pop_isolada": 5025,
+   "trecho_critico": "ERS-423 (423ERS0010)"
+  },
+  "4315206": {
+   "km_rede": 2.9,
+   "km_com_vdm": 2.9,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 2810,
+   "trecho_critico": "ERS-435 (435ERS0010)"
+  },
+  "4315305": {
+   "km_rede": 112.2,
+   "km_com_vdm": 35.8,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 412,
+   "trecho_critico": "293BRS9020 (293BRS9020)"
+  },
+  "4315313": {
+   "km_rede": 12.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 6,
+   "maior_pop_isolada": 776,
+   "trecho_critico": "VRS-828 (828ERS0020)"
+  },
+  "4315354": {
+   "km_rede": 24.0,
+   "km_com_vdm": 21.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4315404": {
+   "km_rede": 39.6,
+   "km_com_vdm": 22.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4315453": {
+   "km_rede": 8.8,
+   "km_com_vdm": 8.8,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 1616,
+   "trecho_critico": "ERS-433 (433ERS0010)"
+  },
+  "4315503": {
+   "km_rede": 59.9,
+   "km_com_vdm": 59.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4315552": {
+   "km_rede": 3.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4315602": {
+   "km_rede": 177.6,
+   "km_com_vdm": 17.6,
+   "segmentos_ponte": 71,
+   "maior_pop_isolada": 90715,
+   "trecho_critico": "BRS-471 (471BRS0230)"
+  },
+  "4315701": {
+   "km_rede": 110.1,
+   "km_com_vdm": 43.2,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 624,
+   "trecho_critico": "ERS-410 (410ERS0010)"
+  },
+  "4315750": {
+   "km_rede": 26.4,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4315800": {
+   "km_rede": 16.8,
+   "km_com_vdm": 8.9,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 4630,
+   "trecho_critico": "VRS-841 (841ERS0010)"
+  },
+  "4315909": {
+   "km_rede": 7.7,
+   "km_com_vdm": 4.1,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 13497,
+   "trecho_critico": "ERS-587 (587ERS0010)"
+  },
+  "4315958": {
+   "km_rede": 25.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316006": {
+   "km_rede": 23.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316105": {
+   "km_rede": 45.7,
+   "km_com_vdm": 33.1,
+   "segmentos_ponte": 13,
+   "maior_pop_isolada": 17482,
+   "trecho_critico": "ERS-211 (211ERS0003)"
+  },
+  "4316204": {
+   "km_rede": 30.5,
+   "km_com_vdm": 18.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316303": {
+   "km_rede": 37.7,
+   "km_com_vdm": 14.7,
+   "segmentos_ponte": 15,
+   "maior_pop_isolada": 8484,
+   "trecho_critico": "BRS-392 (392BRS0470)"
+  },
+  "4316402": {
+   "km_rede": 121.5,
+   "km_com_vdm": 16.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316428": {
+   "km_rede": 10.6,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316436": {
+   "km_rede": 14.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316451": {
+   "km_rede": 36.7,
+   "km_com_vdm": 33.2,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 1166,
+   "trecho_critico": "VRS-818 (818ERS0030)"
+  },
+  "4316477": {
+   "km_rede": 6.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316501": {
+   "km_rede": 8.6,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316600": {
+   "km_rede": 48.2,
+   "km_com_vdm": 37.5,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316709": {
+   "km_rede": 81.5,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 26,
+   "maior_pop_isolada": 2607,
+   "trecho_critico": "ERS-508 (508ERS0010)"
+  },
+  "4316733": {
+   "km_rede": 22.3,
+   "km_com_vdm": 8.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316758": {
+   "km_rede": 3.9,
+   "km_com_vdm": 3.9,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 6887,
+   "trecho_critico": "ERS-413 (413ERS0020)"
+  },
+  "4316808": {
+   "km_rede": 87.3,
+   "km_com_vdm": 49.8,
+   "segmentos_ponte": 48,
+   "maior_pop_isolada": 33307,
+   "trecho_critico": "MRS-418 (418MRS0005)"
+  },
+  "4316907": {
+   "km_rede": 159.4,
+   "km_com_vdm": 47.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316956": {
+   "km_rede": 18.9,
+   "km_com_vdm": 4.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4316972": {
+   "km_rede": 42.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4317004": {
+   "km_rede": 70.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4317103": {
+   "km_rede": 235.4,
+   "km_com_vdm": 21.7,
+   "segmentos_ponte": 26,
+   "maior_pop_isolada": 5772,
+   "trecho_critico": "ERS-654 (654ERS0010)"
+  },
+  "4317202": {
+   "km_rede": 71.9,
+   "km_com_vdm": 40.9,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 39108,
+   "trecho_critico": "BRS-472 (472BRS0110)"
+  },
+  "4317251": {
+   "km_rede": 12.7,
+   "km_com_vdm": 9.7,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 1128,
+   "trecho_critico": "ERS-444 (444ERS0060)"
+  },
+  "4317301": {
+   "km_rede": 148.9,
+   "km_com_vdm": 19.6,
+   "segmentos_ponte": 133,
+   "maior_pop_isolada": 33895,
+   "trecho_critico": "BRS-471 (471BRS0230)"
+  },
+  "4317400": {
+   "km_rede": 144.9,
+   "km_com_vdm": 81.5,
+   "segmentos_ponte": 14,
+   "maior_pop_isolada": 6759,
+   "trecho_critico": "ERS-541 (541ERS0050)"
+  },
+  "4317509": {
+   "km_rede": 53.0,
+   "km_com_vdm": 37.2,
+   "segmentos_ponte": 20,
+   "maior_pop_isolada": 31866,
+   "trecho_critico": "MRS-218 (218MRS0010)"
+  },
+  "4317558": {
+   "km_rede": 8.7,
+   "km_com_vdm": 5.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4317608": {
+   "km_rede": 119.3,
+   "km_com_vdm": 34.2,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 10305,
+   "trecho_critico": "030ARS1005 (030ARS1005)"
+  },
+  "4317707": {
+   "km_rede": 110.5,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 34,
+   "maior_pop_isolada": 5700,
+   "trecho_critico": "ERS-176 (176ERS0007)"
+  },
+  "4317756": {
+   "km_rede": 13.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4317806": {
+   "km_rede": 46.2,
+   "km_com_vdm": 38.2,
+   "segmentos_ponte": 11,
+   "maior_pop_isolada": 11595,
+   "trecho_critico": "ERS-571 (571ERS0010)"
+  },
+  "4317905": {
+   "km_rede": 57.0,
+   "km_com_vdm": 40.0,
+   "segmentos_ponte": 58,
+   "maior_pop_isolada": 31411,
+   "trecho_critico": "BRS-472 (472BRS0110)"
+  },
+  "4317954": {
+   "km_rede": 4.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318002": {
+   "km_rede": 193.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 3092,
+   "trecho_critico": "BRS-285 (285BRS0391)"
+  },
+  "4318051": {
+   "km_rede": 7.9,
+   "km_com_vdm": 7.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318101": {
+   "km_rede": 94.8,
+   "km_com_vdm": 89.8,
+   "segmentos_ponte": 6,
+   "maior_pop_isolada": 1112,
+   "trecho_critico": "ERS-241 (241ERS0040)"
+  },
+  "4318200": {
+   "km_rede": 273.4,
+   "km_com_vdm": 126.6,
+   "segmentos_ponte": 4,
+   "maior_pop_isolada": 158,
+   "trecho_critico": "020ARS1005 (020ARS1005)"
+  },
+  "4318309": {
+   "km_rede": 162.5,
+   "km_com_vdm": 3.6,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 372,
+   "trecho_critico": "VRS-807 (807ERS0010)"
+  },
+  "4318408": {
+   "km_rede": 37.3,
+   "km_com_vdm": 12.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318424": {
+   "km_rede": 26.4,
+   "km_com_vdm": 13.4,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 3599,
+   "trecho_critico": "ERS-477 (477ERS0050)"
+  },
+  "4318432": {
+   "km_rede": 15.6,
+   "km_com_vdm": 10.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318440": {
+   "km_rede": 8.0,
+   "km_com_vdm": 5.1,
+   "segmentos_ponte": 8,
+   "maior_pop_isolada": 6951,
+   "trecho_critico": "ERS-126 (126ERS0190)"
+  },
+  "4318457": {
+   "km_rede": 12.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318465": {
+   "km_rede": 14.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 126,
+   "trecho_critico": "386BRS9140 (386BRS9140)"
+  },
+  "4318481": {
+   "km_rede": 6.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318499": {
+   "km_rede": 9.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318507": {
+   "km_rede": 101.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318606": {
+   "km_rede": 55.9,
+   "km_com_vdm": 16.0,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 2079,
+   "trecho_critico": "ERS-492 (492ERS0010)"
+  },
+  "4318614": {
+   "km_rede": 19.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318622": {
+   "km_rede": 50.4,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 17,
+   "maior_pop_isolada": 1042,
+   "trecho_critico": "BRS-285 (285BRS0075)"
+  },
+  "4318705": {
+   "km_rede": 15.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4318804": {
+   "km_rede": 88.0,
+   "km_com_vdm": 53.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 2413,
+   "trecho_critico": "ERS-265 (265ERS0130)"
+  },
+  "4318903": {
+   "km_rede": 115.9,
+   "km_com_vdm": 48.8,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 5665,
+   "trecho_critico": "ERS-536 (536ERS0050)"
+  },
+  "4319000": {
+   "km_rede": 43.8,
+   "km_com_vdm": 7.6,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 31577,
+   "trecho_critico": "MRS-815 (815MRS0005)"
+  },
+  "4319109": {
+   "km_rede": 24.3,
+   "km_com_vdm": 21.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4319125": {
+   "km_rede": 8.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4319158": {
+   "km_rede": 18.9,
+   "km_com_vdm": 18.9,
+   "segmentos_ponte": 11,
+   "maior_pop_isolada": 4085,
+   "trecho_critico": "ERS-536 (536ERS0050)"
+  },
+  "4319208": {
+   "km_rede": 14.9,
+   "km_com_vdm": 14.9,
+   "segmentos_ponte": 15,
+   "maior_pop_isolada": 7058,
+   "trecho_critico": "ERS-561 (561ERS0010)"
+  },
+  "4319307": {
+   "km_rede": 10.9,
+   "km_com_vdm": 10.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4319356": {
+   "km_rede": 4.2,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4319364": {
+   "km_rede": 2.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4319372": {
+   "km_rede": 7.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4319406": {
+   "km_rede": 65.4,
+   "km_com_vdm": 24.2,
+   "segmentos_ponte": 28,
+   "maior_pop_isolada": 7499,
+   "trecho_critico": "MRS-530 (530MRS0090)"
+  },
+  "4319505": {
+   "km_rede": 23.4,
+   "km_com_vdm": 1.2,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 977,
+   "trecho_critico": "124ARS1005 (124ARS1005)"
+  },
+  "4319604": {
+   "km_rede": 91.1,
+   "km_com_vdm": 4.9,
+   "segmentos_ponte": 18,
+   "maior_pop_isolada": 3064,
+   "trecho_critico": "ERS-149 (149ERS0007)"
+  },
+  "4319703": {
+   "km_rede": 18.1,
+   "km_com_vdm": 17.0,
+   "segmentos_ponte": 18,
+   "maior_pop_isolada": 29223,
+   "trecho_critico": "RSC-480 (480ERS0172)"
+  },
+  "4319711": {
+   "km_rede": 15.5,
+   "km_com_vdm": 15.5,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 413,
+   "trecho_critico": "431ERS9050 (431ERS9050)"
+  },
+  "4319752": {
+   "km_rede": 8.0,
+   "km_com_vdm": 5.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4319802": {
+   "km_rede": 80.7,
+   "km_com_vdm": 46.5,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 4994,
+   "trecho_critico": "ERS-532 (532ERS0010)"
+  },
+  "4319901": {
+   "km_rede": 7.7,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4320008": {
+   "km_rede": 12.5,
+   "km_com_vdm": 6.9,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 250568,
+   "trecho_critico": "BRS-448F (448BRS0010)"
+  },
+  "4320107": {
+   "km_rede": 54.9,
+   "km_com_vdm": 11.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4320206": {
+   "km_rede": 41.2,
+   "km_com_vdm": 17.6,
+   "segmentos_ponte": 18,
+   "maior_pop_isolada": 20298,
+   "trecho_critico": "ERS-587 (587ERS0010)"
+  },
+  "4320230": {
+   "km_rede": 1.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4320263": {
+   "km_rede": 12.6,
+   "km_com_vdm": 1.0,
+   "segmentos_ponte": 13,
+   "maior_pop_isolada": 10920,
+   "trecho_critico": "ERS-347 (347ERS0030)"
+  },
+  "4320305": {
+   "km_rede": 18.2,
+   "km_com_vdm": 18.2,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4320321": {
+   "km_rede": 23.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 779,
+   "trecho_critico": "VRS-867 (867ERS0010)"
+  },
+  "4320354": {
+   "km_rede": 39.3,
+   "km_com_vdm": 2.8,
+   "segmentos_ponte": 19,
+   "maior_pop_isolada": 11691,
+   "trecho_critico": "ERS-715 (715ERS0010)"
+  },
+  "4320404": {
+   "km_rede": 27.7,
+   "km_com_vdm": 21.8,
+   "segmentos_ponte": 16,
+   "maior_pop_isolada": 5848,
+   "trecho_critico": "VRS-851 (851ERS0010)"
+  },
+  "4320453": {
+   "km_rede": 21.3,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4320503": {
+   "km_rede": 32.3,
+   "km_com_vdm": 7.3,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 692,
+   "trecho_critico": "135ARS1005 (135ARS1005)"
+  },
+  "4320552": {
+   "km_rede": 6.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 5863,
+   "trecho_critico": "ERS-713 (713ERS0010)"
+  },
+  "4320578": {
+   "km_rede": 10.9,
+   "km_com_vdm": 2.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4320602": {
+   "km_rede": 30.1,
+   "km_com_vdm": 5.3,
+   "segmentos_ponte": 17,
+   "maior_pop_isolada": 3737,
+   "trecho_critico": "ERS-426 (426ERS0030)"
+  },
+  "4320651": {
+   "km_rede": 7.4,
+   "km_com_vdm": 7.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4320677": {
+   "km_rede": 26.7,
+   "km_com_vdm": 14.9,
+   "segmentos_ponte": 16,
+   "maior_pop_isolada": 4901,
+   "trecho_critico": "RSC-471 (471ERS0045)"
+  },
+  "4320701": {
+   "km_rede": 35.6,
+   "km_com_vdm": 26.6,
+   "segmentos_ponte": 14,
+   "maior_pop_isolada": 14017,
+   "trecho_critico": "ERS-347 (347ERS0030)"
+  },
+  "4320800": {
+   "km_rede": 97.4,
+   "km_com_vdm": 62.0,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 624,
+   "trecho_critico": "332ERS9070 (332ERS9070)"
+  },
+  "4320859": {
+   "km_rede": 17.8,
+   "km_com_vdm": 2.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4320909": {
+   "km_rede": 36.7,
+   "km_com_vdm": 22.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321006": {
+   "km_rede": 32.8,
+   "km_com_vdm": 31.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321105": {
+   "km_rede": 25.2,
+   "km_com_vdm": 14.2,
+   "segmentos_ponte": 14,
+   "maior_pop_isolada": 8229,
+   "trecho_critico": "ERS-717 (717ERS0010)"
+  },
+  "4321204": {
+   "km_rede": 61.1,
+   "km_com_vdm": 27.5,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321303": {
+   "km_rede": 38.8,
+   "km_com_vdm": 17.7,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 7330,
+   "trecho_critico": "ERS-436 (436ERS0010)"
+  },
+  "4321329": {
+   "km_rede": 7.1,
+   "km_com_vdm": 7.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321352": {
+   "km_rede": 37.9,
+   "km_com_vdm": 12.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321402": {
+   "km_rede": 55.1,
+   "km_com_vdm": 50.4,
+   "segmentos_ponte": 12,
+   "maior_pop_isolada": 7261,
+   "trecho_critico": "RSC-163 (163ERS0010)"
+  },
+  "4321436": {
+   "km_rede": 30.0,
+   "km_com_vdm": 13.7,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 688,
+   "trecho_critico": "ERS-486 (486ERS0060)"
+  },
+  "4321451": {
+   "km_rede": 31.0,
+   "km_com_vdm": 13.4,
+   "segmentos_ponte": 13,
+   "maior_pop_isolada": 15289,
+   "trecho_critico": "ERS-419 (419ERS0010)"
+  },
+  "4321469": {
+   "km_rede": 31.4,
+   "km_com_vdm": 18.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321477": {
+   "km_rede": 28.6,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 28,
+   "maior_pop_isolada": 5129,
+   "trecho_critico": "BRS-468 (468BRS0125)"
+  },
+  "4321493": {
+   "km_rede": 2.7,
+   "km_com_vdm": 2.7,
+   "segmentos_ponte": 3,
+   "maior_pop_isolada": 1915,
+   "trecho_critico": "ERS-530 (530ERS0070)"
+  },
+  "4321501": {
+   "km_rede": 29.7,
+   "km_com_vdm": 11.9,
+   "segmentos_ponte": 6,
+   "maior_pop_isolada": 4479,
+   "trecho_critico": "MRS-453 (453MRS0410)"
+  },
+  "4321600": {
+   "km_rede": 23.1,
+   "km_com_vdm": 23.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321626": {
+   "km_rede": 7.4,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 7,
+   "maior_pop_isolada": 2152,
+   "trecho_critico": "VRS-811 (811ERS0020)"
+  },
+  "4321634": {
+   "km_rede": 16.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321667": {
+   "km_rede": 31.0,
+   "km_com_vdm": 7.9,
+   "segmentos_ponte": 11,
+   "maior_pop_isolada": 9970,
+   "trecho_critico": "ERS-494 (494ERS0010)"
+  },
+  "4321709": {
+   "km_rede": 19.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321808": {
+   "km_rede": 52.5,
+   "km_com_vdm": 27.5,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 4791,
+   "trecho_critico": "VRS-838 (838ERS0010)"
+  },
+  "4321832": {
+   "km_rede": 13.2,
+   "km_com_vdm": 4.2,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 2162,
+   "trecho_critico": "ERS-417 (417ERS0010)"
+  },
+  "4321857": {
+   "km_rede": 16.9,
+   "km_com_vdm": 16.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4321907": {
+   "km_rede": 46.9,
+   "km_com_vdm": 16.4,
+   "segmentos_ponte": 13,
+   "maior_pop_isolada": 9175,
+   "trecho_critico": "BRS-468 (468BRS0125)"
+  },
+  "4321956": {
+   "km_rede": 9.8,
+   "km_com_vdm": 9.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322004": {
+   "km_rede": 76.0,
+   "km_com_vdm": 16.3,
+   "segmentos_ponte": 10,
+   "maior_pop_isolada": 3299,
+   "trecho_critico": "ERS-440 (440ERS0020)"
+  },
+  "4322103": {
+   "km_rede": 34.4,
+   "km_com_vdm": 34.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322186": {
+   "km_rede": 8.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 5,
+   "maior_pop_isolada": 981,
+   "trecho_critico": "ERS-492 (492ERS0010)"
+  },
+  "4322202": {
+   "km_rede": 91.9,
+   "km_com_vdm": 46.4,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322251": {
+   "km_rede": 2.8,
+   "km_com_vdm": 2.8,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322301": {
+   "km_rede": 30.9,
+   "km_com_vdm": 30.9,
+   "segmentos_ponte": 18,
+   "maior_pop_isolada": 6846,
+   "trecho_critico": "ERS-344 (344ERS0010)"
+  },
+  "4322327": {
+   "km_rede": 8.9,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322343": {
+   "km_rede": 2.0,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 1329,
+   "trecho_critico": "392BRS9110 (392BRS9110)"
+  },
+  "4322376": {
+   "km_rede": 34.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322400": {
+   "km_rede": 212.3,
+   "km_com_vdm": 18.9,
+   "segmentos_ponte": 39,
+   "maior_pop_isolada": 22572,
+   "trecho_critico": "BRS-472 (472BRS0225)"
+  },
+  "4322509": {
+   "km_rede": 100.8,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 37,
+   "maior_pop_isolada": 23752,
+   "trecho_critico": "BRS-116 (116BRS3010)"
+  },
+  "4322525": {
+   "km_rede": 27.2,
+   "km_com_vdm": 26.2,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 6467,
+   "trecho_critico": "ERS-244 (244ERS0110)"
+  },
+  "4322533": {
+   "km_rede": 21.9,
+   "km_com_vdm": 10.9,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322541": {
+   "km_rede": 10.0,
+   "km_com_vdm": 10.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322558": {
+   "km_rede": 6.0,
+   "km_com_vdm": 6.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322608": {
+   "km_rede": 127.2,
+   "km_com_vdm": 29.1,
+   "segmentos_ponte": 53,
+   "maior_pop_isolada": 25447,
+   "trecho_critico": "ERS-422 (422ERS0017)"
+  },
+  "4322707": {
+   "km_rede": 75.1,
+   "km_com_vdm": 49.1,
+   "segmentos_ponte": 37,
+   "maior_pop_isolada": 19778,
+   "trecho_critico": "ERS-412 (412ERS0010)"
+  },
+  "4322806": {
+   "km_rede": 43.0,
+   "km_com_vdm": 19.4,
+   "segmentos_ponte": 19,
+   "maior_pop_isolada": 9851,
+   "trecho_critico": "ERS-359 (359ERS0010)"
+  },
+  "4322855": {
+   "km_rede": 14.0,
+   "km_com_vdm": 4.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4322905": {
+   "km_rede": 11.4,
+   "km_com_vdm": 10.5,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323002": {
+   "km_rede": 114.9,
+   "km_com_vdm": 40.2,
+   "segmentos_ponte": 38,
+   "maior_pop_isolada": 517266,
+   "trecho_critico": "ERS-118 (118ERS0150)"
+  },
+  "4323101": {
+   "km_rede": 19.9,
+   "km_com_vdm": 10.7,
+   "segmentos_ponte": 20,
+   "maior_pop_isolada": 4442,
+   "trecho_critico": "ERS-150 (150ERS0030)"
+  },
+  "4323200": {
+   "km_rede": 32.2,
+   "km_com_vdm": 22.3,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323309": {
+   "km_rede": 6.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323358": {
+   "km_rede": 14.6,
+   "km_com_vdm": 14.6,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323408": {
+   "km_rede": 18.6,
+   "km_com_vdm": 18.6,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323457": {
+   "km_rede": 25.1,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323507": {
+   "km_rede": 4.1,
+   "km_com_vdm": 4.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323606": {
+   "km_rede": 19.7,
+   "km_com_vdm": 8.1,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323705": {
+   "km_rede": 8.6,
+   "km_com_vdm": 0.0,
+   "segmentos_ponte": 9,
+   "maior_pop_isolada": 5944,
+   "trecho_critico": "RSC-163 (163ERS0010)"
+  },
+  "4323754": {
+   "km_rede": 20.7,
+   "km_com_vdm": 4.7,
+   "segmentos_ponte": 0,
+   "maior_pop_isolada": 0,
+   "trecho_critico": null
+  },
+  "4323770": {
+   "km_rede": 14.4,
+   "km_com_vdm": 1.1,
+   "segmentos_ponte": 1,
+   "maior_pop_isolada": 3318,
+   "trecho_critico": "453RSC9130 (453RSC9130)"
+  },
+  "4323804": {
+   "km_rede": 16.8,
+   "km_com_vdm": 16.8,
+   "segmentos_ponte": 2,
+   "maior_pop_isolada": 7587,
+   "trecho_critico": "ERS-407 (407ERS0030)"
+  }
+ },
+ "rede": {
+  "segmentos": 17611,
+  "km": 17583,
+  "nos": 17502,
+  "componentes": 84,
+  "nos_rede_principal": 16597,
+  "pontes": 3448,
+  "municipios_com_no_no_poligono": 488,
+  "municipios_pelo_no_mais_proximo": 7,
+  "municipios_fora_da_rede": 2,
+  "populacao_ligada_a_rede": 0.9994,
+  "cobertura_vdm_segmentos": 0.383,
+  "cobertura_vdm_km": 0.383
+ }
+}
