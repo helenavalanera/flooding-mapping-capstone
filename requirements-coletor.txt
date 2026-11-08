@@ -1,0 +1,4 @@
+# Dependências mínimas do coletor agendado (GitHub Actions).
+# O coletor não usa geopandas, r5py etc.; versões fixas por reprodutibilidade.
+boto3==1.43.126
+botocore==1.43.126
