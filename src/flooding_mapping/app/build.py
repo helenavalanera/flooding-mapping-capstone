@@ -57,6 +57,13 @@ def blockages_payload(payload: dict, segments: gpd.GeoDataFrame, impact: pd.Data
             "atualizado_pela_fonte": payload.get("atualizado"), "total": len(rows), "bloqueios": rows}
 
 
+def check_card(artifact: dict, card: dict) -> None:
+    """The site may only be built with the model its model card documents."""
+    documented = card["artefato"]["versao"]
+    if artifact["versao"] != documented:
+        raise SystemExit(f"model {artifact['versao']} is not the one the card documents ({documented})")
+
+
 def build_site(out: Path, artifact: dict, card: dict, series: pd.DataFrame, meta: dict,
                blockages: dict | None, segments: gpd.GeoDataFrame, impact: pd.DataFrame) -> dict:
     """Write the site into ``out`` and return what was published."""
@@ -89,6 +96,7 @@ def main() -> None:
     args = parser.parse_args()
     artifact = inference.load_artifact(args.model)
     card = json.loads(args.card.read_text())
+    check_card(artifact, card)
     series, meta = forecast_source.operational(artifact["municipios"])
     try:
         blockages = fetch_blockages()
