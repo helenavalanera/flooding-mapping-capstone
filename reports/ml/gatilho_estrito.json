@@ -1,0 +1,809 @@
+{
+  "rotulo": "estrito",
+  "cobrade": [
+    12100,
+    12200,
+    12300
+  ],
+  "dataset": {
+    "rotulo": "estrito",
+    "linhas": 1770811,
+    "linhas_usadas": 1768598,
+    "linhas_excluidas_pos_evento": 2213,
+    "municipios": 497,
+    "periodo": [
+      "2017-01-31",
+      "2026-11-02"
+    ],
+    "positivos": 2238,
+    "prevalencia": 0.00127,
+    "positivos_por_negativo": 0.00127,
+    "municipios_com_positivo": 325,
+    "episodios": 99,
+    "positivos_por_ano": {
+      "2017": 574,
+      "2018": 73,
+      "2019": 159,
+      "2020": 111,
+      "2021": 69,
+      "2022": 93,
+      "2023": 620,
+      "2024": 202,
+      "2025": 155,
+      "2026": 182
+    },
+    "janela_rotulo_dias": 3,
+    "buffer_pos_evento_dias": 3,
+    "intervalo_entre_episodios_dias": 5
+  },
+  "semente": 20261108,
+  "chuva_em_torno_dos_registros": {
+    "registros": 759,
+    "mediana_mm_por_defasagem": {
+      "-3": 4.2,
+      "-2": 6.3,
+      "-1": 15.4,
+      "0": 29.9,
+      "1": 2.8,
+      "2": 0.5,
+      "3": 0.3
+    },
+    "fracao_com_chuva_forte_no_dia_do_protocolo": 0.599,
+    "fracao_com_chuva_forte_em_dias_aleatorios": 0.074,
+    "chuva_forte_mm": 20.0
+  },
+  "vazamento_episodios_entre_particoes": 0,
+  "particoes": {
+    "train": {
+      "linhas": 1069465,
+      "positivos": 1079,
+      "periodo": [
+        "2017-01-31",
+        "2022-12-24"
+      ]
+    },
+    "val": {
+      "linhas": 359018,
+      "positivos": 822,
+      "periodo": [
+        "2023-01-01",
+        "2024-12-24"
+      ]
+    },
+    "test": {
+      "linhas": 333157,
+      "positivos": 337,
+      "periodo": [
+        "2025-01-01",
+        "2026-11-02"
+      ]
+    }
+  },
+  "ambiente": {
+    "python": "3.12.13",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0"
+  },
+  "selecao_de_variaveis": {
+    "ablacao_val": [
+      {
+        "conjunto": "chuva",
+        "n_variaveis": 11,
+        "pr_auc": 0.0108,
+        "roc_auc": 0.8246,
+        "prevalencia": 0.00229
+      },
+      {
+        "conjunto": "chuva+estacao",
+        "n_variaveis": 13,
+        "pr_auc": 0.0076,
+        "roc_auc": 0.7666,
+        "prevalencia": 0.00229
+      },
+      {
+        "conjunto": "chuva+relativa",
+        "n_variaveis": 13,
+        "pr_auc": 0.0108,
+        "roc_auc": 0.8243,
+        "prevalencia": 0.00229
+      },
+      {
+        "conjunto": "chuva+regional",
+        "n_variaveis": 17,
+        "pr_auc": 0.0114,
+        "roc_auc": 0.8327,
+        "prevalencia": 0.00229
+      },
+      {
+        "conjunto": "completo",
+        "n_variaveis": 24,
+        "pr_auc": 0.0079,
+        "roc_auc": 0.774,
+        "prevalencia": 0.00229
+      }
+    ],
+    "escolhido": "chuva",
+    "variaveis": [
+      "p0",
+      "p_2d",
+      "p_3d",
+      "p_5d",
+      "p_7d",
+      "p_14d",
+      "p_30d",
+      "ant_7d",
+      "ant_30d",
+      "max_7d",
+      "wet_days_30d"
+    ]
+  },
+  "ajuste_de_hiperparametros_val": [
+    {
+      "familia": "logistica",
+      "parametros": "{\"C\": 0.01}",
+      "pr_auc": 0.0099,
+      "roc_auc": 0.8152,
+      "prevalencia": 0.00229
+    },
+    {
+      "familia": "logistica",
+      "parametros": "{\"C\": 0.1}",
+      "pr_auc": 0.0097,
+      "roc_auc": 0.815,
+      "prevalencia": 0.00229
+    },
+    {
+      "familia": "logistica",
+      "parametros": "{\"C\": 1.0}",
+      "pr_auc": 0.0097,
+      "roc_auc": 0.8148,
+      "prevalencia": 0.00229
+    },
+    {
+      "familia": "hgb",
+      "parametros": "{\"learning_rate\": 0.05, \"max_depth\": 3, \"min_samples_leaf\": 100}",
+      "pr_auc": 0.0104,
+      "roc_auc": 0.8231,
+      "prevalencia": 0.00229
+    },
+    {
+      "familia": "hgb",
+      "parametros": "{\"learning_rate\": 0.05, \"max_depth\": 5, \"min_samples_leaf\": 100}",
+      "pr_auc": 0.0106,
+      "roc_auc": 0.8228,
+      "prevalencia": 0.00229
+    },
+    {
+      "familia": "hgb",
+      "parametros": "{\"learning_rate\": 0.1, \"max_depth\": 3, \"min_samples_leaf\": 100}",
+      "pr_auc": 0.0108,
+      "roc_auc": 0.8235,
+      "prevalencia": 0.00229
+    },
+    {
+      "familia": "hgb",
+      "parametros": "{\"learning_rate\": 0.1, \"max_depth\": 5, \"min_samples_leaf\": 100}",
+      "pr_auc": 0.0108,
+      "roc_auc": 0.8246,
+      "prevalencia": 0.00229
+    },
+    {
+      "familia": "rf",
+      "parametros": "{\"min_samples_leaf\": 20}",
+      "pr_auc": 0.0084,
+      "roc_auc": 0.8146,
+      "prevalencia": 0.00229
+    },
+    {
+      "familia": "rf",
+      "parametros": "{\"min_samples_leaf\": 100}",
+      "pr_auc": 0.0087,
+      "roc_auc": 0.8138,
+      "prevalencia": 0.00229
+    }
+  ],
+  "baselines_val": {
+    "prior": {
+      "pr_auc": 0.0023,
+      "roc_auc": 0.5,
+      "prevalencia": 0.00229
+    },
+    "regra_p3d": {
+      "pr_auc": 0.019,
+      "roc_auc": 0.8207,
+      "prevalencia": 0.00229
+    },
+    "regra_rel_p3d": {
+      "pr_auc": 0.0201,
+      "roc_auc": 0.8218,
+      "prevalencia": 0.00229
+    },
+    "logistica_chuva": {
+      "pr_auc": 0.0097,
+      "roc_auc": 0.815,
+      "prevalencia": 0.00229
+    }
+  },
+  "decisao": {
+    "familia": "logistica",
+    "parametros": {
+      "C": 0.01
+    },
+    "pr_auc_val": 0.0099,
+    "melhor_baseline_pr_auc_val": 0.0201,
+    "criterios": {
+      "margem_pr_auc_na_validacao": {
+        "passa": false,
+        "detalhe": "0.0099 contra 0.0201 (margem 10%)"
+      },
+      "anos_da_janela_movel_vencidos": {
+        "passa": false,
+        "detalhe": "0 de 5 anos (mínimo 60%)"
+      },
+      "eventos_fora_da_amostra_no_mesmo_orcamento": {
+        "passa": false,
+        "detalhe": "modelo 0.481 contra melhor baseline 0.586 com 2% dos dias em alerta"
+      }
+    },
+    "estado": "experimental: não passa em margem de PR-AUC na validação; anos da janela móvel vencidos; eventos detectados fora da amostra no mesmo orçamento de alertas"
+  },
+  "eventos_oof_no_orcamento_do_portao": {
+    "modelo": 0.4807,
+    "regra_p3d": 0.5746,
+    "regra_rel_p3d": 0.5856,
+    "logistica_chuva": 0.4696
+  },
+  "limiares_pontuacao_bruta_(oof_2020_2024)": {
+    "alertas_0.5pct": 0.403624027967453,
+    "alertas_2pct": 0.22273901104927063,
+    "alertas_5pct": 0.11045999825000763
+  },
+  "probabilidade_calibrada_nos_limiares": {
+    "alertas_0.5pct": 0.01663,
+    "alertas_2pct": 0.01314,
+    "alertas_5pct": 0.00615
+  },
+  "teste_2025_em_diante": {
+    "modelo": {
+      "pr_auc": 0.0056,
+      "roc_auc": 0.7734,
+      "prevalencia": 0.00101
+    },
+    "baselines": {
+      "prior": {
+        "pr_auc": 0.001,
+        "roc_auc": 0.5,
+        "prevalencia": 0.00101
+      },
+      "regra_p3d": {
+        "pr_auc": 0.0048,
+        "roc_auc": 0.7461,
+        "prevalencia": 0.00101
+      },
+      "regra_rel_p3d": {
+        "pr_auc": 0.0048,
+        "roc_auc": 0.7454,
+        "prevalencia": 0.00101
+      },
+      "logistica_chuva": {
+        "pr_auc": 0.0054,
+        "roc_auc": 0.7685,
+        "prevalencia": 0.00101
+      }
+    },
+    "calibracao": {
+      "brier": 0.001008,
+      "brier_referencia_prevalencia": 0.001011,
+      "confiabilidade": [
+        {
+          "previsto": 0.00011000000085914508,
+          "observado": 0.00027,
+          "n": 29259
+        },
+        {
+          "previsto": 0.00023999999393709004,
+          "observado": 0.00037,
+          "n": 27331
+        },
+        {
+          "previsto": 0.0002699999895412475,
+          "observado": 0.00032,
+          "n": 25262
+        },
+        {
+          "previsto": 0.00033999999868683517,
+          "observado": 0.00027,
+          "n": 79140
+        },
+        {
+          "previsto": 0.0006200000061653554,
+          "observado": 0.00054,
+          "n": 53681
+        },
+        {
+          "previsto": 0.0008399999933317304,
+          "observado": 0.0011,
+          "n": 39218
+        },
+        {
+          "previsto": 0.0013800000306218863,
+          "observado": 0.00145,
+          "n": 39377
+        },
+        {
+          "previsto": 0.004449999891221523,
+          "observado": 0.00404,
+          "n": 39889
+        }
+      ]
+    },
+    "orcamentos_de_alerta": {
+      "modelo": {
+        "alertas_0.5pct": {
+          "limiar": 0.403624027967453,
+          "tp": 0,
+          "fp": 11,
+          "fn": 337,
+          "tn": 332809,
+          "precisao": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "dias_alerta_por_mil": 0.03,
+          "eventos": 111,
+          "eventos_detectados": 0,
+          "recall_eventos": 0.0
+        },
+        "alertas_2pct": {
+          "limiar": 0.22273901104927063,
+          "tp": 11,
+          "fp": 984,
+          "fn": 326,
+          "tn": 331836,
+          "precisao": 0.0111,
+          "recall": 0.0326,
+          "f1": 0.0165,
+          "dias_alerta_por_mil": 2.99,
+          "eventos": 111,
+          "eventos_detectados": 10,
+          "recall_eventos": 0.0901
+        },
+        "alertas_5pct": {
+          "limiar": 0.11045999825000763,
+          "tp": 86,
+          "fp": 8214,
+          "fn": 251,
+          "tn": 324606,
+          "precisao": 0.0104,
+          "recall": 0.2552,
+          "f1": 0.0199,
+          "dias_alerta_por_mil": 24.91,
+          "eventos": 111,
+          "eventos_detectados": 63,
+          "recall_eventos": 0.5676
+        }
+      },
+      "regra_p3d": {
+        "alertas_0.5pct": {
+          "limiar": 123.30000305175781,
+          "tp": 11,
+          "fp": 770,
+          "fn": 326,
+          "tn": 332050,
+          "precisao": 0.0141,
+          "recall": 0.0326,
+          "f1": 0.0197,
+          "dias_alerta_por_mil": 2.34,
+          "eventos": 111,
+          "eventos_detectados": 9,
+          "recall_eventos": 0.0811
+        },
+        "alertas_2pct": {
+          "limiar": 81.5999984741211,
+          "tp": 51,
+          "fp": 5557,
+          "fn": 286,
+          "tn": 327263,
+          "precisao": 0.0091,
+          "recall": 0.1513,
+          "f1": 0.0172,
+          "dias_alerta_por_mil": 16.83,
+          "eventos": 111,
+          "eventos_detectados": 38,
+          "recall_eventos": 0.3423
+        },
+        "alertas_5pct": {
+          "limiar": 56.599998474121094,
+          "tp": 97,
+          "fp": 17150,
+          "fn": 240,
+          "tn": 315670,
+          "precisao": 0.0056,
+          "recall": 0.2878,
+          "f1": 0.011,
+          "dias_alerta_por_mil": 51.77,
+          "eventos": 111,
+          "eventos_detectados": 67,
+          "recall_eventos": 0.6036
+        }
+      },
+      "regra_rel_p3d": {
+        "alertas_0.5pct": {
+          "limiar": 2.2732022333145134,
+          "tp": 14,
+          "fp": 764,
+          "fn": 323,
+          "tn": 332056,
+          "precisao": 0.018,
+          "recall": 0.0415,
+          "f1": 0.0251,
+          "dias_alerta_por_mil": 2.34,
+          "eventos": 111,
+          "eventos_detectados": 9,
+          "recall_eventos": 0.0811
+        },
+        "alertas_2pct": {
+          "limiar": 1.491959533691406,
+          "tp": 54,
+          "fp": 5634,
+          "fn": 283,
+          "tn": 327186,
+          "precisao": 0.0095,
+          "recall": 0.1602,
+          "f1": 0.0179,
+          "dias_alerta_por_mil": 17.07,
+          "eventos": 111,
+          "eventos_detectados": 43,
+          "recall_eventos": 0.3874
+        },
+        "alertas_5pct": {
+          "limiar": 1.0376309752464288,
+          "tp": 94,
+          "fp": 17039,
+          "fn": 243,
+          "tn": 315781,
+          "precisao": 0.0055,
+          "recall": 0.2789,
+          "f1": 0.0108,
+          "dias_alerta_por_mil": 51.43,
+          "eventos": 111,
+          "eventos_detectados": 64,
+          "recall_eventos": 0.5766
+        }
+      },
+      "logistica_chuva": {
+        "alertas_0.5pct": {
+          "limiar": 0.4299492835998535,
+          "tp": 0,
+          "fp": 9,
+          "fn": 337,
+          "tn": 332811,
+          "precisao": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "dias_alerta_por_mil": 0.03,
+          "eventos": 111,
+          "eventos_detectados": 0,
+          "recall_eventos": 0.0
+        },
+        "alertas_2pct": {
+          "limiar": 0.2365512102842331,
+          "tp": 9,
+          "fp": 929,
+          "fn": 328,
+          "tn": 331891,
+          "precisao": 0.0096,
+          "recall": 0.0267,
+          "f1": 0.0141,
+          "dias_alerta_por_mil": 2.82,
+          "eventos": 111,
+          "eventos_detectados": 9,
+          "recall_eventos": 0.0811
+        },
+        "alertas_5pct": {
+          "limiar": 0.1150750070810318,
+          "tp": 82,
+          "fp": 7794,
+          "fn": 255,
+          "tn": 325026,
+          "precisao": 0.0104,
+          "recall": 0.2433,
+          "f1": 0.02,
+          "dias_alerta_por_mil": 23.64,
+          "eventos": 111,
+          "eventos_detectados": 62,
+          "recall_eventos": 0.5586
+        }
+      }
+    },
+    "analise_de_erros_no_orcamento_2pct": {
+      "eventos_perdidos": 101,
+      "chuva_3d_mediana_mm_nos_eventos_perdidos": 28.5,
+      "chuva_3d_mediana_mm_nos_eventos_detectados": 78.2,
+      "alarmes_falsos_dias": 984,
+      "alarmes_falsos_a_menos_de_7_dias_de_um_evento": 0.008,
+      "alarmes_falsos_chuva_3d_mediana_mm": 109.2,
+      "municipios_com_alarme_falso": 324
+    }
+  },
+  "estabilidade_temporal_janela_movel": [
+    {
+      "ano": 2020,
+      "positivos": 111,
+      "pr_auc_modelo": 0.0194,
+      "pr_auc_regra_p3d": 0.035,
+      "pr_auc_regra_rel_p3d": 0.0321,
+      "pr_auc_logistica_chuva": 0.0168
+    },
+    {
+      "ano": 2021,
+      "positivos": 69,
+      "pr_auc_modelo": 0.0009,
+      "pr_auc_regra_p3d": 0.0011,
+      "pr_auc_regra_rel_p3d": 0.0011,
+      "pr_auc_logistica_chuva": 0.0008
+    },
+    {
+      "ano": 2022,
+      "positivos": 93,
+      "pr_auc_modelo": 0.0026,
+      "pr_auc_regra_p3d": 0.0042,
+      "pr_auc_regra_rel_p3d": 0.0026,
+      "pr_auc_logistica_chuva": 0.0026
+    },
+    {
+      "ano": 2023,
+      "positivos": 620,
+      "pr_auc_modelo": 0.0149,
+      "pr_auc_regra_p3d": 0.0361,
+      "pr_auc_regra_rel_p3d": 0.0369,
+      "pr_auc_logistica_chuva": 0.0146
+    },
+    {
+      "ano": 2024,
+      "positivos": 202,
+      "pr_auc_modelo": 0.0062,
+      "pr_auc_regra_p3d": 0.0075,
+      "pr_auc_regra_rel_p3d": 0.0081,
+      "pr_auc_logistica_chuva": 0.006
+    },
+    {
+      "ano": 2025,
+      "positivos": 155,
+      "pr_auc_modelo": 0.0043,
+      "pr_auc_regra_p3d": 0.0032,
+      "pr_auc_regra_rel_p3d": 0.0032,
+      "pr_auc_logistica_chuva": 0.0041
+    },
+    {
+      "ano": 2026,
+      "positivos": 182,
+      "pr_auc_modelo": 0.0066,
+      "pr_auc_regra_p3d": 0.0068,
+      "pr_auc_regra_rel_p3d": 0.0067,
+      "pr_auc_logistica_chuva": 0.0066
+    }
+  ],
+  "generalizacao_espacial_blocos_fora_do_treino": [
+    {
+      "bloco": 0,
+      "municipios": 103,
+      "positivos": 24,
+      "pr_auc_modelo": 0.0041,
+      "pr_auc_regra_p3d": 0.0027
+    },
+    {
+      "bloco": 1,
+      "municipios": 156,
+      "positivos": 129,
+      "pr_auc_modelo": 0.007,
+      "pr_auc_regra_p3d": 0.008
+    },
+    {
+      "bloco": 2,
+      "municipios": 36,
+      "positivos": 54,
+      "pr_auc_modelo": 0.0169,
+      "pr_auc_regra_p3d": 0.009
+    },
+    {
+      "bloco": 3,
+      "municipios": 53,
+      "positivos": 68,
+      "pr_auc_modelo": 0.007,
+      "pr_auc_regra_p3d": 0.0068
+    },
+    {
+      "bloco": 4,
+      "municipios": 149,
+      "positivos": 62,
+      "pr_auc_modelo": 0.0031,
+      "pr_auc_regra_p3d": 0.004
+    }
+  ],
+  "importancia_por_permutacao_pr_auc": [
+    {
+      "variavel": "p0",
+      "queda_media": 0.00856,
+      "desvio": 0.00024
+    },
+    {
+      "variavel": "p_3d",
+      "queda_media": 0.00156,
+      "desvio": 0.00025
+    },
+    {
+      "variavel": "p_14d",
+      "queda_media": 0.00101,
+      "desvio": 0.00049
+    },
+    {
+      "variavel": "p_5d",
+      "queda_media": 0.00089,
+      "desvio": 0.00031
+    },
+    {
+      "variavel": "p_30d",
+      "queda_media": 0.00086,
+      "desvio": 0.00053
+    },
+    {
+      "variavel": "wet_days_30d",
+      "queda_media": 0.00075,
+      "desvio": 0.00049
+    },
+    {
+      "variavel": "p_7d",
+      "queda_media": 0.00015,
+      "desvio": 0.00019
+    },
+    {
+      "variavel": "p_2d",
+      "queda_media": 0.0001,
+      "desvio": 3e-05
+    },
+    {
+      "variavel": "max_7d",
+      "queda_media": 4e-05,
+      "desvio": 8e-05
+    },
+    {
+      "variavel": "ant_7d",
+      "queda_media": -0.00023,
+      "desvio": 0.00038
+    },
+    {
+      "variavel": "ant_30d",
+      "queda_media": -0.00032,
+      "desvio": 0.00033
+    }
+  ],
+  "gatilho_operacional": {
+    "tipo": "regra",
+    "descricao": "regra de chuva (chuva relativa ao percentil 95 local em 3 dias), calibrada em frequência",
+    "regra": "regra_rel_p3d",
+    "colunas": [
+      "rel_p3d"
+    ],
+    "limiares": {
+      "alertas_0.5pct": 2.2732022333145134,
+      "alertas_2pct": 1.491959533691406,
+      "alertas_5pct": 1.0376309752464288
+    },
+    "estado": "regra simples calibrada: o modelo de aprendizado de máquina ficou experimental e não é o gatilho em uso",
+    "motivo": "experimental: não passa em margem de PR-AUC na validação; anos da janela móvel vencidos; eventos detectados fora da amostra no mesmo orçamento de alertas",
+    "desempenho_teste": {
+      "pr_auc": 0.0048,
+      "roc_auc": 0.7454,
+      "prevalencia": 0.00101,
+      "calibracao": {
+        "brier": 0.00101,
+        "brier_referencia_prevalencia": 0.001011,
+        "confiabilidade": [
+          {
+            "previsto": 0.00017,
+            "observado": 0.0003,
+            "n": 56251
+          },
+          {
+            "previsto": 0.00025,
+            "observado": 0.00018,
+            "n": 16368
+          },
+          {
+            "previsto": 0.00028,
+            "observado": 0.00047,
+            "n": 59291
+          },
+          {
+            "previsto": 0.00032,
+            "observado": 0.0,
+            "n": 2470
+          },
+          {
+            "previsto": 0.00045,
+            "observado": 0.00053,
+            "n": 45368
+          },
+          {
+            "previsto": 0.00081,
+            "observado": 0.00096,
+            "n": 84430
+          },
+          {
+            "previsto": 0.00131,
+            "observado": 0.00113,
+            "n": 27317
+          },
+          {
+            "previsto": 0.0054,
+            "observado": 0.00367,
+            "n": 41662
+          }
+        ]
+      },
+      "orcamentos": {
+        "alertas_0.5pct": {
+          "limiar": 2.2732022333145134,
+          "tp": 14,
+          "fp": 764,
+          "fn": 323,
+          "tn": 332056,
+          "precisao": 0.018,
+          "recall": 0.0415,
+          "f1": 0.0251,
+          "dias_alerta_por_mil": 2.34,
+          "eventos": 111,
+          "eventos_detectados": 9,
+          "recall_eventos": 0.0811
+        },
+        "alertas_2pct": {
+          "limiar": 1.491959533691406,
+          "tp": 54,
+          "fp": 5634,
+          "fn": 283,
+          "tn": 327186,
+          "precisao": 0.0095,
+          "recall": 0.1602,
+          "f1": 0.0179,
+          "dias_alerta_por_mil": 17.07,
+          "eventos": 111,
+          "eventos_detectados": 43,
+          "recall_eventos": 0.3874
+        },
+        "alertas_5pct": {
+          "limiar": 1.0376309752464288,
+          "tp": 94,
+          "fp": 17039,
+          "fn": 243,
+          "tn": 315781,
+          "precisao": 0.0055,
+          "recall": 0.2789,
+          "f1": 0.0108,
+          "dias_alerta_por_mil": 51.43,
+          "eventos": 111,
+          "eventos_detectados": 64,
+          "recall_eventos": 0.5766
+        }
+      },
+      "analise_de_erros_no_orcamento_2pct": {
+        "eventos_perdidos": 68,
+        "chuva_3d_mediana_mm_nos_eventos_perdidos": 19.9,
+        "chuva_3d_mediana_mm_nos_eventos_detectados": 61.5,
+        "alarmes_falsos_dias": 5634,
+        "alarmes_falsos_a_menos_de_7_dias_de_um_evento": 0.014,
+        "alarmes_falsos_chuva_3d_mediana_mm": 97.1,
+        "municipios_com_alarme_falso": 492
+      }
+    }
+  },
+  "artefato": {
+    "versao": "gatilho-estrito-20261109",
+    "caminho_local": "artifacts/models/gatilho-estrito-20261109/modelo.joblib",
+    "sha256": "71196b91f4e8cea673afd794c20d33952eeef73df159dee4dbfde4dd0a6e5658",
+    "treinado_desde": "2017-01-31",
+    "treinado_ate": "2026-11-02",
+    "versionado_no_git": false,
+    "observacao": "o artefato fica fora do git; o cartão registra o hash"
+  }
+}
