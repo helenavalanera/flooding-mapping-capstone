@@ -140,8 +140,9 @@
     el("model").innerHTML = "<h2>Gatilho</h2><p class='small'><b>" + Lg.esc(m.descricao) + "</b><br>Versão " + Lg.esc(m.versao) +
       ". Ajustado com dados de " + Lg.esc(m.treinado_desde) + " a " + Lg.esc(m.treinado_ate) + ".<br><b>Estado:</b> " + Lg.esc(m.estado) + ".</p>" +
       (isRule ? "<p class='small'><b>Modelo de aprendizado de máquina:</b> " + Lg.esc(m.estado_do_modelo_de_aprendizado_de_maquina) + ".</p>" : "") +
-      "<p class='small'>No teste (2025 em diante, não usado para ajustar): com 2% dos dias em alerta, detecta " +
-      Math.round(o.recall_eventos * 100) + "% dos eventos, com precisão de " + (o.precisao * 100).toFixed(1).replace(".", ",") +
+      "<p class='small'>No teste (2025 em diante, não usado para ajustar), com os limiares fixados antes (alertaram em " +
+      (o.dias_alerta_por_mil / 10).toFixed(1).replace(".", ",") + "% dos dias), detecta " + Math.round(o.recall_eventos * 100) +
+      "% dos eventos, com precisão de " + (o.precisao * 100).toFixed(1).replace(".", ",") +
       "% (negativos não rotulados: é um piso). PR-AUC " + t.pr_auc.toFixed(4).replace(".", ",") + " contra prevalência " + t.prevalencia.toFixed(4).replace(".", ",") + ".</p>";
     el("limits").innerHTML = "<h2>Limites</h2><ul class='plain'>" + f.avisos.map(function (a) { return "<li>" + Lg.esc(a) + "</li>"; }).join("") + "</ul>" +
       "<p class='small'>Chuva: " + Lg.esc(f.fonte_chuva.fonte.replace("https://", "")) + ", emitida em " + Lg.esc(Lg.formatInstant(f.fonte_chuva.emitido_em_utc)) + ".</p>";

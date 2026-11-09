@@ -29,10 +29,13 @@ seguintes.
 - **Gatilho municipal:** dado o cenário de chuva, estima qual município tem mais chance de
   registrar um desastre hídrico (S2iD, 2017–2026). Treinaram-se e validaram-se modelos de
   aprendizado de máquina (regressão logística, floresta aleatória e gradiente de árvores) contra
-  baselines, por episódio e com expurgo temporal. **Nenhum modelo superou as regras simples de
-  chuva** no portão de validação, então o gatilho em uso é a **regra de chuva relativa em 3 dias,
-  calibrada**, e o modelo fica registrado como experimental. Dados, método, resultados e o que não
-  se pode afirmar: [`docs/ml_gatilho.md`](docs/ml_gatilho.md), gerado dos cartões em `reports/ml/`.
+  baselines, por episódio e com expurgo temporal. **Nenhum modelo passou no portão** de três
+  critérios independentes (validação, janela móvel de 2020–2024 e eventos fora da amostra), então o
+  gatilho em uso é a **regra de chuva relativa em 3 dias, calibrada**, e o modelo fica registrado
+  como experimental. A evidência é **mista**: antes do teste a regra foi melhor; no teste de
+  2025–2026, com o mesmo número de dias em alerta, o modelo detectou mais eventos, em diferença
+  dentro do ruído de poucas dezenas de eventos. Dados, método e o que não se pode afirmar:
+  [`docs/ml_gatilho.md`](docs/ml_gatilho.md), gerado dos cartões em `reports/ml/`.
 - **Previsão de 72 horas e interface estática** (mapa do RS, bloqueios ativos, malha do DAER):
   [`docs/publicacao.md`](docs/publicacao.md).
 - **Coletor dos bloqueios rodoviários** (a fonte não guarda histórico):

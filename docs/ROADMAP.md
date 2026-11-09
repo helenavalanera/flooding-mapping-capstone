@@ -60,7 +60,7 @@ Dependências que importam: o item 2 independe de todos; o 6 depende do 3 e do 5
 
 **Resultados que mudaram o plano** (detalhes em `docs/ml_gatilho.md`):
 
-- O gatilho municipal de aprendizado de máquina **não superou as regras de chuva** no portão de validação (três critérios independentes). O gatilho em uso é a **regra de chuva relativa em 3 dias, calibrada**; o modelo fica registrado como experimental. Variações do modelo foram interrompidas para não ajustar o pipeline ao teste, que já foi consultado duas vezes (histórico na seção 8 do documento).
+- O gatilho municipal de aprendizado de máquina **não passou no portão** (três critérios independentes, medidos antes do teste). O gatilho em uso é a **regra de chuva relativa em 3 dias, calibrada**; o modelo fica registrado como experimental. A evidência é mista: antes do teste a regra foi melhor, e no teste de 2025–2026, com o mesmo número de dias em alerta, o modelo detectou mais eventos, dentro do ruído. Variações do modelo foram interrompidas para não ajustar o pipeline ao teste, que já foi consultado duas vezes (seção 8 do documento).
 - O endpoint de "previsão histórica" do Open-Meteo devolve a **mesma série da reanálise**; previsões reais arquivadas existem só desde meados de 2024. A perda ao operar com previsão foi medida no teste.
 - A suscetibilidade por segmento é um **índice físico relativo**, sem validação em nível de segmento (poucos rótulos). O impacto na mobilidade é **simulado**; o VDM cobre cerca de 38% dos segmentos e o ranking muda de verdade com o peso do tráfego.
 

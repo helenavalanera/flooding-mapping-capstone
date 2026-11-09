@@ -43,6 +43,11 @@ def thousands(n: int) -> str:
     return f"{n:,}".replace(",", ".")
 
 
+def budget_label(key: str) -> str:
+    """``alertas_0.5pct`` -> ``0,5% dos dias``."""
+    return key.replace("alertas_", "").replace("pct", "% dos dias").replace(".", ",")
+
+
 def num(x, digits=4) -> str:
     return "—" if x is None else f"{x:.{digits}f}".replace(".", ",")
 
@@ -113,21 +118,27 @@ def eda_line(card: dict) -> str:
 
 
 def operational_lines(card: dict) -> list[str]:
-    """Which trigger runs, why, and how it did on the test years."""
+    """Which trigger runs, why, how it did on the test years and what its errors look like."""
     op = card["gatilho_operacional"]
     perf = op["desempenho_teste"]
-    rows = []
-    for budget, r in perf["orcamentos"].items():
-        rows.append({"o": budget.replace("alertas_", "").replace("pct", "% dos dias").replace(".", ","),
-                     "ev": f"{r['eventos_detectados']}/{r['eventos']} ({pct(r['recall_eventos'], 0)})", "p": pct(r["precisao"], 2),
-                     "d": r["dias_alerta_por_mil"], "tp": r["tp"], "fp": r["fp"], "fn": r["fn"]})
+    rows = [{"o": budget_label(budget), "ev": f"{r['eventos_detectados']}/{r['eventos']} ({pct(r['recall_eventos'], 0)})",
+             "p": pct(r["precisao"], 2), "d": num(r["dias_alerta_por_mil"], 1), "tp": r["tp"], "fp": thousands(r["fp"]), "fn": r["fn"]}
+            for budget, r in perf["orcamentos"].items()]
+    err = perf["analise_de_erros_no_orcamento_2pct"]
     return ["## 7. Gatilho em uso\n",
             f"**{op['descricao'].capitalize()}.** {op['estado'][0].upper() + op['estado'][1:]}.\n",
             f"Motivo: o modelo de aprendizado de máquina ficou como *{op['motivo']}*.\n" if op["tipo"] == "regra" else "",
             f"No teste (2025 em diante): PR-AUC {num(perf['pr_auc'])}, ROC-AUC {num(perf['roc_auc'], 3)}, prevalência {num(perf['prevalencia'])}; "
             f"Brier {num(perf['calibracao']['brier'], 6)} (referência constante {num(perf['calibracao']['brier_referencia_prevalencia'], 6)}).\n",
-            table(rows, [("o", "Orçamento de alertas"), ("ev", "Eventos detectados"), ("p", "Precisão (piso)"), ("d", "Alertas por mil dias"),
-                         ("tp", "VP"), ("fp", "FP"), ("fn", "FN")]), "\n"]
+            table(rows, [("o", "Limiar fixado em 2020–2024 (orçamento)"), ("ev", "Eventos detectados"), ("p", "Precisão (piso)"), ("d", "Alertas por mil dias"),
+                         ("tp", "VP"), ("fp", "FP"), ("fn", "FN")]),
+            f"\n**Erros do gatilho em uso (orçamento de 2%).** {err['eventos_perdidos']} eventos não foram detectados; a chuva mediana em 3 dias "
+            f"foi {num(err['chuva_3d_mediana_mm_nos_eventos_perdidos'], 1)} mm nos perdidos contra {num(err['chuva_3d_mediana_mm_nos_eventos_detectados'], 1)} mm "
+            f"nos detectados, ou seja, o que escapa são sobretudo tempestades locais que a reanálise de ~10 km não enxerga. Houve "
+            f"{thousands(err['alarmes_falsos_dias'])} dias de falso alarme em {err['municipios_com_alarme_falso']} municípios, "
+            f"{pct(err['alarmes_falsos_a_menos_de_7_dias_de_um_evento'], 1)} deles a menos de 7 dias de um evento do mesmo município "
+            "(possíveis erros de data ou registros tardios). Um falso negativo é um evento sem aviso; um falso positivo é um alerta sem "
+            "registro, e como a base não rotula negativos, estes são um limite superior.\n"]
 
 
 def history_lines(card: dict, versions: list[tuple[str, dict]]) -> list[str]:
@@ -137,30 +148,53 @@ def history_lines(card: dict, versions: list[tuple[str, dict]]) -> list[str]:
     rows = []
     for name, c in versions + [("versão atual", card)]:
         t = c["teste_2025_em_diante"]
-        top = t["orcamentos_de_alerta"]["modelo"]["alertas_2pct"]
         rows.append({"v": name, "m": f"{c['decisao']['familia']} {json.dumps(c['decisao']['parametros'], ensure_ascii=False)}",
-                     "pr": num(t["modelo"]["pr_auc"]), "roc": num(t["modelo"]["roc_auc"], 3),
-                     "ev": f"{top['eventos_detectados']}/{top['eventos']}",
-                     "r": f"{t['orcamentos_de_alerta']['regra_rel_p3d']['alertas_2pct']['eventos_detectados']}/{top['eventos']}"})
+                     "pr": num(t["modelo"]["pr_auc"]), "roc": num(t["modelo"]["roc_auc"], 3)})
     return ["## 8. Histórico do pipeline e uso do teste\n",
             "O teste (2025 em diante) foi consultado **duas vezes**, por duas versões do pipeline. A primeira treinou os modelos sem restrições. "
             "Ao ver que o modelo ficava abaixo das regras já na **validação** (2023–2024), a segunda passou a impor que o risco não caia quando a "
             "chuva sobe (restrição monotônica nas árvores e escala logarítmica na logística). Essa escolha se baseou na validação e na janela "
             "móvel, não no teste, mas o teste já havia sido visto, então a segunda leitura não é a de um conjunto virgem.\n",
-            table(rows, [("v", "Versão"), ("m", "Modelo escolhido"), ("pr", "PR-AUC teste"), ("roc", "ROC-AUC teste"),
-                         ("ev", "Eventos @2% (modelo)"), ("r", "Eventos @2% (regra relativa)")]), "\n"]
+            table(rows, [("v", "Versão"), ("m", "Modelo escolhido"), ("pr", "PR-AUC teste"), ("roc", "ROC-AUC teste")]), "\n"]
 
 
-def comparison_sentence(card: dict) -> str:
-    """What the model does against the plain rainfall rule, in the same alert budget."""
-    budget = card["teste_2025_em_diante"]["orcamentos_de_alerta"]
-    m, rule = budget["modelo"]["alertas_2pct"], budget["regra_p3d"]["alertas_2pct"]
-    more = m["eventos_detectados"] - rule["eventos_detectados"]
-    verb = "mais" if more > 0 else "menos" if more < 0 else "o mesmo número de"
-    gap = "" if more == 0 else f" ({abs(more)} {verb})"
-    return (f"Com 2% dos dias-município em alerta, o modelo detecta {m['eventos_detectados']} dos {m['eventos']} eventos "
-            f"de teste ({pct(m['recall_eventos'], 0)}), contra {rule['eventos_detectados']} da regra de chuva em 3 dias "
-            f"({pct(rule['recall_eventos'], 0)}){gap}.")
+def operational_sentence(card: dict) -> str:
+    perf = card["gatilho_operacional"]["desempenho_teste"]["orcamentos"]["alertas_2pct"]
+    return (f"**Gatilho em uso, no teste:** com os limiares fixados em 2020–2024 (orçamento de 2%), que no teste alertaram em "
+            f"{num(perf['dias_alerta_por_mil'] / 10, 1)}% dos dias-município, detecta {perf['eventos_detectados']} dos {perf['eventos']} eventos "
+            f"({pct(perf['recall_eventos'], 0)}), com precisão de {pct(perf['precisao'], 2)} (piso).")
+
+
+def equal_share_events(test: pd.DataFrame, columns=tuple(SCORERS), budgets=(0.005, 0.01, 0.02, 0.05)) -> dict:
+    """Events caught by each scorer when each alerts on the same share of the test days.
+
+    The threshold of each scorer is a quantile of its *own* test scores, so the comparison measures
+    ranking alone and cannot be distorted by a shift in the scale of the scores.
+    """
+    y = test["y"].to_numpy()
+    out = {}
+    for column in columns:
+        score = test[column].to_numpy()
+        out[column] = {}
+        for budget in budgets:
+            threshold = float(np.quantile(score, 1 - budget))
+            caught = metrics.event_recall(test, score, threshold)
+            out[column][budget] = {"eventos": caught["eventos"], "detectados": caught["eventos_detectados"],
+                                   "precisao": metrics.at_threshold(y, score, threshold)["precisao"]}
+    return out
+
+
+def comparison_sentence(card: dict, fair: dict) -> str:
+    """The honest reading of model against rules: same alert share on test, and before the test."""
+    at = lambda col: fair[col][0.02]  # noqa: E731
+    m, rel, p3, lg = at("score"), at("regra_rel_p3d"), at("regra_p3d"), at("logistica_chuva")
+    before = card["eventos_oof_no_orcamento_do_portao"]
+    best_rule = max(before["regra_p3d"], before["regra_rel_p3d"])
+    return (f"Com o mesmo número de dias em alerta no teste (2%), o modelo de aprendizado de máquina detecta {m['detectados']} dos {m['eventos']} "
+            f"eventos ({pct(m['detectados'] / m['eventos'], 0)}), a logística só com chuva {lg['detectados']}, a regra de chuva relativa "
+            f"{rel['detectados']} e a regra de chuva em 3 dias {p3['detectados']}. Antes do teste (janela móvel de 2020–2024, mesmo orçamento) a ordem "
+            f"foi a inversa: a melhor regra detectou {pct(best_rule, 0)} dos eventos e o modelo {pct(before['modelo'], 0)}. São diferenças de poucas "
+            "dezenas de eventos, agrupados em poucos episódios, que não permitem afirmar que um supera o outro.")
 
 
 def render(label: str, card: dict, skew: dict | None, index: dict | None, impact: dict | None, figs: list[str],
@@ -170,15 +204,18 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
     tuned = pd.DataFrame(card["ajuste_de_hiperparametros_val"])
     tuned["pr_auc"] = tuned["pr_auc"].map(num)
     tuned["roc_auc"] = tuned["roc_auc"].map(num)
-    budget_rows = []
-    for name, title in (("modelo", "Modelo"), ("regra_p3d", "Regra: chuva em 3 dias"), ("regra_rel_p3d", "Regra: chuva relativa"),
-                        ("logistica_chuva", "Logística só com chuva")):
+    test_scores = pd.read_parquet(resolve(f"data/processed/gatilho_{label}_teste.parquet"))
+    oof = pd.read_parquet(resolve(f"data/processed/gatilho_{label}_oof.parquet"))
+    p98_oof = float(np.quantile(oof.loc[oof["ano"] <= 2024, "score"], 0.98))
+    p98_test = float(np.quantile(test_scores["score"], 0.98))
+    fair = equal_share_events(test_scores)
+    fair_rows = []
+    for column, title in SCORERS.items():
         row = {"Método": title}
-        for b in ("alertas_0.5pct", "alertas_2pct", "alertas_5pct"):
-            r = test["orcamentos_de_alerta"][name][b]
-            row[b] = f"{r['eventos_detectados']}/{r['eventos']} ({pct(r['recall_eventos'], 0)}), precisão {pct(r['precisao'], 2)}"
-        budget_rows.append(row)
-    err = test["analise_de_erros_no_orcamento_2pct"]
+        for b in (0.005, 0.01, 0.02, 0.05):
+            r = fair[column][b]
+            row[b] = f"{r['detectados']}/{r['eventos']} ({pct(r['detectados'] / r['eventos'], 0)}), precisão {pct(r['precisao'], 2)}"
+        fair_rows.append(row)
     lines = [
         f"# Gatilho municipal de risco hídrico: dados, método e resultados ({label})\n",
         "_Documento gerado por `python -m flooding_mapping.evaluation.report`. Os números vêm de "
@@ -192,8 +229,9 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
         f"{thousands(d['positivos'])} dias positivos em {d['episodios']} episódios, prevalência {pct(d['prevalencia'], 2)}.",
         f"- **Teste do modelo (2025 em diante; ver a seção 8 sobre seu uso):** PR-AUC {num(test['modelo']['pr_auc'])} contra prevalência "
         f"{num(test['modelo']['prevalencia'])}; ROC-AUC {num(test['modelo']['roc_auc'], 3)}.",
-        f"- {comparison_sentence(card)}",
-        f"- **Modelo versionado:** `{art['versao']}`, treinado de {art['treinado_desde']} a {art['treinado_ate']}; "
+        f"- {comparison_sentence(card, fair)}",
+        f"- {operational_sentence(card)}",
+        f"- **Artefato do gatilho:** `{art['versao']}`, ajustado com dados de {art['treinado_desde']} a {art['treinado_ate']}; "
         f"SHA-256 `{art['sha256'][:16]}…` (o artefato fica fora do git).\n",
         "## 1. Dados (template 3.1)\n",
         table([
@@ -262,25 +300,23 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
                for r in card["generalizacao_espacial_blocos_fora_do_treino"]],
               [("b", "Região fora do treino"), ("mun", "Municípios"), ("pos", "Positivos"), ("m", "PR-AUC modelo"), ("r", "PR-AUC regra 3 dias")]),
         "\n## 6. Avaliação (template 3.6)\n",
-        f"Matriz de confusão e demais métricas por orçamento de alertas (limiares fixados em 2020–2024, aplicados ao teste). "
+        f"Matriz de confusão e demais métricas **do modelo de aprendizado de máquina (experimental)** por orçamento de alertas (limiares fixados em 2020–2024, aplicados ao teste). "
         f"Acurácia não é reportada: com prevalência de {pct(test['modelo']['prevalencia'], 2)}, um modelo que nunca alerta acerta mais de 99%.\n",
-        table([{"o": o, "tp": r["tp"], "fp": r["fp"], "fn": r["fn"], "tn": f"{r['tn']:,}".replace(",", "."), "p": pct(r["precisao"], 2),
-                "rc": pct(r["recall"], 1), "f1": num(r["f1"]), "dias": r["dias_alerta_por_mil"], "ev": f"{r['eventos_detectados']}/{r['eventos']}"}
+        table([{"o": budget_label(o), "tp": r["tp"], "fp": thousands(r["fp"]), "fn": r["fn"], "tn": thousands(r["tn"]), "p": pct(r["precisao"], 2),
+                "rc": pct(r["recall"], 1), "f1": num(r["f1"]), "dias": num(r["dias_alerta_por_mil"], 1), "ev": f"{r['eventos_detectados']}/{r['eventos']}"}
                for o, r in test["orcamentos_de_alerta"]["modelo"].items()],
               [("o", "Orçamento"), ("tp", "VP"), ("fp", "FP"), ("fn", "FN"), ("tn", "VN"), ("p", "Precisão"), ("rc", "Recall (dias)"),
                ("f1", "F1"), ("dias", "Alertas por mil dias"), ("ev", "Eventos detectados")]),
-        "\n**Eventos detectados no mesmo orçamento, modelo e baselines** (uma sequência de dias positivos conta como um evento):\n",
-        table(budget_rows, [("Método", "Método"), ("alertas_0.5pct", "0,5% dos dias"), ("alertas_2pct", "2% dos dias"), ("alertas_5pct", "5% dos dias")]),
-        f"\n{comparison_sentence(card)}\n",
+        "\n**Comparação justa: eventos detectados quando todos alertam no mesmo número de dias do teste** (cada método com o limiar que lhe dá "
+        "essa fração dos dias; uma sequência de dias positivos conta como um evento). Mede só a ordenação:\n",
+        table(fair_rows, [("Método", "Método"), (0.005, "0,5% dos dias"), (0.01, "1% dos dias"), (0.02, "2% dos dias"), (0.05, "5% dos dias")]),
+        f"\n{comparison_sentence(card, fair)}\n",
+        "\n**Por que a tabela de confusão acima mostra tão poucos alertas do modelo.** Os limiares foram fixados em 2020–2024 sobre escores de "
+        f"modelos ajustados com menos anos; ao reajustar o modelo, a escala dos escores mudou (o percentil 98 foi {num(p98_oof, 3)} nos escores fora da "
+        f"amostra de 2020–2024 e {num(p98_test, 3)} no teste), e o limiar de 2% passou a alertar em uma fração bem menor dos dias. As regras são funções fixas e não sofrem essa deriva. Para um "
+        "modelo, limiares fixos não se transferem sem recalibrar; essa é uma das razões para manter a regra como gatilho.\n",
         "\n".join(f"![{n}](figuras/{n})" for n in figs) + "\n",
-        f"**Falsos negativos e falsos positivos (orçamento de 2%).** Dos eventos, {err['eventos_perdidos']} não foram detectados; a chuva "
-        f"mediana em 3 dias nos perdidos foi {err['chuva_3d_mediana_mm_nos_eventos_perdidos']} mm contra "
-        f"{err['chuva_3d_mediana_mm_nos_eventos_detectados']} mm nos detectados: o modelo perde sobretudo tempestades locais que a "
-        f"reanálise não enxerga. Houve {err['alarmes_falsos_dias']:,} dias de falso alarme em {err['municipios_com_alarme_falso']} municípios".replace(",", ".")
-        + f", {pct(err['alarmes_falsos_a_menos_de_7_dias_de_um_evento'], 1)} deles a menos de 7 dias de um evento do mesmo município "
-        "(possíveis erros de data ou registros tardios). Operacionalmente, um falso negativo é um evento sem aviso; um falso positivo é "
-        "um alerta sem registro, e como a base não rotula negativos, estes são um limite superior.\n",
-        f"**Calibração.** Brier {num(test['calibracao']['brier'], 6)} contra {num(test['calibracao']['brier_referencia_prevalencia'], 6)} "
+        f"**Calibração (modelo).** Brier {num(test['calibracao']['brier'], 6)} contra {num(test['calibracao']['brier_referencia_prevalencia'], 6)} "
         "de um preditor constante: com eventos tão raros a calibração melhora a escala das probabilidades, não a discriminação.\n",
     ]
     lines += operational_lines(card) + history_lines(card, versions or [])
@@ -288,15 +324,17 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
         rows = []
         for name, c in ((label, card), (other["rotulo"], other)):
             t = c["teste_2025_em_diante"]
-            top, rule = t["orcamentos_de_alerta"]["modelo"]["alertas_2pct"], t["orcamentos_de_alerta"]["regra_p3d"]["alertas_2pct"]
+            other_fair = equal_share_events(pd.read_parquet(resolve(f"data/processed/gatilho_{name}_teste.parquet")))
+            top = {"eventos_detectados": other_fair["score"][0.02]["detectados"], "eventos": other_fair["score"][0.02]["eventos"]}
+            rule = {"eventos_detectados": max(other_fair[r][0.02]["detectados"] for r in ("regra_p3d", "regra_rel_p3d"))}
             rows.append({"r": name, "c": ", ".join(str(x) for x in c["cobrade"]), "p": thousands(c["dataset"]["positivos"]),
                          "e": c["dataset"]["episodios"], "pr": num(t["modelo"]["pr_auc"]), "roc": num(t["modelo"]["roc_auc"], 3),
-                         "ev": f"{top['eventos_detectados']}/{top['eventos']} (regra: {rule['eventos_detectados']})", "s": c["decisao"]["estado"]})
-        lines += ["## 8b. Sensibilidade ao rótulo\n",
+                         "ev": f"modelo {top['eventos_detectados']}/{top['eventos']}; melhor regra {rule['eventos_detectados']}", "s": c["gatilho_operacional"]["descricao"]})
+        lines += ["## 9. Sensibilidade ao rótulo\n",
                   "O rótulo **estrito** (inundações, enxurradas e alagamentos) é o principal. O **amplo** acrescenta \"chuvas intensas\" (13214), "
                   "uma categoria de tempestade que mistura eventos não hídricos e que cresce a partir de 2023 por mudança de notificação.\n",
                   table(rows, [("r", "Rótulo"), ("c", "COBRADE"), ("p", "Dias positivos"), ("e", "Episódios"), ("pr", "PR-AUC teste"),
-                               ("roc", "ROC-AUC teste"), ("ev", "Eventos @2%"), ("s", "Estado")]), "\n"]
+                               ("roc", "ROC-AUC teste"), ("ev", "Eventos com o mesmo 2% dos dias"), ("s", "Gatilho em uso")]), "\n"]
     if skew:
         rows = []
         for key, title in (("reanalise", "Reanálise (como no treino)"), ("reanalise_nos_mesmos_dias", "Reanálise, mesmos dias da previsão"),
@@ -307,34 +345,40 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
                 rows.append({"c": title, "l": f"{s['linhas']:,}".replace(",", "."), "pr": num(s["pr_auc"]), "roc": num(s["roc_auc"], 3),
                              "ev": f"{top['eventos_detectados']}/{top['eventos']}",
                              "corr": num(s.get("chuva", {}).get("correlacao"), 3) if "chuva" in s else "—"})
-        lines += ["## 9. Treino com reanálise, operação com previsão\n",
+        lines += ["## 10. Treino com reanálise, operação com previsão\n",
                   "O endpoint de \"previsão histórica\" do Open-Meteo devolve **a mesma série da reanálise** (diferença de 0,00 mm/dia em 2019–2026), "
                   "então não serve de evidência de previsão. Previsões reais arquivadas existem desde meados de 2024 (API de execuções anteriores); "
                   "com elas, o mesmo modelo testado é pontuado com chuva prevista 1 e 2 dias antes, em todos os dias da janela (limite superior "
                   "da perda: na operação os dias passados são análise).\n",
                   table(rows, [("c", "Entrada de chuva"), ("l", "Linhas"), ("pr", "PR-AUC"), ("roc", "ROC-AUC"), ("ev", "Eventos @2%"), ("corr", "Correlação diária com a reanálise")]), "\n"]
     if index:
-        lines += ["## 10. Suscetibilidade por segmento (índice, não probabilidade)\n",
-                  f"{index['natureza']}. {index['segmentos']:,} segmentos de 1 km; componentes: baixa altitude, depressão local e proximidade da água "
-                  "(pesos iguais, nada é ajustado).".replace(",", ".") + "\n",
-                  f"- Segmentos com bloqueio observado: {json.dumps(index['segmentos_com_bloqueio_observado'], ensure_ascii=False)}",
-                  f"- Verificação municipal fraca: {json.dumps(index['verificacao_municipal_fraca'], ensure_ascii=False)}\n"]
+        lab, mun = index["segmentos_com_bloqueio_observado"], index["verificacao_municipal_fraca"]
+        lines += ["## 11. Suscetibilidade por segmento (índice, não probabilidade)\n",
+                  f"Índice físico relativo, **não** é probabilidade e **não** foi validado em nível de segmento. {thousands(index['segmentos'])} segmentos "
+                  "de 1 km; componentes: baixa altitude, depressão local e proximidade da água, com pesos iguais (nada é ajustado).\n",
+                  (f"- **Segmentos de bloqueios observados** ({lab['segmentos_rotulados']} segmentos, de apenas 16 bloqueios, pois um intervalo cobre vários): "
+                   f"percentil mediano {num(lab['indice']['mediana'], 1)} pelo índice contra {num(lab['regra_so_elevacao']['mediana'], 1)} pela regra só de altitude; "
+                   f"{pct(lab['indice']['no_top_20pct'], 0)} contra {pct(lab['regra_so_elevacao']['no_top_20pct'], 0)} no quinto mais suscetível. "
+                   "Descritivo, sem valor estatístico." if lab.get("segmentos_rotulados") else ""),
+                  f"- **Verificação municipal fraca** ({mun['municipios']} municípios): correlação de Spearman entre o percentil médio das rodovias e os registros "
+                  f"hídricos por km de {num(mun['spearman_indice_x_registros_por_km'], 2)} (índice) contra {num(mun['spearman_so_elevacao_x_registros_por_km'], 2)} "
+                  "(só altitude). Ambas fracas e confundidas pela chuva, pela população e pelo hábito de notificar.\n"]
     if impact:
         cov, cmp_ = impact["cobertura"], impact["com_x_sem_peso_do_vdm"]
-        lines += ["## 11. Impacto na mobilidade (simulado)\n",
-                  f"{impact['natureza']}. Cobertura do VDM: {pct(cov['fracao_com_vdm'], 1)} dos segmentos (ausente não é zero). "
+        lines += ["## 12. Impacto na mobilidade (simulado)\n",
+                  f"{impact['natureza'][0].upper() + impact['natureza'][1:]}. Cobertura do VDM: {pct(cov['fracao_com_vdm'], 1)} dos segmentos (ausente não é zero). "
                   f"Entre os {cmp_['trechos_com_vdm_e_desvio']} trechos com VDM e desvio, a correlação de Spearman entre o desvio sem peso e "
                   f"ponderado é {num(cmp_['spearman_desvio_x_ponderado'], 2)} e só {cmp_['sobreposicao_top50']} dos 50 primeiros coincidem: "
                   "o peso do tráfego muda de verdade a prioridade.\n",
                   "\n".join(f"- {x}" for x in impact["limites"]) + "\n"]
-    lines += ["## 12. Limitações e riscos\n",
+    lines += ["## 13. Limitações e riscos\n",
               "- Negativos não rotulados; precisão é um piso. Município sem registro não é município sem alagamento.",
               "- Poucos episódios independentes (dezenas), muito concentrados (2023 e 2024); a validação é por episódio, mas o erro de estimativa é grande.",
               "- Mudança de notificação a partir de 2023 (mais registros de \"chuvas intensas\"): o rótulo estrito evita parte disso; o amplo não.",
               "- A data do protocolo é a de abertura do registro, não a do dano; usa-se uma janela de rótulo.",
-              "- Treino em reanálise e operação em previsão; ver a seção 9.",
+              "- Treino em reanálise e operação em previsão; ver a seção 10.",
               "- O modelo estima o registro de um desastre, não a água na rua; não substitui os alertas oficiais.\n",
-              "## 13. Como reproduzir\n",
+              "## 14. Como reproduzir\n",
               "```bash\nmake estado-dados     # municípios, S2iD, malha DAER, segmentos, impacto, camadas\nmake estado-chuva     # chuva diária por município (retoma de onde parou)\n"
               "make estado-modelo    # treina e valida (estrito e amplo)\nmake estado-avaliacao # previsão versus reanálise\n"
               "PYTHONPATH=src python -m flooding_mapping.evaluation.report --label estrito\n```\n"]

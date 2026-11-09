@@ -389,7 +389,8 @@ def run(label_name: str, quick: bool = False) -> dict:
                    if use_rule else decision["estado"]),
         "motivo": decision["estado"],
         "desempenho_teste": {**metrics.ranking(y_test, op_test_score), "calibracao": metrics.calibration(y_test, op_probability),
-                             "orcamentos": op_budgets}}
+                             "orcamentos": op_budgets,
+                             "analise_de_erros_no_orcamento_2pct": error_analysis(test, op_test_score, op_thresholds["alertas_2pct"])}}
     # The trigger that was tested (trained/fitted before 2025), kept for the forecast-skew evaluation.
     tested_artifact = {"modelo": tested_model, "calibrador": op_calibrator, "limiares": op_thresholds, "colunas": op_cols,
                        "quantis": quantiles, "municipios": towns[["ibge", "nome", "lat", "lon", "area_km2", "populacao", "regiao_imediata"]].copy(),
