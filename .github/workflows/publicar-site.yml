@@ -17,8 +17,10 @@ permissions:
 
 jobs:
   construir:
-    # Só no repositório original e só se não estiver desligado (variável SITE_ATIVO = false pausa).
-    if: github.repository == 'helenavalanera/flooding-mapping-capstone' && vars.SITE_ATIVO != 'false'
+    # Adesão: só roda no repositório original e depois que SITE_ATIVO = true for definida em
+    # Settings > Secrets and variables > Actions > Variables (ver docs/publicacao.md). Antes disso o
+    # modelo ainda não está no R2 e cada execução agendada falharia. Para pausar: remova a variável.
+    if: github.repository == 'helenavalanera/flooding-mapping-capstone' && vars.SITE_ATIVO == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:

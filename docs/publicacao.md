@@ -29,11 +29,14 @@ Arquivos: `.github/workflows/publicar-site.yml`, `src/flooding_mapping/app/build
 
    O envio é recusado se o arquivo não for o que o cartão descreve. Usa 2 operações de escrita
    (Classe A) do R2; cada publicação do site usa 2 de leitura (Classe B), cerca de 480 por mês.
-3. **Rodar o workflow uma vez à mão** (Actions → publicar-site → Run workflow) e abrir a URL que
+3. **Definir a variável `SITE_ATIVO = true`** (Settings → Secrets and variables → Actions →
+   Variables). **O workflow só roda depois disso**: sem ela, o agendamento fica inerte e não gera
+   e-mails de falha enquanto o modelo ainda não está no R2.
+4. **Rodar o workflow uma vez à mão** (Actions → publicar-site → Run workflow) e abrir a URL que
    o passo `publicar` mostra. Depois ele roda sozinho a cada 3 horas.
 
-Os segredos `R2_*` já usados pelo coletor servem aqui. Variável opcional `SITE_ATIVO = false`
-pausa a publicação.
+Os segredos `R2_*` já usados pelo coletor servem aqui. Para pausar a publicação, remova a variável
+`SITE_ATIVO` (ou troque o valor).
 
 ## Segurança
 
