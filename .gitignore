@@ -55,3 +55,6 @@ reports/qa/*
 # Artefatos de modelo e site gerado ficam fora do git (o cartão do modelo registra o hash).
 artifacts/
 site/
+
+# Índices pequenos e derivados que a montagem do site precisa num clone limpo (ver docs/publicacao.md).
+!src/flooding_mapping/app/data/*.parquet

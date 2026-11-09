@@ -23,12 +23,16 @@ multiplicado por um fator de precariedade (1 = condição observada).
 ## Escopo estadual (RS): gatilho de risco, impacto e interface
 
 O projeto foi ampliado de Porto Alegre para o Rio Grande do Sul, em duas camadas: um **gatilho
-municipal de risco hídrico**, treinado e validado (aprendizado de máquina), e o **estudo de caso
-urbano de Porto Alegre**, descrito nas seções seguintes.
+municipal de risco hídrico** e o **estudo de caso urbano de Porto Alegre**, descrito nas seções
+seguintes.
 
 - **Gatilho municipal:** dado o cenário de chuva, estima qual município tem mais chance de
-  registrar um desastre hídrico (S2iD, 2017–2026). Dados, método, validação por episódio e
-  resultados em [`docs/ml_gatilho.md`](docs/ml_gatilho.md), gerado dos cartões em `reports/ml/`.
+  registrar um desastre hídrico (S2iD, 2017–2026). Treinaram-se e validaram-se modelos de
+  aprendizado de máquina (regressão logística, floresta aleatória e gradiente de árvores) contra
+  baselines, por episódio e com expurgo temporal. **Nenhum modelo superou as regras simples de
+  chuva** no portão de validação, então o gatilho em uso é a **regra de chuva relativa em 3 dias,
+  calibrada**, e o modelo fica registrado como experimental. Dados, método, resultados e o que não
+  se pode afirmar: [`docs/ml_gatilho.md`](docs/ml_gatilho.md), gerado dos cartões em `reports/ml/`.
 - **Previsão de 72 horas e interface estática** (mapa do RS, bloqueios ativos, malha do DAER):
   [`docs/publicacao.md`](docs/publicacao.md).
 - **Coletor dos bloqueios rodoviários** (a fonte não guarda histórico):
@@ -45,9 +49,9 @@ make estado-avaliacao  # perda ao operar com previsão em vez de reanálise
 make estado-site       # monta o site local em site/
 ```
 
-O modelo **não prevê profundidade, extensão nem duração da água**, estima o registro de um
+O gatilho **não prevê profundidade, extensão nem duração da água**, estima o registro de um
 desastre; a precisão é um piso (negativos não rotulados) e o resultado vem com todas as
-ressalvas em `docs/ml_gatilho.md`. O artefato do modelo fica fora do git; o cartão registra o hash.
+ressalvas em `docs/ml_gatilho.md`. O artefato fica fora do git; o cartão registra o hash.
 
 ## Escopo e limitações
 

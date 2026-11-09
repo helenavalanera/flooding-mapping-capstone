@@ -127,3 +127,17 @@ def test_roads_layer_carries_the_physical_index_as_a_percentile_and_keeps_missin
     out = layers.roads(trechos, stretches, pd.Series({1: 83.4}))
     assert list(out["codigo_sre"]) == ["a"]                       # planned roads are not drawn
     assert out["indice_fisico"].iloc[0] == 83.0 and out["ponte"].iloc[0] and pd.isna(out["desvio_km"].iloc[0])
+
+
+def test_the_files_the_build_needs_in_a_clean_clone_exist_and_are_not_git_ignored():
+    """The Actions runner only has what is committed: a Parquet hidden by `*.parquet` breaks the site."""
+    import shutil
+    import subprocess
+
+    needed = [build.BUILD_DATA / "segmentos_indice.parquet", build.BUILD_DATA / "impacto_segmentos.parquet",
+              *[build.STATIC_DATA / n for n in ("municipios.geojson", "rodovias.geojson", "ocorrencias.json", "impacto_rs.json")]]
+    assert all(p.exists() for p in needed)
+    if shutil.which("git"):
+        ignored = subprocess.run(["git", "check-ignore", "-q", *map(str, needed)], cwd=build.BUILD_DATA, capture_output=True)
+        if ignored.returncode in (0, 1):  # 128 means "not a git repository": nothing to check
+            assert ignored.returncode == 1, "a file the site build needs is ignored by .gitignore"
