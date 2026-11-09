@@ -19,6 +19,7 @@ import pandas as pd  # noqa: E402
 from sklearn.metrics import precision_recall_curve  # noqa: E402
 
 from ..config import resolve  # noqa: E402
+from ..models.gatilho import GATE_NAMES  # noqa: E402
 from . import metrics  # noqa: E402
 
 DOC = "docs/ml_gatilho.md"
@@ -100,6 +101,56 @@ def figures(label: str, card: dict, out) -> list[str]:
     return names
 
 
+def eda_line(card: dict) -> str:
+    """The data-exploration finding that explains the low PR-AUC, from the card."""
+    e = card["chuva_em_torno_dos_registros"]
+    med = e["mediana_mm_por_defasagem"]
+    return (f"6. **EDA** ({e['registros']} registros): o protocolo coincide com o dia da chuva. Mediana de chuva de {num(med['0'], 1)} mm "
+            f"no dia do protocolo, {num(med['-1'], 1)} mm no dia anterior e {num(med['1'], 1)} mm no seguinte; "
+            f"{pct(e['fracao_com_chuva_forte_no_dia_do_protocolo'], 0)} dos registros têm ≥{e['chuva_forte_mm']:g} mm no dia, contra "
+            f"{pct(e['fracao_com_chuva_forte_em_dias_aleatorios'], 1)} em dias aleatórios. A chuva forte é comum e o registro é raro, "
+            "por isso o PR-AUC é baixo mesmo com sinal real.\n")
+
+
+def operational_lines(card: dict) -> list[str]:
+    """Which trigger runs, why, and how it did on the test years."""
+    op = card["gatilho_operacional"]
+    perf = op["desempenho_teste"]
+    rows = []
+    for budget, r in perf["orcamentos"].items():
+        rows.append({"o": budget.replace("alertas_", "").replace("pct", "% dos dias").replace(".", ","),
+                     "ev": f"{r['eventos_detectados']}/{r['eventos']} ({pct(r['recall_eventos'], 0)})", "p": pct(r["precisao"], 2),
+                     "d": r["dias_alerta_por_mil"], "tp": r["tp"], "fp": r["fp"], "fn": r["fn"]})
+    return ["## 7. Gatilho em uso\n",
+            f"**{op['descricao'].capitalize()}.** {op['estado'][0].upper() + op['estado'][1:]}.\n",
+            f"Motivo: o modelo de aprendizado de máquina ficou como *{op['motivo']}*.\n" if op["tipo"] == "regra" else "",
+            f"No teste (2025 em diante): PR-AUC {num(perf['pr_auc'])}, ROC-AUC {num(perf['roc_auc'], 3)}, prevalência {num(perf['prevalencia'])}; "
+            f"Brier {num(perf['calibracao']['brier'], 6)} (referência constante {num(perf['calibracao']['brier_referencia_prevalencia'], 6)}).\n",
+            table(rows, [("o", "Orçamento de alertas"), ("ev", "Eventos detectados"), ("p", "Precisão (piso)"), ("d", "Alertas por mil dias"),
+                         ("tp", "VP"), ("fp", "FP"), ("fn", "FN")]), "\n"]
+
+
+def history_lines(card: dict, versions: list[tuple[str, dict]]) -> list[str]:
+    """Pipeline versions that were scored on the test years, with what changed."""
+    if not versions:
+        return []
+    rows = []
+    for name, c in versions + [("versão atual", card)]:
+        t = c["teste_2025_em_diante"]
+        top = t["orcamentos_de_alerta"]["modelo"]["alertas_2pct"]
+        rows.append({"v": name, "m": f"{c['decisao']['familia']} {json.dumps(c['decisao']['parametros'], ensure_ascii=False)}",
+                     "pr": num(t["modelo"]["pr_auc"]), "roc": num(t["modelo"]["roc_auc"], 3),
+                     "ev": f"{top['eventos_detectados']}/{top['eventos']}",
+                     "r": f"{t['orcamentos_de_alerta']['regra_rel_p3d']['alertas_2pct']['eventos_detectados']}/{top['eventos']}"})
+    return ["## 8. Histórico do pipeline e uso do teste\n",
+            "O teste (2025 em diante) foi consultado **duas vezes**, por duas versões do pipeline. A primeira treinou os modelos sem restrições. "
+            "Ao ver que o modelo ficava abaixo das regras já na **validação** (2023–2024), a segunda passou a impor que o risco não caia quando a "
+            "chuva sobe (restrição monotônica nas árvores e escala logarítmica na logística). Essa escolha se baseou na validação e na janela "
+            "móvel, não no teste, mas o teste já havia sido visto, então a segunda leitura não é a de um conjunto virgem.\n",
+            table(rows, [("v", "Versão"), ("m", "Modelo escolhido"), ("pr", "PR-AUC teste"), ("roc", "ROC-AUC teste"),
+                         ("ev", "Eventos @2% (modelo)"), ("r", "Eventos @2% (regra relativa)")]), "\n"]
+
+
 def comparison_sentence(card: dict) -> str:
     """What the model does against the plain rainfall rule, in the same alert budget."""
     budget = card["teste_2025_em_diante"]["orcamentos_de_alerta"]
@@ -112,7 +163,8 @@ def comparison_sentence(card: dict) -> str:
             f"({pct(rule['recall_eventos'], 0)}){gap}.")
 
 
-def render(label: str, card: dict, skew: dict | None, index: dict | None, impact: dict | None, figs: list[str]) -> str:
+def render(label: str, card: dict, skew: dict | None, index: dict | None, impact: dict | None, figs: list[str],
+           other: dict | None = None, versions: list[tuple[str, dict]] | None = None) -> str:
     d, dec, test = card["dataset"], card["decisao"], card["teste_2025_em_diante"]
     art = card["artefato"]
     tuned = pd.DataFrame(card["ajuste_de_hiperparametros_val"])
@@ -132,12 +184,13 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
         "_Documento gerado por `python -m flooding_mapping.evaluation.report`. Os números vêm de "
         f"`reports/ml/gatilho_{label}.json`; nenhum foi digitado à mão._\n",
         "## Resumo\n",
-        f"- **Estado do modelo:** {dec['estado']}.",
+        f"- **Gatilho em uso:** {card['gatilho_operacional']['descricao']}.",
+        f"- **Modelo de aprendizado de máquina:** {dec['estado']}.",
         "- **Pergunta:** dado o cenário de chuva, qual município tem mais chance de **registrar um desastre hídrico** "
         "(inundação, enxurrada ou alagamento) naquele dia? Não prevê profundidade, extensão nem duração da água.",
         f"- **Dados:** {thousands(d['linhas_usadas'])} dias-município de {d['municipios']} municípios ({d['periodo'][0]} a {d['periodo'][1]}), "
         f"{thousands(d['positivos'])} dias positivos em {d['episodios']} episódios, prevalência {pct(d['prevalencia'], 2)}.",
-        f"- **Teste (2025 em diante, tocado uma única vez):** PR-AUC {num(test['modelo']['pr_auc'])} contra prevalência "
+        f"- **Teste do modelo (2025 em diante; ver a seção 8 sobre seu uso):** PR-AUC {num(test['modelo']['pr_auc'])} contra prevalência "
         f"{num(test['modelo']['prevalencia'])}; ROC-AUC {num(test['modelo']['roc_auc'], 3)}.",
         f"- {comparison_sentence(card)}",
         f"- **Modelo versionado:** `{art['versao']}`, treinado de {art['treinado_desde']} a {art['treinado_ate']}; "
@@ -168,19 +221,18 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
         "máximo diário em 7 dias; dias úmidos em 30; chuva relativa ao percentil 95 do próprio município (climatologia 2017–2019); "
         "contexto regional (média e máximo da região imediata e fração do estado com ≥50 mm em 3 dias); sazonalidade; altitude, "
         "área e população. **Nenhuma variável do dia `d` usa chuva posterior a `d`** (testado).",
-        "6. **EDA:** o protocolo coincide com o dia da chuva: mediana de 39,5 mm no dia do protocolo e 2,1 mm no seguinte; 65% dos "
-        "registros têm ≥20 mm no dia contra 6,6% em dias aleatórios. A chuva forte é comum e o registro é raro, por isso o PR-AUC é baixo.\n",
+        eda_line(card),
         table([{"ano": a, "pos": p} for a, p in d["positivos_por_ano"].items()], [("ano", "Ano"), ("pos", "Dias positivos")]),
         "\n## 3. Seleção do modelo (template 3.3)\n",
         "Dados tabulares, relação não linear e extremamente desbalanceada: comparam-se regressão logística (referência interpretável), "
         "floresta aleatória e gradiente de árvores (`HistGradientBoosting`), todos contra três baselines simples (acaso, regra de chuva "
         "em 3 dias, regra de chuva relativa) e uma logística só com chuva. Não há série temporal no modelo: a dinâmica entra pelas "
-        "janelas de chuva acumulada. Redes neurais não foram usadas porque 1.5 mil positivos agrupados em poucas dezenas de "
-        "episódios não sustentam um modelo mais flexível; seria sobreajuste.",
+        "janelas de chuva acumulada. Redes neurais não foram usadas porque {thousands(d['positivos'])} dias positivos agrupados em "
+        f"{d['episodios']} episódios não sustentam um modelo mais flexível; seria sobreajuste.",
         f"\n**Escolha:** {dec['familia']} {json.dumps(dec['parametros'], ensure_ascii=False)}, a família mais simples dentro de "
         f"{pct(0.1, 0)} (relativo) do melhor PR-AUC de validação. **Estado:** {dec['estado']}.\n",
         "O selo \"validado\" exige três critérios independentes, todos medidos antes do teste:\n",
-        table([{"c": k.replace("_", " "), "p": "sim" if v["passa"] else "**não**", "d": v["detalhe"]} for k, v in dec["criterios"].items()],
+        table([{"c": GATE_NAMES[k], "p": "sim" if v["passa"] else "**não**", "d": v["detalhe"]} for k, v in dec["criterios"].items()],
               [("c", "Critério"), ("p", "Passa"), ("d", "Detalhe")]),
         "## 4. Treinamento (template 3.4)\n",
         f"Semente {card['semente']}; ambiente: Python {card['ambiente']['python']}, scikit-learn {card['ambiente']['sklearn']}, "
@@ -231,6 +283,20 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
         f"**Calibração.** Brier {num(test['calibracao']['brier'], 6)} contra {num(test['calibracao']['brier_referencia_prevalencia'], 6)} "
         "de um preditor constante: com eventos tão raros a calibração melhora a escala das probabilidades, não a discriminação.\n",
     ]
+    lines += operational_lines(card) + history_lines(card, versions or [])
+    if other:
+        rows = []
+        for name, c in ((label, card), (other["rotulo"], other)):
+            t = c["teste_2025_em_diante"]
+            top, rule = t["orcamentos_de_alerta"]["modelo"]["alertas_2pct"], t["orcamentos_de_alerta"]["regra_p3d"]["alertas_2pct"]
+            rows.append({"r": name, "c": ", ".join(str(x) for x in c["cobrade"]), "p": thousands(c["dataset"]["positivos"]),
+                         "e": c["dataset"]["episodios"], "pr": num(t["modelo"]["pr_auc"]), "roc": num(t["modelo"]["roc_auc"], 3),
+                         "ev": f"{top['eventos_detectados']}/{top['eventos']} (regra: {rule['eventos_detectados']})", "s": c["decisao"]["estado"]})
+        lines += ["## 8b. Sensibilidade ao rótulo\n",
+                  "O rótulo **estrito** (inundações, enxurradas e alagamentos) é o principal. O **amplo** acrescenta \"chuvas intensas\" (13214), "
+                  "uma categoria de tempestade que mistura eventos não hídricos e que cresce a partir de 2023 por mudança de notificação.\n",
+                  table(rows, [("r", "Rótulo"), ("c", "COBRADE"), ("p", "Dias positivos"), ("e", "Episódios"), ("pr", "PR-AUC teste"),
+                               ("roc", "ROC-AUC teste"), ("ev", "Eventos @2%"), ("s", "Estado")]), "\n"]
     if skew:
         rows = []
         for key, title in (("reanalise", "Reanálise (como no treino)"), ("reanalise_nos_mesmos_dias", "Reanálise, mesmos dias da previsão"),
@@ -241,34 +307,34 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
                 rows.append({"c": title, "l": f"{s['linhas']:,}".replace(",", "."), "pr": num(s["pr_auc"]), "roc": num(s["roc_auc"], 3),
                              "ev": f"{top['eventos_detectados']}/{top['eventos']}",
                              "corr": num(s.get("chuva", {}).get("correlacao"), 3) if "chuva" in s else "—"})
-        lines += ["## 7. Treino com reanálise, operação com previsão\n",
+        lines += ["## 9. Treino com reanálise, operação com previsão\n",
                   "O endpoint de \"previsão histórica\" do Open-Meteo devolve **a mesma série da reanálise** (diferença de 0,00 mm/dia em 2019–2026), "
                   "então não serve de evidência de previsão. Previsões reais arquivadas existem desde meados de 2024 (API de execuções anteriores); "
                   "com elas, o mesmo modelo testado é pontuado com chuva prevista 1 e 2 dias antes, em todos os dias da janela (limite superior "
                   "da perda: na operação os dias passados são análise).\n",
                   table(rows, [("c", "Entrada de chuva"), ("l", "Linhas"), ("pr", "PR-AUC"), ("roc", "ROC-AUC"), ("ev", "Eventos @2%"), ("corr", "Correlação diária com a reanálise")]), "\n"]
     if index:
-        lines += ["## 8. Suscetibilidade por segmento (índice, não probabilidade)\n",
+        lines += ["## 10. Suscetibilidade por segmento (índice, não probabilidade)\n",
                   f"{index['natureza']}. {index['segmentos']:,} segmentos de 1 km; componentes: baixa altitude, depressão local e proximidade da água "
                   "(pesos iguais, nada é ajustado).".replace(",", ".") + "\n",
                   f"- Segmentos com bloqueio observado: {json.dumps(index['segmentos_com_bloqueio_observado'], ensure_ascii=False)}",
                   f"- Verificação municipal fraca: {json.dumps(index['verificacao_municipal_fraca'], ensure_ascii=False)}\n"]
     if impact:
         cov, cmp_ = impact["cobertura"], impact["com_x_sem_peso_do_vdm"]
-        lines += ["## 9. Impacto na mobilidade (simulado)\n",
+        lines += ["## 11. Impacto na mobilidade (simulado)\n",
                   f"{impact['natureza']}. Cobertura do VDM: {pct(cov['fracao_com_vdm'], 1)} dos segmentos (ausente não é zero). "
                   f"Entre os {cmp_['trechos_com_vdm_e_desvio']} trechos com VDM e desvio, a correlação de Spearman entre o desvio sem peso e "
                   f"ponderado é {num(cmp_['spearman_desvio_x_ponderado'], 2)} e só {cmp_['sobreposicao_top50']} dos 50 primeiros coincidem: "
                   "o peso do tráfego muda de verdade a prioridade.\n",
                   "\n".join(f"- {x}" for x in impact["limites"]) + "\n"]
-    lines += ["## 10. Limitações e riscos\n",
+    lines += ["## 12. Limitações e riscos\n",
               "- Negativos não rotulados; precisão é um piso. Município sem registro não é município sem alagamento.",
               "- Poucos episódios independentes (dezenas), muito concentrados (2023 e 2024); a validação é por episódio, mas o erro de estimativa é grande.",
               "- Mudança de notificação a partir de 2023 (mais registros de \"chuvas intensas\"): o rótulo estrito evita parte disso; o amplo não.",
               "- A data do protocolo é a de abertura do registro, não a do dano; usa-se uma janela de rótulo.",
-              "- Treino em reanálise e operação em previsão; ver a seção 7.",
+              "- Treino em reanálise e operação em previsão; ver a seção 9.",
               "- O modelo estima o registro de um desastre, não a água na rua; não substitui os alertas oficiais.\n",
-              "## 11. Como reproduzir\n",
+              "## 13. Como reproduzir\n",
               "```bash\nmake estado-dados     # municípios, S2iD, malha DAER, segmentos, impacto, camadas\nmake estado-chuva     # chuva diária por município (retoma de onde parou)\n"
               "make estado-modelo    # treina e valida (estrito e amplo)\nmake estado-avaliacao # previsão versus reanálise\n"
               "PYTHONPATH=src python -m flooding_mapping.evaluation.report --label estrito\n```\n"]
@@ -282,8 +348,11 @@ def main() -> None:
     load = lambda name: json.loads(resolve(name).read_text()) if resolve(name).exists() else None  # noqa: E731
     card = load(f"reports/ml/gatilho_{args.label}.json")
     figs = figures(args.label, card, resolve(FIGURES))
+    other = load(f"reports/ml/gatilho_{'amplo' if args.label == 'estrito' else 'estrito'}.json")
+    versions = [(path.stem.replace("gatilho_", "").replace("_", " "), json.loads(path.read_text()))
+                for path in sorted(resolve("reports/ml/versoes").glob(f"gatilho_{args.label}_v*.json"))]
     text = render(args.label, card, load(f"reports/ml/skew_{args.label}.json"), load("reports/ml/indice_suscetibilidade.json"),
-                  load("reports/qa/impacto_rs.json"), figs)
+                  load("reports/qa/impacto_rs.json"), figs, other, versions)
     resolve(DOC).write_text(text)
     print(f"{DOC}: {len(text.splitlines())} linhas, {len(figs)} figuras")
 

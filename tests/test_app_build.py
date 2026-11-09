@@ -12,10 +12,12 @@ from flooding_mapping.app import build
 
 X0, Y0 = Transformer.from_crs("EPSG:4326", "EPSG:5880", always_xy=True).transform(-51.0, -30.0)
 
-CARD = {"decisao": {"estado": "experimental: não supera o melhor baseline"},
-        "teste_2025_em_diante": {"modelo": {"pr_auc": 0.0053, "roc_auc": 0.79, "prevalencia": 0.001},
-                                 "orcamentos_de_alerta": {"modelo": {"alertas_2pct": {
-                                     "recall_eventos": 0.33, "precisao": 0.011, "dias_alerta_por_mil": 20.0}}}}}
+CARD = {"decisao": {"estado": "experimental: não passa em eventos detectados fora da amostra"},
+        "gatilho_operacional": {
+            "tipo": "regra", "descricao": "regra de chuva calibrada", "estado": "regra simples calibrada: o modelo ficou experimental",
+            "motivo": "experimental: não passa em eventos detectados fora da amostra",
+            "desempenho_teste": {"pr_auc": 0.0048, "roc_auc": 0.745, "prevalencia": 0.001,
+                                 "orcamentos": {"alertas_2pct": {"recall_eventos": 0.39, "precisao": 0.0095, "dias_alerta_por_mil": 20.0}}}}}
 
 
 def segment_index():
@@ -74,7 +76,8 @@ def test_forecast_file_states_what_it_is_and_what_it_is_not(tmp_path):
     out, _ = make_site(tmp_path)
     f = json.loads((out / "previsao_72h.json").read_text())
     assert f["tipo"].startswith("estimativa") and f["emitido_para"] == "2026-11-08"
-    assert f["modelo"]["estado"].startswith("experimental") and f["modelo"]["treinado_ate"]
+    assert f["modelo"]["tipo"] == "regra" and f["modelo"]["estado_do_modelo_de_aprendizado_de_maquina"].startswith("experimental")
+    assert f["modelo"]["treinado_ate"]
     assert len(f["municipios"][0]["dias"]) == 3 and f["fonte_chuva"]["ultima_data"] == "2026-11-10"
     assert any("Defesa Civil" in a for a in f["avisos"]) and f["municipios_sem_dados"] == []
 

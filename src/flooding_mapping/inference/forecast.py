@@ -68,8 +68,8 @@ def estimate(artifact: dict, series: pd.DataFrame, towns: pd.DataFrame, grid: pd
 def payload(estimates: pd.DataFrame, missing: list[str], towns: pd.DataFrame, artifact: dict,
             card: dict, meta: dict, issue_day: pd.Timestamp) -> dict:
     """The JSON the static interface reads: estimates, their provenance and their limits."""
-    validation = card["decisao"]["estado"]
-    test = card["teste_2025_em_diante"]
+    trigger = card["gatilho_operacional"]
+    test = trigger["desempenho_teste"]
     names = towns.set_index("ibge")
     municipalities = []
     for ibge, group in estimates.groupby("ibge"):
@@ -84,13 +84,14 @@ def payload(estimates: pd.DataFrame, missing: list[str], towns: pd.DataFrame, ar
         "gerado_em_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "emitido_para": str(issue_day.date()),
         "tipo": "estimativa do modelo (não é observação)",
-        "modelo": {"versao": artifact["versao"], "rotulo": artifact["rotulo"], "familia": artifact["familia"],
-                   "estado": validation, "treinado_desde": artifact["treinado_desde"],
-                   "treinado_ate": artifact["treinado_ate"], "n_variaveis": len(artifact["colunas"]),
+        "modelo": {"versao": artifact["versao"], "rotulo": artifact["rotulo"], "tipo": trigger["tipo"],
+                   "descricao": trigger["descricao"], "familia": artifact["familia"], "estado": trigger["estado"],
+                   "estado_do_modelo_de_aprendizado_de_maquina": trigger["motivo"],
+                   "treinado_desde": artifact["treinado_desde"], "treinado_ate": artifact["treinado_ate"],
+                   "n_variaveis": len(artifact["colunas"]),
                    "desempenho_teste_2025_em_diante": {
-                       "pr_auc": test["modelo"]["pr_auc"], "roc_auc": test["modelo"]["roc_auc"],
-                       "prevalencia": test["modelo"]["prevalencia"],
-                       "orcamento_2pct": {k: test["orcamentos_de_alerta"]["modelo"]["alertas_2pct"][k]
+                       "pr_auc": test["pr_auc"], "roc_auc": test["roc_auc"], "prevalencia": test["prevalencia"],
+                       "orcamento_2pct": {k: test["orcamentos"]["alertas_2pct"][k]
                                           for k in ("recall_eventos", "precisao", "dias_alerta_por_mil")}}},
         "classes": {"alto": "0,5% dos dias-município de maior pontuação no histórico",
                     "atencao": "2% dos dias-município de maior pontuação no histórico",
@@ -100,7 +101,7 @@ def payload(estimates: pd.DataFrame, missing: list[str], towns: pd.DataFrame, ar
         "avisos": ["Estimativa estatística de que um município registre desastre hídrico; "
                    "não prevê profundidade, extensão nem duração da água.",
                    "Não substitui os alertas oficiais da Defesa Civil.",
-                   "O modelo foi treinado com chuva de reanálise e opera com previsão: a qualidade "
+                   "O gatilho foi ajustado com chuva de reanálise e opera com previsão: a qualidade "
                    "cai quando a previsão erra a chuva.",
                    "Municípios sem registro no S2iD não são municípios sem alagamento."],
         "municipios": municipalities}

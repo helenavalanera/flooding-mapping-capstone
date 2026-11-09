@@ -132,11 +132,15 @@
 
   function describeModel(f) {
     var m = f.modelo, t = m.desempenho_teste_2025_em_diante, o = t.orcamento_2pct;
-    var validated = m.estado.indexOf("validado") === 0;
-    var badge = el("status-badge"); badge.textContent = validated ? "validado frente aos baselines" : "experimental"; badge.className = "badge" + (validated ? " ok" : "");
-    el("model").innerHTML = "<h2>Modelo</h2><p class='small'><b>" + Lg.esc(m.versao) + "</b> (" + Lg.esc(m.familia) + ")<br>Treinado com dados de " +
-      Lg.esc(m.treinado_desde) + " a " + Lg.esc(m.treinado_ate) + ".<br><b>Estado:</b> " + Lg.esc(m.estado) + ".</p>" +
-      "<p class='small'>No teste (2025 em diante, nunca usado para ajustar): com 2% dos dias em alerta, o modelo detecta " +
+    var isRule = m.tipo === "regra";
+    var validated = !isRule && m.estado.indexOf("validado") === 0;
+    var badge = el("status-badge");
+    badge.textContent = isRule ? "regra calibrada · modelo de ML experimental" : (validated ? "modelo validado frente aos baselines" : "experimental");
+    badge.className = "badge" + (validated ? " ok" : "");
+    el("model").innerHTML = "<h2>Gatilho</h2><p class='small'><b>" + Lg.esc(m.descricao) + "</b><br>Versão " + Lg.esc(m.versao) +
+      ". Ajustado com dados de " + Lg.esc(m.treinado_desde) + " a " + Lg.esc(m.treinado_ate) + ".<br><b>Estado:</b> " + Lg.esc(m.estado) + ".</p>" +
+      (isRule ? "<p class='small'><b>Modelo de aprendizado de máquina:</b> " + Lg.esc(m.estado_do_modelo_de_aprendizado_de_maquina) + ".</p>" : "") +
+      "<p class='small'>No teste (2025 em diante, não usado para ajustar): com 2% dos dias em alerta, detecta " +
       Math.round(o.recall_eventos * 100) + "% dos eventos, com precisão de " + (o.precisao * 100).toFixed(1).replace(".", ",") +
       "% (negativos não rotulados: é um piso). PR-AUC " + t.pr_auc.toFixed(4).replace(".", ",") + " contra prevalência " + t.prevalencia.toFixed(4).replace(".", ",") + ".</p>";
     el("limits").innerHTML = "<h2>Limites</h2><ul class='plain'>" + f.avisos.map(function (a) { return "<li>" + Lg.esc(a) + "</li>"; }).join("") + "</ul>" +

@@ -15,7 +15,9 @@ Protocol (see ``evaluation.splits`` for the dates)
        operating thresholds; the test years are never used for either.
     5. The test years (2025 on) are scored once, by a model trained on everything before them.
     6. Place generalization: train on four fifths of the municipalities, test on the rest.
-    7. The operational model is refit on all usable rows with the chosen recipe.
+    7. The operational trigger is the validated model; if none passes the gate it is the best
+       rainfall rule (by events caught out of sample), calibrated the same way, and the model is
+       kept in the card as experimental. Either is refit/applied on all usable rows.
 
 Training uses all positives and ``NEG_PER_POS`` random negatives per positive (speed and
 class balance); evaluation always uses every row, with the natural prevalence, and the
@@ -35,12 +37,13 @@ import joblib
 import numpy as np
 import pandas as pd
 import sklearn
+from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.inspection import permutation_importance
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import FunctionTransformer, StandardScaler
 
 from ..config import resolve
 from ..datasets import gatilho as dataset
@@ -48,6 +51,7 @@ from ..evaluation import metrics, splits
 from ..features import weather as feat
 from ..ingestion import s2id
 from ..ingestion import weather as rain_source
+from .rules import RuleScorer
 
 SEED = 20261108
 NEG_PER_POS = 50
@@ -76,6 +80,8 @@ GRID = {
 SIMPLICITY = {"logistica": 0, "hgb": 1, "rf": 2}
 ABLATION_PARAMS = {"learning_rate": 0.1, "max_depth": 5, "min_samples_leaf": 100}
 BASELINE_PARAMS = {"C": 0.1}
+# The rainfall rules that can take over when no learned model passes the gate.
+RULES = {"regra_p3d": "p_3d", "regra_rel_p3d": "rel_p3d"}
 BASELINES = {
     "prior": lambda f: np.zeros(len(f)),
     "regra_p3d": lambda f: f["p_3d"].to_numpy(dtype=float),
@@ -83,11 +89,21 @@ BASELINES = {
 }
 
 
-def make_model(family: str, params: dict, seed: int = SEED):
+# Rainfall can only raise the risk: the trees are told so (monotonic constraints) and the logistic
+# model sees rainfall on a log scale. Flexible models trained up to 2022 cannot extrapolate to
+# the record rain of 2023, and a function that may fall as rain rises ranks the extremes badly.
+RAINFALL = set(feat.RAIN_FEATURES + feat.RELATIVE_FEATURES + feat.REGIONAL_FEATURES)
+
+
+def make_model(family: str, params: dict, cols: list[str], seed: int = SEED):
+    rain_idx = [i for i, c in enumerate(cols) if c in RAINFALL]
     if family == "logistica":
-        return make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000, random_state=seed, **params))
+        log = ColumnTransformer([("log", FunctionTransformer(np.log1p), rain_idx)], remainder="passthrough")
+        return make_pipeline(log, StandardScaler(), LogisticRegression(max_iter=2000, random_state=seed, **params))
     if family == "hgb":
-        return HistGradientBoostingClassifier(max_iter=300, l2_regularization=1.0, random_state=seed, **params)
+        monotone = [1 if c in RAINFALL else 0 for c in cols]
+        return HistGradientBoostingClassifier(max_iter=300, l2_regularization=1.0, monotonic_cst=monotone,
+                                              random_state=seed, **params)
     if family == "rf":
         return RandomForestClassifier(n_estimators=200, max_features="sqrt", n_jobs=-1, random_state=seed, **params)
     raise ValueError(f"unknown model family: {family}")
@@ -104,8 +120,8 @@ def training_rows(frame: pd.DataFrame, mask: np.ndarray, seed: int = SEED) -> np
 
 def fit(frame: pd.DataFrame, mask: np.ndarray, family: str, params: dict, cols: list[str]):
     rows = training_rows(frame, mask)
-    return make_model(family, params).fit(frame.iloc[rows][cols].to_numpy("float32"),
-                                          frame["y"].to_numpy()[rows])
+    return make_model(family, params, cols).fit(frame.iloc[rows][cols].to_numpy("float32"),
+                                                frame["y"].to_numpy()[rows])
 
 
 def predict(model, frame: pd.DataFrame, mask: np.ndarray, cols: list[str]) -> np.ndarray:
@@ -161,6 +177,11 @@ def oof_events(frame: pd.DataFrame, rows: pd.Series, scores: dict[str, np.ndarra
             for name, s in scores.items()}
 
 
+GATE_NAMES = {"margem_pr_auc_na_validacao": "margem de PR-AUC na validação",
+              "anos_da_janela_movel_vencidos": "anos da janela móvel vencidos",
+              "eventos_fora_da_amostra_no_mesmo_orcamento": "eventos detectados fora da amostra no mesmo orçamento de alertas"}
+
+
 def validation_gate(decision: dict, by_year: list[dict], events: dict) -> dict:
     """Validated only if the model beats the baselines in three independent ways; says which failed."""
     years = [r for r in by_year if r["ano"] in CALIBRATION_YEARS]
@@ -177,7 +198,7 @@ def validation_gate(decision: dict, by_year: list[dict], events: dict) -> dict:
     decision = {k: v for k, v in decision.items() if k != "passa_margem_validacao"}
     return {**decision, "criterios": criteria,
             "estado": "validado frente aos baselines (validação, janela móvel e eventos)" if not failed
-            else "experimental: não passa em " + ", ".join(failed)}
+            else "experimental: não passa em " + "; ".join(GATE_NAMES[k] for k in failed)}
 
 
 def rolling_oof(frame: pd.DataFrame, family: str, params: dict, cols: list[str]) -> pd.DataFrame:
@@ -256,6 +277,7 @@ def run(label_name: str, quick: bool = False) -> dict:
     masks = splits.temporal(frame)
     card = {"rotulo": label_name, "cobrade": list(LABELS[label_name]),
             "dataset": dataset.describe(frame, label_name), "semente": SEED,
+            "chuva_em_torno_dos_registros": dataset.rain_profile(feat.wide(rain), records, LABELS[label_name], SEED),
             "vazamento_episodios_entre_particoes": episode_leakage(frame, masks),
             "particoes": {k: {"linhas": int(v.sum()), "positivos": int(frame.loc[v, "y"].sum()),
                               "periodo": [str(frame.loc[v, "data"].min().date()), str(frame.loc[v, "data"].max().date())]}
@@ -305,6 +327,8 @@ def run(label_name: str, quick: bool = False) -> dict:
     gate_events = oof_events(frame, calibration_rows, {"modelo": oof["score"].to_numpy()[calib_rows],
                                                        **{n: base_oof[n][calib_rows] for n in base_oof if n != "prior"}})
     decision = validation_gate(decision, by_year, gate_events)
+    use_rule = not decision["estado"].startswith("validado")
+    rule = max(RULES, key=lambda n: (gate_events[n], base_val[n]["pr_auc"])) if use_rule else None
     blocks = splits.spatial_blocks(towns)
     spatial = []
     for block in sorted(blocks.unique()):
@@ -346,16 +370,37 @@ def run(label_name: str, quick: bool = False) -> dict:
             key=lambda r: -r["queda_media"]),
     })
 
-    # The model that was tested (trained before 2025), kept for the forecast-skew evaluation.
-    tested_artifact = {"modelo": tested, "calibrador": calibrator, "limiares": thresholds, "colunas": cols,
+    if use_rule:
+        op_cols, op_thresholds, op_family, op_params = [RULES[rule]], base_thresholds[rule], "regra", {"coluna": RULES[rule]}
+        op_calibrator = IsotonicRegression(out_of_bounds="clip", y_min=0, y_max=1).fit(
+            base_oof[rule][calib_rows], oof_y[calib_rows])
+        tested_model, op_test_score = RuleScorer(0), scorers[rule](test)
+    else:
+        op_cols, op_thresholds, op_family, op_params = cols, thresholds, family, params
+        op_calibrator, tested_model, op_test_score = calibrator, tested, raw
+    op_probability = op_calibrator.predict(op_test_score)
+    op_budgets = threshold_report(test, op_test_score, op_thresholds)
+    card["gatilho_operacional"] = {
+        "tipo": "regra" if use_rule else "modelo",
+        "descricao": (f"regra de chuva ({'chuva relativa ao percentil 95 local em 3 dias' if rule == 'regra_rel_p3d' else 'chuva acumulada em 3 dias'}), "
+                      "calibrada em frequência") if use_rule else f"modelo {family}",
+        "regra": rule, "colunas": op_cols, "limiares": op_thresholds,
+        "estado": ("regra simples calibrada: o modelo de aprendizado de máquina ficou experimental e não é o gatilho em uso"
+                   if use_rule else decision["estado"]),
+        "motivo": decision["estado"],
+        "desempenho_teste": {**metrics.ranking(y_test, op_test_score), "calibracao": metrics.calibration(y_test, op_probability),
+                             "orcamentos": op_budgets}}
+    # The trigger that was tested (trained/fitted before 2025), kept for the forecast-skew evaluation.
+    tested_artifact = {"modelo": tested_model, "calibrador": op_calibrator, "limiares": op_thresholds, "colunas": op_cols,
                        "quantis": quantiles, "municipios": towns[["ibge", "nome", "lat", "lon", "area_km2", "populacao", "regiao_imediata"]].copy(),
                        "grade": grid[["ibge", "altitude_m"]].copy(), "sklearn": sklearn.__version__,
                        "treinado_ate": str(frame.loc[final_train, "data"].max().date())}
-    operational = fit(frame, ~frame["excluido"].to_numpy(), family, params, cols)
+    operational = RuleScorer(0) if use_rule else fit(frame, ~frame["excluido"].to_numpy(), family, params, cols)
     version = f"gatilho-{label_name}-{datetime.now(timezone.utc):%Y%m%d}"
-    artifact = {"versao": version, "rotulo": label_name, "familia": family, "parametros": params,
-                "colunas": cols, "modelo": operational, "calibrador": calibrator, "limiares": thresholds,
-                "limiares_orcamento": "pontuação bruta do modelo; alertas_X = X% dos dias-município (OOF 2020-2024)",
+    artifact = {"versao": version, "rotulo": label_name, "familia": op_family, "parametros": op_params,
+                "colunas": op_cols, "modelo": operational, "calibrador": op_calibrator, "limiares": op_thresholds,
+                "tipo": "regra" if use_rule else "modelo",
+                "limiares_orcamento": "pontuação bruta do gatilho; alertas_X = X% dos dias-município (OOF 2020-2024)",
                 "quantis": quantiles, "climatologia_ate": CLIMATOLOGY_UNTIL,
                 # static inputs of the features, so the published site needs only this file
                 "municipios": towns[["ibge", "nome", "lat", "lon", "area_km2", "populacao", "regiao_imediata"]].copy(),

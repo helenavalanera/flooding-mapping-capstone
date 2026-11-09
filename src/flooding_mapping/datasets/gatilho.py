@@ -22,6 +22,7 @@ Grouping
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 LABEL_BEFORE_DAYS = 2
@@ -84,3 +85,27 @@ def describe(frame: pd.DataFrame, label_name: str) -> dict:
 def build(features: pd.DataFrame, records: pd.DataFrame, cobrade: tuple[int, ...]) -> pd.DataFrame:
     """Labelled dataset: features + ``y``, ``excluido``, ``episodio``."""
     return assign_episodes(label(features, records, cobrade))
+
+
+def rain_profile(series: pd.DataFrame, records: pd.DataFrame, cobrade: tuple[int, ...], seed: int = 0,
+                 heavy_mm: float = 20.0, lags: range = range(-3, 4)) -> dict:
+    """Daily rain around each record's protocol date: does the date match the rain?
+
+    ``series`` is days x municipalities. Lag 0 is the protocol date; a record whose window falls
+    outside the series is skipped. Random days of the same municipalities are the comparison.
+    """
+    values = series.to_numpy(float)
+    chosen = records[records["cobrade"].isin(cobrade) & records["ibge"].isin(series.columns)]
+    cols = series.columns.get_indexer(chosen["ibge"])
+    around = {}
+    for lag in lags:
+        rows = series.index.get_indexer(chosen["data_evento"] + pd.Timedelta(days=lag))
+        around[lag] = np.where(rows >= 0, values[np.maximum(rows, 0), cols], np.nan)
+    table = pd.DataFrame(around).dropna()
+    rng = np.random.default_rng(seed)
+    random_days = values[rng.integers(0, len(values), len(table)), series.columns.get_indexer(chosen["ibge"])[: len(table)]]
+    return {"registros": int(len(table)),
+            "mediana_mm_por_defasagem": {int(k): round(float(table[k].median()), 1) for k in lags},
+            "fracao_com_chuva_forte_no_dia_do_protocolo": round(float((table[0] >= heavy_mm).mean()), 3),
+            "fracao_com_chuva_forte_em_dias_aleatorios": round(float(np.nanmean(random_days >= heavy_mm)), 3),
+            "chuva_forte_mm": heavy_mm}

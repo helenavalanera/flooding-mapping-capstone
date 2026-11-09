@@ -63,10 +63,11 @@ def test_validated_needs_all_three_independent_checks_and_names_the_failures():
     decision = {"familia": "hgb", "parametros": {}, "pr_auc_val": 0.03, "melhor_baseline_pr_auc_val": 0.02, "passa_margem_validacao": True}
     ok = model.validation_gate(decision, years([1, 1, 1, 0, 0]), {"modelo": 0.40, "regra_p3d": 0.35, "logistica_chuva": 0.30})
     assert ok["estado"].startswith("validado") and "passa_margem_validacao" not in ok
+    assert all(v["passa"] for v in ok["criterios"].values())
     lost_events = model.validation_gate(decision, years([1, 1, 1, 0, 0]), {"modelo": 0.30, "logistica_chuva": 0.35})
-    assert lost_events["estado"].startswith("experimental") and "eventos_fora_da_amostra" in lost_events["estado"]
+    assert lost_events["estado"].startswith("experimental") and "eventos detectados fora da amostra" in lost_events["estado"]
     few_years = model.validation_gate(decision, years([1, 0, 0, 0, 0]), {"modelo": 0.40, "logistica_chuva": 0.30})
-    assert "anos_da_janela_movel_vencidos" in few_years["estado"]
+    assert "anos da janela móvel vencidos" in few_years["estado"]
     weak = model.validation_gate({**decision, "passa_margem_validacao": False}, years([1] * 5), {"modelo": 0.4, "x": 0.1})
     assert weak["estado"].startswith("experimental") and not weak["criterios"]["margem_pr_auc_na_validacao"]["passa"]
 
@@ -94,12 +95,20 @@ def test_full_protocol_on_synthetic_storms(tmp_path, monkeypatch):
     assert budgets["modelo"]["alertas_2pct"]["dias_alerta_por_mil"] < 60
     assert {"brier", "confiabilidade"} <= set(test["calibracao"])
     assert card["decisao"]["familia"] in model.GRID and card["estabilidade_temporal_janela_movel"]
+    assert card["chuva_em_torno_dos_registros"]["registros"] > 100       # the EDA is stored with the card
     assert card["importancia_por_permutacao_pr_auc"][0]["variavel"]
 
     saved = json.loads((tmp_path / "reports/ml/gatilho_estrito.json").read_text())
     assert saved["artefato"]["versionado_no_git"] is False and len(saved["artefato"]["sha256"]) == 64
     artifact = joblib.load(next((tmp_path / "artifacts/models").rglob("modelo.joblib")))
-    assert artifact["colunas"] == card["selecao_de_variaveis"]["variaveis"]
+    operational = card["gatilho_operacional"]
+    assert artifact["tipo"] == operational["tipo"] and artifact["colunas"] == operational["colunas"]
+    if operational["tipo"] == "modelo":
+        assert artifact["colunas"] == card["selecao_de_variaveis"]["variaveis"] and card["decisao"]["estado"].startswith("validado")
+    else:  # no model passed the gate: a calibrated rainfall rule runs, and the card says why
+        assert operational["regra"] in model.RULES and card["decisao"]["estado"].startswith("experimental")
+        assert operational["motivo"] == card["decisao"]["estado"] and "experimental" in operational["estado"]
+    assert operational["desempenho_teste"]["orcamentos"]["alertas_2pct"]["eventos"] > 0
     assert {"ibge", "nome", "lat", "lon", "populacao", "regiao_imediata"} <= set(artifact["municipios"].columns)
     assert list(artifact["grade"].columns) == ["ibge", "altitude_m"]
     assert artifact["treinado_ate"] >= "2026-10-01" and set(artifact["limiares"]) == set(budgets["modelo"])
@@ -110,3 +119,27 @@ def test_full_protocol_on_synthetic_storms(tmp_path, monkeypatch):
 
 def test_label_set_changes_what_counts_as_positive():
     assert set(model.LABELS["estrito"]) < set(model.LABELS["amplo"])
+
+
+def test_a_rule_scorer_ranks_by_its_column_and_nothing_is_fitted():
+    import numpy as np
+
+    from flooding_mapping.models.rules import RuleScorer
+
+    scorer = RuleScorer(1)
+    probability = scorer.predict_proba(np.array([[9.0, 2.0], [1.0, 40.0], [5.0, 7.0]]))
+    assert probability.shape == (3, 2) and probability[:, 1].tolist() == [2.0, 40.0, 7.0]
+    assert np.argsort(-probability[:, 1]).tolist() == [1, 2, 0]
+
+
+def test_the_monotone_trees_never_lower_the_risk_when_rain_rises():
+    import numpy as np
+
+    cols = ["p0", "p_3d", "lat"]
+    rng = np.random.default_rng(0)
+    X = np.column_stack([rng.gamma(0.4, 8, 4000), rng.gamma(0.5, 20, 4000), rng.uniform(-33, -28, 4000)]).astype("float32")
+    y = (X[:, 1] + rng.normal(0, 25, 4000) > 60).astype(int)
+    hgb = model.make_model("hgb", {"learning_rate": 0.1, "max_depth": 5, "min_samples_leaf": 20}, cols).fit(X, y)
+    low, high = X.copy(), X.copy()
+    high[:, 1] += 50                                  # the same municipality-days with 50 mm more rain in 3 days
+    assert (hgb.predict_proba(high)[:, 1] >= hgb.predict_proba(low)[:, 1] - 1e-9).all()

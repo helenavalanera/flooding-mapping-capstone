@@ -118,3 +118,16 @@ def test_ranking_and_calibration_return_the_documented_fields():
     assert budgets["alertas_0.5pct"] > budgets["alertas_2pct"] > budgets["alertas_5pct"]
     for share, key in ((0.005, "alertas_0.5pct"), (0.02, "alertas_2pct"), (0.05, "alertas_5pct")):
         assert (score >= budgets[key]).mean() == pytest.approx(share, abs=0.002)
+
+
+def test_rain_profile_shows_whether_the_protocol_date_matches_the_rain():
+    days = pd.date_range("2024-01-01", periods=60)
+    series = pd.DataFrame(0.0, index=days, columns=["A", "B"])
+    series.loc["2024-02-10", "A"] = 40.0       # the rain falls on the protocol date
+    series.loc["2024-02-09", "A"] = 10.0
+    records = pd.DataFrame({"ibge": ["A", "Z"], "data_evento": pd.to_datetime(["2024-02-10", "2024-02-10"]), "cobrade": [12200, 12200]})
+    profile = gatilho.rain_profile(series, records, (12200,))
+    assert profile["registros"] == 1                                  # municipality Z is not in the series
+    assert profile["mediana_mm_por_defasagem"][0] == 40.0 and profile["mediana_mm_por_defasagem"][-1] == 10.0
+    assert profile["mediana_mm_por_defasagem"][1] == 0.0 and profile["fracao_com_chuva_forte_no_dia_do_protocolo"] == 1.0
+    assert profile["fracao_com_chuva_forte_em_dias_aleatorios"] < 0.2
