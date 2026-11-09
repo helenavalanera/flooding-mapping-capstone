@@ -35,7 +35,7 @@ import geopandas as gpd
 import pandas as pd
 from shapely import STRtree
 
-from ..config import load_config, resolve
+from ..config import resolve
 
 KM_TOLERANCE = 1.0
 DIST_OK_M = 1000.0

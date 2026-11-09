@@ -19,7 +19,6 @@ CARD = {"decisao": {"estado": "experimental: não supera o melhor baseline"},
 
 
 def segment_index():
-    line = LineString([(X0, Y0), (X0 + 9000, Y0)])
     return gpd.GeoDataFrame({"segmento_id": ["7-000", "7-001"], "objectid": [7, 7], "codigo_sre": ["001ERS0010"] * 2,
                              "nome": ["ERS-1"] * 2, "km_ini": [0.0, 4.5], "km_fim": [4.5, 9.0],
                              "geometry": [LineString([(X0, Y0), (X0 + 4500, Y0)]), LineString([(X0 + 4500, Y0), (X0 + 9000, Y0)])]},

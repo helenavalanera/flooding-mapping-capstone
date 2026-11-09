@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import pytest
 
 from flooding_mapping.models import susceptibility_index as si
 

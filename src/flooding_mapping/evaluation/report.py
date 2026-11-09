@@ -133,8 +133,8 @@ def render(label: str, card: dict, skew: dict | None, index: dict | None, impact
         f"`reports/ml/gatilho_{label}.json`; nenhum foi digitado à mão._\n",
         "## Resumo\n",
         f"- **Estado do modelo:** {dec['estado']}.",
-        f"- **Pergunta:** dado o cenário de chuva, qual município tem mais chance de **registrar um desastre hídrico** "
-        f"(inundação, enxurrada ou alagamento) naquele dia? Não prevê profundidade, extensão nem duração da água.",
+        "- **Pergunta:** dado o cenário de chuva, qual município tem mais chance de **registrar um desastre hídrico** "
+        "(inundação, enxurrada ou alagamento) naquele dia? Não prevê profundidade, extensão nem duração da água.",
         f"- **Dados:** {thousands(d['linhas_usadas'])} dias-município de {d['municipios']} municípios ({d['periodo'][0]} a {d['periodo'][1]}), "
         f"{thousands(d['positivos'])} dias positivos em {d['episodios']} episódios, prevalência {pct(d['prevalencia'], 2)}.",
         f"- **Teste (2025 em diante, tocado uma única vez):** PR-AUC {num(test['modelo']['pr_auc'])} contra prevalência "

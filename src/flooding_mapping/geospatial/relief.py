@@ -43,7 +43,7 @@ def ensure_tiles(tiles: list[tuple[int, int]], root: Path, manifest: Path) -> di
     for lat, lon in tiles:
         name = tile_name(lat, lon)
         try:
-            entry = download(TILE_URL.format(name=name), root / f"{name}.tif", manifest, timeout=300)
+            download(TILE_URL.format(name=name), root / f"{name}.tif", manifest, timeout=300)
         except urllib.error.HTTPError as exc:
             if exc.code in (403, 404):
                 continue

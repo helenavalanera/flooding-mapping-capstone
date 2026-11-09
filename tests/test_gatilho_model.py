@@ -3,9 +3,7 @@ import json
 import joblib
 import numpy as np
 import pandas as pd
-import pytest
 
-from flooding_mapping.evaluation import splits
 from flooding_mapping.models import gatilho as model
 
 TOWNS = [f"43{i:05d}" for i in range(14)]

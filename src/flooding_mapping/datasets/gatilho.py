@@ -22,7 +22,6 @@ Grouping
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
 LABEL_BEFORE_DAYS = 2
