@@ -6,6 +6,7 @@
   <title>Risco de alagamentos no RS</title>
   <meta name="description" content="Estimativa experimental, por município, do risco de registro de desastre hídrico nas próximas 72 horas no Rio Grande do Sul.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,8 +15,18 @@
       <h1>Risco de alagamentos no Rio Grande do Sul <span class="badge" id="status-badge">experimental</span></h1>
       <p class="sub">Estimativa por município para as próximas 72 horas · <strong id="updated">carregando…</strong></p>
     </div>
+    <nav id="abas" role="tablist" aria-label="Áreas do painel">
+      <button role="tab" data-aba="geral" aria-selected="false">Visão geral</button>
+      <button role="tab" data-aba="mapa" aria-selected="true">Mapa</button>
+      <button role="tab" data-aba="previsao" aria-selected="false">Previsão</button>
+      <button role="tab" data-aba="mobilidade" aria-selected="false">Mobilidade</button>
+      <button role="tab" data-aba="ocorrencias" aria-selected="false">Ocorrências</button>
+      <button role="tab" data-aba="proveniencia" aria-selected="false">Proveniência</button>
+    </nav>
   </header>
   <div id="banner" role="alert" hidden></div>
+  <section id="vista-geral" class="vista" role="tabpanel" hidden></section>
+  <div id="vista-mapa" class="vista" role="tabpanel">
   <div class="layout">
     <div id="map" role="application" aria-label="Mapa do Rio Grande do Sul com o risco estimado por município"></div>
     <aside id="panel" aria-label="Controles e informações">
@@ -31,6 +42,29 @@
         <label><input type="checkbox" id="l-road"> Rodovias por tráfego VDM <em>(DAER)</em></label>
         <label><input type="checkbox" id="l-crit"> Trechos críticos <em>(simulação)</em></label>
       </section>
+      <section id="poa-controles" aria-labelledby="h-poa" hidden>
+        <h2 id="h-poa">Porto Alegre · trechos</h2>
+        <div class="escopo" role="group" aria-label="Escopo do mapa">
+          <button type="button" id="escopo-rs" aria-pressed="true">Estado</button>
+          <button type="button" id="escopo-poa" aria-pressed="false">Porto Alegre</button>
+        </div>
+        <div id="poa-opcoes" hidden>
+          <label for="poa-hora">Hora: <b id="poa-hora-rotulo">agora</b> <span id="poa-hora-kind"></span></label>
+          <input type="range" id="poa-hora" min="0" max="48" step="1" value="0" aria-describedby="poa-hora-rotulo">
+          <label><input type="checkbox" id="l-poa-risco" checked> Risco por trecho <em>(previsto: baseline sem validação)</em></label>
+          <label><input type="checkbox" id="l-poa-occ" checked> Ocorrências <em>(reportada ou confirmada)</em></label>
+          <label><input type="checkbox" id="l-poa-int" checked> Interdições <em>(confirmado)</em></label>
+          <ul class="legend" aria-label="Legenda de Porto Alegre">
+            <li><span class="sw line" style="border-color:#b3202a"></span><b>Alto</b> <span class="kind k-previsto">Previsto</span> trechos mais suscetíveis com chuva forte</li>
+            <li><span class="sw line" style="border-color:#c27a00"></span><b>Atenção</b> <span class="kind k-previsto">Previsto</span> (tracejado = hora à frente)</li>
+            <li><span class="sw" style="border:2px dashed #1f6fb2;border-radius:50%;background:#fff"></span>Ocorrência reportada <span class="kind k-observado">Observado</span> sem verificação</li>
+            <li><span class="sw" style="background:#1b2630;border-radius:50%"></span>Ocorrência confirmada <span class="kind k-confirmado">Confirmado</span></li>
+            <li><span class="sw" style="background:#000;color:#fff;text-align:center;font-size:10px;line-height:12px">✕</span>Interdição: o trecho não é usado nas rotas <span class="kind k-confirmado">Confirmado</span></li>
+          </ul>
+          <p class="small" id="poa-resumo" aria-live="polite"></p>
+          <div id="detalhe-trecho" aria-live="polite"><p class="muted">Clique em um trecho no mapa.</p></div>
+        </div>
+      </section>
       <section aria-labelledby="h-legend">
         <h2 id="h-legend">Legenda</h2>
         <ul class="legend" id="legend"></ul>
@@ -45,12 +79,18 @@
           <li><b>Estimativa</b>: o que o modelo calcula a partir da previsão de chuva.</li>
           <li><b>Observado</b>: bloqueio ativo ou registro de desastre, com atraso e viés de notificação.</li>
           <li><b>Simulação</b>: impacto do fechamento de um trecho na malha mapeada, não uma ocorrência.</li>
+          <li><b>Confirmado</b>: interdição validada por operador, com evidência escrita.</li>
         </ul>
       </section>
       <section id="model" aria-labelledby="h-model"><h2 id="h-model">Modelo</h2></section>
       <section id="limits" aria-labelledby="h-limits"><h2 id="h-limits">Limites</h2></section>
     </aside>
   </div>
+  </div>
+  <section id="vista-previsao" class="vista" role="tabpanel" hidden></section>
+  <section id="vista-mobilidade" class="vista" role="tabpanel" hidden></section>
+  <section id="vista-ocorrencias" class="vista" role="tabpanel" hidden></section>
+  <section id="vista-proveniencia" class="vista" role="tabpanel" hidden></section>
   <footer>
     Projeto acadêmico de código aberto. Não substitui os alertas oficiais da Defesa Civil.
     Fontes: Open-Meteo (chuva), CPRv BM (bloqueios), S2iD/MIDR (registros), DAER (rodovias), IBGE (municípios).
@@ -59,5 +99,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="logic.js"></script>
   <script src="app.js"></script>
+  <script src="painel.js"></script>
 </body>
 </html>

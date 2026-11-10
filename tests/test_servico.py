@@ -171,7 +171,7 @@ def test_the_map_has_no_estimate_when_the_rain_window_is_incomplete():
 def test_segment_detail_has_terrain_risk_by_hour_and_the_simulated_closure():
     s, r = montar()
     d = s.trecho("S0")
-    assert d["peso"] == pytest.approx(0.95) and len(d["risco_por_hora"]) == 25 and d["hora_de_maior_exposicao"]["classe"] == "alto"
+    assert d["peso"] == pytest.approx(1.0) and len(d["risco_por_hora"]) == 25 and d["hora_de_maior_exposicao"]["classe"] == "alto"
     assert d["impacto_simulado_do_fechamento"]["carro"]["na_rede"] is True and d["limites"]
     with pytest.raises(KeyError):
         s.trecho("nao-existe")
@@ -228,3 +228,26 @@ def test_health_reports_degraded_without_rain_data_and_never_exposes_the_key():
     assert h["status"] == "degradado" and h["provedor_de_linguagem"] is False
     with pytest.raises(ChuvaIndisponivel):
         s.visao_geral()
+
+
+def sem_nome():
+    """The same network, but every street of the short path is unnamed (OSM often has no name)."""
+    r = rede(tres_caminhos().assign(nome=lambda d: d["nome"].where(~d["segmento_id"].str.startswith("S"), float("nan"))))
+    meta = {"fonte": "teste", "emitido_em_utc": "2026-11-09T14:00:00Z"}
+    return sv.Servico(r, ChuvaHoraria(0, 0, fonte=lambda lat, lon: (chuva(), meta)), oc.Ocorrencias(), Explicador(None), PR,
+                      relogio=lambda: pd.Timestamp(AGORA)), r
+
+
+def estrito(dados):
+    return json.loads(json.dumps(dados, allow_nan=False))  # raises on NaN/Infinity
+
+
+def test_unnamed_streets_are_none_everywhere_and_every_answer_is_strict_json():
+    s, r = sem_nome()
+    assert r.arestas["nome"].isna().sum() == 2 and all(n is None for n in r.arestas["nome"][:2])
+    mapa = estrito(s.risco_mapa(2))
+    assert any(f["properties"]["nome"] is None for f in mapa["geojson"]["features"])
+    a = estrito(s.rotas(pedido()))
+    assert any(t["nome"] is None for t in a["rotas"]["habitual"]["trechos_de_risco"])
+    assert estrito(s.explicacao(a["analise_id"], True))["texto"]
+    estrito(s.trecho("S0")), estrito(s.previsao(8)), estrito(s.visao_geral()), estrito(s.proveniencia())

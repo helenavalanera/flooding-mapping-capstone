@@ -18,7 +18,7 @@ def aresta(sid, u, v, de, para, metros=1000.0, pct=50.0, highway="primary", onew
             "lat1": LAT0 + para[1], "percentil": pct, "nome": nome or sid}
 
 
-def tres_caminhos(pct_curto=95.0, pct_medio=50.0, pct_longo=5.0, metros=1000.0):
+def tres_caminhos(pct_curto=100.0, pct_medio=50.0, pct_longo=5.0, metros=1000.0):
     """O -> D by a short (2 segments), a medium (3) and a long (4) path with no segment in common."""
     O, D = (0.0, 0.0), (0.03, 0.0)
     pontos = {"s1": (0.015, 0.004), "m1": (0.01, 0.01), "m2": (0.02, 0.01), "l1": (0.005, -0.012),

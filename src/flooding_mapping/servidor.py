@@ -39,6 +39,8 @@ from .linguagem.explicar import Explicador
 from .servico import Servico
 
 STATIC = Path(__file__).parent / "app" / "static"
+# Source files win; the build folder only supplies what the pipeline generates (state forecast, layers).
+RAIZES = (STATIC, ROOT / "site")
 MAX_CORPO = 8 * 1024
 LIMITES_POR_MIN = {"/api/rotas": 20, "/api/explicacao": 10, "/api/relatos": 10}
 CSP = ("default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
@@ -106,7 +108,9 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
                 self.send_header("Vary", "Origin")
 
         def _json(self, dados, status=HTTPStatus.OK) -> None:
-            corpo = json.dumps(dados, ensure_ascii=False, default=str, allow_nan=False).encode()
+            self._enviar(json.dumps(dados, ensure_ascii=False, default=str, allow_nan=False).encode(), status)
+
+        def _enviar(self, corpo: bytes, status=HTTPStatus.OK) -> None:
             self.send_response(status)
             self._cabecalhos("application/json; charset=utf-8", len(corpo), True)
             self.end_headers()
@@ -171,7 +175,12 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             except Exception as erro:  # never leak the request or a trace
                 print(f"erro interno: {type(erro).__name__}", file=sys.stderr)
                 return self._erro(HTTPStatus.INTERNAL_SERVER_ERROR, "erro interno")
-            self._json(resultado)
+            try:  # strict JSON: a NaN is a server bug (500), not a client mistake, and never reaches a client
+                corpo = json.dumps(resultado, ensure_ascii=False, default=str, allow_nan=False).encode()
+            except (ValueError, TypeError) as erro:
+                print(f"erro interno ao serializar: {type(erro).__name__}", file=sys.stderr)
+                return self._erro(HTTPStatus.INTERNAL_SERVER_ERROR, "erro interno")
+            self._enviar(corpo)
 
         def _operador(self) -> None:
             if not servico.token_operador:
@@ -214,16 +223,18 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
         # -------------------------------------------------------------- arquivos estáticos
         def _estatico(self, caminho: str) -> None:
             relativo = caminho.lstrip("/") or "index.html"
-            alvo = (STATIC / relativo).resolve()
-            if alvo.is_dir():
-                alvo = alvo / "index.html"
-            if not alvo.is_file() or not alvo.is_relative_to(STATIC.resolve()) or alvo.suffix not in TIPOS:
-                return self._erro(HTTPStatus.NOT_FOUND, "não encontrado")
-            corpo = alvo.read_bytes()
-            self.send_response(HTTPStatus.OK)
-            self._cabecalhos(TIPOS[alvo.suffix], len(corpo), False)
-            self.end_headers()
-            self.wfile.write(corpo)
+            for raiz in RAIZES:
+                alvo = (raiz / relativo).resolve()
+                if alvo.is_dir():
+                    alvo = alvo / "index.html"
+                if alvo.is_file() and alvo.is_relative_to(raiz.resolve()) and alvo.suffix in TIPOS:
+                    corpo = alvo.read_bytes()
+                    self.send_response(HTTPStatus.OK)
+                    self._cabecalhos(TIPOS[alvo.suffix], len(corpo), False)
+                    self.end_headers()
+                    self.wfile.write(corpo)
+                    return
+            self._erro(HTTPStatus.NOT_FOUND, "não encontrado")
 
     return Handler
 

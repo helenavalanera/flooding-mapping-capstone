@@ -118,9 +118,17 @@ risco_trecho:
   chuva_alto: {max_1h_mm: 9.0, total_24h_mm: 55.9}
   fator_no_medio: 0.4          # PROVISÓRIO: fator de chuva ao atingir o nível médio (alto = 1.0)
   # Condição antecedente: chuva nas 72 h anteriores à janela de 24 h.
+  # Recuo: a água sai da via em poucas horas depois da chuva, mas as janelas de 24 h seguem altas. O fator decai
+  # linearmente até zero em `recuo_h` horas sem chuva (hora com menos de `chuva_minima_mm` conta como seca).
+  recuo_h: 6                   # PROVISÓRIO
+  chuva_minima_mm: 0.5         # PROVISÓRIO
   antecedente_72h_mm: 26.2     # PROVISÓRIO: usa o mesmo limite médio de 24 h
   antecedente_fator: 1.15      # PROVISÓRIO: multiplicador do fator de chuva, limitado a 1
-  classes: {atencao: 0.15, alto: 0.4}   # PROVISÓRIO: cortes do escore (fator de chuva x peso do trecho)
+  # O peso do trecho é uma rampa linear sobre o percentil físico: 0 até este corte, 1 no percentil 100. Só os trechos
+  # mais suscetíveis carregam peso; sem isso a classe "Alto" cobriria metade da cidade com chuva forte.
+  corte_fisico: 85             # PROVISÓRIO: orçamento de atenção, não ajustado a ocorrências
+  classes: {atencao: 0.25, alto: 0.6}   # PROVISÓRIO: cortes do escore (fator de chuva x peso); ~5% da malha em atenção com chuva
+                                         # no nível médio e ~10% (atenção + alto) com chuva no nível alto
   # Peso mínimo do trecho quando há ocorrência próxima e ainda ativa, por situação.
   piso_ocorrencia: {confirmada: 0.9, reportada: 0.6}   # PROVISÓRIO
   fator_confiabilidade_ocorrencia: {alta: 1.0, media: 0.75, baixa: 0.5}   # PROVISÓRIO

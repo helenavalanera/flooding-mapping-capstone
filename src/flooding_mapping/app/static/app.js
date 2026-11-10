@@ -16,6 +16,7 @@
   function banner(text) { var b = el("banner"); b.textContent = text; b.hidden = false; }
 
   var map = L_.map("map", { zoomControl: true }).setView([-30.0, -53.2], 6);
+  window.FloodingMap = map;  // the dashboard tabs (painel.js) add the street-level layers to this map
   L_.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 12, attribution: "&copy; colaboradores do OpenStreetMap" }).addTo(map);
 

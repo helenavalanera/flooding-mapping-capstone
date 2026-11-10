@@ -33,11 +33,12 @@ from .risco_trecho import LOCAL, agora_local, classe, fator_em, natureza, pesos,
 TTL_ANALISE_S = 1800
 MAX_ANALISES = 200
 MAX_TEXTO_RELATO = 600
-MAX_FEICOES = 3000
+MAX_FEICOES = 8000
 METODO = ("Escore = fator de chuva (0-1) x peso do trecho (0-1). O fator vem da chuva horária da cidade (total em 24 h e hora "
-          "mais intensa, ancorados nos níveis observados em dias com bloqueios em Porto Alegre, mais a condição antecedente). O peso é o "
-          "percentil de um índice físico relativo (cota baixa, depressão local, proximidade da água, acumulação de fluxo, terreno plano), "
-          "elevado a um piso quando há ocorrência próxima e ativa.")
+          "mais intensa, ancorados nos níveis observados em dias com bloqueios em Porto Alegre, mais a condição antecedente, com recuo de poucas horas depois que a chuva para). O peso é uma "
+          "rampa sobre o percentil de um índice físico relativo (cota baixa, depressão local, proximidade da água, acumulação de fluxo, terreno plano): "
+          "só os trechos mais suscetíveis têm peso, para sinalizar uma parcela pequena da malha mesmo com chuva forte. "
+          "Uma ocorrência próxima e ativa eleva o peso a um piso.")
 LIMITES = [
     "Baseline determinístico: não foi ajustado nem validado contra alagamentos em vias.",
     "Os cortes de classe e os pesos de condição antecedente e de ocorrência são provisórios.",
@@ -165,9 +166,10 @@ class Servico:
         marcados = np.flatnonzero(np.isin(cls, ["atencao", "alto"]))
         fortes = marcados[np.argsort(-escore[marcados])][:MAX_FEICOES]
         r, a = self.rede, self.rede.arestas
-        feicoes = [{"type": "Feature", "geometry": {"type": "LineString", "coordinates": [[float(a["lon0"].iat[i]), float(a["lat0"].iat[i])],
-                                                                                          [float(a["lon1"].iat[i]), float(a["lat1"].iat[i])]]},
+        feicoes = [{"type": "Feature", "geometry": {"type": "LineString", "coordinates": [[round(float(a["lon0"].iat[i]), 5), round(float(a["lat0"].iat[i]), 5)],
+                                                                                          [round(float(a["lon1"].iat[i]), 5), round(float(a["lat1"].iat[i]), 5)]]},
                     "properties": {"id": str(r.ids[i]), "nome": a["nome"].iat[i] or None, "classe": cls[i], "escore": round(float(escore[i]), 3),
+                                   "km": round(float(r.comp_m[i]) / 1000, 3),
                                    "ocorrencia": e["risco"]["ocorrencia"][i], "interditado": bool(e["bloqueada"][i])}} for i in fortes]
         return {**base, "sem_estimativa": False, "total_atencao_ou_alto": int(len(marcados)), "exibidos": len(feicoes),
                 "geojson": {"type": "FeatureCollection", "features": feicoes}}

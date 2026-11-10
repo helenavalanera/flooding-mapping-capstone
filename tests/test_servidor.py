@@ -139,3 +139,29 @@ def test_the_env_file_fills_missing_variables_but_never_overrides_the_real_envir
     srv.ler_env(arquivo, env)
     assert env["GEMINI_API_KEY"] == "abc" and env["GEMINI_MODEL"] == "modelo-x" and env["OPERADOR_TOKEN"] == "do-ambiente"
     srv.ler_env(tmp_path / "nao-existe", env)  # a missing file is fine
+
+
+def test_a_serialisation_failure_answers_500_instead_of_dropping_the_connection(api):
+    base, servico, _ = api()
+    servico.saude = lambda: {"valor": float("nan")}   # strict JSON refuses NaN
+    r = requests.get(base + "/api/saude")
+    assert r.status_code == 500 and r.json() == {"erro": "erro interno"}
+
+
+def test_generated_files_come_from_the_build_folder_but_source_files_win(api, tmp_path, monkeypatch):
+    fonte, build = tmp_path / "fonte", tmp_path / "build"
+    for pasta in (fonte, build):
+        pasta.mkdir()
+    (fonte / "index.html").write_text("<p>da fonte</p>")
+    (build / "index.html").write_text("<p>antigo do build</p>")
+    (build / "previsao_72h.json").write_text('{"gerado": true}')
+    (tmp_path / "segredo.json").write_text('{"segredo": 1}')
+    monkeypatch.setattr(srv, "RAIZES", (fonte, build))
+    base, _, _ = api()
+    assert requests.get(base + "/").text == "<p>da fonte</p>"
+    assert requests.get(base + "/previsao_72h.json").json() == {"gerado": True}
+    assert requests.get(base + "/nao-existe.json").status_code == 404
+    host, port = base.removeprefix("http://").split(":")
+    c = http.client.HTTPConnection(host, int(port))
+    c.request("GET", "/../segredo.json")           # a sibling of both roots must stay out of reach
+    assert c.getresponse().status == 404

@@ -65,8 +65,8 @@ def test_site_has_the_page_the_data_and_no_jekyll_marker(tmp_path):
 def test_every_file_the_page_loads_exists_in_the_site(tmp_path):
     out, _ = make_site(tmp_path)
     html = (out / "index.html").read_text()
-    local = [m for m in re.findall(r'(?:src|href)="([^"]+)"', html) if not m.startswith("http")]
-    assert {"style.css", "logic.js", "app.js"} <= set(local) and all((out / m).exists() for m in local)
+    local = [m for m in re.findall(r'(?:src|href)="([^"]+)"', html) if not m.startswith(("http", "data:"))]
+    assert {"style.css", "logic.js", "app.js", "painel.js"} <= set(local) and all((out / m).exists() for m in local)
     js = (out / "app.js").read_text()
     for name in re.findall(r'getJson\((?:DATA \+ )?"([^"]+)"', js):
         assert (out / name).exists() or (out / "data" / name).exists(), name

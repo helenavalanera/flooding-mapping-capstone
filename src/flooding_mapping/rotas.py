@@ -52,6 +52,7 @@ class Rede:
     def __init__(self, arestas: pd.DataFrame, params: dict):
         self.p = params
         a = arestas.reset_index(drop=True)
+        a["nome"] = a["nome"].astype(object).where(a["nome"].notna(), None)  # an unnamed street is None, never NaN (not JSON)
         self.n = len(a)
         self.arestas = a
         self.ids = a["segmento_id"].to_numpy()

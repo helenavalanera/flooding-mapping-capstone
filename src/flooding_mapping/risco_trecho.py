@@ -6,11 +6,15 @@
 the 24 h total and the highest hour inside it, each mapped piecewise-linearly so that the
 levels measured on days with documented blockages in Porto Alegre (``chuva_medio``, ``chuva_alto``
 in ``config/analysis.yaml``, lower bounds from ``reports/qa/rain_calibration.json``) give 0.4 and 1.
-Wet antecedent conditions (rain in the 72 h before the window) raise it by a fixed factor.
+Wet antecedent conditions (rain in the 72 h before the window) raise it by a fixed factor. Water
+leaves the street within hours of the rain, while the 24 h windows stay high, so the factor
+recedes linearly to zero over ``recuo_h`` dry hours.
 
-``peso`` (0-1) is the segment's physical susceptibility percentile (relative index; see
-``indice_fisico``), raised to a floor where a recent occurrence is near: a confirmed one more
-than a reported one, scaled by its reliability.
+``peso`` (0-1) is a linear ramp over the segment's physical susceptibility percentile (a relative
+index, see ``indice_fisico``): 0 up to ``corte_fisico`` and 1 at the top, so only the most
+susceptible streets carry weight. It is raised to a floor where a recent occurrence is near: a
+confirmed one more than a reported one, scaled by its reliability. The cutoffs are an explicit
+attention budget (a small share of the network is flagged even in heavy rain), not a fit.
 
 What this is not: the municipal x day model (S2iD decrees, no geometry) is not used here, and
 no label is propagated to streets. Nothing here was fitted or validated against street-level
@@ -71,6 +75,9 @@ def tabela_de_chuva(serie: pd.Series, p: dict) -> pd.DataFrame:
                        _nivel(maximo.to_numpy(), nm["max_1h_mm"], na["max_1h_mm"], f0))
     umido = antes.to_numpy() >= p["antecedente_72h_mm"]
     fator = np.where(umido, np.minimum(1, fator * p["antecedente_fator"]), fator)
+    seco = serie < p["chuva_minima_mm"]
+    horas_secas = seco.groupby((~seco).cumsum()).cumsum()  # 0 while it rains, k after k dry hours
+    fator = fator * (1 - horas_secas / p["recuo_h"]).clip(lower=0).to_numpy()
     tabela = pd.DataFrame({"chuva_hora_mm": serie, "total_24h_mm": total, "max_1h_mm": maximo,
                            "antecedente_72h_mm": antes, "antecedente_umido": umido, "fator": fator}, index=serie.index)
     tabela.loc[total.isna() | maximo.isna(), "fator"] = np.nan  # incomplete window: no estimate
@@ -100,7 +107,7 @@ def pesos(pct: np.ndarray, rede, ocorrencias: list[dict], p: dict) -> dict:
 
     ``peso`` is NaN where there is neither terrain data nor a nearby occurrence.
     """
-    peso = pct / 100.0
+    peso = np.where(np.isnan(pct), np.nan, np.clip((pct - p["corte_fisico"]) / (100.0 - p["corte_fisico"]), 0, 1))
     confiab = np.where(np.isnan(pct), np.nan, p["confiabilidade"]["fisico"])
     origem = np.full(len(pct), None, dtype=object)
     for r in ocorrencias:
