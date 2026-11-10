@@ -292,3 +292,50 @@ def test_a_lower_exposure_that_comes_from_stretches_without_data_is_flagged_as_u
     normal = {c["rota"]: c for c in explicar.comparar(CASO)}                  # 5% without data in every route: no caveat
     assert normal["menor_exposicao"]["comparacao_incerta"] is False and "(parte" not in normal["menor_exposicao"]["rotulo"]
     assert "incerta" not in explicar.alerta(CASO, METEO)["texto"]
+
+
+def test_token_usage_is_summed_across_the_rounds_of_one_answer():
+    def com_uso(r, entrada, saida, pensamento=0):
+        r._corpo["usageMetadata"] = {"promptTokenCount": entrada, "candidatesTokenCount": saida, "thoughtsTokenCount": pensamento}
+        return r
+    c, _ = cliente(com_uso(chamada("analyze_route_risk", {"rota": "habitual"}), 800, 20, 100), com_uso(texto("pronto"), 900, 150, 50))
+    c.gerar("s", "p", executar=lambda n, a: {"km": 1}, declaracoes=ferramentas.DECLARACOES)
+    assert c.ultimo_uso == {"chamadas": 2, "entrada": 1700, "saida": 170, "pensamento": 150}
+    c2, _ = cliente(com_uso(texto("ok"), 10, 2))
+    c2.gerar("s", "p")
+    assert c2.ultimo_uso["chamadas"] == 1                                    # reset for every answer
+
+
+def test_an_answer_cut_by_the_token_limit_is_its_own_failure_not_an_empty_answer():
+    corte = Resp(200, {"candidates": [{"finishReason": "MAX_TOKENS", "content": {"role": "model"}}]})
+    c, _ = cliente(corte)
+    with pytest.raises(LinguagemIndisponivel) as erro:
+        c.gerar("s", "p")
+    assert erro.value.codigo == "limite_de_tokens"
+
+
+def test_thinking_is_kept_minimal_by_default_so_it_does_not_eat_the_output_budget():
+    c, http = cliente(texto("ok"))
+    c.gerar("s", "p")
+    assert http.pedidos[0]["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "minimal"}
+
+
+def test_a_model_that_refuses_the_thinking_setting_is_asked_again_without_it_and_remembered():
+    recusa = Resp(400, texto="Unsupported thinking level for this model")
+    c, http = cliente(recusa, texto("primeira"), texto("segunda"))
+    assert c.gerar("s", "p") == "primeira"
+    assert "thinkingConfig" in http.pedidos[0]["json"]["generationConfig"] and "thinkingConfig" not in http.pedidos[1]["json"]["generationConfig"]
+    assert c.gerar("s", "p") == "segunda" and "thinkingConfig" not in http.pedidos[2]["json"]["generationConfig"]
+
+
+def test_thinking_can_be_switched_off_from_the_environment():
+    assert gemini.do_ambiente({"GEMINI_API_KEY": "k", "GEMINI_MODEL": "m", "GEMINI_PENSAMENTO": ""}).pensamento == ""
+    assert gemini.do_ambiente({"GEMINI_API_KEY": "k", "GEMINI_MODEL": "m"}).pensamento == "minimal"
+
+
+def test_an_answer_cut_by_the_limit_is_refused_even_when_it_carries_partial_text():
+    parcial = Resp(200, {"candidates": [{"finishReason": "MAX_TOKENS", "content": {"parts": [{"text": "Com chuva prevista, a rota habitual tem 13,9 km em 2"}]}}]})
+    c, _ = cliente(parcial)
+    with pytest.raises(LinguagemIndisponivel) as erro:
+        c.gerar("s", "p")
+    assert erro.value.codigo == "limite_de_tokens"

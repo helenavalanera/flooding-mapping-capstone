@@ -8,6 +8,7 @@ of this is data about the world, and nothing is written to disk.
 """
 
 import argparse
+import os
 import sys
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -18,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from flooding_mapping import ocorrencias as oc  # noqa: E402
 from flooding_mapping import servidor as srv  # noqa: E402
 from flooding_mapping.chuva_horaria import ChuvaHoraria  # noqa: E402
+from flooding_mapping.linguagem.explicar import Explicador  # noqa: E402
 
 
 def montar_demo(estaticos: Path | None = None):
@@ -31,7 +33,9 @@ def montar_demo(estaticos: Path | None = None):
     meta = {"fonte": "SÉRIE SINTÉTICA DE DEMONSTRAÇÃO (não é previsão)", "emitido_em_utc": pd.Timestamp.now("UTC").strftime("%Y-%m-%dT%H:%M:%SZ"),
             "primeira_hora": str(indice[0]), "ultima_hora": str(indice[-1]), "resolucao_espacial": "demonstração"}
     servico.chuva = ChuvaHoraria(0, 0, fonte=lambda lat, lon: (serie, meta))
-    servico.store, servico.token_operador = oc.Ocorrencias(), "demo"
+    servico.store, servico.token_operador = oc.Ocorrencias(), "demo-operador-com-mais-de-24-caracteres"
+    if not os.environ.get("DEMO_GEMINI"):   # the browser tests never spend the language provider's quota
+        servico.explicador = Explicador(None)
     r = servico.rede
     candidatas = [i for i in r.proximos(-51.2300, -30.0300, 600) if r.arestas["drive"].iat[i] and r.arestas["nome"].iat[i]]
     for i, situacao in ((candidatas[0], "reportada"), (candidatas[len(candidatas) // 2], "confirmada")):

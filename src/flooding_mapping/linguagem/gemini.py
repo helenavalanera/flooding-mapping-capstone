@@ -18,7 +18,7 @@ from . import ferramentas
 BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 TIMEOUT_S = 15
 MAX_RODADAS = 3
-MAX_SAIDA_TOKENS = 600
+MAX_SAIDA_TOKENS = 1024   # models that think count their thinking against this limit: too small and the answer comes back empty
 
 
 class LinguagemIndisponivel(RuntimeError):
@@ -37,16 +37,33 @@ MENSAGENS = {
     "tempo_esgotado": "o provedor de linguagem não respondeu a tempo",
     "indisponivel": "provedor de linguagem indisponível",
     "resposta_invalida": "resposta do provedor de linguagem inválida",
+    "limite_de_tokens": "a resposta do provedor de linguagem foi cortada pelo limite de tokens",
 }
 
 
 class Gemini:
-    def __init__(self, chave: str, modelo: str, http=requests, timeout: float = TIMEOUT_S):
+    def __init__(self, chave: str, modelo: str, http=requests, timeout: float = TIMEOUT_S, pensamento: str = "minimal"):
         if not chave or not modelo:
             raise LinguagemIndisponivel("nao_configurado")
         self._chave, self.modelo, self._http, self._timeout = chave, modelo, http, timeout
+        self.pensamento = pensamento           # thinking level: explaining a computed result needs none, and thinking eats the output budget
+        self._sem_config_de_pensamento = not pensamento
+        self.ultimo_uso = self._uso_vazio()   # tokens of the last ``gerar``/``estruturar`` (all rounds), for cost and limits
+
+    @staticmethod
+    def _uso_vazio() -> dict:
+        return {"chamadas": 0, "entrada": 0, "saida": 0, "pensamento": 0}
+
+    def _somar_uso(self, dados: dict) -> None:
+        meta = dados.get("usageMetadata") or {}
+        self.ultimo_uso["chamadas"] += 1
+        self.ultimo_uso["entrada"] += int(meta.get("promptTokenCount") or 0)
+        self.ultimo_uso["saida"] += int(meta.get("candidatesTokenCount") or 0)
+        self.ultimo_uso["pensamento"] += int(meta.get("thoughtsTokenCount") or 0)
 
     def _chamar(self, corpo: dict) -> dict:
+        if not self._sem_config_de_pensamento:
+            corpo = {**corpo, "generationConfig": {**corpo.get("generationConfig", {}), "thinkingConfig": {"thinkingLevel": self.pensamento}}}
         try:
             resposta = self._http.post(f"{BASE}/{self.modelo}:generateContent", json=corpo, timeout=self._timeout,
                                        headers={"x-goog-api-key": self._chave})
@@ -54,6 +71,9 @@ class Gemini:
             raise LinguagemIndisponivel("tempo_esgotado") from None
         except requests.RequestException:
             raise LinguagemIndisponivel("indisponivel") from None
+        if resposta.status_code == 400 and not self._sem_config_de_pensamento and "thinking" in resposta.text[:600].lower():
+            self._sem_config_de_pensamento = True   # this model family refuses the setting: ask once more without it, and stop sending it
+            return self._chamar({**corpo, "generationConfig": {k: v for k, v in corpo["generationConfig"].items() if k != "thinkingConfig"}})
         if resposta.status_code in (401, 403) or (resposta.status_code == 400 and "API key" in resposta.text[:400]):
             raise LinguagemIndisponivel("autenticacao")
         if resposta.status_code == 429:
@@ -63,15 +83,24 @@ class Gemini:
         if resposta.status_code != 200:
             raise LinguagemIndisponivel("resposta_invalida")
         try:
-            return resposta.json()
+            dados = resposta.json()
         except ValueError:
             raise LinguagemIndisponivel("resposta_invalida") from None
+        if isinstance(dados, dict):
+            self._somar_uso(dados)
+        return dados
 
     @staticmethod
     def _partes(dados: dict) -> list[dict]:
         try:
-            partes = dados["candidates"][0]["content"]["parts"]
+            candidato = dados["candidates"][0]
         except (KeyError, IndexError, TypeError):
+            raise LinguagemIndisponivel("resposta_invalida") from None
+        if candidato.get("finishReason") == "MAX_TOKENS":   # cut off, even if some text came: a half sentence is never shown
+            raise LinguagemIndisponivel("limite_de_tokens")
+        try:
+            partes = candidato["content"]["parts"]
+        except (KeyError, TypeError):
             raise LinguagemIndisponivel("resposta_invalida") from None
         if not isinstance(partes, list):
             raise LinguagemIndisponivel("resposta_invalida")
@@ -80,6 +109,7 @@ class Gemini:
     def gerar(self, sistema: str, pergunta: str, executar: Callable[[str, object], dict] | None = None,
               declaracoes: list[dict] | None = None) -> str:
         """Text answer; the model may ask for the declared operations, at most ``MAX_RODADAS`` rounds."""
+        self.ultimo_uso = self._uso_vazio()
         conversa = [{"role": "user", "parts": [{"text": pergunta}]}]
         corpo = {"systemInstruction": {"parts": [{"text": sistema}]},
                  "generationConfig": {"temperature": 0.2, "maxOutputTokens": MAX_SAIDA_TOKENS}}
@@ -107,6 +137,7 @@ class Gemini:
 
     def estruturar(self, sistema: str, texto: str, esquema: dict) -> dict:
         """One call, no operations, answer forced into ``esquema`` (a JSON schema)."""
+        self.ultimo_uso = self._uso_vazio()
         corpo = {"systemInstruction": {"parts": [{"text": sistema}]},
                  "contents": [{"role": "user", "parts": [{"text": texto}]}],
                  "generationConfig": {"temperature": 0, "maxOutputTokens": 300, "responseMimeType": "application/json",
@@ -124,4 +155,4 @@ class Gemini:
 def do_ambiente(env) -> Gemini | None:
     """The configured provider, or ``None`` when the key or the model is missing."""
     chave, modelo = (env.get("GEMINI_API_KEY") or "").strip(), (env.get("GEMINI_MODEL") or "").strip()
-    return Gemini(chave, modelo) if chave and modelo else None
+    return Gemini(chave, modelo, pensamento=(env.get("GEMINI_PENSAMENTO") if env.get("GEMINI_PENSAMENTO") is not None else "minimal").strip()) if chave and modelo else None
