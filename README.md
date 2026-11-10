@@ -20,6 +20,19 @@ pontos documentados de bloqueio total e mais N pontos apontados pelo modelo de s
 com N vindo de um ajuste linear entre chuva acumulada e número de bloqueios registrados por data,
 multiplicado por um fator de precariedade (1 = condição observada).
 
+## Plataforma: Rio Grande do Sul e Porto Alegre
+
+Uma interface de duas escalas (dashboard e PWA de mobilidade preventiva) sobre o mesmo serviço: monitoramento regional no Rio Grande do Sul
+e mobilidade preventiva em Porto Alegre, com mapa 3D, cobertura de dados calculada e capacidades declaradas por região.
+
+```
+make rede     # tabela de ruas de Porto Alegre (uma vez)
+make servir   # http://127.0.0.1:8000/  dashboard  |  /pwa/  mobilidade preventiva
+```
+
+O risco por trecho é um **baseline determinístico, sem validação em vias**; o roteamento e o risco por trecho existem só em Porto Alegre.
+Arquitetura, cobertura, API, privacidade, testes e pendências: [`docs/produto_preventivo.md`](docs/produto_preventivo.md).
+
 ## Escopo estadual (RS): gatilho de risco, impacto e interface
 
 O projeto foi ampliado de Porto Alegre para o Rio Grande do Sul, em duas camadas: um **gatilho
