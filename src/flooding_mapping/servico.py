@@ -27,6 +27,7 @@ from . import ocorrencias as oc
 from . import rotas as rt
 from .chuva_horaria import ChuvaHoraria
 from .linguagem import ferramentas
+from .cobertura import cobertura_poa, montar as montar_territorios
 from .linguagem.explicar import ROTULOS, Explicador, alerta, comparar, resumo_rota
 from .risco_trecho import LOCAL, agora_local, classe, fator_em, natureza, pesos, tabela_de_chuva
 
@@ -68,9 +69,11 @@ def ponto(dados, campo: str, limites: tuple[float, float, float, float]) -> tupl
 
 class Servico:
     def __init__(self, rede: rt.Rede, chuva: ChuvaHoraria, store: oc.Ocorrencias, explicador: Explicador, params_risco: dict,
-                 relogio=agora_local, token_operador: str = "", meta_dados: dict | None = None):
+                 relogio=agora_local, token_operador: str = "", meta_dados: dict | None = None, territorios: dict | None = None,
+                 resumo_rs: dict | None = None):
         self.rede, self.chuva, self.store, self.explicador, self.pr = rede, chuva, store, explicador, params_risco
         self.relogio, self.token_operador, self.meta_dados = relogio, token_operador, meta_dados or {}
+        self.territorios_config, self.resumo_rs = territorios, resumo_rs
         self._tabela: tuple[int, pd.DataFrame] | None = None
         self._analises: dict[str, tuple[float, rt.Analise, dict, dict]] = {}
         self._lock = threading.Lock()
@@ -349,6 +352,14 @@ class Servico:
         return self.store.mudar_situacao(id_, dados.get("situacao"), por=str(dados.get("por") or "operador")[:40],
                                          evidencia=dados.get("evidencia", ""), confiabilidade=dados.get("confiabilidade"))
 
+    # ------------------------------------------------------------------ territórios
+    def territorios(self) -> dict:
+        """Capabilities (declared once in the configuration) with the coverage of each region: the state summary
+        computed at build time and Porto Alegre's computed now from the street table that is loaded."""
+        if self.territorios_config is None:
+            raise KeyError("territorios")
+        return montar_territorios(self.territorios_config, self.resumo_rs, cobertura_poa(self.rede.arestas))
+
     # ------------------------------------------------------------------ proveniência e saúde
     def proveniencia(self) -> dict:
         e = self._estado()
@@ -359,7 +370,7 @@ class Servico:
             {"nome": "Copernicus DEM GLO-30", "uso": "elevação, declividade, depressão local e acumulação de fluxo"},
             {"nome": "Ocorrências", "uso": "relatos de usuários (reportada) e confirmações de operadores", "criterio": oc.SITUACOES},
         ], "cobertura": {"segmentos": r.n, "com_indice_fisico": int(np.isfinite(r.pct).sum()),
-                         "fracao_com_indice_fisico": round(float(np.isfinite(r.pct).mean()), 3)},
+                         "fracao_com_indice_fisico": round(float(np.isfinite(r.pct).mean()), 3), "por_modal_em_km": cobertura_poa(r.arestas)},
             "parametros_provisorios": ["fator_no_medio", "antecedente_fator", "classes", "piso_ocorrencia", "confiabilidade", "penalidade_s_por_km_risco"],
             "metodo": METODO, "limites": LIMITES, "dados_da_rede": self.meta_dados,
             "natureza": {"observado": "chuva até agora; ocorrências com status", "previsto": "chuva futura e o risco estimado a partir dela",

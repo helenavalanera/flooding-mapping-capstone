@@ -239,6 +239,8 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
                     return servico.listar_ocorrencias(consulta.get("situacao"), completo)
                 if caminho == "/api/proveniencia":
                     return servico.proveniencia()
+                if caminho == "/api/territorios":
+                    return servico.territorios()
             if metodo == "POST":
                 if caminho == "/api/rotas":
                     return servico.rotas(self._corpo())
@@ -288,8 +290,12 @@ def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
         raise SystemExit(f"Falta {destino.relative_to(ROOT)}. Gere com: python -m flooding_mapping.rede_poa")
     rede = rt.Rede(pd.read_parquet(destino), config["roteamento"])
     lat, lon = float(rede.no_lat.mean()), float(rede.no_lon.mean())
+    from .cobertura import yaml_territorios
+
+    resumo = resolve("src/flooding_mapping/app/static/data/cobertura_rs.json")
     servico = Servico(rede, ChuvaHoraria(lat, lon), oc.Ocorrencias(resolve("data/operacional/ocorrencias.jsonl")),
                       Explicador(gemini.do_ambiente(env)), config["risco_trecho"], token_operador=(env.get("OPERADOR_TOKEN") or "").strip(),
+                      territorios=yaml_territorios(), resumo_rs=json.loads(resumo.read_text())["estado"] if resumo.exists() else None,
                       meta_dados={"rede": str(destino.relative_to(ROOT)), "gerada_em": time.strftime("%Y-%m-%d", time.localtime(destino.stat().st_mtime))})
     return servico, (env.get("CORS_ORIGEM") or "").strip()
 

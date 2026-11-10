@@ -209,3 +209,14 @@ def test_a_directory_without_the_trailing_slash_redirects_so_relative_paths_keep
     assert r.status_code == 301 and r.headers["Location"] == "/pwa/"
     assert requests.get(base + "/pwa").status_code == 200 and requests.get(base + "/pwa").url.endswith("/pwa/")
     assert requests.get(base + "/pwa/pwa.js").status_code == 200
+
+
+def test_territories_endpoint_serves_the_capabilities_and_the_live_coverage_of_porto_alegre(api):
+    import yaml
+    from flooding_mapping.config import ROOT
+    base, servico, _ = api()
+    assert requests.get(base + "/api/territorios").status_code == 404           # not configured: no invented answer
+    servico.territorios_config = yaml.safe_load((ROOT / "config" / "territorios.yaml").read_text(encoding="utf-8"))
+    t = requests.get(base + "/api/territorios").json()
+    assert set(t["territorios"]) == {"rs", "poa"} and t["territorios"]["rs"]["cobertura"] is None
+    assert t["territorios"]["poa"]["cobertura"]["dirigivel"]["km"] > 0 and t["territorios"]["rs"]["capacidades"]["rotas"]["estado"] == "indisponivel"

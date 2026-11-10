@@ -5,6 +5,7 @@ import pytest
 from rede_sintetica import PR
 
 from flooding_mapping import auditoria_risco as au
+from flooding_mapping.cobertura import cobertura_poa
 
 
 def rede():
@@ -13,7 +14,7 @@ def rede():
 
 
 def test_coverage_is_by_length_and_a_footway_without_index_counts_as_uncovered():
-    c = au.cobertura(rede())
+    c = cobertura_poa(rede())
     assert c["dirigivel"] == {"km": 2.0, "fracao_com_indice": 0.5}
     assert c["somente_a_pe"] == {"km": 2.0, "fracao_com_indice": 1.0} and c["nenhum_modal"]["fracao_com_indice"] == 0.0
     assert c["caminhavel"]["fracao_com_indice"] == pytest.approx(3 / 4)

@@ -16,22 +16,13 @@ import json
 import numpy as np
 import pandas as pd
 
+from .cobertura import cobertura_poa
 from .config import load_config, resolve
 from .ingestion.weather import ARCHIVE_URL, TIMEZONE, request
 from .risco_trecho import tabela_de_chuva
 
 POA = {"latitude": -30.03, "longitude": -51.22}
 EVENTOS = {"2019-09-17": 18, "2021-09-08": 7, "2022-03-06": 17, "2025-06-18": 21}   # date -> hour of the report (rain_calibration.json)
-
-
-def cobertura(rede: pd.DataFrame) -> dict:
-    """Share of the length (km) with a terrain index, by kind of way."""
-    km = rede["comprimento_m"] / 1000
-    tem = rede["percentil"].notna()
-    def parte(mask) -> dict:
-        return {"km": round(float(km[mask].sum()), 1), "fracao_com_indice": round(float(km[mask & tem].sum() / km[mask].sum()), 3) if km[mask].sum() else None}
-    return {"dirigivel": parte(rede["drive"]), "caminhavel": parte(rede["walk"]),
-            "somente_a_pe": parte(rede["walk"] & ~rede["drive"]), "nenhum_modal": parte(~rede["walk"] & ~rede["drive"])}
 
 
 def fracao_sinalizada(rede: pd.DataFrame, p: dict, fatores=(0.4, 0.7, 1.0)) -> dict:
@@ -73,7 +64,7 @@ def main() -> None:
     eventos = fator_nos_eventos(p)
     relatorio = {
         "natureza": "auditoria descritiva; nenhum parâmetro foi alterado",
-        "cobertura_do_indice_fisico": cobertura(rede), "fracao_da_malha_sinalizada_por_fator_de_chuva": fracao_sinalizada(rede, p),
+        "cobertura_do_indice_fisico": cobertura_poa(rede), "fracao_da_malha_sinalizada_por_fator_de_chuva": fracao_sinalizada(rede, p),
         "fator_nas_horas_dos_bloqueios_documentados": eventos,
         "conclusoes": [
             "Os trechos só de pedestres (calçadas e passagens) não têm índice: para quem anda a pé, parte do percurso fica sem estimativa, e o rótulo de menor exposição deve avisar quando vier de trechos sem dado.",
