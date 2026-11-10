@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rotas na chuva · Flooding Mapping</title>
+  <meta name="description" content="Veja antes de sair se a sua rota passa por trechos com risco estimado de acúmulo de água e compare alternativas.">
+  <meta name="theme-color" content="#0b5d8f">
+  <meta name="api-base" content="">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="pwa.css">
+</head>
+<body>
+  <header>
+    <h1>Rotas na chuva</h1>
+    <p class="sub">Porto Alegre · risco estimado de acúmulo de água na sua rota</p>
+  </header>
+  <div id="aviso" role="status" hidden></div>
+  <div id="mapa" role="application" aria-label="Mapa para marcar pontos e ver as rotas"></div>
+  <p id="dica-mapa" class="dica" hidden></p>
+  <main id="tela" tabindex="-1"></main>
+  <nav id="abas" aria-label="Seções">
+    <button data-tela="planejar" aria-current="page">Planejar</button>
+    <button data-tela="lugares">Lugares</button>
+    <button data-tela="relatar">Relatar</button>
+    <button data-tela="privacidade">Privacidade</button>
+  </nav>
+  <dialog id="consentimento" aria-labelledby="c-titulo">
+    <h2 id="c-titulo">Usar sua localização?</h2>
+    <p>Vamos pedir ao seu aparelho a posição <b>uma vez</b>, só com o app aberto, para marcar o ponto que você escolheu (origem, lugar ou relato).
+       Não acompanhamos você em segundo plano e não guardamos sua posição no servidor. Você pode revogar isto em Privacidade.</p>
+    <form method="dialog"><button class="btn" value="sim">Permitir agora</button> <button class="btn sec" value="nao">Agora não</button></form>
+  </dialog>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="../logic.js"></script>
+  <script src="dados.js"></script>
+  <script src="pwa.js"></script>
+</body>
+</html>

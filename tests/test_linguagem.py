@@ -273,3 +273,10 @@ def test_invented_fields_in_the_structured_answer_are_discarded():
             return {"tipo": "ufo", "severidade": "extrema", "impacto_circulacao": "interdicao", "descricao": "ok", "situacao": "confirmada"}
     r = explicar.Explicador(Malicioso()).interpretar_relato("texto")
     assert r["tipo"] == "outro" and r["severidade"] == "desconhecida" and "situacao" not in r
+
+
+def test_the_alert_says_greater_exposure_only_when_the_habitual_route_is_the_most_exposed():
+    pior_alternativa = {**CASO, "alternativa": rota(35, 6.0, 4.0, 2.0, [trecho("Rua Y")])}
+    assert "maior exposição estimada a trechos" in explicar.alerta(CASO, METEO)["texto"]
+    texto = explicar.alerta(pior_alternativa, METEO)["texto"]
+    assert "maior exposição estimada a trechos" not in texto and "exposição estimada a trechos" in texto

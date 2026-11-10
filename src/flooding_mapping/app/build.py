@@ -76,6 +76,7 @@ def build_site(out: Path, artifact: dict, card: dict, series: pd.DataFrame, meta
     (out / "data").mkdir(parents=True)
     for name in ASSETS:
         shutil.copy(STATIC / name, out / name)
+    shutil.copytree(STATIC / "pwa", out / "pwa")
     for path in STATIC_DATA.glob("*"):
         shutil.copy(path, out / "data" / path.name)
     (out / "previsao_72h.json").write_text(json.dumps(forecast, ensure_ascii=False, separators=(",", ":")))

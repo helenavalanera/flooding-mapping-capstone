@@ -165,3 +165,11 @@ def test_generated_files_come_from_the_build_folder_but_source_files_win(api, tm
     c = http.client.HTTPConnection(host, int(port))
     c.request("GET", "/../segredo.json")           # a sibling of both roots must stay out of reach
     assert c.getresponse().status == 404
+
+
+def test_only_the_service_worker_may_connect_to_the_map_library_cdn(api):
+    base, _, _ = api()
+    pagina = requests.get(base + "/pwa/").headers["Content-Security-Policy"]
+    sw = requests.get(base + "/pwa/sw.js").headers["Content-Security-Policy"]
+    assert "cdnjs" not in pagina.split("connect-src")[1].split(";")[0] and "cdnjs" in sw.split("connect-src")[1].split(";")[0]
+    assert requests.get(base + "/pwa/manifest.webmanifest").headers["Content-Type"].startswith("application/manifest+json")

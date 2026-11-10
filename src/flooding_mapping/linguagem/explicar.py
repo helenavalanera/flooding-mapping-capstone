@@ -95,8 +95,10 @@ def alerta(rotas: dict, meteo: dict) -> dict:
                 "texto": texto + " É uma estimativa, não uma garantia: acompanhe os alertas oficiais.", "motivos": []}
     nivel = "alto" if hab["km_alto"] > 0 else "atencao"
     nomes = list(dict.fromkeys(t["nome"] for t in hab["trechos_de_risco"] if t["nome"]))[:3]
-    partes = ["Há previsão de chuva no período do seu deslocamento. Sua rota habitual apresenta maior exposição estimada a trechos "
-              "com possibilidade de acúmulo de água" + (f" (por exemplo: {', '.join(nomes)})." if nomes else ".")]
+    # "maior" only when the habitual route really is the most exposed of those offered
+    mais_exposta = hab["exposicao_km_risco"] >= max(r["exposicao_km_risco"] for r in rotas.values())
+    partes = ["Há previsão de chuva no período do seu deslocamento. Sua rota habitual apresenta " + ("maior " if mais_exposta else "")
+              + "exposição estimada a trechos com possibilidade de acúmulo de água" + (f" (por exemplo: {', '.join(nomes)})." if nomes else ".")]
     menor, alt = rotas.get("menor_exposicao"), rotas.get("alternativa")
     if menor:
         extra = round((menor["tempo_s"] - hab["tempo_s"]) / 60)

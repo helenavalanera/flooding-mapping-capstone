@@ -141,3 +141,26 @@ def test_the_files_the_build_needs_in_a_clean_clone_exist_and_are_not_git_ignore
         ignored = subprocess.run(["git", "check-ignore", "-q", *map(str, needed)], cwd=build.BUILD_DATA, capture_output=True)
         if ignored.returncode in (0, 1):  # 128 means "not a git repository": nothing to check
             assert ignored.returncode == 1, "a file the site build needs is ignored by .gitignore"
+
+
+def test_the_pwa_ships_with_everything_it_loads_and_never_caches_the_api(tmp_path):
+    out, _ = make_site(tmp_path)
+    pwa = out / "pwa"
+    html = (pwa / "index.html").read_text()
+    local = [m for m in re.findall(r'(?:src|href)="([^"]+)"', html) if not m.startswith(("http", "data:"))]
+    assert {"pwa.js", "dados.js", "pwa.css", "manifest.webmanifest", "../logic.js"} <= set(local)
+    assert all((pwa / m).exists() for m in local), [m for m in local if not (pwa / m).exists()]
+    manifest = json.loads((pwa / "manifest.webmanifest").read_text())
+    assert manifest["display"] == "standalone" and manifest["start_url"] == "./" and manifest["lang"] == "pt-BR"
+    assert all((pwa / i["src"]).exists() for i in manifest["icons"]) and {"192x192", "512x512"} <= {i["sizes"] for i in manifest["icons"]}
+    sw = (pwa / "sw.js").read_text()
+    shell = re.search(r"var CASCA = \[(.*?)\];", sw, re.S).group(1)
+    assert all((pwa / n).exists() for n in re.findall(r'"([^"h][^"]*)"', shell))     # every cached shell file exists
+    assert 'url.pathname.indexOf("/api/") >= 0) return;' in sw                          # API requests are left to the network
+
+
+def test_the_pwa_escapes_what_it_shows_and_never_watches_the_position():
+    js = (build.STATIC / "pwa" / "pwa.js").read_text()
+    assert "geolocation.watchPosition" not in js and js.count("geolocation.getCurrentPosition") == 1   # one position, foreground only
+    assert "Lg.esc" in js and js.count("esc(") > 30
+    assert not re.search(r"(api[_-]?key|token|secret)", js + (build.STATIC / "pwa" / "dados.js").read_text(), re.I)

@@ -1,0 +1,17 @@
+{
+  "name": "Rotas na chuva · Flooding Mapping",
+  "short_name": "Rotas na chuva",
+  "description": "Mobilidade preventiva: risco estimado de acúmulo de água na sua rota e alternativas.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f8f9",
+  "theme_color": "#0b5d8f",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

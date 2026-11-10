@@ -7,7 +7,7 @@ M  := $(PY) -m flooding_mapping
 
 .PHONY: all help downloads validar preparar cenarios suscetibilidade chuva \
         mobilidade robustez tipologia mapas criticidade abrir test coletar \
-        estado-dados estado-chuva estado-modelo estado-avaliacao estado-site estado
+        estado-dados estado-chuva estado-modelo estado-avaliacao estado-site estado rede servir
 
 all: downloads validar preparar cenarios suscetibilidade chuva mobilidade \
      robustez tipologia mapas  ## roda as etapas 1 a 10 em ordem
@@ -89,3 +89,9 @@ estado-site:  ## monta o site local em site/ com o modelo mais recente (abre com
 	$(M).app.build --model $$(ls -t artifacts/models/gatilho-estrito-*/modelo.joblib | head -1) --card reports/ml/gatilho_estrito.json --out site
 
 estado: estado-dados estado-chuva estado-modelo estado-avaliacao  ## fluxo estadual completo (sem publicar)
+
+rede:  ## tabela de ruas de Porto Alegre para o servidor (data/processed/rede_poa.parquet)
+	$(M).rede_poa
+
+servir:  ## dashboard, PWA (/pwa/) e API em http://127.0.0.1:8000
+	$(M).servidor

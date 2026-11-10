@@ -45,6 +45,8 @@ MAX_CORPO = 8 * 1024
 LIMITES_POR_MIN = {"/api/rotas": 20, "/api/explicacao": 10, "/api/relatos": 10}
 CSP = ("default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
        "img-src 'self' data: https://tile.openstreetmap.org https://cdnjs.cloudflare.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
+# The service worker downloads the map library from the CDN to keep a copy for offline use; only its own script gets that permission.
+CSP_SW = CSP.replace("connect-src 'self'", "connect-src 'self' https://cdnjs.cloudflare.com")
 TIPOS = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
          ".json": "application/json", ".geojson": "application/json", ".webmanifest": "application/manifest+json",
          ".png": "image/png", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
@@ -94,7 +96,7 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             pass
 
         # -------------------------------------------------------------- respostas
-        def _cabecalhos(self, tipo: str, tamanho: int, api: bool) -> None:
+        def _cabecalhos(self, tipo: str, tamanho: int, api: bool, csp: str = CSP) -> None:
             self.send_header("Content-Type", tipo)
             self.send_header("Content-Length", str(tamanho))
             self.send_header("X-Content-Type-Options", "nosniff")
@@ -102,7 +104,7 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             self.send_header("Permissions-Policy", "geolocation=(self), camera=(), microphone=()")
             self.send_header("Cache-Control", "no-store" if api else "no-cache")
             if not api:
-                self.send_header("Content-Security-Policy", CSP)
+                self.send_header("Content-Security-Policy", csp)
             if cors_origem:
                 self.send_header("Access-Control-Allow-Origin", cors_origem)
                 self.send_header("Vary", "Origin")
@@ -230,7 +232,7 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
                 if alvo.is_file() and alvo.is_relative_to(raiz.resolve()) and alvo.suffix in TIPOS:
                     corpo = alvo.read_bytes()
                     self.send_response(HTTPStatus.OK)
-                    self._cabecalhos(TIPOS[alvo.suffix], len(corpo), False)
+                    self._cabecalhos(TIPOS[alvo.suffix], len(corpo), False, CSP_SW if alvo.name == "sw.js" else CSP)
                     self.end_headers()
                     self.wfile.write(corpo)
                     return
