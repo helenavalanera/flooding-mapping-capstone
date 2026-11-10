@@ -34,3 +34,19 @@ ul { padding-left:18px; margin:4px 0; font-size:.9rem; } li { margin:3px 0; }
 #abas button[aria-current="page"] { color:var(--accent); font-weight:700; box-shadow:inset 0 3px 0 var(--accent); }
 dialog { border:1px solid var(--line); border-radius:14px; max-width:92vw; background:var(--card); color:var(--ink); } dialog::backdrop { background:rgba(0,0,0,.45); }
 @media (min-width:700px) { #mapa { height:42vh; margin:0 auto; max-width:640px; } .dica { max-width:640px; margin-left:auto; margin-right:auto; } }
+
+/* Fluxo, decisão e estados */
+.passos { list-style:none; display:flex; gap:6px; padding:0; margin:8px 0; counter-reset:p; } .passos li { flex:1; padding:6px 8px; border:1px solid var(--line); border-radius:8px; font-size:.78rem; color:var(--muted); background:var(--card); counter-increment:p; min-width:0; }
+.passos li::before { content:counter(p) " · "; font-weight:700; } .passos li.feito { border-color:var(--good); color:var(--ink); } .passos li.feito::after { content:" ✓"; color:var(--good); font-weight:700; } .passos li b { display:block; font-size:.82rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cond { border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin:8px 0; background:var(--card); } .cond h2 { margin:0 0 4px; font-size:.95rem; }
+.vazio, .erro { border:1px dashed var(--line); border-radius:12px; padding:12px 14px; margin:10px 0; background:var(--card); } .erro { border:2px solid var(--bad); border-style:solid; }
+.decisao { border:2px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; background:var(--card); } .decisao.alto { border-color:var(--bad); } .decisao.atencao { border-color:var(--warn); } .decisao.sem_risco_estimado { border-color:var(--good); }
+.decisao h2 { margin:0 0 4px; font-size:1.1rem; } .decisao .nivel { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.verif { display:flex; flex-direction:column; gap:6px; margin:8px 0; } .verif .item { padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+#vista3d { margin:8px 16px; } #mapa3d { height:46vh; min-height:260px; border-radius:10px; background:#cfd8de; border:1px solid var(--line); } #vista3d .cabeca { margin-bottom:6px; }
+.kind { display:inline-block; padding:1px 8px; font-size:.7rem; font-weight:700; border-radius:4px; vertical-align:middle; } .k-observado { background:#e3f0fa; color:#0b3d62; border:2px solid #1f6fb2; } .k-previsto { background:#fff4dc; color:#5c3d00; border:2px dashed #c27a00; } .k-simulado { background:#f1e6f7; color:#4a1a63; border:2px dotted #7b2d8e; } .k-confirmado { background:#1b2630; color:#fff; border:2px solid #000; }
+.trecho { padding:8px 0; border-bottom:1px solid var(--line); } .trecho:last-child { border-bottom:0; }
+#aviso button { margin-left:8px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+
+.verif .item { display:block; }

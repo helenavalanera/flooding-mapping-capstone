@@ -198,5 +198,6 @@ def test_every_layer_the_configuration_names_is_drawn_by_the_map_or_is_a_colouri
 def test_the_page_policy_lets_the_map_work_and_nothing_more():
     from flooding_mapping import servidor
     csp = dict(p.strip().split(" ", 1) for p in servidor.CSP.split(";") if p.strip())
-    assert "blob:" in csp["worker-src"] and "https://s3.amazonaws.com" in csp["connect-src"] and "https://tile.openstreetmap.org" in csp["connect-src"]
+    assert "'self'" in csp["worker-src"] and "blob:" in csp["worker-src"]     # the map needs blob workers; the PWA needs its own service worker
+    assert "https://s3.amazonaws.com" in csp["connect-src"] and "https://tile.openstreetmap.org" in csp["connect-src"]
     assert "'unsafe-eval'" not in servidor.CSP and csp["frame-ancestors"] == "'none'" and csp["script-src"] == "'self' https://cdnjs.cloudflare.com"

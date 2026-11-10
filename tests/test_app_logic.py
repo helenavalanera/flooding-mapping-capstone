@@ -134,3 +134,18 @@ def test_counts_per_class_report_the_municipalities_with_no_estimate_apart():
     c = run(f"L.countByClass({json.dumps(FORECAST)}, 0)")
     assert (c["alto"], c["atencao"], c["baixo"], c["sem_estimativa"]) == (1, 1, 2, 1) and c["chuva_maxima_mm"] == 80 and c["chuva_media_mm"] == 25.5
     assert run(f"L.countByClass({json.dumps(FORECAST)}, 1)")["atencao"] == 1
+
+
+def test_fragments_of_one_street_read_as_one_line_in_the_order_of_the_route():
+    trechos = [{"nome": "Av. A", "classe": "atencao", "km": 0.04, "inicio": "2026-11-09T18:35:00-03:00", "fim": "2026-11-09T18:35:00-03:00"},
+               {"nome": "Rua B", "classe": "atencao", "km": 0.3, "inicio": "2026-11-09T18:36:00-03:00", "fim": "2026-11-09T18:37:00-03:00"},
+               {"nome": "Av. A", "classe": "alto", "km": 0.2, "inicio": "2026-11-09T18:40:00-03:00", "fim": "2026-11-09T18:42:00-03:00", "ocorrencia": "x"},
+               {"nome": None, "classe": "atencao", "km": 0.1, "inicio": "2026-11-09T18:50:00-03:00", "fim": "2026-11-09T18:51:00-03:00"}]
+    g = run(f"L.groupStretches({json.dumps(trechos)})")
+    assert [x["nome"] for x in g] == ["Av. A", "Rua B", "(via sem nome)"]
+    assert g[0] == {"nome": "Av. A", "km": 0.24, "classe": "alto", "inicio": "2026-11-09T18:35:00-03:00", "fim": "2026-11-09T18:42:00-03:00", "n": 2, "ocorrencia": True}
+    assert run("L.groupStretches([])") == []
+
+
+def test_a_very_short_stretch_is_not_shown_as_zero_kilometres():
+    assert run("L.km(0.04)") == "<0,1 km" and run("L.km(0)") == "0 km" and run("L.km(1.26)") == "1,3 km" and run("L.km(null)") == "—"

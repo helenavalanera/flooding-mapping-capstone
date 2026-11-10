@@ -1,6 +1,6 @@
 /* Service worker: caches the app shell so it opens offline. It never stores API answers, because they
    describe places and times of a person, and an old risk estimate must not be shown as current. */
-var VERSAO = "fm-pwa-v1";
+var VERSAO = "fm-pwa-v2";
 var CASCA = ["./", "index.html", "pwa.css", "pwa.js", "dados.js", "../logic.js", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 var EXTERNOS = ["https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js", "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"];
 

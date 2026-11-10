@@ -97,7 +97,11 @@
     return n === 0 ? "mesmo tempo" : (n > 0 ? "+" : "−") + Math.abs(Math.round(n)) + " min";
   }
   function mm(v) { return v == null ? "—" : (Math.round(v * 10) / 10).toLocaleString("pt-BR") + " mm"; }
-  function km(v) { return v == null ? "—" : (Math.round(v * 10) / 10).toLocaleString("pt-BR") + " km"; }
+  function km(v) {
+    if (v == null) return "—";
+    if (v > 0 && v < 0.1) return "<0,1 km";   // a short stretch is not "0 km"
+    return (Math.round(v * 10) / 10).toLocaleString("pt-BR") + " km";
+  }
 
   /* Streets of a risk layer grouped by name: total length and the worst class. Unnamed streets stay apart. */
   function groupStreets(features) {
@@ -157,6 +161,21 @@
     return { territorio: t, aba: tabs.indexOf(parts[0]) >= 0 ? parts[0] : null };
   }
 
+  /* Fragments of one street along a route read as one line: total length, first to last passage, worst class.
+     Streets keep the order in which the route meets them. */
+  function groupStretches(stretches) {
+    var order = [], by = {};
+    stretches.forEach(function (t) {
+      var key = t.nome || "(via sem nome)", g = by[key];
+      if (!g) { g = by[key] = { nome: key, km: 0, classe: "atencao", inicio: t.inicio, fim: t.fim, n: 0, ocorrencia: false }; order.push(key); }
+      g.km += t.km; g.n += 1; g.ocorrencia = g.ocorrencia || !!t.ocorrencia;
+      if (t.classe === "alto") g.classe = "alto";
+      if (t.inicio < g.inicio) g.inicio = t.inicio;
+      if (t.fim > g.fim) g.fim = t.fim;
+    });
+    return order.map(function (k) { by[k].km = Math.round(by[k].km * 1000) / 1000; return by[k]; });
+  }
+
   /* Municipal estimate (72 h): municipalities ordered by class then by rain, and the count per class for one day.
      A municipality without an estimate is left out of the ranking, never counted as "low". */
   var CLASS_RANK = { alto: 2, atencao: 1, baixo: 0 };
@@ -189,7 +208,7 @@
 
   var api = { KINDS: KINDS, kind: kind, kindBadge: kindBadge, hhmm: hhmm, weekdayHour: weekdayHour, minutes: minutes,
               extraMinutes: extraMinutes, mm: mm, km: km, groupStreets: groupStreets, barHeights: barHeights,
-              ROUTE_STYLE: ROUTE_STYLE, rankMunicipalities: rankMunicipalities, countByClass: countByClass, STATE_LABEL: STATE_LABEL, CLASS_LABEL_COV: CLASS_LABEL_COV, capStatus: capStatus, layersOf: layersOf, pct: pct,
+              ROUTE_STYLE: ROUTE_STYLE, groupStretches: groupStretches, rankMunicipalities: rankMunicipalities, countByClass: countByClass, STATE_LABEL: STATE_LABEL, CLASS_LABEL_COV: CLASS_LABEL_COV, capStatus: capStatus, layersOf: layersOf, pct: pct,
               classBadge: classBadge, dimensions: dimensions, norm: norm, parseHash: parseHash, CLASS_ORDER: CLASS_ORDER, CLASS_LABEL: CLASS_LABEL, esc: esc, classColor: classColor,
               vdmColor: vdmColor, indexByIbge: indexByIbge, classAt: classAt, formatInstant: formatInstant,
               dayLabel: dayLabel, blockageSpan: blockageSpan, percent: percent, NO_DATA: NO_DATA };

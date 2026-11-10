@@ -320,7 +320,7 @@
         "<div class='rolagem'><table><thead><tr><th>Rota</th><th>Tempo</th><th>Diferença</th><th>Exposição estimada</th><th>Km em Atenção/Alto</th><th>Trajeto sem dado de terreno</th><th>Pico</th></tr></thead><tbody>" + linhas + "</tbody></table></div>" +
         "<p class='small'>Chuva na janela da viagem: " + Lg.mm(a.meteo.total_na_janela_mm) + ". Interdições confirmadas consideradas: " + a.interdicoes_consideradas + ".</p>" +
         "<p><button class='btn sec' id='mob-explicar'>Explicar com mais contexto</button> " + (window.Mapa && window.Mapa.webglOk() ? "<button class='btn sec' id='mob-3d'>Ver as rotas no mapa 3D</button>" : "") + " <span id='mob-explicacao'></span></p>" +
-        "<details><summary>Trechos de atenção da rota habitual</summary>" + ul(a.rotas.habitual.trechos_de_risco.map(function (t) { return Lg.esc(t.nome || "via sem nome") + " · " + Lg.esc(t.classe) + " · " + Lg.km(t.km) + " · passagem " + Lg.hhmm(t.inicio) + "–" + Lg.hhmm(t.fim); })) + "</details>" + ul(a.avisos.map(Lg.esc), "plain small");
+        "<details><summary>Trechos de atenção da rota habitual</summary>" + ul(Lg.groupStretches(a.rotas.habitual.trechos_de_risco).map(function (t) { return Lg.esc(t.nome) + " · " + (t.classe === "alto" ? "Alto" : "Atenção") + " · " + Lg.km(t.km) + " · passagem " + Lg.hhmm(t.inicio) + "–" + Lg.hhmm(t.fim); })) + "</details>" + ul(a.avisos.map(Lg.esc), "plain small");
       el("mob-explicar").addEventListener("click", function () {
         var alvo = el("mob-explicacao"); alvo.textContent = "consultando…";
         api("explicacao", { method: "POST", body: { analise_id: a.analise_id, contextualizar: true } }).then(function (e) {
