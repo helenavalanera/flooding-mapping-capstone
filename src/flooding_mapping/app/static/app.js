@@ -1,6 +1,7 @@
 /* State flood-risk interface: a static page that only reads the published JSON files. */
-(function () {
+window.iniciarMapaClassico = function () {
   "use strict";
+  if (window.FloodingMap) { window.FloodingMap.invalidateSize(); return; }
   var L_ = window.L, Lg = window.Logic;
   var DATA = "data/";
   var state = { day: 0, forecast: null, byIbge: {}, blockages: null, occurrences: null, impact: null };
@@ -178,4 +179,4 @@
       setTimeout(function () { map.invalidateSize(); map.fitBounds(layers.risk.getBounds()); }, 0);
     })
     .catch(function (e) { banner("Não foi possível carregar os dados da estimativa: " + e.message); });
-})();
+};

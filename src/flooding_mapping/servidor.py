@@ -46,7 +46,8 @@ LIMITES_POR_MIN = {"/api/rotas": 20, "/api/explicacao": 10, "/api/relatos": 10}
 LIMITE_LEITURA_POR_MIN = 240   # GET on the API: enough for a dashboard, not for scraping
 FALHAS_DE_CREDENCIAL_POR_MIN = 8
 CSP = ("default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
-       "img-src 'self' data: https://tile.openstreetmap.org https://cdnjs.cloudflare.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
+       "img-src 'self' data: blob: https://tile.openstreetmap.org https://cdnjs.cloudflare.com https://s3.amazonaws.com; "
+       "connect-src 'self' https://tile.openstreetmap.org https://s3.amazonaws.com; worker-src blob:; child-src blob:; frame-ancestors 'none'; base-uri 'none'")
 # The service worker downloads the map library from the CDN to keep a copy for offline use; only its own script gets that permission.
 CSP_SW = CSP.replace("connect-src 'self'", "connect-src 'self' https://cdnjs.cloudflare.com")
 TIPOS = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",

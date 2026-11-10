@@ -118,6 +118,69 @@
     return values.map(function (v) { return v == null || isNaN(v) ? 0 : Math.round(height * v / top); });
   }
 
+  /* Capabilities: one place decides what a region offers (config/territorios.yaml, published as territorios.json).
+     A missing capability is shown as unavailable with its reason, never as a zero. */
+  var STATE_LABEL = { disponivel: "Dados disponíveis", parcial: "Cobertura parcial", indisponivel: "Dados indisponíveis" };
+  var CLASS_LABEL_COV = { disponivel: "Dados disponíveis", parcial: "Cobertura parcial", insuficiente: "Dados insuficientes" };
+  function capStatus(cap, online) {
+    if (!cap) return { ativa: false, rotulo: "Dados indisponíveis", nota: "Capacidade não descrita.", estado: "indisponivel" };
+    if (cap.estado === "indisponivel") return { ativa: false, rotulo: STATE_LABEL.indisponivel, nota: cap.motivo || "", estado: cap.estado };
+    if (cap.requer_servidor && !online) return { ativa: false, rotulo: "Requer o servidor de análise", nota: "Esta funcionalidade só existe com o servidor ativo (python -m flooding_mapping.servidor).", estado: cap.estado };
+    return { ativa: true, rotulo: STATE_LABEL[cap.estado] || cap.estado, nota: cap.nota || "", estado: cap.estado };
+  }
+  /* Map layers a territory may show: those named by a capability that is active. Returns {layerName: status}. */
+  function layersOf(territory, online) {
+    var out = {};
+    Object.keys(territory.capacidades).forEach(function (name) {
+      var cap = territory.capacidades[name], st = capStatus(cap, online);
+      (cap.camadas || []).forEach(function (layer) { out[layer] = Object.assign({ capacidade: name }, st); });
+    });
+    return out;
+  }
+  function pct(f) { return f == null || isNaN(f) ? "—" : Math.round(f * 100) + "%"; }
+  function classBadge(c) {
+    var ok = { disponivel: 1, parcial: 1, insuficiente: 1 }[c];
+    return "<span class='cls cls-" + (ok ? c : "nenhum") + "'>" + esc(CLASS_LABEL_COV[c] || "Sem classificação") + "</span>";
+  }
+  var DIM_NAME = { malha: "Malha rodoviária DAER", indice_fisico: "Índice físico", vdm: "Tráfego (VDM)", ocorrencias_s2id: "Registros hidrológicos do S2iD" };
+  /* Each dimension in words and with a mark that does not depend on colour. */
+  function dimensions(dims) {
+    return "<ul class='dims'>" + Object.keys(dims).map(function (k) {
+      return "<li class='" + (dims[k] ? "sim" : "nao") + "'><span aria-hidden='true'>" + (dims[k] ? "✓" : "✗") + "</span> " + esc(DIM_NAME[k] || k) + " <span class='small'>" + (dims[k] ? "atende o mínimo" : "abaixo do mínimo ou ausente") + "</span></li>";
+    }).join("") + "</ul>";
+  }
+  /* Accent- and case-insensitive key, to match names written differently by two sources. */
+  function norm(s) { return String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim(); }
+  /* "#poa/mobilidade" -> {territorio, aba}; a bare tab ("#mapa") keeps the default territory; anything else falls back. */
+  function parseHash(hash, tabs, territories, fallback) {
+    var parts = String(hash || "").replace(/^#/, "").split("/"), t = territories.indexOf(parts[0]) >= 0 ? parts.shift() : fallback;
+    return { territorio: t, aba: tabs.indexOf(parts[0]) >= 0 ? parts[0] : null };
+  }
+
+  /* Municipal estimate (72 h): municipalities ordered by class then by rain, and the count per class for one day.
+     A municipality without an estimate is left out of the ranking, never counted as "low". */
+  var CLASS_RANK = { alto: 2, atencao: 1, baixo: 0 };
+  function rankMunicipalities(forecast, n) {
+    var rows = [];
+    (forecast.municipios || []).forEach(function (m) {
+      var worst = null;
+      (m.dias || []).forEach(function (d) { if (!worst || CLASS_RANK[d.classe] > CLASS_RANK[worst.classe] || (d.classe === worst.classe && d.chuva_3d_mm > worst.chuva_3d_mm)) worst = d; });
+      if (worst && CLASS_RANK[worst.classe] > 0) rows.push({ ibge: m.ibge, nome: m.nome, classe: worst.classe, data: worst.data, horizonte: worst.horizonte_dias, chuva_dia_mm: worst.chuva_dia_mm, chuva_3d_mm: worst.chuva_3d_mm });
+    });
+    rows.sort(function (a, b) { return (CLASS_RANK[b.classe] - CLASS_RANK[a.classe]) || (b.chuva_3d_mm - a.chuva_3d_mm); });
+    return n ? rows.slice(0, n) : rows;
+  }
+  function countByClass(forecast, horizon) {
+    var out = { baixo: 0, atencao: 0, alto: 0, sem_estimativa: (forecast.municipios_sem_dados || []).length, chuva_maxima_mm: 0, chuva_media_mm: 0 }, n = 0, soma = 0;
+    (forecast.municipios || []).forEach(function (m) {
+      var d = (m.dias || []).filter(function (x) { return x.horizonte_dias === horizon; })[0];
+      if (!d) return;
+      out[d.classe] += 1; n += 1; soma += d.chuva_dia_mm; out.chuva_maxima_mm = Math.max(out.chuva_maxima_mm, d.chuva_dia_mm);
+    });
+    out.chuva_media_mm = n ? Math.round(soma / n * 10) / 10 : 0;
+    return out;
+  }
+
   var ROUTE_STYLE = {
     habitual: { color: "#333f48", dash: null, label: "Rota habitual" },
     menor_exposicao: { color: "#1b7f5c", dash: null, label: "Menor exposição estimada" },
@@ -126,7 +189,8 @@
 
   var api = { KINDS: KINDS, kind: kind, kindBadge: kindBadge, hhmm: hhmm, weekdayHour: weekdayHour, minutes: minutes,
               extraMinutes: extraMinutes, mm: mm, km: km, groupStreets: groupStreets, barHeights: barHeights,
-              ROUTE_STYLE: ROUTE_STYLE, CLASS_ORDER: CLASS_ORDER, CLASS_LABEL: CLASS_LABEL, esc: esc, classColor: classColor,
+              ROUTE_STYLE: ROUTE_STYLE, rankMunicipalities: rankMunicipalities, countByClass: countByClass, STATE_LABEL: STATE_LABEL, CLASS_LABEL_COV: CLASS_LABEL_COV, capStatus: capStatus, layersOf: layersOf, pct: pct,
+              classBadge: classBadge, dimensions: dimensions, norm: norm, parseHash: parseHash, CLASS_ORDER: CLASS_ORDER, CLASS_LABEL: CLASS_LABEL, esc: esc, classColor: classColor,
               vdmColor: vdmColor, indexByIbge: indexByIbge, classAt: classAt, formatInstant: formatInstant,
               dayLabel: dayLabel, blockageSpan: blockageSpan, percent: percent, NO_DATA: NO_DATA };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

@@ -49,9 +49,11 @@ territorios:
         nota: Elevação pública para visualização; não alimenta nenhum cálculo de risco.
       risco_por_trecho:
         estado: indisponivel
+        camadas: [risco_trecho]
         motivo: Não há ocorrências georreferenciadas suficientes nem validação em escala estadual.
       rotas:
         estado: indisponivel
+        camadas: [rotas]
         motivo: O roteamento estadual não faz parte desta etapa, e a malha DAER não inclui as vias urbanas.
   poa:
     nome: Porto Alegre
@@ -63,12 +65,12 @@ territorios:
         motivo: O município é uma única unidade; a escala urbana usa a rede de ruas.
       malha_rodoviaria:
         estado: parcial
-        camadas: [ruas]
+        camadas: []
         nota: Rede de ruas do OpenStreetMap para carro e a pé. A cobertura do terreno por modal está em Proveniência.
       meteorologia:
         estado: disponivel
         requer_servidor: true
-        camadas: [chuva_horaria]
+        camadas: []
         nota: Chuva horária recente e prevista para 72 h, uma série para a cidade inteira (grade de cerca de 10 km).
       ocorrencias:
         estado: parcial
@@ -78,8 +80,8 @@ territorios:
       caracteristicas_fisicas:
         estado: parcial
         requer_servidor: true
-        camadas: [indice_fisico]
-        nota: Índice físico relativo por trecho (cota, depressão local, proximidade da água, fluxo, declividade). Trechos só de pedestres não têm índice.
+        camadas: []
+        nota: Índice físico relativo por trecho (cota, depressão local, proximidade da água, fluxo, declividade), visível ao selecionar um trecho; não há camada com todas as ruas. Trechos só de pedestres não têm índice.
       mobilidade_simulada:
         estado: disponivel
         requer_servidor: true

@@ -164,3 +164,39 @@ def test_the_pwa_escapes_what_it_shows_and_never_watches_the_position():
     assert "geolocation.watchPosition" not in js and js.count("geolocation.getCurrentPosition") == 1   # one position, foreground only
     assert "Lg.esc" in js and js.count("esc(") > 30
     assert not re.search(r"(api[_-]?key|token|secret)", js + (build.STATIC / "pwa" / "dados.js").read_text(), re.I)
+
+
+def test_the_site_ships_the_territory_files_and_the_map_modules(tmp_path):
+    out, _ = make_site(tmp_path)
+    for name in ("territorio.js", "mapa.js", "data/territorios.json", "data/cobertura_rs.json"):
+        assert (out / name).exists(), name
+    territorios = json.loads((out / "data/territorios.json").read_text())
+    assert set(territorios["territorios"]) == {"rs", "poa"} and territorios["territorios"]["rs"]["cobertura"]["municipios"] == 497
+    cobertura = json.loads((out / "data/cobertura_rs.json").read_text())
+    assert len(cobertura["municipios"]) == 497 and cobertura["metodo"] and cobertura["estado"]["municipios_por_classe"]["parcial"] > 0
+
+
+def test_the_map_library_is_pinned_with_an_integrity_hash_and_no_other_3d_engine_is_loaded():
+    html = (build.STATIC / "index.html").read_text()
+    tag = re.search(r'<script src="https://cdnjs\.cloudflare\.com/ajax/libs/maplibre-gl/(\d+\.\d+\.\d+)/maplibre-gl\.js"([^>]*)>', html)
+    assert tag and re.fullmatch(r"\d+\.\d+\.\d+", tag.group(1)) and 'integrity="sha384-' in tag.group(2) and 'crossorigin="anonymous"' in tag.group(2)
+    assert not re.search(r"three(\.min)?\.js|cesium|deck\.gl", html, re.I)
+
+
+def test_every_layer_the_configuration_names_is_drawn_by_the_map_or_is_a_colouring_mode():
+    import yaml
+
+    from flooding_mapping.config import ROOT
+    js = (build.STATIC / "mapa.js").read_text()
+    desenhadas = set(re.findall(r"^    (\w+): \{ rotulo:", js, re.M)) | {"risco_municipal", "indice_fisico"}   # the last two are colouring modes
+    config = yaml.safe_load((ROOT / "config" / "territorios.yaml").read_text(encoding="utf-8"))
+    prometidas = {c for t in config["territorios"].values() for cap in t["capacidades"].values() for c in cap.get("camadas", [])}
+    assert prometidas <= desenhadas, sorted(prometidas - desenhadas)
+    assert {"municipios", "rodovias", "risco_trecho", "rotas", "interdicoes"} <= desenhadas
+
+
+def test_the_page_policy_lets_the_map_work_and_nothing_more():
+    from flooding_mapping import servidor
+    csp = dict(p.strip().split(" ", 1) for p in servidor.CSP.split(";") if p.strip())
+    assert "blob:" in csp["worker-src"] and "https://s3.amazonaws.com" in csp["connect-src"] and "https://tile.openstreetmap.org" in csp["connect-src"]
+    assert "'unsafe-eval'" not in servidor.CSP and csp["frame-ancestors"] == "'none'" and csp["script-src"] == "'self' https://cdnjs.cloudflare.com"

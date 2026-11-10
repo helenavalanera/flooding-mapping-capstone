@@ -76,3 +76,61 @@ def test_streets_are_grouped_by_name_with_the_worst_class_first():
 def test_bar_heights_ignore_missing_values_and_never_divide_by_zero():
     assert run("L.barHeights([0, 5, 10, null, NaN], 40)") == [0, 20, 40, 0, 0]
     assert run("L.barHeights([0, 0], 40)") == [0, 0] and run("L.barHeights([1, 2], 40, 10)") == [4, 8]
+
+
+def test_an_unavailable_capability_is_shown_with_its_reason_and_never_as_active():
+    cap = {"estado": "indisponivel", "motivo": "Sem validação."}
+    s = run(f"L.capStatus({json.dumps(cap)}, true)")
+    assert s == {"ativa": False, "rotulo": "Dados indisponíveis", "nota": "Sem validação.", "estado": "indisponivel"}
+    assert run("L.capStatus(undefined, true)")["ativa"] is False        # an undescribed capability is not assumed to exist
+
+
+def test_a_capability_that_needs_the_server_is_inactive_without_it():
+    cap = {"estado": "parcial", "requer_servidor": True, "nota": "Baseline."}
+    assert run(f"L.capStatus({json.dumps(cap)}, false)")["rotulo"] == "Requer o servidor de análise"
+    com = run(f"L.capStatus({json.dumps(cap)}, true)")
+    assert com["ativa"] is True and com["rotulo"] == "Cobertura parcial" and com["nota"] == "Baseline."
+    assert run('L.capStatus({estado:"disponivel"}, false)')["rotulo"] == "Dados disponíveis"
+
+
+def test_the_layers_of_a_territory_come_from_its_capabilities():
+    t = {"capacidades": {"ocorrencias": {"estado": "parcial", "camadas": ["bloqueios", "s2id"]}, "rotas": {"estado": "indisponivel", "motivo": "Fora desta etapa.", "camadas": ["rotas"]},
+                         "meteorologia": {"estado": "parcial", "requer_servidor": True, "camadas": ["chuva_horaria"]}}}
+    camadas = run(f"L.layersOf({json.dumps(t)}, false)")
+    assert set(camadas) == {"bloqueios", "s2id", "rotas", "chuva_horaria"}
+    assert camadas["bloqueios"]["ativa"] is True and camadas["rotas"]["ativa"] is False and camadas["rotas"]["nota"] == "Fora desta etapa."
+    assert camadas["chuva_horaria"]["ativa"] is False and run(f"L.layersOf({json.dumps(t)}, true)")["chuva_horaria"]["ativa"] is True
+
+
+def test_coverage_is_shown_as_unavailable_or_partial_and_a_missing_number_is_a_dash_not_zero():
+    assert run("L.pct(null)") == "—" and run("L.pct(0)") == "0%" and run("L.pct(0.364)") == "36%"
+    assert "Cobertura parcial" in run('L.classBadge("parcial")') and "cls-nenhum" in run('L.classBadge("x")')
+    dims = run('L.dimensions({malha:true, vdm:false})')
+    assert "✓" in dims and "✗" in dims and "abaixo do mínimo ou ausente" in dims          # the mark does not rely on colour alone
+
+
+def test_names_are_matched_without_accents_or_case_and_the_hash_picks_territory_and_tab():
+    assert run('L.norm("  São   Jerônimo ")') == run('L.norm("sao jeronimo")') == "sao jeronimo"
+    abas = '["geral","mapa"]'
+    assert run(f'L.parseHash("#poa/mapa", {abas}, ["rs","poa"], "rs")') == {"territorio": "poa", "aba": "mapa"}
+    assert run(f'L.parseHash("#mapa", {abas}, ["rs","poa"], "rs")') == {"territorio": "rs", "aba": "mapa"}
+    assert run(f'L.parseHash("#lixo/x", {abas}, ["rs","poa"], "rs")') == {"territorio": "rs", "aba": None}
+
+
+FORECAST = {"municipios_sem_dados": [{"ibge": "9"}], "municipios": [
+    {"ibge": "1", "nome": "A", "dias": [{"horizonte_dias": 0, "classe": "baixo", "chuva_dia_mm": 2, "chuva_3d_mm": 5, "data": "d0"}, {"horizonte_dias": 1, "classe": "atencao", "chuva_dia_mm": 30, "chuva_3d_mm": 40, "data": "d1"}]},
+    {"ibge": "2", "nome": "B", "dias": [{"horizonte_dias": 0, "classe": "alto", "chuva_dia_mm": 80, "chuva_3d_mm": 90, "data": "d0"}]},
+    {"ibge": "3", "nome": "C", "dias": [{"horizonte_dias": 0, "classe": "atencao", "chuva_dia_mm": 20, "chuva_3d_mm": 60, "data": "d0"}]},
+    {"ibge": "4", "nome": "D", "dias": [{"horizonte_dias": 0, "classe": "baixo", "chuva_dia_mm": 0, "chuva_3d_mm": 0, "data": "d0"}]}]}
+
+
+def test_municipalities_are_ranked_by_class_then_rain_and_low_ones_are_left_out():
+    ranking = run(f"L.rankMunicipalities({json.dumps(FORECAST)})")
+    assert [r["ibge"] for r in ranking] == ["2", "3", "1"] and ranking[2]["horizonte"] == 1 and ranking[2]["classe"] == "atencao"
+    assert len(run(f"L.rankMunicipalities({json.dumps(FORECAST)}, 2)")) == 2
+
+
+def test_counts_per_class_report_the_municipalities_with_no_estimate_apart():
+    c = run(f"L.countByClass({json.dumps(FORECAST)}, 0)")
+    assert (c["alto"], c["atencao"], c["baixo"], c["sem_estimativa"]) == (1, 1, 2, 1) and c["chuva_maxima_mm"] == 80 and c["chuva_media_mm"] == 25.5
+    assert run(f"L.countByClass({json.dumps(FORECAST)}, 1)")["atencao"] == 1

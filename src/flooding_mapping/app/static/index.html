@@ -3,102 +3,117 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Risco de alagamentos no RS</title>
-  <meta name="description" content="Estimativa experimental, por município, do risco de registro de desastre hídrico nas próximas 72 horas no Rio Grande do Sul.">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <title>Flooding Mapping · inteligência territorial e mobilidade preventiva</title>
+  <meta name="description" content="Monitoramento regional do Rio Grande do Sul e mobilidade preventiva em Porto Alegre: onde há dados, o que está estimado e o que foi confirmado.">
   <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div>
-      <h1>Risco de alagamentos no Rio Grande do Sul <span class="badge" id="status-badge">experimental</span></h1>
-      <p class="sub">Estimativa por município para as próximas 72 horas · <strong id="updated">carregando…</strong></p>
+    <div class="topo">
+      <div>
+        <h1>Flooding Mapping</h1>
+        <p class="sub" id="sub-territorio">Inteligência territorial e mobilidade preventiva</p>
+      </div>
+      <div id="territorios" role="radiogroup" aria-label="Território">
+        <button type="button" role="radio" data-territorio="rs" aria-checked="true"><b>Rio Grande do Sul</b><small>monitoramento regional</small></button>
+        <button type="button" role="radio" data-territorio="poa" aria-checked="false"><b>Porto Alegre</b><small>mobilidade preventiva</small></button>
+      </div>
     </div>
     <nav id="abas" role="tablist" aria-label="Áreas do painel">
-      <button role="tab" data-aba="geral" aria-selected="false">Visão geral</button>
-      <button role="tab" data-aba="mapa" aria-selected="true">Mapa</button>
-      <button role="tab" data-aba="previsao" aria-selected="false">Previsão</button>
+      <button role="tab" data-aba="geral" aria-selected="true">Visão geral</button>
+      <button role="tab" data-aba="mapa" aria-selected="false">Mapa</button>
+      <button role="tab" data-aba="previsao" aria-selected="false">Condições e previsão</button>
       <button role="tab" data-aba="mobilidade" aria-selected="false">Mobilidade</button>
       <button role="tab" data-aba="ocorrencias" aria-selected="false">Ocorrências</button>
       <button role="tab" data-aba="proveniencia" aria-selected="false">Proveniência</button>
     </nav>
   </header>
   <div id="banner" role="alert" hidden></div>
-  <section id="vista-geral" class="vista" role="tabpanel" hidden></section>
-  <div id="vista-mapa" class="vista" role="tabpanel">
-  <div class="layout">
-    <div id="map" role="application" aria-label="Mapa do Rio Grande do Sul com o risco estimado por município"></div>
-    <aside id="panel" aria-label="Controles e informações">
-      <section aria-labelledby="h-day">
-        <h2 id="h-day">Dia</h2>
-        <div id="days" role="radiogroup" aria-label="Dia da estimativa"></div>
-      </section>
-      <section aria-labelledby="h-layers">
-        <h2 id="h-layers">Camadas</h2>
-        <label><input type="checkbox" id="l-risk" checked> Risco municipal <em>(estimativa do modelo)</em></label>
-        <label><input type="checkbox" id="l-block" checked> Bloqueios ativos <em>(observado, CPRv BM)</em></label>
-        <label><input type="checkbox" id="l-occ"> Ocorrências recentes <em>(observado, S2iD)</em></label>
-        <label><input type="checkbox" id="l-road"> Rodovias por tráfego VDM <em>(DAER)</em></label>
-        <label><input type="checkbox" id="l-crit"> Trechos críticos <em>(simulação)</em></label>
-      </section>
-      <section id="poa-controles" aria-labelledby="h-poa" hidden>
-        <h2 id="h-poa">Porto Alegre · trechos</h2>
-        <div class="escopo" role="group" aria-label="Escopo do mapa">
-          <button type="button" id="escopo-rs" aria-pressed="true">Estado</button>
-          <button type="button" id="escopo-poa" aria-pressed="false">Porto Alegre</button>
-        </div>
-        <div id="poa-opcoes" hidden>
-          <label for="poa-hora">Hora: <b id="poa-hora-rotulo">agora</b> <span id="poa-hora-kind"></span></label>
-          <input type="range" id="poa-hora" min="0" max="48" step="1" value="0" aria-describedby="poa-hora-rotulo">
-          <label><input type="checkbox" id="l-poa-risco" checked> Risco por trecho <em>(previsto: baseline sem validação)</em></label>
-          <label><input type="checkbox" id="l-poa-occ" checked> Ocorrências <em>(reportada ou confirmada)</em></label>
-          <label><input type="checkbox" id="l-poa-int" checked> Interdições <em>(confirmado)</em></label>
-          <ul class="legend" aria-label="Legenda de Porto Alegre">
-            <li><span class="sw line" style="border-color:#b3202a"></span><b>Alto</b> <span class="kind k-previsto">Previsto</span> trechos mais suscetíveis com chuva forte</li>
-            <li><span class="sw line" style="border-color:#c27a00"></span><b>Atenção</b> <span class="kind k-previsto">Previsto</span> (tracejado = hora à frente)</li>
-            <li><span class="sw" style="border:2px dashed #1f6fb2;border-radius:50%;background:#fff"></span>Ocorrência reportada <span class="kind k-observado">Observado</span> sem verificação</li>
-            <li><span class="sw" style="background:#1b2630;border-radius:50%"></span>Ocorrência confirmada <span class="kind k-confirmado">Confirmado</span></li>
-            <li><span class="sw" style="background:#000;color:#fff;text-align:center;font-size:10px;line-height:12px">✕</span>Interdição: o trecho não é usado nas rotas <span class="kind k-confirmado">Confirmado</span></li>
-          </ul>
-          <p class="small" id="poa-resumo" aria-live="polite"></p>
-          <div id="detalhe-trecho" aria-live="polite"><p class="muted">Clique em um trecho no mapa.</p></div>
-        </div>
-      </section>
-      <section aria-labelledby="h-legend">
-        <h2 id="h-legend">Legenda</h2>
-        <ul class="legend" id="legend"></ul>
-      </section>
-      <section id="detail" aria-live="polite" aria-labelledby="h-detail">
-        <h2 id="h-detail">Município</h2>
-        <p class="muted">Clique em um município no mapa.</p>
-      </section>
-      <section aria-labelledby="h-kinds">
-        <h2 id="h-kinds">Como ler</h2>
-        <ul class="kinds">
-          <li><b>Estimativa</b>: o que o modelo calcula a partir da previsão de chuva.</li>
-          <li><b>Observado</b>: bloqueio ativo ou registro de desastre, com atraso e viés de notificação.</li>
-          <li><b>Simulação</b>: impacto do fechamento de um trecho na malha mapeada, não uma ocorrência.</li>
-          <li><b>Confirmado</b>: interdição validada por operador, com evidência escrita.</li>
-        </ul>
-      </section>
-      <section id="model" aria-labelledby="h-model"><h2 id="h-model">Modelo</h2></section>
-      <section id="limits" aria-labelledby="h-limits"><h2 id="h-limits">Limites</h2></section>
-    </aside>
+
+  <section id="vista-geral" class="vista" role="tabpanel" aria-label="Visão geral"></section>
+
+  <div id="vista-mapa" class="vista" role="tabpanel" aria-label="Mapa" hidden>
+    <div id="mapa-3d" class="mapa-layout">
+      <div id="mapa-gl" role="application" aria-label="Mapa interativo com relevo. Use as setas para mover, Shift com as setas para girar e inclinar."></div>
+      <aside id="painel-mapa" aria-label="Controles, legenda e informações do mapa">
+        <section id="contexto" aria-live="polite" aria-labelledby="h-contexto">
+          <h2 id="h-contexto">Seleção</h2>
+          <p class="muted" id="contexto-vazio">Clique em um município, uma rodovia ou (em Porto Alegre) um trecho de rua.</p>
+        </section>
+        <section aria-labelledby="h-vista">
+          <h2 id="h-vista">Vista</h2>
+          <div class="escopo" role="group" aria-label="Dimensão do mapa">
+            <button type="button" id="vista-3d" aria-pressed="true">3D com relevo</button>
+            <button type="button" id="vista-2d" aria-pressed="false">2D</button>
+          </div>
+          <label for="exagero">Exagero vertical do relevo <em>(só visual)</em></label>
+          <select id="exagero"><option value="1">1× (real)</option><option value="1.5" selected>1,5×</option><option value="2">2×</option><option value="3">3×</option></select>
+          <p class="small" id="nota-relevo">O relevo é elevação pública apenas para visualização: não entra em nenhum cálculo de risco, e o modelo pode ter artefatos sobre água e vegetação.</p>
+        </section>
+        <section id="cores" aria-labelledby="h-cores"></section>
+        <section aria-labelledby="h-camadas">
+          <h2 id="h-camadas">Camadas</h2>
+          <div id="camadas"></div>
+          <div id="poa-opcoes" hidden>
+            <label for="poa-hora">Hora do risco estimado: <b id="poa-hora-rotulo">agora</b> <span id="poa-hora-kind"></span></label>
+            <input type="range" id="poa-hora" min="0" max="48" step="1" value="0">
+            <p class="small" id="poa-resumo" aria-live="polite"></p>
+          </div>
+        </section>
+        <section aria-labelledby="h-legenda"><h2 id="h-legenda">Legenda</h2><ul class="legend" id="legenda-gl"></ul></section>
+        <p class="small"><button type="button" class="link" id="btn-classico">Usar o mapa clássico (2D, sem WebGL)</button></p>
+      </aside>
+    </div>
+
+    <!-- Mapa clássico: alternativa 2D (Leaflet), também usada quando o navegador não tem WebGL. -->
+    <div id="mapa-classico" hidden>
+      <p class="small classico-topo"><span class="badge" id="status-badge">experimental</span> <strong id="updated">carregando…</strong>
+        <button type="button" class="link" id="btn-3d">Voltar ao mapa 3D</button></p>
+      <div class="layout">
+        <div id="map" role="application" aria-label="Mapa do Rio Grande do Sul com o risco estimado por município"></div>
+        <aside id="panel" aria-label="Controles e informações">
+          <section aria-labelledby="h-day">
+            <h2 id="h-day">Dia</h2>
+            <div id="days" role="radiogroup" aria-label="Dia da estimativa"></div>
+          </section>
+          <section aria-labelledby="h-layers">
+            <h2 id="h-layers">Camadas</h2>
+            <label><input type="checkbox" id="l-risk" checked> Risco municipal <em>(estimativa do modelo)</em></label>
+            <label><input type="checkbox" id="l-block" checked> Bloqueios ativos <em>(observado, CPRv BM)</em></label>
+            <label><input type="checkbox" id="l-occ"> Ocorrências recentes <em>(observado, S2iD)</em></label>
+            <label><input type="checkbox" id="l-road"> Rodovias por tráfego VDM <em>(DAER)</em></label>
+            <label><input type="checkbox" id="l-crit"> Trechos críticos <em>(simulação)</em></label>
+          </section>
+          <section aria-labelledby="h-legend"><h2 id="h-legend">Legenda</h2><ul class="legend" id="legend"></ul></section>
+          <section id="detail" aria-live="polite" aria-labelledby="h-detail">
+            <h2 id="h-detail">Município</h2>
+            <p class="muted">Clique em um município no mapa.</p>
+          </section>
+          <section id="model" aria-labelledby="h-model"><h2 id="h-model">Modelo</h2></section>
+          <section id="limits" aria-labelledby="h-limits"><h2 id="h-limits">Limites</h2></section>
+        </aside>
+      </div>
+    </div>
   </div>
-  </div>
-  <section id="vista-previsao" class="vista" role="tabpanel" hidden></section>
-  <section id="vista-mobilidade" class="vista" role="tabpanel" hidden></section>
-  <section id="vista-ocorrencias" class="vista" role="tabpanel" hidden></section>
-  <section id="vista-proveniencia" class="vista" role="tabpanel" hidden></section>
+
+  <section id="vista-previsao" class="vista" role="tabpanel" aria-label="Condições e previsão" hidden></section>
+  <section id="vista-mobilidade" class="vista" role="tabpanel" aria-label="Mobilidade" hidden></section>
+  <section id="vista-ocorrencias" class="vista" role="tabpanel" aria-label="Ocorrências" hidden></section>
+  <section id="vista-proveniencia" class="vista" role="tabpanel" aria-label="Proveniência" hidden></section>
+
   <footer>
     Projeto acadêmico de código aberto. Não substitui os alertas oficiais da Defesa Civil.
-    Fontes: Open-Meteo (chuva), CPRv BM (bloqueios), S2iD/MIDR (registros), DAER (rodovias), IBGE (municípios).
-    Mapa © colaboradores do OpenStreetMap.
+    Fontes: Open-Meteo (chuva), CPRv BM (bloqueios), S2iD/MIDR (registros), DAER (rodovias), IBGE (municípios), OpenStreetMap, Copernicus DEM e AWS Terrain Tiles (relevo).
   </footer>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
   <script src="logic.js"></script>
+  <script src="territorio.js"></script>
   <script src="app.js"></script>
+  <script src="mapa.js"></script>
   <script src="painel.js"></script>
 </body>
 </html>
