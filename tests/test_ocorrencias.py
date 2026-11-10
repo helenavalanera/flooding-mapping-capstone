@@ -81,3 +81,25 @@ def test_a_record_stays_active_for_its_validity_window_only():
 def test_no_personal_fields_are_stored():
     r = oc.Ocorrencias().relato({**PONTO, "ip": "1.2.3.4", "usuario": "ana", "endereco": "Rua X"})
     assert not {"ip", "usuario", "endereco"} & set(r)
+
+
+def test_a_write_cut_short_does_not_stop_the_service_from_starting(tmp_path):
+    caminho = tmp_path / "o.jsonl"
+    store = oc.Ocorrencias(caminho)
+    bom = store.relato(PONTO)
+    with caminho.open("a") as f:
+        f.write('{"id": "x", "situa')                    # power lost in the middle of a line
+        f.write("\nlixo que não é json\n")
+    de_novo = oc.Ocorrencias(caminho)
+    assert de_novo.obter(bom["id"]) is not None and de_novo.linhas_invalidas == 2
+    de_novo.relato(PONTO)                                 # and it keeps working after the damaged lines
+    assert len(oc.Ocorrencias(caminho).listar()) == 2
+
+
+def test_retention_rewrites_the_file_aside_and_leaves_no_temporary_file(tmp_path):
+    caminho = tmp_path / "o.jsonl"
+    store = oc.Ocorrencias(caminho)
+    store.relato({**PONTO, "data_hora": (oc.agora() - timedelta(days=200)).isoformat()})
+    novo = store.relato(PONTO)
+    assert store.expirar(90) == 1 and [p.name for p in tmp_path.iterdir()] == ["o.jsonl"]
+    assert [r["id"] for r in oc.Ocorrencias(caminho).listar()] == [novo["id"]]

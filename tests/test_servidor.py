@@ -173,3 +173,39 @@ def test_only_the_service_worker_may_connect_to_the_map_library_cdn(api):
     sw = requests.get(base + "/pwa/sw.js").headers["Content-Security-Policy"]
     assert "cdnjs" not in pagina.split("connect-src")[1].split(";")[0] and "cdnjs" in sw.split("connect-src")[1].split(";")[0]
     assert requests.get(base + "/pwa/manifest.webmanifest").headers["Content-Type"].startswith("application/manifest+json")
+
+
+def test_guessing_the_operator_credential_is_blocked_after_a_few_failures(api):
+    base, servico, _ = api(token="credencial-correta")
+    rel = requests.post(base + "/api/relatos", json={"texto": "x", "lon": O[0], "lat": O[1]}).json()
+    corpo = {"situacao": "confirmada", "evidencia": "Guarda municipal no local, via interditada"}
+    codigos = [requests.post(base + f"/api/ocorrencias/{rel['id']}", json=corpo, headers={"Authorization": f"Bearer chute{i}"}).status_code
+               for i in range(srv.FALHAS_DE_CREDENCIAL_POR_MIN + 4)]
+    assert codigos[:srv.FALHAS_DE_CREDENCIAL_POR_MIN] == [403] * srv.FALHAS_DE_CREDENCIAL_POR_MIN and set(codigos[srv.FALHAS_DE_CREDENCIAL_POR_MIN:]) == {429}
+    certa = requests.post(base + f"/api/ocorrencias/{rel['id']}", json=corpo, headers={"Authorization": "Bearer credencial-correta"})
+    assert certa.status_code == 429 and servico.store.obter(rel["id"])["situacao"] == "reportada"   # locked out: even the right one waits
+
+
+def test_the_public_list_hides_free_text_and_only_an_operator_sees_it(api):
+    base, _, _ = api(token="op")
+    requests.post(base + "/api/relatos", json={"texto": "rua alagada, falar com Maria 51 99999-0000", "lon": O[0], "lat": O[1]})
+    publica = requests.get(base + "/api/ocorrencias").json()
+    assert publica["texto_livre_incluido"] is False and all("descricao" not in r for r in publica["ocorrencias"]) and "99999" not in json.dumps(publica)
+    completa = requests.get(base + "/api/ocorrencias", headers={"Authorization": "Bearer op"}).json()
+    assert completa["texto_livre_incluido"] is True and any("descricao" in r for r in completa["ocorrencias"])
+    assert requests.get(base + "/api/ocorrencias", headers={"Authorization": "Bearer errado"}).status_code == 403
+
+
+def test_read_requests_are_limited_per_client(api, monkeypatch):
+    monkeypatch.setattr(srv, "LIMITE_LEITURA_POR_MIN", 5)
+    base, _, _ = api()
+    codigos = [requests.get(base + "/api/saude").status_code for _ in range(7)]
+    assert codigos == [200] * 5 + [429] * 2
+
+
+def test_a_directory_without_the_trailing_slash_redirects_so_relative_paths_keep_working(api):
+    base, _, _ = api()
+    r = requests.get(base + "/pwa", allow_redirects=False)
+    assert r.status_code == 301 and r.headers["Location"] == "/pwa/"
+    assert requests.get(base + "/pwa").status_code == 200 and requests.get(base + "/pwa").url.endswith("/pwa/")
+    assert requests.get(base + "/pwa/pwa.js").status_code == 200

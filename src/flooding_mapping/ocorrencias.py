@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import secrets
 import threading
@@ -102,17 +103,24 @@ class Ocorrencias:
         self.caminho = Path(caminho) if caminho else None
         self._registros: dict[str, dict] = {}
         self._lock = threading.Lock()
+        self.linhas_invalidas = 0   # a write cut short (power loss) must not stop the service from starting
         if self.caminho and self.caminho.exists():
-            for linha in self.caminho.read_text(encoding="utf-8").splitlines():
-                if linha.strip():
+            for linha in self.caminho.read_text(encoding="utf-8", errors="replace").splitlines():
+                if not linha.strip():
+                    continue
+                try:
                     registro = json.loads(linha)
                     self._registros[registro["id"]] = registro
+                except (ValueError, KeyError, TypeError):
+                    self.linhas_invalidas += 1
 
     def _gravar(self, registro: dict) -> None:
         if self.caminho:
             self.caminho.parent.mkdir(parents=True, exist_ok=True)
             with self.caminho.open("a", encoding="utf-8") as arquivo:
                 arquivo.write(json.dumps(registro, ensure_ascii=False) + "\n")
+                arquivo.flush()
+                os.fsync(arquivo.fileno())
 
     def registrar(self, dados: dict, fonte: str, origem: str, situacao: str = "reportada",
                   confiabilidade: str = "baixa", evidencia: str = "") -> dict:
@@ -201,7 +209,8 @@ class Ocorrencias:
             velhos = [i for i, r in self._registros.items() if r["data_hora"] < corte]
             for i in velhos:
                 del self._registros[i]
-            if self.caminho and velhos:
-                self.caminho.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in self._registros.values()),
-                                        encoding="utf-8")
+            if self.caminho and velhos:   # rewrite aside and swap, so a crash never leaves a half-written store
+                temporario = self.caminho.with_suffix(".tmp")
+                temporario.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in self._registros.values()), encoding="utf-8")
+                os.replace(temporario, self.caminho)
         return len(velhos)

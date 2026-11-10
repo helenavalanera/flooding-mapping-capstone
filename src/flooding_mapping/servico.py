@@ -330,11 +330,15 @@ class Servico:
         return {"id": registro["id"], "situacao": registro["situacao"], "confiabilidade": registro["confiabilidade"],
                 "mensagem": "Relato recebido como reportado. Ele não interdita vias: só uma confirmação com evidência o faz."}
 
-    def listar_ocorrencias(self, situacao: str | None = None) -> dict:
+    def listar_ocorrencias(self, situacao: str | None = None, completo: bool = False) -> dict:
+        """The public list leaves out the free text: an unverified report may carry personal data typed by a stranger.
+        Only an authenticated operator (``completo``) sees it."""
         if situacao and situacao not in oc.SITUACOES:
             raise ValueError(f"situacao: use um de {', '.join(oc.SITUACOES)}")
-        itens = self.store.listar(situacao)
-        return {"total": len(itens), "ocorrencias": itens[:500],
+        itens = self.store.listar(situacao)[:500]
+        if not completo:
+            itens = [{k: v for k, v in r.items() if k != "descricao"} for r in itens]
+        return {"total": len(self.store.listar(situacao)), "ocorrencias": itens, "texto_livre_incluido": completo,
                 "natureza": "reportada = relato sem verificação; confirmada = validada por operador com evidência; descartada = refutada"}
 
     def autorizado(self, token: str) -> bool:

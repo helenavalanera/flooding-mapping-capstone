@@ -43,6 +43,8 @@ STATIC = Path(__file__).parent / "app" / "static"
 RAIZES = (STATIC, ROOT / "site")
 MAX_CORPO = 8 * 1024
 LIMITES_POR_MIN = {"/api/rotas": 20, "/api/explicacao": 10, "/api/relatos": 10}
+LIMITE_LEITURA_POR_MIN = 240   # GET on the API: enough for a dashboard, not for scraping
+FALHAS_DE_CREDENCIAL_POR_MIN = 8
 CSP = ("default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
        "img-src 'self' data: https://tile.openstreetmap.org https://cdnjs.cloudflare.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
 # The service worker downloads the map library from the CDN to keep a copy for offline use; only its own script gets that permission.
@@ -52,12 +54,25 @@ TIPOS = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=u
          ".png": "image/png", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
 
 
+class MuitasTentativas(Exception):
+    """Too many failed credential attempts (HTTP 429)."""
+
+
 class Limitador:
     """At most ``max_n`` hits per ``janela_s`` per key, in memory only."""
 
     def __init__(self, janela_s: float = 60, relogio=time.monotonic):
         self.janela_s, self._relogio, self._lock = janela_s, relogio, threading.Lock()
         self._hits: dict[tuple, deque] = defaultdict(deque)
+
+    def bloqueado(self, chave: tuple, max_n: int) -> bool:
+        """True when ``chave`` already used its ``max_n`` hits in the window (does not count a new one)."""
+        agora = self._relogio()
+        with self._lock:
+            fila = self._hits.get(chave)
+            while fila and agora - fila[0] > self.janela_s:
+                fila.popleft()
+            return bool(fila) and len(fila) >= max_n
 
     def permite(self, chave: tuple, max_n: int) -> bool:
         agora = self._relogio()
@@ -161,11 +176,13 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             url = urlparse(self.path)
             if not url.path.startswith("/api/"):
                 return self._estatico(url.path) if metodo == "GET" else self._erro(HTTPStatus.METHOD_NOT_ALLOWED, "método não permitido")
-            maximo = LIMITES_POR_MIN.get(url.path)
-            if metodo == "POST" and maximo and not limitador.permite((url.path, self.client_address[0]), maximo):
+            maximo = LIMITES_POR_MIN.get(url.path) if metodo == "POST" else (LIMITE_LEITURA_POR_MIN if metodo == "GET" else None)
+            if maximo and not limitador.permite((metodo, url.path if metodo == "POST" else "leitura", self.client_address[0]), maximo):
                 return self._erro(HTTPStatus.TOO_MANY_REQUESTS, "muitas requisições; tente em instantes")
             try:
                 resultado = self._api(metodo, url.path, {k: v[-1] for k, v in parse_qs(url.query).items()})
+            except MuitasTentativas as erro:
+                return self._erro(HTTPStatus.TOO_MANY_REQUESTS, str(erro))
             except PermissionError as erro:
                 return self._erro(HTTPStatus.FORBIDDEN, str(erro))
             except (ValueError, rt.ForaDaRede, rt.SemRota) as erro:
@@ -184,11 +201,25 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
                 return self._erro(HTTPStatus.INTERNAL_SERVER_ERROR, "erro interno")
             self._enviar(corpo)
 
+        def _credencial_valida(self) -> bool:
+            token = (self.headers.get("Authorization") or "").removeprefix("Bearer ").strip()
+            return servico.autorizado(token)
+
+        def _lista_completa(self) -> bool:
+            """An operator asking for the full list goes through the same brute-force protection."""
+            self._operador()
+            return True
+
         def _operador(self) -> None:
+            """Authorises an operator action. Wrong credentials are counted per client and blocked after a few tries,
+            so the token cannot be guessed by brute force."""
             if not servico.token_operador:
                 raise PermissionError("confirmação de ocorrências desativada (OPERADOR_TOKEN não definido)")
-            token = (self.headers.get("Authorization") or "").removeprefix("Bearer ").strip()
-            if not servico.autorizado(token):
+            chave = ("falha-operador", self.client_address[0])
+            if limitador.bloqueado(chave, FALHAS_DE_CREDENCIAL_POR_MIN):
+                raise MuitasTentativas("muitas tentativas com credencial inválida; aguarde um minuto")
+            if not self._credencial_valida():
+                limitador.permite(chave, FALHAS_DE_CREDENCIAL_POR_MIN)
                 raise PermissionError("não autorizado")
 
         def _api(self, metodo: str, caminho: str, consulta: dict):
@@ -204,7 +235,8 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
                 if caminho == "/api/trecho":
                     return servico.trecho(consulta.get("id", ""))
                 if caminho == "/api/ocorrencias":
-                    return servico.listar_ocorrencias(consulta.get("situacao"))
+                    completo = bool(self.headers.get("Authorization")) and servico.token_operador != "" and self._lista_completa()
+                    return servico.listar_ocorrencias(consulta.get("situacao"), completo)
                 if caminho == "/api/proveniencia":
                     return servico.proveniencia()
             if metodo == "POST":
@@ -228,6 +260,12 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             for raiz in RAIZES:
                 alvo = (raiz / relativo).resolve()
                 if alvo.is_dir():
+                    if not caminho.endswith("/") and alvo.is_relative_to(raiz.resolve()):   # relative links need the trailing slash
+                        self.send_response(HTTPStatus.MOVED_PERMANENTLY)
+                        self.send_header("Location", caminho + "/")
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                        return
                     alvo = alvo / "index.html"
                 if alvo.is_file() and alvo.is_relative_to(raiz.resolve()) and alvo.suffix in TIPOS:
                     corpo = alvo.read_bytes()
