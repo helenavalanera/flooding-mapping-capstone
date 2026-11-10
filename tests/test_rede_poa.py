@@ -21,3 +21,20 @@ def test_the_street_table_has_lon_lat_endpoints_names_and_a_missing_index_where_
     assert t["lon0"].between(-52, -50).all() and t["lat0"].between(-31, -29).all() and (t["lon1"] > t["lon0"]).iloc[0]
     assert t["percentil"].notna().iloc[0] and np.isnan(t["percentil"].iloc[1])  # no terrain: no estimate, not zero
     assert {"drive", "walk", "oneway", "comprimento_m"} <= set(t.columns)
+
+
+def test_the_descriptive_check_reports_where_documented_blockages_fall_and_its_own_limits():
+    from rede_sintetica import LAT0, LON0, rede, tres_caminhos
+
+    from flooding_mapping import rede_poa as rp
+
+    df = tres_caminhos(pct_curto=95.0, pct_medio=50.0, pct_longo=5.0)
+    df["elev"] = df["percentil"].rsub(100)  # high percentile = low ground
+    # one event on the short (most susceptible) path
+    eventos = pd.DataFrame({"latitude": [LAT0 + 0.002], "longitude": [LON0 + 0.0075], "event_date": ["2025-06-18"]})
+    r = rede(df)
+    out = rp.verificacao_descritiva(r, eventos, raio_m=100, n_nulo=50)
+    assert out["eventos_com_segmento"] == 1 and out["indice_fisico"]["mediana"] == 95.0
+    assert out["indice_fisico"]["mediana"] > out["mediana_geral_do_indice"]
+    assert out["natureza"].startswith("descritivo") and len(out["limites"]) == 3
+    assert rp.verificacao_descritiva(r, eventos.assign(latitude=[None]), n_nulo=5) == {"eventos_com_segmento": 0}

@@ -12,12 +12,14 @@ import argparse
 import json
 
 import geopandas as gpd
+import numpy as np
 import osmium
 import pandas as pd
 import shapely
 
 from .config import load_config, resolve
 from .risco_trecho import COMPONENTES, indice_fisico
+from .rotas import Rede
 
 OUTPUT = "data/processed/rede_poa.parquet"
 TERRENO = ["elev", "rel_elev_250", "slope", "height_above_water", "log_flow_acc"]
@@ -47,8 +49,56 @@ def construir(segmentos: gpd.GeoDataFrame, terreno: pd.DataFrame, nomes: dict[in
     return tabela.join(extras.astype("float32"), on="segmento_id")
 
 
+def verificacao_descritiva(rede: Rede, eventos: pd.DataFrame, raio_m: float = 50, n_nulo: int = 1000, semente: int = 20261110) -> dict:
+    """Where the segments of documented water-accumulation blockages fall in the physical index.
+
+    Descriptive only. The events are few (one point each, a handful of dates, several on the same
+    day) and are the same ones used to anchor the rain levels, so this says nothing about rain. It
+    asks one thing: do the streets next to documented blockages sit higher in the terrain index than
+    streets in general, and higher than under the plain "lowest elevation first" rule?
+    """
+    a = rede.arestas
+    com_indice = a["drive"].to_numpy(bool) & np.isfinite(rede.pct)
+    elev = (-a["elev"]).rank(pct=True).to_numpy() * 100
+    pontos = eventos.dropna(subset=["latitude", "longitude"])
+    vizinhos = [[i for i in rede.proximos(p.longitude, p.latitude, raio_m) if com_indice[i]] for p in pontos.itertuples()]
+    vizinhos = [v for v in vizinhos if v]
+    if not vizinhos:
+        return {"eventos_com_segmento": 0}
+    por_evento = [float(np.max(rede.pct[v])) for v in vizinhos]
+    segmentos = sorted({i for v in vizinhos for i in v})
+    descreve = lambda x: {"mediana": round(float(np.nanmedian(x[segmentos])), 1), "no_terco_superior": round(float(np.nanmean(x[segmentos] >= 70)), 3)}  # noqa: E731
+    sorteio = np.random.default_rng(semente)
+    candidatos = np.flatnonzero(com_indice)
+    meio = lambda i: ((a["lon0"].iat[i] + a["lon1"].iat[i]) / 2, (a["lat0"].iat[i] + a["lat1"].iat[i]) / 2)  # noqa: E731
+    nulo = []
+    for _ in range(n_nulo):
+        escolhidos = sorteio.choice(candidatos, size=min(len(vizinhos), len(candidatos)), replace=False)
+        nulo.append(np.median([np.max(rede.pct[[j for j in rede.proximos(*meio(i), raio_m) if com_indice[j]] or [i]]) for i in escolhidos]))
+    return {
+        "natureza": "descritivo; não valida o índice nem o risco por trecho",
+        "eventos_com_segmento": len(vizinhos), "datas_distintas": int(pontos["event_date"].nunique()), "segmentos_proximos": len(segmentos),
+        "raio_m": raio_m, "segmentos_com_indice": int(com_indice.sum()),
+        "indice_fisico": descreve(rede.pct), "regra_so_cota_baixa": descreve(elev),
+        "mediana_geral_do_indice": round(float(np.nanmedian(rede.pct[com_indice])), 1),
+        "mediana_por_evento_do_maximo_no_entorno": round(float(np.median(por_evento)), 1),
+        "mediana_em_sorteios_aleatorios": round(float(np.mean(nulo)), 1), "p95_dos_sorteios": round(float(np.percentile(nulo, 95)), 1),
+        "limites": ["poucos eventos (um ponto cada) concentrados em poucas datas: as unidades não são independentes",
+                    "os mesmos eventos ancoraram os níveis de chuva; esta checagem só olha o terreno",
+                    "se a regra de cota baixa se sai igual, os demais fatores não mostram ganho"]}
+
+
 def main() -> None:
-    argparse.ArgumentParser(description="Street table of Porto Alegre for the routing service").parse_args()
+    parser = argparse.ArgumentParser(description="Street table of Porto Alegre for the routing service")
+    parser.add_argument("--verificar", action="store_true", help="checagem descritiva do índice físico contra eventos documentados")
+    args = parser.parse_args()
+    if args.verificar:
+        rede = Rede(pd.read_parquet(resolve(OUTPUT)), load_config()["roteamento"])
+        resultado = verificacao_descritiva(rede, pd.read_csv(resolve("data/events/events.csv")))
+        alvo = resolve("reports/ml/risco_trecho_descritivo.json")
+        alvo.write_text(json.dumps(resultado, indent=2, ensure_ascii=False) + "\n")
+        print(json.dumps({k: v for k, v in resultado.items() if k != "limites"}, ensure_ascii=False))
+        return
     segmentos = gpd.read_parquet(resolve("data/interim/segments.parquet"))
     terreno = pd.read_parquet(resolve("data/interim/susceptibility_features_v2.parquet"))
     tabela = construir(segmentos, terreno, nomes_das_vias(resolve("data/interim/poa.osm.pbf")))
