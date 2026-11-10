@@ -280,3 +280,15 @@ def test_the_alert_says_greater_exposure_only_when_the_habitual_route_is_the_mos
     assert "maior exposição estimada a trechos" in explicar.alerta(CASO, METEO)["texto"]
     texto = explicar.alerta(pior_alternativa, METEO)["texto"]
     assert "maior exposição estimada a trechos" not in texto and "exposição estimada a trechos" in texto
+
+
+def test_a_lower_exposure_that_comes_from_stretches_without_data_is_flagged_as_uncertain():
+    sem_dado = {**CASO["menor_exposicao"], "km_sem_estimativa": 5.0}          # half of its 10 km has no terrain estimate
+    casos = {**CASO, "menor_exposicao": sem_dado}
+    por = {c["rota"]: c for c in explicar.comparar(casos)}
+    assert por["menor_exposicao"]["comparacao_incerta"] is True and por["menor_exposicao"]["pct_sem_estimativa"] == 50
+    assert por["menor_exposicao"]["rotulo"].endswith("(parte do trajeto sem dado)")
+    assert "comparação é incerta" in explicar.alerta(casos, METEO)["texto"]
+    normal = {c["rota"]: c for c in explicar.comparar(CASO)}                  # 5% without data in every route: no caveat
+    assert normal["menor_exposicao"]["comparacao_incerta"] is False and "(parte" not in normal["menor_exposicao"]["rotulo"]
+    assert "incerta" not in explicar.alerta(CASO, METEO)["texto"]

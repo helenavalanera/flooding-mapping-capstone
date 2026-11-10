@@ -1,0 +1,83 @@
+{
+  "natureza": "auditoria descritiva; nenhum parâmetro foi alterado",
+  "cobertura_do_indice_fisico": {
+    "dirigivel": {
+      "km": 5482.8,
+      "fracao_com_indice": 0.724
+    },
+    "caminhavel": {
+      "km": 6451.5,
+      "fracao_com_indice": 0.594
+    },
+    "somente_a_pe": {
+      "km": 1159.3,
+      "fracao_com_indice": 0.0
+    },
+    "nenhum_modal": {
+      "km": 72.0,
+      "fracao_com_indice": 0.0
+    }
+  },
+  "fracao_da_malha_sinalizada_por_fator_de_chuva": {
+    "0.4": {
+      "alto": 0.0,
+      "atencao": 0.0513
+    },
+    "0.7": {
+      "alto": 0.0191,
+      "atencao": 0.0685
+    },
+    "1.0": {
+      "alto": 0.0545,
+      "atencao": 0.0484
+    }
+  },
+  "fator_nas_horas_dos_bloqueios_documentados": [
+    {
+      "data": "2019-09-17",
+      "hora_do_reporte": 18,
+      "chuva_no_dia_mm": 38.4,
+      "max_1h_mm": 3.5,
+      "ultima_hora_com_chuva": "23:00",
+      "horas_secas_antes_do_reporte": null,
+      "fator_com_recuo": 0.4,
+      "fator_sem_recuo": 0.4
+    },
+    {
+      "data": "2021-09-08",
+      "hora_do_reporte": 7,
+      "chuva_no_dia_mm": 20.3,
+      "max_1h_mm": 3.6,
+      "ultima_hora_com_chuva": "22:00",
+      "horas_secas_antes_do_reporte": null,
+      "fator_com_recuo": 0.9,
+      "fator_sem_recuo": 0.9
+    },
+    {
+      "data": "2022-03-06",
+      "hora_do_reporte": 17,
+      "chuva_no_dia_mm": 8.1,
+      "max_1h_mm": 5.2,
+      "ultima_hora_com_chuva": "21:00",
+      "horas_secas_antes_do_reporte": null,
+      "fator_com_recuo": 0.13,
+      "fator_sem_recuo": 0.39
+    },
+    {
+      "data": "2025-06-18",
+      "hora_do_reporte": 21,
+      "chuva_no_dia_mm": 65.9,
+      "max_1h_mm": 5.9,
+      "ultima_hora_com_chuva": "23:00",
+      "horas_secas_antes_do_reporte": null,
+      "fator_com_recuo": 1.0,
+      "fator_sem_recuo": 1.0
+    }
+  ],
+  "conclusoes": [
+    "Os trechos só de pedestres (calçadas e passagens) não têm índice: para quem anda a pé, parte do percurso fica sem estimativa, e o rótulo de menor exposição deve avisar quando vier de trechos sem dado.",
+    "Nos quatro eventos a chuva continuou até a noite ou o reporte ocorreu durante ela: eles não restringem a duração do recuo (6 h é provisório, sem evidência a favor nem contra).",
+    "Em 2022-03-06 o fator na hora do reporte fica abaixo do corte de Atenção para qualquer trecho: o baseline não sinalizaria esse evento (já era erro conhecido do gatilho municipal).",
+    "Os eventos ancoram os níveis de chuva (limites inferiores): a verificação dos níveis contra eles é circular e não os valida."
+  ]
+}

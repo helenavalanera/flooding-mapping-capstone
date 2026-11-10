@@ -45,6 +45,16 @@ def hora(iso: str) -> str:
     return iso[11:16]
 
 
+def parte_sem_dado(r: dict) -> float:
+    """Share of the route length with no terrain estimate (those stretches add no exposure, which is not the same as safe)."""
+    return r["km_sem_estimativa"] / max(r["distancia_km"], 1e-9)
+
+
+def comparacao_incerta(r: dict, base: dict) -> bool:
+    """A lower exposure is doubtful when it comes with a clearly larger share of stretches without data."""
+    return parte_sem_dado(r) > 0.2 and parte_sem_dado(r) > parte_sem_dado(base) + 0.1
+
+
 def comparar(rotas: dict) -> list[dict]:
     """One line per route: time, extra time, estimated exposure and how it ranks against the others."""
     base = rotas["habitual"]
@@ -60,7 +70,10 @@ def comparar(rotas: dict) -> list[dict]:
             rotulo = "maior exposição estimada"
         else:
             rotulo = "exposição estimada intermediária"
-        linhas.append({"rota": nome, "tempo_min": round(r["tempo_s"] / 60), "acrescimo_min": round((r["tempo_s"] - base["tempo_s"]) / 60),
+        incerta = nome != "habitual" and comparacao_incerta(r, base)
+        if incerta and rotulo == "menor exposição estimada":
+            rotulo += " (parte do trajeto sem dado)"
+        linhas.append({"rota": nome, "pct_sem_estimativa": round(100 * parte_sem_dado(r)), "comparacao_incerta": incerta, "tempo_min": round(r["tempo_s"] / 60), "acrescimo_min": round((r["tempo_s"] - base["tempo_s"]) / 60),
                        "distancia_km": round(r["distancia_km"], 1), "exposicao_km_risco": round(r["exposicao_km_risco"], 2),
                        "km_atencao_ou_alto": round(r["km_atencao_ou_alto"], 2), "km_alto": round(r["km_alto"], 2),
                        "reducao_exposicao_pct": 0 if base["exposicao_km_risco"] == 0 else round(100 * (1 - r["exposicao_km_risco"] / base["exposicao_km_risco"])),
@@ -105,6 +118,8 @@ def alerta(rotas: dict, meteo: dict) -> dict:
         reducao = round(100 * (1 - menor["exposicao_km_risco"] / hab["exposicao_km_risco"]))
         partes.append(f"A alternativa com menor exposição estimada {'acrescenta' if extra > 0 else 'altera em'} "
                       f"aproximadamente {abs(extra)} min ao percurso e reduz a exposição estimada em cerca de {reducao}%.")
+        if comparacao_incerta(menor, hab):
+            partes.append(f"Atenção: {round(100 * parte_sem_dado(menor))}% desse trajeto não tem dado de terreno, então a comparação é incerta.")
     else:
         partes.append("Não encontramos alternativa com menor exposição estimada.")
     if alt:
