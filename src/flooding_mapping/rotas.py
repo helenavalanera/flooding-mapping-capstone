@@ -243,7 +243,8 @@ class Analise:
         for i, e in enumerate(arestas):
             if cls[i] in ("atencao", "alto"):
                 if atual is None:
-                    atual = {"segmentos": [], "km": 0.0, "inicio": quando[i], "classe": "atencao", "escore": 0.0}
+                    atual = {"segmentos": [], "km": 0.0, "inicio": quando[i], "classe": "atencao", "escore": 0.0, "i0": i}
+                atual["i1"] = i
                 atual["segmentos"].append(str(r.ids[e]))
                 atual["km"] += km[i]
                 atual["fim"] = quando[i]
@@ -259,6 +260,8 @@ class Analise:
         if atual:
             trechos.append(atual)
         coords = [[float(r.no_lon[n]), float(r.no_lat[n])] for n in nos]
+        for t in trechos:   # the stretch's own line: the nodes from the start of its first segment to the end of its last
+            t["coordenadas"] = coords[t.pop("i0"): t.pop("i1") + 2]
         pico = int(np.nanargmax(escore)) if not sem.all() else None
         return {
             "arestas": [int(e) for e in arestas], "coordenadas": coords,

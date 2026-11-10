@@ -251,3 +251,9 @@ def test_unnamed_streets_are_none_everywhere_and_every_answer_is_strict_json():
     assert any(t["nome"] is None for t in a["rotas"]["habitual"]["trechos_de_risco"])
     assert estrito(s.explicacao(a["analise_id"], True))["texto"]
     estrito(s.trecho("S0")), estrito(s.previsao(8)), estrito(s.visao_geral()), estrito(s.proveniencia())
+
+
+def test_the_published_route_exposes_the_geometry_of_each_risk_stretch():
+    s, _ = montar()
+    trecho = s.rotas(pedido())["rotas"]["habitual"]["trechos_de_risco"][0]
+    assert len(trecho["coordenadas"]) >= 2 and all(len(c) == 2 for c in trecho["coordenadas"])

@@ -123,3 +123,13 @@ def test_simulated_closure_impact_gives_the_detour_or_says_there_is_none():
     assert desvio["sem_alternativa_proxima"] is False and desvio["desvio_s"] > 0
     unico = rede(tres_caminhos().iloc[:2])
     assert rotas.impacto_fechamento(unico, "carro", 0)["sem_alternativa_proxima"] is True
+
+
+def test_each_risk_stretch_carries_its_own_line_so_it_can_be_highlighted_on_the_route():
+    r = rede(tres_caminhos())
+    rota = analise(r).comparar()["habitual"]
+    assert rota["trechos_de_risco"]
+    t = rota["trechos_de_risco"][0]
+    assert len(t["coordenadas"]) == len(t["segmentos"]) + 1                         # n consecutive segments = n + 1 nodes
+    assert all(c in rota["coordenadas"] for c in t["coordenadas"]) and "i0" not in t and "i1" not in t
+    assert t["coordenadas"][0] == rota["coordenadas"][0]                            # the whole short path is the stretch here

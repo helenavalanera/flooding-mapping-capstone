@@ -240,7 +240,7 @@ class Servico:
                     "Trechos sem dado de terreno aparecem como 'sem estimativa'; isso não significa risco baixo."]}
 
     def _publica(self, rota: dict, nome: str) -> dict:
-        trechos = [{**{k: t[k] for k in ("nome", "classe", "km", "escore", "peso", "fator", "segmentos")}, "inicio": iso_local(t["inicio"]),
+        trechos = [{**{k: t[k] for k in ("nome", "classe", "km", "escore", "peso", "fator", "segmentos", "coordenadas")}, "inicio": iso_local(t["inicio"]),
                     "fim": iso_local(t["fim"]), "ocorrencia": t["ocorrencia"]} for t in rota["trechos_de_risco"]]
         return {"rotulo": ROTULOS[nome], "coordenadas": rota["coordenadas"], "tempo_min": round(rota["tempo_s"] / 60, 1),
                 "distancia_km": round(rota["distancia_km"], 2), "exposicao_km_risco": round(rota["exposicao_km_risco"], 3),
