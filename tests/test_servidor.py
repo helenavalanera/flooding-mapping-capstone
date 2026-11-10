@@ -284,3 +284,18 @@ def test_assistant_endpoint_answers_and_is_rate_limited(api):
     assert requests.post(base + "/api/assistente", json={"tipo": "trecho", "id": "S0"}).status_code == 422
     codigos = [requests.post(base + "/api/assistente", json={}).status_code for _ in range(12)]
     assert codigos[-1] == 429
+
+
+def test_the_api_answers_503_with_the_last_update_when_the_rain_data_is_down(api):
+    from test_servico import sem_chuva
+    servico, _ = sem_chuva()
+    servidor = ThreadingHTTPServer(("127.0.0.1", 0), srv.criar_handler(servico, "", srv.Limitador()))
+    threading.Thread(target=servidor.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{servidor.server_address[1]}"
+    try:
+        r = requests.get(base + "/api/previsao")
+        assert r.status_code == 503 and r.json()["ultima_atualizacao"] == "2026-11-09T09:00:00Z" and "desatualizados" in r.json()["erro"]
+        assert requests.get(base + "/api/saude").json()["status"] == "degradado"                       # the map and the segment detail do not depend on it
+        assert requests.post(base + "/api/rotas", json=CORPO).json()["alerta"]["nivel"] == "sem_dados"
+    finally:
+        servidor.shutdown()

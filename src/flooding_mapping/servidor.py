@@ -277,8 +277,8 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
                 return self._erro(HTTPStatus.UNPROCESSABLE_ENTITY, str(erro))
             except KeyError:
                 return self._erro(HTTPStatus.NOT_FOUND, "não encontrado (ou expirado)")
-            except ChuvaIndisponivel:
-                return self._erro(HTTPStatus.SERVICE_UNAVAILABLE, "sem dados de chuva no momento")
+            except ChuvaIndisponivel as erro:   # never old rain as if it were current: say it is down and when it last worked
+                return self._json({"erro": str(erro), "ultima_atualizacao": erro.ultima_atualizacao}, HTTPStatus.SERVICE_UNAVAILABLE)
             except Exception as erro:  # never leak the request or a trace
                 print(f"erro interno: {type(erro).__name__}", file=sys.stderr)
                 return self._erro(HTTPStatus.INTERNAL_SERVER_ERROR, "erro interno")

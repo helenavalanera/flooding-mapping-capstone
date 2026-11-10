@@ -70,8 +70,11 @@ def comparar(rotas: dict) -> list[dict]:
     menor = min(r["exposicao_km_risco"] for r in rotas.values())
     maior = max(r["exposicao_km_risco"] for r in rotas.values())
     linhas = []
+    sem_estimativa = all(parte_sem_dado(r) > 0.999 for r in rotas.values())   # no route has any estimate (for instance, no rain data)
     for nome, r in rotas.items():
-        if maior - menor < 0.05 * max(maior, 1e-9) or maior == 0:
+        if sem_estimativa:
+            rotulo = "sem estimativa de risco"
+        elif maior - menor < 0.05 * max(maior, 1e-9) or maior == 0:
             rotulo = "exposição estimada equivalente"
         elif r["exposicao_km_risco"] == menor:
             rotulo = "menor exposição estimada"
@@ -106,6 +109,11 @@ def motivos(rota: dict, minimo_peso: float = 0.6) -> list[str]:
 def alerta(rotas: dict, meteo: dict) -> dict:
     """Deterministic preventive alert for an analysis (level, title, text and reasons)."""
     hab = rotas["habitual"]
+    if meteo.get("indisponivel"):
+        ultima = meteo.get("ultima_atualizacao")
+        return {"nivel": "sem_dados", "titulo": "Sem dados meteorológicos",
+                "texto": "A meteorologia está indisponível agora" + (f" (última atualização conhecida: {ultima[11:16]} UTC)" if ultima else "") +
+                         ". Mostramos só tempo e distância das rotas; não há estimativa de risco para este deslocamento. Consulte os alertas oficiais.", "motivos": []}
     chuva = meteo["total_na_janela_mm"]
     if hab["km_atencao_ou_alto"] == 0:
         if chuva < 1:

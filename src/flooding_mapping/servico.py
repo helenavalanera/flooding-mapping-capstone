@@ -25,7 +25,8 @@ import pandas as pd
 
 from . import ocorrencias as oc
 from . import rotas as rt
-from .chuva_horaria import ChuvaHoraria
+from .chuva_horaria import ESCOPO as ESCOPO_CHUVA
+from .chuva_horaria import ChuvaHoraria, ChuvaIndisponivel
 from .linguagem import assistente as asst
 from .linguagem import ferramentas
 from .cobertura import cobertura_poa, montar as montar_territorios
@@ -83,13 +84,24 @@ class Servico:
                         float(rede.no_lat.min()) - margem, float(rede.no_lat.max()) + margem)
 
     # ------------------------------------------------------------------ estado comum
-    def _estado(self) -> dict:
-        serie, meta = self.chuva.obter()
-        with self._lock:
-            if self._tabela is None or self._tabela[0] != id(serie):
-                self._tabela = (id(serie), tabela_de_chuva(serie, self.pr))
-            tabela = self._tabela[1]
+    def _estado(self, tolerar_sem_chuva: bool = False) -> dict:
+        """Common state of one request. Without rain data it raises ``ChuvaIndisponivel``, unless ``tolerar_sem_chuva``:
+        then the rain factor is missing (NaN, never zero) and ``meta["indisponivel"]`` is set, so a route can still be
+        computed on time and distance alone and nothing old or invented passes for current weather."""
         agora = self.relogio()
+        try:
+            serie, meta = self.chuva.obter()
+        except ChuvaIndisponivel as erro:
+            if not tolerar_sem_chuva:
+                raise
+            indice = pd.date_range(agora.floor("h") - pd.Timedelta(hours=24), periods=24 * 4 + 1, freq="h")
+            serie, meta = pd.Series(0.0, index=indice), {"indisponivel": True, "ultima_atualizacao": erro.ultima_atualizacao, "motivo": str(erro)}
+            tabela = pd.DataFrame({"fator": np.nan, "chuva_hora_mm": np.nan}, index=indice)
+        else:
+            with self._lock:
+                if self._tabela is None or self._tabela[0] != id(serie):
+                    self._tabela = (id(serie), tabela_de_chuva(serie, self.pr))
+                tabela = self._tabela[1]
         em = agora.tz_localize(LOCAL).tz_convert("UTC").to_pydatetime()
         ativas = self.store.ativas(self.pr["validade_ocorrencia_h"], em)
         bloqueada = np.zeros(self.rede.n, bool)
@@ -134,7 +146,7 @@ class Servico:
                            **self._classes_na_hora(e, t)})
         validos = [x for x in linhas if x["km_alto"] is not None]
         pico = max(validos, key=lambda x: (x["km_alto"], x["km_atencao"]), default=None)
-        return {"natureza": "estimativa (baseline determinístico, sem validação em vias)", "horas": linhas, "hora_de_maior_exposicao": pico,
+        return {"natureza": "estimativa (baseline determinístico, sem validação em vias)", "escopo_da_chuva": ESCOPO_CHUVA, "horas": linhas, "hora_de_maior_exposicao": pico,
                 "fonte_chuva": e["meta"], "metodo": METODO, "limites": LIMITES}
 
     def visao_geral(self) -> dict:
@@ -161,7 +173,7 @@ class Servico:
         e = self._estado()
         t = e["agora"].floor("h") + pd.Timedelta(hours=max(0, min(float(deslocamento_h), 48)))
         fator = fator_em(e["tabela"], t)
-        base = {"hora": iso_local(t), "natureza": natureza(t, e["agora"]), "fator": None if np.isnan(fator) else round(float(fator), 3),
+        base = {"escopo_da_chuva": ESCOPO_CHUVA, "hora": iso_local(t), "natureza": natureza(t, e["agora"]), "fator": None if np.isnan(fator) else round(float(fator), 3),
                 "metodo": METODO}
         if np.isnan(fator):
             return {**base, "sem_estimativa": True, "geojson": {"type": "FeatureCollection", "features": []}}
@@ -180,7 +192,7 @@ class Servico:
 
     def trecho(self, segmento_id: str) -> dict:
         """One segment: terrain facts, risk by hour, nearby occurrences and the simulated closure impact."""
-        e = self._estado()
+        e = self._estado(tolerar_sem_chuva=True)
         idx = self.rede.indices([segmento_id])
         if not idx:
             raise KeyError(segmento_id)
@@ -198,7 +210,7 @@ class Servico:
                     for r in e["ativas"] if i in set(self.rede.proximos(r["lon"], r["lat"], self.pr["raio_ocorrencia_m"]))]
         fisicas = {k: (None if pd.isna(a.get(k)) else round(float(a[k]), 2)) for k in
                    ("elev", "rel_elev_250", "slope", "height_above_water", "log_flow_acc", "percentil")}
-        return {"id": segmento_id, "nome": a["nome"] or None, "classe_via": a["highway"], "comprimento_m": round(float(a["comprimento_m"]), 1),
+        return {"escopo_da_chuva": ESCOPO_CHUVA, "chuva_indisponivel": bool(e["meta"].get("indisponivel")), "id": segmento_id, "nome": a["nome"] or None, "classe_via": a["highway"], "comprimento_m": round(float(a["comprimento_m"]), 1),
                 "interditado": bool(e["bloqueada"][i]), "caracteristicas_fisicas": fisicas, "peso": None if np.isnan(peso) else round(float(peso), 3),
                 "confiabilidade_do_dado": None if np.isnan(e["risco"]["confiabilidade"][i]) else float(e["risco"]["confiabilidade"][i]),
                 "risco_por_hora": horas, "hora_de_maior_exposicao": max(validas, key=lambda h: h["escore"]) if validas else None,
@@ -212,7 +224,7 @@ class Servico:
             raise ValueError("corpo inválido")
         origem, destino = ponto(dados, "origem", self.limites), ponto(dados, "destino", self.limites)
         modal = dados.get("modal", "carro")
-        e = self._estado()
+        e = self._estado(tolerar_sem_chuva=True)
         try:
             saida = pd.Timestamp(dados["saida"]) if dados.get("saida") else e["agora"].ceil("5min")
         except (ValueError, TypeError):
@@ -224,7 +236,10 @@ class Servico:
         analise = rt.Analise(self.rede, modal, origem, destino, saida, e["tabela"], e["risco"], e["bloqueada"], e["agora"])
         brutas = analise.comparar()
         comparacao = comparar(brutas)
-        meteo = self._janela(e["serie"], saida, pd.Timestamp(brutas["habitual"]["chegada"]), e["agora"])
+        if e["meta"].get("indisponivel"):
+            meteo = {"indisponivel": True, "ultima_atualizacao": e["meta"]["ultima_atualizacao"], "total_na_janela_mm": None, "maximo_hora_mm": None, "horas": []}
+        else:
+            meteo = self._janela(e["serie"], saida, pd.Timestamp(brutas["habitual"]["chegada"]), e["agora"])
         identificador = secrets.token_urlsafe(12)
         with self._lock:
             agora_m = time.monotonic()
@@ -235,10 +250,10 @@ class Servico:
         return {"analise_id": identificador, "natureza": "estimativa de risco por trecho (baseline sem validação em vias)", "modal": modal,
                 "saida": iso_local(saida), "meteo": meteo, "alerta": alerta(brutas, meteo), "comparacao": comparacao,
                 "rotas": {n: self._publica(r, n) for n, r in brutas.items()}, "interdicoes_consideradas": int(e["bloqueada"].sum()),
-                "fonte_chuva": e["meta"], "avisos": [
+                "fonte_chuva": e["meta"], "escopo_da_chuva": ESCOPO_CHUVA, "avisos": [
                     "Valores são estimativas, não garantias: nenhuma rota é apresentada como segura.",
                     "A escolha da rota é sua; o trajeto não é alterado automaticamente.",
-                    "Trechos sem dado de terreno aparecem como 'sem estimativa'; isso não significa risco baixo."]}
+                    "Trechos sem estimativa (sem dado de terreno ou de chuva) não significam risco baixo.", "A chuva é uma estimativa regional, não uma medição no trecho."]}
 
     def _publica(self, rota: dict, nome: str) -> dict:
         trechos = [{**{k: t[k] for k in ("nome", "classe", "km", "escore", "peso", "fator", "segmentos", "coordenadas")}, "inicio": iso_local(t["inicio"]),
@@ -267,7 +282,7 @@ class Servico:
         if not contextualizar or det["nivel"] == "sem_risco_estimado":
             return {"texto": det["texto"], "origem": "deterministico", "motivo": "nao_solicitado" if not contextualizar else "sem_risco_estimado",
                     "alerta": det}
-        e = self._estado()
+        e = self._estado(tolerar_sem_chuva=True)
         resumos = {"saida": iso_local(analise.saida), "modal": analise.modo, "chuva_na_janela_mm": extra["meteo"]["total_na_janela_mm"],
                    "rotas": {n: resumo_rota(r, n, extra["comparacao"]) for n, r in brutas.items()}}
         man = self._manipuladores(analise, brutas, extra, e)
@@ -298,7 +313,7 @@ class Servico:
             _, analise, brutas, extra = self._analise(identificador)
             contexto = asst.contexto_rota({"comparacao": extra["comparacao"], "modal": analise.modo, "meteo": extra["meteo"]}, brutas, extra["interdicoes"])
             alerta_det = alerta(brutas, extra["meteo"])
-            man = self._manipuladores(analise, brutas, extra, self._estado())
+            man = self._manipuladores(analise, brutas, extra, self._estado(tolerar_sem_chuva=True))
             executar, declaracoes = (lambda nome, args: ferramentas.executar(nome, args, man)), ferramentas.DECLARACOES
         else:
             tabela = (self.cobertura_rs or {}).get("municipios" if tipo == "municipio" else "rodovias", {})
@@ -321,8 +336,10 @@ class Servico:
             return brutas[nome]
 
         def clima(horas=12):
+            if e["meta"].get("indisponivel"):
+                return {"indisponivel": True, "ultima_atualizacao": e["meta"]["ultima_atualizacao"], "aviso": "Meteorologia indisponível: não há chuva a informar."}
             proximas = e["serie"][(e["serie"].index > e["agora"].floor("h")) & (e["serie"].index <= e["agora"].floor("h") + pd.Timedelta(hours=horas))]
-            return {"fonte": "modelo de previsão Open-Meteo, uma série para a cidade", "obsoleta": bool(e["meta"].get("obsoleta")),
+            return {"fonte": "modelo de previsão Open-Meteo, uma série para a cidade (estimativa regional, não medição no trecho)", "horas_passadas": "análise do modelo, não pluviômetro", "obsoleta": bool(e["meta"].get("obsoleta")),
                     "total_mm": round(float(proximas.sum()), 1), "pico": None if proximas.empty else {"hora": iso_local(proximas.idxmax())[11:16],
                                                                                                         "mm": round(float(proximas.max()), 1)},
                     "horas": [{"hora": iso_local(t)[11:16], "mm": round(float(v), 1), "natureza": natureza(t, e["agora"])} for t, v in proximas.head(24).items()]}
@@ -419,7 +436,9 @@ class Servico:
     def saude(self) -> dict:
         try:
             _, meta = self.chuva.obter()
-            chuva = {"ok": True, "obsoleta": bool(meta.get("obsoleta"))}
+            chuva = {"ok": True, "obsoleta": bool(meta.get("obsoleta")), "idade_min": meta.get("idade_min"), "atualizada_em_utc": meta.get("emitido_em_utc")}
+        except ChuvaIndisponivel as erro:
+            chuva = {"ok": False, "obsoleta": None, "ultima_atualizacao": erro.ultima_atualizacao}
         except Exception:
             chuva = {"ok": False, "obsoleta": None}
         return {"status": "ok" if chuva["ok"] else "degradado", "chuva": chuva, "segmentos": self.rede.n,

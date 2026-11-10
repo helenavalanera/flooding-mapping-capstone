@@ -107,7 +107,7 @@ def contexto_rota(a: dict, brutas: dict, interdicoes: int) -> dict:
     if meteo.get("indisponivel"):
         lacunas.insert(0, "Meteorologia indisponível: as rotas mostram só tempo e distância, sem estimativa de risco.")
     for n, r in rotas.items():
-        if r["pct_do_trajeto_sem_dado"] >= 10:
+        if r["pct_do_trajeto_sem_dado"] >= 10 and not meteo.get("indisponivel"):
             lacunas.append(f"{r['rotulo']}: {r['pct_do_trajeto_sem_dado']}% do trajeto não tem índice físico (trechos sem estimativa, que não são risco baixo).")
     if "menor_exposicao" not in rotas:
         lacunas.append("Não foi encontrada alternativa com menor exposição estimada.")

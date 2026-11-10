@@ -367,3 +367,72 @@ def test_a_free_question_needs_the_provider_and_says_so_otherwise():
     s, _ = montar_assistente()
     a = s.assistente({"tipo": "trecho", "id": "S0", "pergunta": "Quando devo sair?"})
     assert a["origem"] == "deterministico" and "perguntas sugeridas" in a["texto"]
+
+
+# ---------------------------------------------------------------- meteorologia indisponível
+def sem_chuva(ultima="2026-11-09T09:00:00Z", **kw):
+    s, r = montar(**kw)
+
+    def cai(lat, lon):
+        raise ChuvaIndisponivel("dados de chuva desatualizados (última atualização há 8.0 h)", ultima)
+    s.chuva = type("Fora", (), {"obter": staticmethod(lambda: cai(0, 0))})()
+    return s, r
+
+
+def test_without_rain_data_routes_still_work_on_time_and_distance_and_say_there_is_no_risk_estimate():
+    s, r = sem_chuva()
+    a = s.rotas(pedido())
+    assert a["alerta"]["nivel"] == "sem_dados" and "indisponível" in a["alerta"]["texto"] and "09:00" in a["alerta"]["texto"]
+    assert "Sem exposição" not in a["alerta"]["titulo"] and a["meteo"] == {"indisponivel": True, "ultima_atualizacao": "2026-11-09T09:00:00Z", "total_na_janela_mm": None, "maximo_hora_mm": None, "horas": []}
+    assert a["rotas"]["habitual"]["tempo_min"] > 0 and a["rotas"]["habitual"]["trechos_de_risco"] == []
+    assert {c["rotulo"] for c in a["comparacao"]} == {"sem estimativa de risco"}         # equal "exposure" is not "equivalent": there is none
+    assert ids_da_rota(s, r, a, "habitual") == ["S0", "S1"]                              # and the fastest route is still the fastest
+
+
+def test_a_closure_is_still_respected_when_the_rain_data_is_down():
+    store = oc.Ocorrencias()
+    s, r = sem_chuva(store=store)
+    rel = store.relato({"lon": O[0], "lat": O[1], "segmento_ids": ["S1"], "impacto_circulacao": "interdicao", "data_hora": "2026-11-09T10:30"})
+    store.mudar_situacao(rel["id"], "confirmada", por="operador", evidencia="Via fechada pela guarda municipal")
+    assert "S1" not in ids_da_rota(s, r, s.rotas(pedido()), "habitual")
+
+
+def test_forecast_map_and_overview_refuse_with_the_last_update_instead_of_showing_old_rain():
+    s, _ = sem_chuva()
+    for chamada in (s.previsao, s.visao_geral, s.risco_mapa):
+        with pytest.raises(ChuvaIndisponivel) as erro:
+            chamada()
+        assert erro.value.ultima_atualizacao == "2026-11-09T09:00:00Z"
+
+
+def test_a_segment_still_shows_its_terrain_but_no_risk_when_the_rain_data_is_down():
+    s, _ = sem_chuva()
+    t = s.trecho("S0")
+    assert t["chuva_indisponivel"] is True and t["caracteristicas_fisicas"]["percentil"] == 100.0
+    assert all(h["escore"] is None and h["classe"] is None for h in t["risco_por_hora"]) and t["hora_de_maior_exposicao"] is None
+    lacunas = perguntar(s, tipo="trecho", id="S0", pergunta_id="indisponivel")["texto"]
+    assert "Sem estimativa de risco" in lacunas
+
+
+def test_the_assistant_and_the_tools_say_the_weather_is_unavailable_instead_of_inventing_zero_rain():
+    p = Provedor(chamar=[("get_weather_forecast", {"horas": 6})])
+    s, _ = sem_chuva(provedor=p)
+    a = s.rotas(pedido())
+    r = s.assistente({"tipo": "rota", "id": a["analise_id"], "pergunta": "Vai chover?"})
+    assert p.resultados[0]["indisponivel"] is True and "0" not in str(p.resultados[0].get("horas", ""))
+    assert "Meteorologia indisponível" in perguntar(s, tipo="rota", id=a["analise_id"], pergunta_id="indisponivel")["texto"]
+    assert r["origem"] == "provedor_de_linguagem"
+
+
+def test_health_reports_how_old_the_rain_data_is_and_when_it_was_last_good():
+    s, _ = montar()
+    assert s.saude()["chuva"]["ok"] is True and s.saude()["chuva"]["idade_min"] == 0 and s.saude()["chuva"]["atualizada_em_utc"]
+    fora, _ = sem_chuva()
+    h = fora.saude()
+    assert h["status"] == "degradado" and h["chuva"]["ok"] is False and h["chuva"]["ultima_atualizacao"] == "2026-11-09T09:00:00Z"
+
+
+def test_every_answer_that_uses_the_rain_states_that_it_is_regional():
+    s, _ = montar()
+    assert "grade de cerca de 10 km" in s.previsao(4)["escopo_da_chuva"] and "não medição neste trecho" in s.rotas(pedido())["escopo_da_chuva"]
+    assert "estimativa regional" in s.risco_mapa(2)["escopo_da_chuva"] and "estimativa regional" in s.trecho("S0")["escopo_da_chuva"]
