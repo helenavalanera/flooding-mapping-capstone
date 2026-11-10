@@ -58,3 +58,6 @@ site/
 
 # Índices pequenos e derivados que a montagem do site precisa num clone limpo (ver docs/publicacao.md).
 !src/flooding_mapping/app/data/*.parquet
+
+# Ocorrências operacionais (dados de operação, nunca versionados).
+data/operacional/

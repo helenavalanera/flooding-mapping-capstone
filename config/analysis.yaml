@@ -107,3 +107,42 @@ daer:
   # os fusos UTM 21S e 22S). Usado só para comprimentos e posições ao longo da linha.
   crs_metrico: EPSG:5880
   segmento_km: 1.0
+
+# Risco por trecho (baseline determinístico, SEM validação empírica em nível de via) e roteamento.
+# O que não tem base nos dados do projeto está marcado PROVISÓRIO; nenhum desses números foi ajustado
+# para "acertar" ocorrências.
+risco_trecho:
+  # Âncoras de chuva em Porto Alegre: limites INFERIORES observados em dias com bloqueios
+  # informados (reports/qa/rain_calibration.json). Abaixo do médio o fator cresce linearmente de 0.
+  chuva_medio: {max_1h_mm: 3.5, total_24h_mm: 26.2}
+  chuva_alto: {max_1h_mm: 9.0, total_24h_mm: 55.9}
+  fator_no_medio: 0.4          # PROVISÓRIO: fator de chuva ao atingir o nível médio (alto = 1.0)
+  # Condição antecedente: chuva nas 72 h anteriores à janela de 24 h.
+  antecedente_72h_mm: 26.2     # PROVISÓRIO: usa o mesmo limite médio de 24 h
+  antecedente_fator: 1.15      # PROVISÓRIO: multiplicador do fator de chuva, limitado a 1
+  classes: {atencao: 0.15, alto: 0.4}   # PROVISÓRIO: cortes do escore (fator de chuva x peso do trecho)
+  # Peso mínimo do trecho quando há ocorrência próxima e ainda ativa, por situação.
+  piso_ocorrencia: {confirmada: 0.9, reportada: 0.6}   # PROVISÓRIO
+  fator_confiabilidade_ocorrencia: {alta: 1.0, media: 0.75, baixa: 0.5}   # PROVISÓRIO
+  raio_ocorrencia_m: 100
+  # Uma interdição confirmada sem segmentos informados fecha só os segmentos a esta distância do ponto.
+  raio_interdicao_m: 30
+  validade_ocorrencia_h: 72
+  # Confiabilidade do dado de risco: só terreno = 0.5; ocorrência reportada = 0.75; confirmada = 1.
+  confiabilidade: {fisico: 0.5, reportada: 0.75, confirmada: 1.0}   # PROVISÓRIO
+
+roteamento:
+  # Velocidades de fluxo livre por classe OSM (km/h), sem congestionamento nem semáforos.   PROVISÓRIO
+  velocidade_kmh: {motorway: 80, motorway_link: 50, trunk: 60, trunk_link: 40, primary: 40, primary_link: 30,
+                   secondary: 35, secondary_link: 25, tertiary: 30, tertiary_link: 25, unclassified: 25,
+                   residential: 25, living_street: 10, service: 15, road: 25}
+  velocidade_padrao_kmh: 25
+  pe_kmh: 4.8
+  # Segundos de penalidade por km percorrido com escore de risco 1 e confiabilidade 1 (aversao = 1).
+  penalidade_s_por_km_risco: 600   # PROVISÓRIO
+  aversoes_candidatas: [1, 3, 10]
+  # Rotas distintas compartilham no máximo esta fração do comprimento com as já escolhidas.
+  compartilhamento_maximo: 0.7
+  # Margem do corredor de busca em torno da reta origem-destino.
+  corredor_margem_km: 3.0
+  snap_maximo_m: 500
