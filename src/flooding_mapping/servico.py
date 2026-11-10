@@ -26,6 +26,7 @@ import pandas as pd
 from . import ocorrencias as oc
 from . import rotas as rt
 from .chuva_horaria import ChuvaHoraria
+from .linguagem import assistente as asst
 from .linguagem import ferramentas
 from .cobertura import cobertura_poa, montar as montar_territorios
 from .linguagem.explicar import ROTULOS, Explicador, alerta, comparar, resumo_rota
@@ -70,10 +71,10 @@ def ponto(dados, campo: str, limites: tuple[float, float, float, float]) -> tupl
 class Servico:
     def __init__(self, rede: rt.Rede, chuva: ChuvaHoraria, store: oc.Ocorrencias, explicador: Explicador, params_risco: dict,
                  relogio=agora_local, token_operador: str = "", meta_dados: dict | None = None, territorios: dict | None = None,
-                 resumo_rs: dict | None = None):
+                 resumo_rs: dict | None = None, cobertura_rs: dict | None = None):
         self.rede, self.chuva, self.store, self.explicador, self.pr = rede, chuva, store, explicador, params_risco
         self.relogio, self.token_operador, self.meta_dados = relogio, token_operador, meta_dados or {}
-        self.territorios_config, self.resumo_rs = territorios, resumo_rs
+        self.territorios_config, self.resumo_rs, self.cobertura_rs = territorios, resumo_rs, cobertura_rs
         self._tabela: tuple[int, pd.DataFrame] | None = None
         self._analises: dict[str, tuple[float, rt.Analise, dict, dict]] = {}
         self._lock = threading.Lock()
@@ -230,7 +231,7 @@ class Servico:
             self._analises = {k: v for k, v in self._analises.items() if v[0] > agora_m}
             while len(self._analises) >= MAX_ANALISES:
                 self._analises.pop(next(iter(self._analises)))
-            self._analises[identificador] = (agora_m + TTL_ANALISE_S, analise, brutas, {"meteo": meteo, "comparacao": comparacao})
+            self._analises[identificador] = (agora_m + TTL_ANALISE_S, analise, brutas, {"meteo": meteo, "comparacao": comparacao, "interdicoes": int(e["bloqueada"].sum())})
         return {"analise_id": identificador, "natureza": "estimativa de risco por trecho (baseline sem validação em vias)", "modal": modal,
                 "saida": iso_local(saida), "meteo": meteo, "alerta": alerta(brutas, meteo), "comparacao": comparacao,
                 "rotas": {n: self._publica(r, n) for n, r in brutas.items()}, "interdicoes_consideradas": int(e["bloqueada"].sum()),
@@ -272,6 +273,45 @@ class Servico:
         man = self._manipuladores(analise, brutas, extra, e)
         saida = self.explicador.explicar(resumos, det, lambda nome, args: ferramentas.executar(nome, args, man), ferramentas.DECLARACOES)
         return {**saida, "alerta": det}
+
+    def assistente(self, dados: dict) -> dict:
+        """Answers a question about what is selected (a segment, a route, a municipality or a highway).
+
+        Every suggested question has an answer built here from the structured context; the language provider is asked to
+        rephrase it only when ``contextualizar`` is true, and its text is validated. A free question has no answer without it."""
+        if not isinstance(dados, dict):
+            raise ValueError("corpo inválido")
+        tipo = dados.get("tipo")
+        if tipo not in asst.POR_CONTEXTO:
+            raise ValueError("tipo: use um de " + ", ".join(asst.POR_CONTEXTO))
+        pid, livre = dados.get("pergunta_id"), dados.get("pergunta")
+        if pid is not None and pid not in asst.POR_CONTEXTO[tipo]:
+            raise ValueError("pergunta_id: use um de " + ", ".join(asst.POR_CONTEXTO[tipo]))
+        if pid is None and not (isinstance(livre, str) and livre.strip()):
+            raise ValueError("informe pergunta_id ou pergunta")
+        pergunta = asst.PERGUNTAS[pid] if pid else oc._texto(livre, "pergunta", asst.MAX_PERGUNTA)
+        identificador = str(dados.get("id") or "")
+        executar = declaracoes = alerta_det = None
+        if tipo == "trecho":
+            contexto = asst.contexto_trecho(self.trecho(identificador))
+        elif tipo == "rota":
+            _, analise, brutas, extra = self._analise(identificador)
+            contexto = asst.contexto_rota({"comparacao": extra["comparacao"], "modal": analise.modo, "meteo": extra["meteo"]}, brutas, extra["interdicoes"])
+            alerta_det = alerta(brutas, extra["meteo"])
+            man = self._manipuladores(analise, brutas, extra, self._estado())
+            executar, declaracoes = (lambda nome, args: ferramentas.executar(nome, args, man)), ferramentas.DECLARACOES
+        else:
+            tabela = (self.cobertura_rs or {}).get("municipios" if tipo == "municipio" else "rodovias", {})
+            if identificador not in tabela:
+                raise KeyError(identificador)
+            nome = oc._texto(dados.get("rotulo") or identificador, "rotulo", 60)
+            contexto = asst.contexto_territorio(tipo, nome, tabela[identificador], (self.territorios_config or {}).get("territorios", {}).get("rs", {}).get("capacidades", {}))
+        deterministica = asst.resposta(tipo, pid, contexto, alerta_det) if pid else None
+        if dados.get("contextualizar") is False:
+            resposta = {"texto": deterministica or "Informe uma das perguntas sugeridas.", "origem": "deterministico", "motivo": "nao_solicitado"}
+        else:
+            resposta = self.explicador.responder(contexto, pergunta, deterministica, executar, declaracoes)
+        return {**resposta, "pergunta": pergunta, "perguntas": asst.sugeridas(tipo)}
 
     def _manipuladores(self, analise: rt.Analise, brutas: dict, extra: dict, e: dict) -> dict:
         """Operations the provider may call, bound to this analysis (the provider cannot name another)."""

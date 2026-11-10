@@ -45,7 +45,7 @@ STATIC = Path(__file__).parent / "app" / "static"
 # Source files win; the build folder only supplies what the pipeline generates (state forecast, layers).
 RAIZES = (STATIC, ROOT / "site")
 MAX_CORPO = 8 * 1024
-LIMITES_POR_MIN = {"/api/rotas": 20, "/api/explicacao": 10, "/api/relatos": 10}
+LIMITES_POR_MIN = {"/api/rotas": 20, "/api/explicacao": 10, "/api/relatos": 10, "/api/assistente": 10}
 LIMITE_LEITURA_POR_MIN = 240   # GET on the API: enough for a dashboard, not for scraping
 FALHAS_DE_CREDENCIAL_POR_MIN = 8
 TOKEN_MINIMO = 24          # shorter operator tokens are refused at start: they are easy to guess
@@ -335,6 +335,8 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
                 if caminho == "/api/explicacao":
                     dados = self._corpo()
                     return servico.explicacao(str(dados.get("analise_id", "")), bool(dados.get("contextualizar")))
+                if caminho == "/api/assistente":
+                    return servico.assistente(self._corpo())
                 if caminho == "/api/relatos":
                     return servico.relato(self._corpo())
                 if caminho.startswith("/api/ocorrencias/") and caminho.count("/") == 3:
@@ -383,10 +385,11 @@ def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
     lat, lon = float(rede.no_lat.mean()), float(rede.no_lon.mean())
     from .cobertura import yaml_territorios
 
-    resumo = resolve("src/flooding_mapping/app/static/data/cobertura_rs.json")
+    arquivo = resolve("src/flooding_mapping/app/static/data/cobertura_rs.json")
+    cobertura = json.loads(arquivo.read_text()) if arquivo.exists() else None
     servico = Servico(rede, ChuvaHoraria(lat, lon), oc.Ocorrencias(Path(env.get("FM_OCORRENCIAS") or resolve("data/operacional/ocorrencias.jsonl"))),
                       Explicador(gemini.do_ambiente(env)), config["risco_trecho"], token_operador=token,
-                      territorios=yaml_territorios(), resumo_rs=json.loads(resumo.read_text())["estado"] if resumo.exists() else None,
+                      territorios=yaml_territorios(), resumo_rs=cobertura["estado"] if cobertura else None, cobertura_rs=cobertura,
                       meta_dados={"rede": destino.name, "gerada_em": time.strftime("%Y-%m-%d", time.localtime(destino.stat().st_mtime))})
     return servico, (env.get("CORS_ORIGEM") or "").strip()
 

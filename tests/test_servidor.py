@@ -272,3 +272,15 @@ def test_the_generated_token_is_long_random_and_printed_not_stored(capsys, monke
     srv.main()
     token = capsys.readouterr().out.strip()
     assert len(token) >= srv.TOKEN_MINIMO and srv.validar_token(token) == token
+
+
+def test_assistant_endpoint_answers_and_is_rate_limited(api):
+    from test_servico import COBERTURA, CAPACIDADES
+    base, servico, _ = api()
+    servico.cobertura_rs, servico.territorios_config = COBERTURA, CAPACIDADES
+    r = requests.post(base + "/api/assistente", json={"tipo": "trecho", "id": "S0", "pergunta_id": "o_que_explica", "contextualizar": False})
+    assert r.status_code == 200 and "fator de chuva" in r.json()["texto"] and len(r.json()["perguntas"]) == 3
+    assert requests.post(base + "/api/assistente", json={"tipo": "trecho", "id": "nao-existe", "pergunta_id": "o_que_explica"}).status_code == 404
+    assert requests.post(base + "/api/assistente", json={"tipo": "trecho", "id": "S0"}).status_code == 422
+    codigos = [requests.post(base + "/api/assistente", json={}).status_code for _ in range(12)]
+    assert codigos[-1] == 429
