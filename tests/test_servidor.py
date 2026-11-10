@@ -1,5 +1,6 @@
 import http.client
 import json
+import sys
 import threading
 from http.server import ThreadingHTTPServer
 
@@ -220,3 +221,54 @@ def test_territories_endpoint_serves_the_capabilities_and_the_live_coverage_of_p
     t = requests.get(base + "/api/territorios").json()
     assert set(t["territorios"]) == {"rs", "poa"} and t["territorios"]["rs"]["cobertura"] is None
     assert t["territorios"]["poa"]["cobertura"]["dirigivel"]["km"] > 0 and t["territorios"]["rs"]["capacidades"]["rotas"]["estado"] == "indisponivel"
+
+
+# ---------------------------------------------------------------- proxy, token, métricas e encerramento
+
+
+@pytest.mark.parametrize("par, cabecalho, confiaveis, esperado", [
+    ("203.0.113.9", "1.2.3.4", [], "203.0.113.9"),                              # no trusted proxy configured: header ignored
+    ("203.0.113.9", "1.2.3.4", ["10.0.0.0/8"], "203.0.113.9"),                  # peer is not a trusted proxy: header ignored
+    ("10.0.0.5", "1.2.3.4", ["10.0.0.0/8"], "1.2.3.4"),                         # trusted peer: believe the client address
+    ("10.0.0.5", "9.9.9.9, 1.2.3.4", ["10.0.0.0/8"], "1.2.3.4"),                # a client cannot forge the left of the chain
+    ("10.0.0.5", "1.2.3.4, 10.0.0.7", ["10.0.0.0/8"], "1.2.3.4"),               # trusted hops on the right are skipped
+    ("10.0.0.5", None, ["10.0.0.0/8"], "10.0.0.5"), ("10.0.0.5", "lixo", ["10.0.0.0/8"], "lixo"),
+])
+def test_the_client_address_trusts_forwarding_headers_only_from_a_configured_proxy(par, cabecalho, confiaveis, esperado):
+    assert srv.ip_do_cliente(par, cabecalho, srv.proxies_confiaveis(",".join(confiaveis))) == esperado
+
+
+def test_a_forged_forwarding_header_does_not_buy_a_new_rate_limit(api):
+    base, _, _ = api()   # no trusted proxy: every request is the same client whatever the header says
+    codigos = [requests.post(base + "/api/rotas", json={}, headers={"X-Forwarded-For": f"9.9.9.{i}"}).status_code for i in range(22)]
+    assert codigos[20:] == [429, 429]
+
+
+def test_a_malformed_proxy_list_or_a_short_operator_token_stops_the_start():
+    with pytest.raises(SystemExit, match="PROXIES_CONFIAVEIS"):
+        srv.proxies_confiaveis("10.0.0.0/8, nao-e-ip")
+    with pytest.raises(SystemExit, match="ao menos 24"):
+        srv.validar_token("curto")
+    assert srv.validar_token("") == "" and srv.validar_token("a" * 24) == "a" * 24
+
+
+def test_health_carries_counters_without_personal_data(api):
+    base, _, _ = api()
+    requests.post(base + "/api/rotas", json=CORPO)
+    requests.get(base + "/api/risco?h=1")
+    saude = requests.get(base + "/api/saude").json()
+    assert saude["metricas"]["requisicoes"] >= 2 and saude["metricas"]["erros_5xx"] == 0 and saude["metricas"]["latencia_p95_ms"] >= 0
+    assert str(O[0]) not in json.dumps(saude)
+
+
+def test_a_stalled_connection_does_not_hold_a_thread_forever():
+    assert 0 < srv.TEMPO_DE_CONEXAO_S <= 30
+    handler = srv.criar_handler(montar()[0])
+    assert handler.timeout == srv.TEMPO_DE_CONEXAO_S
+
+
+def test_the_generated_token_is_long_random_and_printed_not_stored(capsys, monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["servidor", "--gerar-token"])
+    srv.main()
+    token = capsys.readouterr().out.strip()
+    assert len(token) >= srv.TOKEN_MINIMO and srv.validar_token(token) == token

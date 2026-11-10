@@ -17,8 +17,11 @@ Upgrade to a worker pool (or a compiled router) when concurrent analyses become 
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
+import secrets
+import signal
 import sys
 import threading
 import time
@@ -45,6 +48,9 @@ MAX_CORPO = 8 * 1024
 LIMITES_POR_MIN = {"/api/rotas": 20, "/api/explicacao": 10, "/api/relatos": 10}
 LIMITE_LEITURA_POR_MIN = 240   # GET on the API: enough for a dashboard, not for scraping
 FALHAS_DE_CREDENCIAL_POR_MIN = 8
+TOKEN_MINIMO = 24          # shorter operator tokens are refused at start: they are easy to guess
+TEMPO_DE_CONEXAO_S = 20    # a client that stalls does not hold a thread forever
+LENTO_MS = 5000
 CSP = ("default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
        "img-src 'self' data: blob: https://tile.openstreetmap.org https://cdnjs.cloudflare.com https://s3.amazonaws.com; "
        "connect-src 'self' https://tile.openstreetmap.org https://s3.amazonaws.com; worker-src 'self' blob:; child-src 'self' blob:; frame-ancestors 'none'; base-uri 'none'")
@@ -53,6 +59,66 @@ CSP_SW = CSP.replace("connect-src 'self'", "connect-src 'self' https://cdnjs.clo
 TIPOS = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
          ".json": "application/json", ".geojson": "application/json", ".webmanifest": "application/manifest+json",
          ".png": "image/png", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
+
+
+def validar_token(token: str) -> str:
+    """The operator token from the environment, or a clear refusal when it is too short to protect anything."""
+    token = (token or "").strip()
+    if token and len(token) < TOKEN_MINIMO:
+        raise SystemExit(f"OPERADOR_TOKEN com {len(token)} caracteres: use ao menos {TOKEN_MINIMO}. "
+                         f"Gere um com: python -m flooding_mapping.servidor --gerar-token")
+    return token
+
+
+def proxies_confiaveis(texto: str) -> list:
+    """Addresses or networks (comma separated) whose forwarding headers may be believed."""
+    try:
+        return [ipaddress.ip_network(p.strip(), strict=False) for p in (texto or "").split(",") if p.strip()]
+    except ValueError as erro:
+        raise SystemExit(f"PROXIES_CONFIAVEIS inválido: {erro}") from None
+
+
+def ip_do_cliente(par: str, encaminhado: str | None, confiaveis: list) -> str:
+    """The client address for rate limiting.
+
+    The forwarding header is believed only when the direct peer is a configured trusted proxy; the chain is then read from
+    the right, skipping trusted proxies, and the first other address is the client. With no trusted proxy configured, or a
+    peer that is not one, the header is ignored: anyone can write it, and trusting it would let a client pick its own limit."""
+    def confiavel(ip: str) -> bool:
+        try:
+            return any(ipaddress.ip_address(ip) in rede for rede in confiaveis)
+        except ValueError:
+            return False
+    if not confiaveis or not confiavel(par) or not encaminhado:
+        return par
+    for ip in reversed([p.strip() for p in encaminhado.split(",") if p.strip()]):
+        if not confiavel(ip):
+            return ip
+    return par
+
+
+class Metricas:
+    """Counters and latency of the last requests, in memory and without any personal data (route groups only)."""
+
+    def __init__(self, janela: int = 500):
+        self._lock = threading.Lock()
+        self._ultimas: deque = deque(maxlen=janela)
+        self.total = 0
+        self.erros_5xx = 0
+        self.iniciado = time.time()
+
+    def registrar(self, grupo: str, status: int, ms: float) -> None:
+        with self._lock:
+            self._ultimas.append((grupo, status, ms))
+            self.total += 1
+            self.erros_5xx += status >= 500
+
+    def resumo(self) -> dict:
+        with self._lock:
+            ms = sorted(m for _, _, m in self._ultimas)
+        p95 = ms[min(len(ms) - 1, int(0.95 * len(ms)))] if ms else None
+        return {"requisicoes": self.total, "erros_5xx": self.erros_5xx, "ultimas": len(ms), "latencia_p95_ms": None if p95 is None else round(p95),
+                "ativo_ha_s": round(time.time() - self.iniciado)}
 
 
 class MuitasTentativas(Exception):
@@ -101,12 +167,19 @@ def ler_env(caminho: Path, env=os.environ) -> None:
             env.setdefault(chave.strip(), valor.strip().strip("\"'"))
 
 
-def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador | None = None):
+def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador | None = None, confiaveis: list | None = None,
+                  metricas: Metricas | None = None):
     limitador = limitador or Limitador()
+    confiaveis = confiaveis or []
+    metricas = metricas or Metricas()
 
     class Handler(BaseHTTPRequestHandler):
         server_version = "FloodingMapping"
         sys_version = ""
+        timeout = TEMPO_DE_CONEXAO_S
+
+        def _cliente(self) -> str:
+            return ip_do_cliente(self.client_address[0], self.headers.get("X-Forwarded-For"), confiaveis)
 
         def log_message(self, *args):  # no access log: it would carry places and times of people
             pass
@@ -129,6 +202,7 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             self._enviar(json.dumps(dados, ensure_ascii=False, default=str, allow_nan=False).encode(), status)
 
         def _enviar(self, corpo: bytes, status=HTTPStatus.OK) -> None:
+            self._status = int(status)
             self.send_response(status)
             self._cabecalhos("application/json; charset=utf-8", len(corpo), True)
             self.end_headers()
@@ -174,11 +248,24 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             self._despachar("DELETE")
 
         def _despachar(self, metodo: str) -> None:
+            inicio, self._status = time.monotonic(), 0
+            try:
+                self._despachar_interno(metodo)
+            finally:
+                caminho = urlparse(self.path).path
+                if caminho.startswith("/api/"):   # route group only: ids and query strings can carry places and times
+                    grupo = "/".join(caminho.split("/")[:3]) + ("/{id}" if caminho.count("/") > 2 else "")
+                    ms = (time.monotonic() - inicio) * 1000
+                    metricas.registrar(metodo + " " + grupo, self._status, ms)
+                    if ms > LENTO_MS:
+                        print(f"lento: {metodo} {grupo} {ms:.0f} ms", file=sys.stderr)
+
+        def _despachar_interno(self, metodo: str) -> None:
             url = urlparse(self.path)
             if not url.path.startswith("/api/"):
                 return self._estatico(url.path) if metodo == "GET" else self._erro(HTTPStatus.METHOD_NOT_ALLOWED, "método não permitido")
             maximo = LIMITES_POR_MIN.get(url.path) if metodo == "POST" else (LIMITE_LEITURA_POR_MIN if metodo == "GET" else None)
-            if maximo and not limitador.permite((metodo, url.path if metodo == "POST" else "leitura", self.client_address[0]), maximo):
+            if maximo and not limitador.permite((metodo, url.path if metodo == "POST" else "leitura", self._cliente()), maximo):
                 return self._erro(HTTPStatus.TOO_MANY_REQUESTS, "muitas requisições; tente em instantes")
             try:
                 resultado = self._api(metodo, url.path, {k: v[-1] for k, v in parse_qs(url.query).items()})
@@ -216,7 +303,7 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             so the token cannot be guessed by brute force."""
             if not servico.token_operador:
                 raise PermissionError("confirmação de ocorrências desativada (OPERADOR_TOKEN não definido)")
-            chave = ("falha-operador", self.client_address[0])
+            chave = ("falha-operador", self._cliente())
             if limitador.bloqueado(chave, FALHAS_DE_CREDENCIAL_POR_MIN):
                 raise MuitasTentativas("muitas tentativas com credencial inválida; aguarde um minuto")
             if not self._credencial_valida():
@@ -226,7 +313,7 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
         def _api(self, metodo: str, caminho: str, consulta: dict):
             if metodo == "GET":
                 if caminho == "/api/saude":
-                    return servico.saude()
+                    return {**servico.saude(), "metricas": metricas.resumo()}
                 if caminho == "/api/visao-geral":
                     return servico.visao_geral()
                 if caminho == "/api/previsao":
@@ -283,39 +370,53 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
 
 
 def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
-    """The service wired from the repository's data and the environment; the CORS origin to use."""
+    """The service wired from the repository's data and the environment; the CORS origin to use.
+
+    Paths can be moved to a persistent volume with ``FM_REDE`` (street table) and ``FM_OCORRENCIAS`` (occurrence file)."""
     ler_env(raiz / ".env", env)
+    token = validar_token(env.get("OPERADOR_TOKEN"))
     config = load_config()
-    destino = resolve("data/processed/rede_poa.parquet")
+    destino = Path(env.get("FM_REDE") or resolve("data/processed/rede_poa.parquet"))
     if not destino.exists():
-        raise SystemExit(f"Falta {destino.relative_to(ROOT)}. Gere com: python -m flooding_mapping.rede_poa")
+        raise SystemExit(f"Falta a tabela de ruas ({destino}). Gere com: python -m flooding_mapping.rede_poa (ou aponte FM_REDE)")
     rede = rt.Rede(pd.read_parquet(destino), config["roteamento"])
     lat, lon = float(rede.no_lat.mean()), float(rede.no_lon.mean())
     from .cobertura import yaml_territorios
 
     resumo = resolve("src/flooding_mapping/app/static/data/cobertura_rs.json")
-    servico = Servico(rede, ChuvaHoraria(lat, lon), oc.Ocorrencias(resolve("data/operacional/ocorrencias.jsonl")),
-                      Explicador(gemini.do_ambiente(env)), config["risco_trecho"], token_operador=(env.get("OPERADOR_TOKEN") or "").strip(),
+    servico = Servico(rede, ChuvaHoraria(lat, lon), oc.Ocorrencias(Path(env.get("FM_OCORRENCIAS") or resolve("data/operacional/ocorrencias.jsonl"))),
+                      Explicador(gemini.do_ambiente(env)), config["risco_trecho"], token_operador=token,
                       territorios=yaml_territorios(), resumo_rs=json.loads(resumo.read_text())["estado"] if resumo.exists() else None,
-                      meta_dados={"rede": str(destino.relative_to(ROOT)), "gerada_em": time.strftime("%Y-%m-%d", time.localtime(destino.stat().st_mtime))})
+                      meta_dados={"rede": destino.name, "gerada_em": time.strftime("%Y-%m-%d", time.localtime(destino.stat().st_mtime))})
     return servico, (env.get("CORS_ORIGEM") or "").strip()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Servidor do Flooding Mapping (dashboard, PWA e API)")
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8000")))
+    parser.add_argument("--gerar-token", action="store_true", help="imprime um token de operador aleatório (não o grava em lugar nenhum)")
     args = parser.parse_args()
+    if args.gerar_token:
+        print(secrets.token_urlsafe(32))
+        return
     servico, cors = montar()
-    servico.store.expirar(90)  # retention: reports and records older than 90 days are dropped at start
-    servidor = ThreadingHTTPServer((args.host, args.port), criar_handler(servico, cors))
+    confiaveis = proxies_confiaveis(os.environ.get("PROXIES_CONFIAVEIS", ""))
+    perdidos = servico.store.expirar(90)  # retention: reports and records older than 90 days are dropped at start
+    servidor = ThreadingHTTPServer((args.host, args.port), criar_handler(servico, cors, confiaveis=confiaveis))
+    servidor.daemon_threads = True
+    signal.signal(signal.SIGTERM, lambda *_: (_ for _ in ()).throw(KeyboardInterrupt()))   # a platform stop is a clean stop
     print(f"http://{args.host}:{args.port}/  (PWA em /pwa/)  |  provedor de linguagem: "
           f"{'configurado' if servico.explicador.provedor else 'não configurado (textos determinísticos)'}  |  "
-          f"confirmação de ocorrências: {'ativa' if servico.token_operador else 'desativada'}", flush=True)
+          f"confirmação de ocorrências: {'ATIVA' if servico.token_operador else 'DESATIVADA (OPERADOR_TOKEN não definido)'}  |  "
+          f"proxies confiáveis: {len(confiaveis)}  |  ocorrências: {len(servico.store.listar())} ({perdidos} expiradas, {servico.store.linhas_invalidas} linhas inválidas)", flush=True)
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:
         pass
+    finally:
+        servidor.server_close()
+        print("servidor encerrado", flush=True)
 
 
 if __name__ == "__main__":
