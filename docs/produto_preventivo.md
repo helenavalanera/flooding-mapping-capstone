@@ -82,6 +82,16 @@ físico cobre 100% do km da malha; o tráfego, 36%. Um primeiro critério, só c
 Trechos sem índice ficam **sem estimativa**, que não é risco baixo; a comparação de rotas avisa quando a menor exposição vem de uma
 parcela relevante do trajeto sem dado.
 
+## Meteorologia
+
+`chuva_horaria.py`. **Uma série horária para a cidade inteira** (Open-Meteo, grade de cerca de 10 km): diz quando chove, não onde. O
+passado recente é **análise do modelo, não leitura de pluviômetro**; as horas à frente são previsão. Unidade (mm) e fuso são verificados
+na resposta. Os dados valem 6 h: a consulta é renovada a cada 30 min, e se a renovação falhar o último valor segue sendo usado, marcado
+como defasado, **até as 6 h**. Depois disso o serviço responde que a chuva está indisponível (HTTP 503 com a última atualização
+conhecida), as rotas saem só com tempo e distância, sem estimativa de risco, e o alerta é `sem_dados`. A tela diz isso e que não
+significa rota sem risco. Todo texto de risco repete que a chuva é regional. O recuo de 6 h do fator de chuva continua **provisório**: os
+eventos documentados não trazem evidência a favor nem contra.
+
 ## Risco por trecho (metodologia)
 
 `escore = fator de chuva (0–1) × peso do trecho (0–1)`
@@ -102,25 +112,44 @@ Parâmetros em `config/analysis.yaml` (bloco `risco_trecho`); os sem base nos da
 * **Em 2022-03-06** o fator na hora do reporte fica abaixo do corte de Atenção para qualquer trecho: o baseline não sinalizaria esse evento.
 * Os eventos ancoram os níveis de chuva (limites inferiores): reconferi-los contra eles é circular e não os valida.
 * `python -m flooding_mapping.rede_poa --verificar` (`reports/ml/risco_trecho_descritivo.json`): segmentos junto a 19 bloqueios (4 datas) têm percentil mediano 75 (geral 50), mas a regra só de cota baixa faz igual ou melhor (77): os demais fatores não mostram ganho.
-* **Não há previsão viária validada.** Faltam ocorrências georreferenciadas suficientes.
+* **Confronto com os eventos documentados** (19 bloqueios geocodificados, 4 datas; `reports/ml/risco_trecho_auditoria.json`): o baseline sinalizou
+  **4 dos 19** em algum horário do dia e **2 na hora do reporte**. Dos 15 não detectados, 9 têm peso zero (segmentos abaixo do percentil de
+  corte), 6 tiveram chuva abaixo do nível que sinaliza esses trechos, e em 2 o sinal veio em outra hora do dia. Nenhum corte do índice detecta
+  os eventos sem sinalizar uma parcela grande da malha (curva do corte no relatório), então **não há ajuste de parâmetro que resolva isso**, e
+  nenhum foi feito. Os eventos são poucos e concentrados em quatro datas.
+* **Dias sinalizados sem registro:** em 2.863 dias (2019-01-01 a 2026-11-02), alguma via ficou em Atenção em 682 e em Alto em 305; só 4 dias
+  têm bloqueio documentado. **Ausência de registro não é exemplo negativo**: não são falsos alertas comprovados, apenas dias que não se consegue conferir.
+* **Testes de sensibilidade** (`tests/test_sensibilidade_risco.py`): a ordem dos trechos e as classes mudam de forma previsível com chuva, corte e peso.
+* **Não há previsão viária validada.** Faltam ocorrências georreferenciadas suficientes. A Proveniência da interface mostra o que se pode e o que
+  não se pode afirmar (nunca "rota segura" nem "alagamento previsto nesta rua").
 
 ## Roteamento
 
-Dijkstra sobre o grafo OSM (`carro` e `pe`). Custo = tempo + `600 s/km × escore × confiabilidade × aversão`, com o escore no **horário
-estimado de passagem**. **Interdição confirmada remove o trecho; risco previsto só penaliza.** Saem: a rota habitual (menor tempo), a de
-menor exposição estimada (se houver) e uma alternativa distinta (compartilha ≤ 70%, tempo ≤ 1,5× + 10 min). Nenhuma rota é chamada de segura.
+Dijkstra sobre o grafo OSM inteiro (`carro` e `pe`), restrito ao maior componente fortemente conexo de cada modal (carro: 96,7% do km
+permitido alcançável; a pé: 90,7%). Custo = tempo + `600 s/km × escore × confiabilidade × aversão`, com o escore no **horário estimado de
+passagem**. **Interdição confirmada é bloqueio rígido nos dois modais; risco previsto só penaliza.** Saem: a rota habitual (menor tempo), a
+de menor exposição estimada (se houver) e uma alternativa distinta (compartilha ≤ 70%, tempo ≤ 1,5× + 10 min). Nenhuma rota é chamada de segura.
 
-Limites: velocidades de fluxo livre, sem trânsito, semáforos ou restrições de conversão; sem ônibus (sem JDK para o r5py e GTFS vencido);
-cada rota é o melhor caminho sob penalidade dependente do tempo, não o ótimo exato; vias sem terreno somam zero de penalidade e são reportadas.
-Um processo atende poucos usuários simultâneos (consulta de ~1–5 s). Não foram integrados OSRM/Valhalla: exigiriam serviço separado e não
-aceitam penalidade de risco por horário de passagem.
+Convenções do OSM aplicadas na construção da rede (`rede_poa.construir`): sentido único (incluindo rotatórias sem a marca), acesso privado
+ou fechado, estacionamento e garagem fora do carro, escadas contadas à parte (km de escadas na análise).
+
+**Auditoria** (`python -m flooding_mapping.auditoria_rotas` → `reports/ml/rotas_auditoria.json`): conferência contra um caminho mínimo de
+referência (networkx) em 100 pares por modal, **0 diferenças** em carro e a pé; é auditoria do cálculo, não valida a qualidade de nenhum
+deslocamento real. A busca já teve um corredor em torno da reta origem-destino e ele foi **removido** quando produziu uma rota a pé 12 min
+pior que a de referência.
+
+Limites: velocidades de fluxo livre por classe de via (a velocidade máxima legal não é usada), sem trânsito, semáforos, restrições de conversão,
+existência de calçada nem inclinação no tempo a pé; sem ônibus (sem JDK para o r5py e GTFS vencido); sem navegação curva a curva; cada rota é o
+melhor caminho sob penalidade dependente do tempo, não o ótimo exato; vias sem terreno somam zero de penalidade e são reportadas. Um processo
+atende poucos usuários simultâneos (consulta de ~1–5 s). Não foram integrados OSRM/Valhalla: exigiriam serviço separado e não aceitam
+penalidade de risco por horário de passagem.
 
 ## Ocorrências
 
 `ocorrencias.py`: fonte, tipo, localização, data/hora, início/fim, severidade, impacto, situação (reportada, confirmada, descartada),
 confiabilidade, origem do registro e histórico de transições.
 
-* Relato de usuário nasce **sempre** `reportada`/`baixa`. Só o operador (token + evidência escrita ≥ 10 caracteres) muda a situação; só `confirmada` com impacto `interdicao` fecha um trecho.
+* Relato de usuário nasce **sempre** `reportada`/`baixa`. Só o operador (token + evidência escrita ≥ 10 caracteres) muda a situação, e **declara o impacto ao confirmar** (`interdicao`, `parcial`, `nenhum` ou `desconhecido`); só `confirmada` com impacto `interdicao` fecha um trecho. O fluxo completo (relato, confirmação, trecho bloqueado na rota) é testado pela API HTTP.
 * A **listagem pública omite o texto livre**: um relato não verificado pode conter dado pessoal digitado por terceiros. Só o operador autenticado o recebe.
 * **Persistência**: arquivo JSON Lines (`data/operacional/`, fora do Git), `fsync` a cada gravação, linhas truncadas ignoradas e contadas na leitura, retenção de 90 dias por reescrita atômica. É suficiente para um processo; **não** para vários processos escrevendo (ver pendências).
 * Registros do S2iD e bloqueios da CPRv BM (RS) são registros oficiais de terceiros e **não** passam pela classificação reportada/confirmada/descartada.
@@ -132,12 +161,12 @@ confiabilidade, origem do registro e histórico de transições.
 | `/api/saude`, `/api/territorios` | GET | todos | territórios: capacidades + cobertura |
 | `/api/visao-geral`, `/api/previsao`, `/api/risco?h=`, `/api/trecho?id=`, `/api/proveniencia` | GET | todos | Porto Alegre; 240 leituras/min por cliente |
 | `/api/ocorrencias` | GET | todos (sem texto livre); operador (completo) | |
-| `/api/rotas`, `/api/explicacao` | POST | todos | 20 e 10 por minuto |
+| `/api/rotas`, `/api/explicacao`, `/api/assistente` | POST | todos | 20, 10 e 10 por minuto |
 | `/api/relatos` | POST | todos | 10/min; entra como `reportada` |
 | `/api/ocorrencias/{id}` | POST | operador | confirmar ou descartar |
 | `/api/analises/{id}` | DELETE | quem tem o id | apaga a análise da memória |
 
-Corpo máximo de 8 KB; erros em `{"erro": "..."}` (422 validação, 403 autorização, 404, 429, 500 sem detalhes); sem log de acesso nem de corpos; CORS só para `CORS_ORIGEM`; política de segurança de conteúdo restrita (workers e tiles só do necessário).
+`/api/saude` traz métricas em memória (contagens, latências, falhas) e, só para o operador, o diagnóstico de origem do cliente atrás de proxy. Corpo máximo de 8 KB; erros em `{"erro": "..."}` (422 validação, 403 autorização, 404, 429, 500 sem detalhes); sem log de acesso nem de corpos; CORS só para `CORS_ORIGEM`; política de segurança de conteúdo restrita (workers e tiles só do necessário).
 
 ## Camada de linguagem (Gemini)
 
@@ -146,7 +175,13 @@ operações com contrato fechado; recebe só agregados (tempos, km por classe, n
 coordenadas ou texto livre de usuários. Chamada só se o usuário pedir e houver risco a explicar; limite local de 20/min e cache de 15 min.
 Qualquer falha devolve o texto determinístico com o motivo; resposta que afirme que uma rota é segura é descartada.
 
-**Estado:** testada com cliente simulado (falhas, ciclo de operações, privacidade). **A chamada real à API não foi executada: não há chave configurada** (`.env` vazio).
+**Assistente contextual** (`linguagem/assistente.py`, `POST /api/assistente`): para um trecho, uma rota, um município ou uma rodovia, o contexto vira
+um resumo estruturado sem coordenadas, com a lista do que **falta**. As perguntas sugeridas ("Por que este trecho está em atenção?", "O que
+explica esta classificação?", "O que muda entre estas rotas?", "Quais informações estão indisponíveis?") têm resposta determinística; o
+provedor só reformula, e a pergunta livre do usuário é tratada como dado não confiável.
+
+**Estado:** chamadas reais ao provedor foram executadas e estão registradas, com o que não foi validado, em
+[`validacao_gemini.md`](validacao_gemini.md). A chave fica só no `.env`.
 
 ## Interfaces
 
@@ -154,14 +189,16 @@ Qualquer falha devolve o texto determinístico com o motivo; resposta que afirme
 atenção, como pode evoluir, quais deslocamentos podem ser afetados, que informações sustentam), Mapa, Condições e previsão, Mobilidade,
 Ocorrências e Proveniência (inclui a matriz do que cada região oferece). Observado, previsto, simulado e confirmado têm selo, cor e traço próprios.
 
-**Mapa 3D (MapLibre GL JS 4.7.1, BSD-3, fixado com hash de integridade).** Terreno com elevação (AWS Terrain Tiles, público, sem chave),
+**Mapa (um controlador, dois motores).** Com WebGL: MapLibre GL JS 4.7.1 (BSD-3, fixado com hash de integridade). **Sem WebGL: Leaflet, com as mesmas camadas e seleção nos dois territórios** (ocorrências, interdições, trechos de atenção, rotas, municípios, rodovias); só o relevo e a vista inclinada exigem WebGL, e o painel diz isso. O mapa ocupa a tela e os painéis flutuam sobre ele, translúcidos (folha inferior recolhível no celular); onde o navegador não faz desfoque, o painel fica quase opaco. Detalhes do motor com WebGL: Terreno com elevação (AWS Terrain Tiles, público, sem chave),
 inclinação, rotação, camadas por território, seleção de município, rodovia e trecho com painel contextual, destaque das rotas e dos trechos
 de atenção, transição entre escalas. **Justificativa:** o MapLibre integra-se ao mapa atual sem Three.js e preserva uma alternativa 2D
-(botão 2D) e o **mapa clássico em Leaflet**, usado também sem WebGL. O relevo é só visual: o exagero vertical (1×–3×) é escolhido pela pessoa
+(botão 2D) e o motor Leaflet, usado também sem WebGL. O relevo é só visual: o exagero vertical (1×–3×) é escolhido pela pessoa
 e declarado, o modelo pode ter artefatos sobre água e vegetação, e a elevação **não entra em nenhum cálculo de risco**. Nenhuma profundidade
 ou extensão de lâmina d'água é desenhada.
 
-**PWA** (`/pwa/`): etapas visíveis, condições antes da análise, alerta como primeira leitura, comparação das rotas, trechos de atenção por via,
+**Assistente no painel:** ao selecionar um trecho, uma rota, um município ou uma rodovia, uma seção expansível oferece as perguntas sugeridas e a pergunta livre, e declara se a resposta é texto padrão ou reformulada por provedor externo.
+
+**PWA** (`/pwa/`): etapas visíveis; a análise segue a ordem condições da chuva (com escopo regional, idade dos dados e aviso de que o passado é análise do modelo), resultado, rota e alternativas, trechos de atenção por via, explicação (quatro perguntas sugeridas com resposta curta, sem serviço externo, e a explicação contextualizada sob pedido); sem dados de chuva a tela diz que não há estimativa de risco;
 verificação dos trajetos habituais sob demanda (sem segundo plano nem notificações), estados vazios e de erro com ação, 3D opcional baixado só
 ao pedir, aviso de nova versão. Funciona inteira sem localização (pontos no mapa).
 
@@ -171,21 +208,32 @@ servidor guarda a análise 30 min em memória e a apaga ao iniciar outra ou fech
 ## Testes
 
 ```
-pytest                       # lógica, contratos, serviço, servidor, cobertura (401 testes automatizados)
+pytest                       # lógica, contratos, serviço, servidor, cobertura, auditorias (498 testes automatizados, 1 ignorado por falta do boto3)
 PLAYWRIGHT_CORE=... CHROME_PATH=... pytest tests/test_e2e_navegador.py
 ```
 
+Categorias, que não se misturam nos relatórios: **unitários e de contrato** (lógica, serviço, servidor, ocorrências, rotas, meteorologia),
+**auditorias** (rotas contra caminho de referência, risco contra eventos documentados, sensibilidade), **integração HTTP** (fluxo do operador,
+proxy, métricas, 503 sem chuva), **navegador** (abaixo) e **chamadas reais ao provedor de linguagem** (manuais, em `validacao_gemini.md`).
+
 Os de navegador exigem Chromium e `playwright-core` (não são dependências do projeto) e rodam com a rede real de Porto Alegre e uma chuva
-**sintética declarada** (`tests/e2e/servidor_demo.py`). Cobrem dashboard (RS/Porto Alegre, 3D/2D, seleção, capacidades, rotas no mapa), PWA
-(consentimento, lugares, trajetos, 3D sob demanda, privacidade, offline), atualização do service worker e a ausência de transbordo horizontal
-em 360, 390, 768 e 1400 px. O WebGL por software é lento (cerca de 3 minutos no total).
+**sintética declarada** (`tests/e2e/servidor_demo.py`). Cobrem dashboard (RS/Porto Alegre, 3D/2D, seleção, assistente, capacidades, rotas no mapa,
+estado sem chuva), **mapa 2D num navegador sem WebGL nos dois territórios**, PWA (consentimento, lugares, trajetos, ordem da análise, perguntas sugeridas,
+3D sob demanda, privacidade, offline), atualização do service worker e a ausência de transbordo horizontal em 360, 390, 768, 1024 e 1400 px.
+O WebGL por software é lento (cerca de 3 minutos no total). **Teste em dispositivo físico: não executado** (não havia aparelho disponível); os
+testes de navegador emulam tela e toque, e não substituem GPU, sensores e rede reais.
 
 ## Limitações e pendências
 
-* Chave do Gemini e teste real da integração. Hospedagem do servidor (o GitHub Pages não executa Python); para front-end hospedado fora,
-  `CORS_ORIGEM` e `<meta name="api-base">`.
-* `OPERADOR_TOKEN` e um procedimento de confirmação; sem ocorrências confirmadas o roteamento não bloqueia nada.
-* Atrás de proxy, o limite por cliente enxerga um só endereço (o cabeçalho `X-Forwarded-For` não é confiado).
-* Persistência de ocorrências em arquivo: um processo só. Vários processos ou histórico longo pedem um banco.
-* Mais ocorrências georreferenciadas para só então treinar e validar um modelo viário. Risco por trecho em escala estadual e roteamento estadual não existem.
-* O mapa clássico mostra só o Rio Grande do Sul; para Porto Alegre sem WebGL, use Mobilidade (mapa 2D de rotas).
+* **Hospedagem:** nada foi publicado. O servidor roda em contêiner com um volume persistente (ver [`hospedagem.md`](hospedagem.md)); o GitHub Pages
+  não executa Python. Para front-end hospedado fora, `CORS_ORIGEM` e `<meta name="api-base">`. Atrás de proxy, `PROXIES_CONFIAVEIS` define de quem
+  se lê o `X-Forwarded-For`; sem ele o limite por cliente enxerga um só endereço.
+* **Operador:** `OPERADOR_TOKEN` configurado e o fluxo de confirmação testado; falta um procedimento humano de quem confirma e com que evidência.
+  Sem ocorrências confirmadas o roteamento não bloqueia nada.
+* **Persistência de ocorrências em arquivo: um processo só.** Vários processos ou histórico longo pedem um banco.
+* **Risco por trecho sem validação em vias:** o confronto com os 19 eventos documentados mostra poder discriminativo baixo (4 detectados em algum
+  horário, 2 na hora do reporte). Parâmetros provisórios, nenhum ajustado a ocorrências. Mais ocorrências georreferenciadas são o que falta para treinar e validar um modelo viário.
+* **Chuva regional e sem pluviômetro:** uma série para a cidade; o passado é análise do modelo.
+* Risco por trecho e roteamento em escala estadual não existem; ônibus não existe.
+* **Provedor de linguagem:** validado em chamadas reais de amostra pequena (ver `validacao_gemini.md`); sem medição de custo e volume.
+* **Dispositivo físico:** não testado.
