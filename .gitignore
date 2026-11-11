@@ -51,3 +51,17 @@ reports/qa/*
 *.keras
 *.cbm
 *.ubj
+
+# Artefatos de modelo e site gerado ficam fora do git (o cartão do modelo registra o hash).
+artifacts/
+site/
+
+# Índices pequenos e derivados que a montagem do site precisa num clone limpo (ver docs/publicacao.md).
+!src/flooding_mapping/app/data/*.parquet
+
+# Ocorrências operacionais (dados de operação, nunca versionados).
+data/operacional/
+
+# Apresentações geradas por tools/gerar_apresentacao.py (documentos de escritório ficam locais)
+*.pptx
+docs/apresentacao/

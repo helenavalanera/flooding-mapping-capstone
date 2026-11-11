@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import tempfile
 import urllib.request
 import zipfile
@@ -86,6 +87,38 @@ def register(manifest_path: str | Path, entry: dict) -> bool:
     )
     os.replace(temporary, manifest_path)
     return True
+
+
+def register_manual(
+    source: str | Path,
+    destination: str | Path,
+    manifest_path: str | Path,
+    origin: str,
+    source_date: str | None = None,
+) -> dict:
+    """Copy a manually downloaded file into the raw folder and record its provenance.
+
+    There is no URL to fetch again, so the entry keeps ``url`` null and says where the
+    file came from in ``origin``. Registering the same content twice changes nothing.
+    """
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, destination)
+    try:
+        relative = destination.resolve().relative_to(resolve("."))
+    except ValueError:
+        relative = destination
+    entry = {
+        "url": None,
+        "path": str(relative),
+        "downloaded_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "sha256": sha256_file(destination),
+        "size_bytes": destination.stat().st_size,
+        "source_reference_date": source_date,
+        "origin": origin,
+    }
+    entry["registered"] = register(manifest_path, entry)
+    return entry
 
 
 def download(

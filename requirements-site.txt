@@ -1,0 +1,14 @@
+# Dependências da montagem do site (GitHub Actions); versões fixas = as do ambiente que treinou o modelo.
+# A versão do scikit-learn precisa ser a do artefato (o build recusa uma diferente).
+boto3==1.43.126
+botocore==1.43.126
+geopandas==1.1.4
+pandas==3.1.0
+numpy==2.5.4
+shapely==2.2.0
+pyproj==3.6.1
+pyarrow==26.0.0
+scikit-learn==1.9.1
+scipy==1.18.1
+joblib==1.6.0
+pyyaml==6.0.3

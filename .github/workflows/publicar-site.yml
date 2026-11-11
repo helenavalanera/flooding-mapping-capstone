@@ -1,0 +1,71 @@
+name: publicar-site
+
+# Monta a interface estadual (previsão de 72 h + bloqueios ativos + camadas estáticas) e a
+# publica no GitHub Pages SEM fazer commits. Detalhes e pré-requisitos: docs/publicacao.md
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  construir:
+    # Adesão: só roda no repositório original e depois que SITE_ATIVO = true for definida em
+    # Settings > Secrets and variables > Actions > Variables (ver docs/publicacao.md). Antes disso o
+    # modelo ainda não está no R2 e cada execução agendada falharia. Para pausar: remova a variável.
+    if: github.repository == 'helenavalanera/flooding-mapping-capstone' && vars.SITE_ATIVO == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-site.txt
+
+      - name: Instalar dependências
+        run: pip install -r requirements-site.txt
+
+      # Os segredos do R2 existem só neste passo. O modelo é conferido contra o hash do cartão.
+      - name: Baixar o modelo verificado
+        env:
+          PYTHONPATH: src
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET || vars.R2_BUCKET }}
+        run: python -m flooding_mapping.models.publish download --card reports/ml/gatilho_estrito.json --out artifacts/modelo.joblib
+
+      # Sem segredos no ambiente: só consulta as APIs públicas e grava arquivos estáticos.
+      - name: Montar o site
+        env:
+          PYTHONPATH: src
+        run: python -m flooding_mapping.app.build --model artifacts/modelo.joblib --card reports/ml/gatilho_estrito.json --out site
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

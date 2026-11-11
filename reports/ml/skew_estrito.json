@@ -1,0 +1,230 @@
+{
+  "modelo_testado_ate": "2024-12-24",
+  "periodo": [
+    "2025-01-01",
+    "2026-11-02"
+  ],
+  "nota": "chuva prevista com 'lead' dias de antecedência para todos os dias da janela (limite superior da perda)",
+  "reanalise": {
+    "linhas": 333157,
+    "positivos": 337,
+    "pr_auc": 0.0048,
+    "roc_auc": 0.7454,
+    "prevalencia": 0.00101,
+    "orcamentos": {
+      "alertas_0.5pct": {
+        "limiar": 2.2732022333145134,
+        "tp": 14,
+        "fp": 764,
+        "fn": 323,
+        "tn": 332056,
+        "precisao": 0.018,
+        "recall": 0.0415,
+        "f1": 0.0251,
+        "dias_alerta_por_mil": 2.34,
+        "eventos": 111,
+        "eventos_detectados": 9,
+        "recall_eventos": 0.0811
+      },
+      "alertas_2pct": {
+        "limiar": 1.491959533691406,
+        "tp": 54,
+        "fp": 5634,
+        "fn": 283,
+        "tn": 327186,
+        "precisao": 0.0095,
+        "recall": 0.1602,
+        "f1": 0.0179,
+        "dias_alerta_por_mil": 17.07,
+        "eventos": 111,
+        "eventos_detectados": 43,
+        "recall_eventos": 0.3874
+      },
+      "alertas_5pct": {
+        "limiar": 1.0376309752464288,
+        "tp": 94,
+        "fp": 17039,
+        "fn": 243,
+        "tn": 315781,
+        "precisao": 0.0055,
+        "recall": 0.2789,
+        "f1": 0.0108,
+        "dias_alerta_por_mil": 51.43,
+        "eventos": 111,
+        "eventos_detectados": 64,
+        "recall_eventos": 0.5766
+      }
+    }
+  },
+  "previsao_1d_antes": {
+    "chuva": {
+      "dias_x_municipios": 350882,
+      "vies_medio_mm": 0.147,
+      "erro_absoluto_medio_mm": 3.278,
+      "correlacao": 0.7558,
+      "dias_ge_30mm_reanalise": 13982,
+      "acerto_dias_ge_30mm": 0.532,
+      "falso_alarme_dias_ge_30mm": 0.519
+    },
+    "linhas": 333157,
+    "positivos": 337,
+    "pr_auc": 0.0036,
+    "roc_auc": 0.7274,
+    "prevalencia": 0.00101,
+    "orcamentos": {
+      "alertas_0.5pct": {
+        "limiar": 2.2732022333145134,
+        "tp": 13,
+        "fp": 1210,
+        "fn": 324,
+        "tn": 331610,
+        "precisao": 0.0106,
+        "recall": 0.0386,
+        "f1": 0.0167,
+        "dias_alerta_por_mil": 3.67,
+        "eventos": 111,
+        "eventos_detectados": 10,
+        "recall_eventos": 0.0901
+      },
+      "alertas_2pct": {
+        "limiar": 1.491959533691406,
+        "tp": 49,
+        "fp": 7025,
+        "fn": 288,
+        "tn": 325795,
+        "precisao": 0.0069,
+        "recall": 0.1454,
+        "f1": 0.0132,
+        "dias_alerta_por_mil": 21.23,
+        "eventos": 111,
+        "eventos_detectados": 35,
+        "recall_eventos": 0.3153
+      },
+      "alertas_5pct": {
+        "limiar": 1.0376309752464288,
+        "tp": 80,
+        "fp": 19585,
+        "fn": 257,
+        "tn": 313235,
+        "precisao": 0.0041,
+        "recall": 0.2374,
+        "f1": 0.008,
+        "dias_alerta_por_mil": 59.03,
+        "eventos": 111,
+        "eventos_detectados": 53,
+        "recall_eventos": 0.4775
+      }
+    }
+  },
+  "previsao_2d_antes": {
+    "chuva": {
+      "dias_x_municipios": 350882,
+      "vies_medio_mm": 0.256,
+      "erro_absoluto_medio_mm": 3.649,
+      "correlacao": 0.7217,
+      "dias_ge_30mm_reanalise": 13982,
+      "acerto_dias_ge_30mm": 0.542,
+      "falso_alarme_dias_ge_30mm": 0.541
+    },
+    "linhas": 333157,
+    "positivos": 337,
+    "pr_auc": 0.0045,
+    "roc_auc": 0.7226,
+    "prevalencia": 0.00101,
+    "orcamentos": {
+      "alertas_0.5pct": {
+        "limiar": 2.2732022333145134,
+        "tp": 24,
+        "fp": 1820,
+        "fn": 313,
+        "tn": 331000,
+        "precisao": 0.013,
+        "recall": 0.0712,
+        "f1": 0.022,
+        "dias_alerta_por_mil": 5.53,
+        "eventos": 111,
+        "eventos_detectados": 17,
+        "recall_eventos": 0.1532
+      },
+      "alertas_2pct": {
+        "limiar": 1.491959533691406,
+        "tp": 62,
+        "fp": 8176,
+        "fn": 275,
+        "tn": 324644,
+        "precisao": 0.0075,
+        "recall": 0.184,
+        "f1": 0.0145,
+        "dias_alerta_por_mil": 24.73,
+        "eventos": 111,
+        "eventos_detectados": 40,
+        "recall_eventos": 0.3604
+      },
+      "alertas_5pct": {
+        "limiar": 1.0376309752464288,
+        "tp": 105,
+        "fp": 20718,
+        "fn": 232,
+        "tn": 312102,
+        "precisao": 0.005,
+        "recall": 0.3116,
+        "f1": 0.0099,
+        "dias_alerta_por_mil": 62.5,
+        "eventos": 111,
+        "eventos_detectados": 60,
+        "recall_eventos": 0.5405
+      }
+    }
+  },
+  "reanalise_nos_mesmos_dias": {
+    "linhas": 333157,
+    "positivos": 337,
+    "pr_auc": 0.0048,
+    "roc_auc": 0.7454,
+    "prevalencia": 0.00101,
+    "orcamentos": {
+      "alertas_0.5pct": {
+        "limiar": 2.2732022333145134,
+        "tp": 14,
+        "fp": 764,
+        "fn": 323,
+        "tn": 332056,
+        "precisao": 0.018,
+        "recall": 0.0415,
+        "f1": 0.0251,
+        "dias_alerta_por_mil": 2.34,
+        "eventos": 111,
+        "eventos_detectados": 9,
+        "recall_eventos": 0.0811
+      },
+      "alertas_2pct": {
+        "limiar": 1.491959533691406,
+        "tp": 54,
+        "fp": 5634,
+        "fn": 283,
+        "tn": 327186,
+        "precisao": 0.0095,
+        "recall": 0.1602,
+        "f1": 0.0179,
+        "dias_alerta_por_mil": 17.07,
+        "eventos": 111,
+        "eventos_detectados": 43,
+        "recall_eventos": 0.3874
+      },
+      "alertas_5pct": {
+        "limiar": 1.0376309752464288,
+        "tp": 94,
+        "fp": 17039,
+        "fn": 243,
+        "tn": 315781,
+        "precisao": 0.0055,
+        "recall": 0.2789,
+        "f1": 0.0108,
+        "dias_alerta_por_mil": 51.43,
+        "eventos": 111,
+        "eventos_detectados": 64,
+        "recall_eventos": 0.5766
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# nada de dados, modelos, segredos nem histórico entra na imagem
+.git
+.venv
+.env
+data
+artifacts
+site
+outputs
+docs
+tests
+**/__pycache__
+*.pbf
+*.parquet
+*.joblib

@@ -1,0 +1,38 @@
+# MODELO de configuração para Fly.io. Não faz nada sozinho: só vale se alguém, com autorização, rodar `fly launch` / `fly deploy`.
+# Uma única máquina com volume: o arquivo de ocorrências é de um processo só (ver docs/hospedagem.md).
+app = "NOME-DO-APP"           # troque
+primary_region = "gru"
+
+[build]
+
+[env]
+  HOST = "0.0.0.0"
+  PORT = "8080"
+  # Preencha depois de descobrir o endereço do proxy com /api/saude (diagnostico_de_origem). Sem isso, o limite por cliente
+  # enxerga um único endereço.
+  PROXIES_CONFIAVEIS = ""
+  CORS_ORIGEM = ""
+
+[mounts]
+  source = "dados"
+  destination = "/dados"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"      # sempre ligada: a análise de rota não tolera partida a frio de 8 s e o volume é único
+  auto_start_machines = false
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/saude"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "40s"
+
+[vm]
+  size = "shared-cpu-1x"
+  memory = "1gb"                  # o pico medido foi de 482 MB; 512 MB não deixa folga
+
+# Segredos (nunca neste arquivo): fly secrets set OPERADOR_TOKEN=... GEMINI_API_KEY=... GEMINI_MODEL=...

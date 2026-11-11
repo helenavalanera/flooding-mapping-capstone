@@ -1,8 +1,11 @@
 """Rain at reported blockages (calibration of the alert thresholds).
 
-Uses Open-Meteo's historical-forecast archive — the same model family the
-dashboard reads live — at each geocoded event, in the 24 h before the hour of
-the official report. Without rainy days *without* blockages, the result is a
+Uses Open-Meteo's "historical forecast" endpoint at each geocoded event, in the
+24 h before the hour of the official report. Checked on 2019-2026 samples
+(Porto Alegre, Santa Maria, Passo Fundo), that endpoint returns exactly the same
+daily series as the reanalysis archive (0.00 mm/day difference), so these are
+*modelled* rain amounts, not archived forecasts; real archived forecasts exist only
+from mid-2024 ("previous runs" API, see ``ingestion/forecast.py``). Without rainy days *without* blockages, the result is a
 lower bound (the least rain that has coincided with reported blockages), not a
 probability.
 """

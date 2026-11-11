@@ -20,16 +20,56 @@ pontos documentados de bloqueio total e mais N pontos apontados pelo modelo de s
 com N vindo de um ajuste linear entre chuva acumulada e número de bloqueios registrados por data,
 multiplicado por um fator de precariedade (1 = condição observada).
 
-## Evolução: escopo estadual (em andamento)
+## Plataforma: Rio Grande do Sul e Porto Alegre
 
-O projeto está sendo ampliado de Porto Alegre para o Rio Grande do Sul, em duas camadas: uma de
-**gatilho e suscetibilidade estaduais** (malha do DAER, registros de desastres do S2iD e
-bloqueios da CPRv BM) e o **estudo de caso urbano de Porto Alegre**, já implementado e descrito
-nas seções seguintes.
+Uma interface de duas escalas (dashboard e PWA de mobilidade preventiva) sobre o mesmo serviço: monitoramento regional no Rio Grande do Sul
+e mobilidade preventiva em Porto Alegre, com mapa 3D, cobertura de dados calculada e capacidades declaradas por região.
 
-- Plano, ordem de execução e riscos: [`docs/ROADMAP.md`](docs/ROADMAP.md).
-- Coletor agendado que cria o histórico dos bloqueios rodoviários, que a fonte não guarda:
+```
+make rede     # tabela de ruas de Porto Alegre (uma vez)
+make servir   # http://127.0.0.1:8000/  dashboard  |  /pwa/  mobilidade preventiva
+```
+
+O risco por trecho é um **baseline determinístico, sem validação em vias**; o roteamento e o risco por trecho existem só em Porto Alegre.
+Arquitetura, cobertura, API, privacidade, testes e pendências: [`docs/produto_preventivo.md`](docs/produto_preventivo.md). Hospedagem (nada publicado): [`docs/hospedagem.md`](docs/hospedagem.md). Provedor de linguagem em chamadas reais: [`docs/validacao_gemini.md`](docs/validacao_gemini.md).
+
+**Demonstração controlada (dados sintéticos, sem internet para os fluxos essenciais):** `make demo`; roteiro, limpeza e checklists em [`docs/demonstracao.md`](docs/demonstracao.md). Guia de uso: [`docs/guia_de_uso.md`](docs/guia_de_uso.md). Operação de ocorrências: [`docs/operacao_ocorrencias.md`](docs/operacao_ocorrencias.md). Segurança e dados pessoais: [`docs/seguranca_lgpd.md`](docs/seguranca_lgpd.md). Resultados e limites para a apresentação: [`docs/sintese_academica.md`](docs/sintese_academica.md). QA: [`docs/qa_relatorio_final.md`](docs/qa_relatorio_final.md). Teste em celular (não executado; roteiro e tabela de registro): [`docs/qa_mobile_fisico.md`](docs/qa_mobile_fisico.md). Roteiro de apresentação: [`docs/roteiro_apresentacao.md`](docs/roteiro_apresentacao.md) (a apresentação `.pptx` é gerada por `tools/gerar_apresentacao.py` e fica local). Hospedagem no Render (preparada, **não publicada**): [`docs/render.md`](docs/render.md).
+
+## Escopo estadual (RS): gatilho de risco, impacto e interface
+
+O projeto foi ampliado de Porto Alegre para o Rio Grande do Sul, em duas camadas: um **gatilho
+municipal de risco hídrico** e o **estudo de caso urbano de Porto Alegre**, descrito nas seções
+seguintes.
+
+- **Gatilho municipal:** dado o cenário de chuva, estima qual município tem mais chance de
+  registrar um desastre hídrico (S2iD, 2017–2026). Treinaram-se e validaram-se modelos de
+  aprendizado de máquina (regressão logística, floresta aleatória e gradiente de árvores) contra
+  baselines, por episódio e com expurgo temporal. **Nenhum modelo passou no portão** de três
+  critérios independentes (validação, janela móvel de 2020–2024 e eventos fora da amostra), então o
+  gatilho em uso é a **regra de chuva relativa em 3 dias, calibrada**, e o modelo fica registrado
+  como experimental. A evidência é **mista**: antes do teste a regra foi melhor; no teste de
+  2025–2026, com o mesmo número de dias em alerta, o modelo detectou mais eventos, em diferença
+  dentro do ruído de poucas dezenas de eventos. Dados, método e o que não se pode afirmar:
+  [`docs/ml_gatilho.md`](docs/ml_gatilho.md), gerado dos cartões em `reports/ml/`.
+- **Previsão de 72 horas e interface estática** (mapa do RS, bloqueios ativos, malha do DAER):
+  [`docs/publicacao.md`](docs/publicacao.md).
+- **Coletor dos bloqueios rodoviários** (a fonte não guarda histórico):
   [`docs/coletor_crbm.md`](docs/coletor_crbm.md).
+- **Impacto simulado** do fechamento de cada segmento de 1 km da malha do DAER, com e sem o
+  tráfego (VDM): `reports/qa/impacto_rs.json`.
+- Plano e riscos: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+```bash
+make estado-dados      # municípios, S2iD, malha DAER, segmentos, impacto simulado, camadas
+make estado-chuva      # chuva diária por município (Open-Meteo; retoma de onde parou)
+make estado-modelo     # treina e valida o gatilho (rótulos estrito e amplo)
+make estado-avaliacao  # perda ao operar com previsão em vez de reanálise
+make estado-site       # monta o site local em site/
+```
+
+O gatilho **não prevê profundidade, extensão nem duração da água**, estima o registro de um
+desastre; a precisão é um piso (negativos não rotulados) e o resultado vem com todas as
+ressalvas em `docs/ml_gatilho.md`. O artefato fica fora do git; o cartão registra o hash.
 
 ## Escopo e limitações
 
@@ -84,7 +124,7 @@ nas seções seguintes.
 | GTFS EPTC — [dadosabertos.poa.br](https://dadosabertos.poa.br/dataset/gtfs) | Rede de ônibus | Creative Commons Atribuição (portal); © EPTC/Prefeitura de Porto Alegre |
 | OpenStreetMap via [Geofabrik](https://download.geofabrik.de/south-america/brazil/sul.html) | Rede viária e drenagem | ODbL — © colaboradores do OpenStreetMap |
 | IBGE — Censo 2022, malha de setores com agregados | Território e população | Fonte: IBGE, Censo Demográfico 2022 |
-| Open-Meteo (previsão, arquivo de previsões e reanálise) | Chuva prevista, calibração e frequência | CC BY 4.0 — Open-Meteo.com |
+| Open-Meteo (previsão, reanálise e previsões arquivadas desde 2024) | Chuva prevista, calibração, frequência e treino do gatilho estadual | CC BY 4.0 — Open-Meteo.com |
 | Copernicus DEM GLO-30 (AWS Open Data) | Relevo | © DLR e.V. 2010–2014 e © Airbus Defence and Space GmbH 2014–2018, fornecido no âmbito do COPERNICUS pela União Europeia e ESA |
 | EPTC / Prefeitura de Porto Alegre; Jornal do Comércio; Sul21 | Eventos de bloqueio | Citados por URL em `data/events/events.csv` |
 
@@ -114,6 +154,14 @@ src/flooding_mapping/
   dashboard.py              dashboard de alerta: localização, previsão ao vivo, nível por trecho
   collector.py              coletor dos bloqueios ativos da CPRv BM (arquiva só as mudanças)
   r2.py                     armazenamento no Cloudflare R2 com orçamento de operações
+  ingestion/                municípios, S2iD, malha DAER, chuva diária e previsão (Open-Meteo)
+  geospatial/               segmentos de 1 km, casamento dos bloqueios, relevo, impacto simulado
+  features/                 variáveis de chuva, contexto regional e territoriais (sem olhar o futuro)
+  datasets/                 dataset município x dia, rótulos, janelas e episódios
+  evaluation/               divisões temporais/espaciais, métricas, perda previsão x reanálise, relatório
+  models/                   gatilho (treino, seleção, validação), índice físico, publicação do modelo
+  inference/                risco municipal para as próximas 72 h
+  app/                      interface estática, camadas e montagem do site
 Makefile                    pipeline em um comando (`make help`)
 .github/workflows/          coletor agendado dos bloqueios (coletor-crbm.yml)
 docs/                       ROADMAP.md, coletor_crbm.md, events_contract.md, proposta.md

@@ -1,0 +1,507 @@
+{
+ "natureza": "impacto SIMULADO do fechamento de cada segmento de 1 km na malha mapeada do DAER; não é ocorrência observada nem previsão",
+ "criterios": {
+  "ponte": "o fechamento divide a rede; pop_isolada = população do lado menor",
+  "desvio_km": "distância extra entre as pontas do segmento pela melhor rota alternativa (teto de 300 km)",
+  "veiculos_km_dia": "VDM x desvio_km; só onde há VDM"
+ },
+ "limites": [
+  "Estradas municipais e urbanas estão ausentes da camada: muitas 'pontes' são falta de alternativa mapeada, não isolamento real.",
+  "VDM existe em cerca de 38% dos segmentos; VDM ausente não é tráfego zero e esses segmentos ficam fora do ranking ponderado."
+ ],
+ "cobertura": {
+  "segmentos": 17611,
+  "com_vdm": 6739,
+  "fracao_com_vdm": 0.383
+ },
+ "com_x_sem_peso_do_vdm": {
+  "trechos_com_vdm_e_desvio": 361,
+  "spearman_desvio_x_ponderado": 0.422,
+  "sobreposicao_top50": 9
+ },
+ "ranking_pontes_populacao_isolada": [
+  {
+   "codigo_sre": "118ERS0150",
+   "nome": "ERS-118",
+   "km_inicio": 38.23,
+   "km_final": 39.52,
+   "local_inicio": "ENTR. ERS-040 (P/ VIAMÃO)",
+   "local_final": "PASSO DO FIÚZA",
+   "vdm": null,
+   "pop_isolada": 517266.22222222236
+  },
+  {
+   "codigo_sre": "118ERS0160",
+   "nome": "ERS-118",
+   "km_inicio": 39.52,
+   "km_final": 42.52,
+   "local_inicio": "PASSO DO FIÚZA",
+   "local_final": "ENTR. RUA MANOEL SANTANA (VIAMÃO)",
+   "vdm": 2108.0,
+   "pop_isolada": 515191.11111111124
+  },
+  {
+   "codigo_sre": "448BRS0010",
+   "nome": "BRS-448F",
+   "km_inicio": 0.0,
+   "km_final": 0.6,
+   "local_inicio": "ENTR. BRS-116(A)/ERS-118 (SAPUCAIA DO SUL)",
+   "local_final": "INÍCIO DA CONCESSÃO (DIVISA MUNICIPAL SAPUCAIA DO SUL/ESTEIO)",
+   "vdm": null,
+   "pop_isolada": 250568.30519688653
+  },
+  {
+   "codigo_sre": "448BRS0012",
+   "nome": "BRS-448F",
+   "km_inicio": 0.6,
+   "km_final": 6.8,
+   "local_inicio": "INÍCIO DA CONCESSÃO (DIVISA MUNICIPAL SAPUCAIA DO SUL/ESTEIO)",
+   "local_final": "ENTR. CONTORNO PLANEJADO BRS-116 (ESTEIO)",
+   "vdm": null,
+   "pop_isolada": 240406.2282738096
+  },
+  {
+   "codigo_sre": "118ERS0170",
+   "nome": "ERS-118",
+   "km_inicio": 58.42,
+   "km_final": 62.99,
+   "local_inicio": "LAMI",
+   "local_final": "PASSO DO VAREJÃO",
+   "vdm": 3855.0,
+   "pop_isolada": 196151.0476190476
+  },
+  {
+   "codigo_sre": "448BRS0015",
+   "nome": "BRS-448F",
+   "km_inicio": 6.8,
+   "km_final": 9.7,
+   "local_inicio": "ENTR. CONTORNO PLANEJADO BRS-116 (ESTEIO)",
+   "local_final": "ENTR. BRS-386 (CANOAS)",
+   "vdm": null,
+   "pop_isolada": 194724.02827380953
+  },
+  {
+   "codigo_sre": "448BRS0020",
+   "nome": "BRS-448F",
+   "km_inicio": 9.7,
+   "km_final": 22.3,
+   "local_inicio": "ENTR. BRS-386 (CANOAS)",
+   "local_final": "ENTR. BRS-116(B)/290 (PORTO ALEGRE)",
+   "vdm": null,
+   "pop_isolada": 162131.18452380953
+  },
+  {
+   "codigo_sre": "116ARS1005",
+   "nome": "116ARS1005",
+   "km_inicio": 0.0,
+   "km_final": 3.0,
+   "local_inicio": "ENTR. BRS-116/290 (PORTO ALEGRE)",
+   "local_final": "ENTR. RUA EDU CHAVES (PORTO ALEGRE)",
+   "vdm": null,
+   "pop_isolada": 95279.42857142857
+  },
+  {
+   "codigo_sre": "471BRS0230",
+   "nome": "BRS-471",
+   "km_inicio": 465.05,
+   "km_final": 556.49,
+   "local_inicio": "ENTR. RSC-473 (VILA SARANDI)",
+   "local_final": "CURRAL ALTO",
+   "vdm": null,
+   "pop_isolada": 90715.03955911197
+  },
+  {
+   "codigo_sre": "239ARS2005",
+   "nome": "239ARS2005",
+   "km_inicio": 0.0,
+   "km_final": 4.6,
+   "local_inicio": "ENTR. ERS-239 (CAMPO BOM - INÍCIO TRV-MUN)",
+   "local_final": "ENTR. AV. PRESIDENTE VARGAS (AV. DOS MUNICÍPIOS - CAMPO BOM - TRV-MUN)",
+   "vdm": 13052.0,
+   "pop_isolada": 82031.00000000001
+  },
+  {
+   "codigo_sre": "118ARS1005",
+   "nome": "118ARS1005",
+   "km_inicio": 0.0,
+   "km_final": 4.5600000000000005,
+   "local_inicio": "ENTR. ERS-118",
+   "local_final": "ALVORADA",
+   "vdm": 8053.0,
+   "pop_isolada": 74393.34722222222
+  },
+  {
+   "codigo_sre": "239ARS2010",
+   "nome": "239ARS2010",
+   "km_inicio": 4.6,
+   "km_final": 7.79,
+   "local_inicio": "ENTR. AV. PRESIDENTE VARGAS (AV. DOS MUNICÍPIOS - CAMPO BOM - TRV-MUN)",
+   "local_final": "DIVISA MUNICIPAL CAMPO BOM/NOVO HAMBURGO (AV. DOS MUNICÍPIOS - FIM TRV-MUN)",
+   "vdm": 9001.0,
+   "pop_isolada": 59571.71428571429
+  },
+  {
+   "codigo_sre": "737ERS0010",
+   "nome": "ERS-737",
+   "km_inicio": 0.0,
+   "km_final": 16.4,
+   "local_inicio": "ENTR. BRS-116(P/ PELOTAS)",
+   "local_final": "DIVISA MUNICIPAL PELOTAS/ARROIO DO PADRE",
+   "vdm": 990.0,
+   "pop_isolada": 56879.833333333314
+  },
+  {
+   "codigo_sre": "406ERS0030",
+   "nome": "ERS-406",
+   "km_inicio": 17.96,
+   "km_final": 27.42,
+   "local_inicio": "ENTR. ERS-487 (NONOAI)",
+   "local_final": "ENTR. ERS-324 (SERRARIA)",
+   "vdm": 3922.0,
+   "pop_isolada": 42326.53347171769
+  },
+  {
+   "codigo_sre": "239MRS0007",
+   "nome": "MRS-239",
+   "km_inicio": 10.88,
+   "km_final": 13.23,
+   "local_inicio": "AV. PRESIDENTE VARGAS (ESTÂNCIA VELHA - TRV-MUN)",
+   "local_final": "ENTR. BRS-116 (P/ NOVO HAMBURGO - FIM TRV-MUN)",
+   "vdm": 20836.0,
+   "pop_isolada": 41933.5
+  }
+ ],
+ "ranking_desvio_sem_vdm": [
+  {
+   "codigo_sre": "101ERS4455",
+   "nome": "RSC-101",
+   "km_inicio": 128.71,
+   "km_final": 139.75,
+   "local_inicio": "ENTR. ERS-040 (CAPIVARI DO SUL)",
+   "local_final": "ENTR. ERS-776 (P/ PALMARES DO SUL)",
+   "vdm": 3576.0,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4460",
+   "nome": "RSC-101",
+   "km_inicio": 139.75,
+   "km_final": 167.79,
+   "local_inicio": "ENTR. ERS-776 (P/ PALMARES DO SUL)",
+   "local_final": "BACUPARI (PALMARES DO SUL)",
+   "vdm": 1807.0,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4465",
+   "nome": "RSC-101",
+   "km_inicio": 167.79,
+   "km_final": 252.27,
+   "local_inicio": "BACUPARI (PALMARES DO SUL)",
+   "local_final": "ENTR. AV. PADRE SIMÃO (MOSTARDAS)",
+   "vdm": 620.0,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4470",
+   "nome": "RSC-101",
+   "km_inicio": 252.27,
+   "km_final": 278.81,
+   "local_inicio": "ENTR. AV. PADRE SIMÃO (MOSTARDAS)",
+   "local_final": "ENTR. R. ISIDORO TEIXEIRA MACHADO (TAVARES)",
+   "vdm": 1276.0,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4480",
+   "nome": "RSC-101",
+   "km_inicio": 278.81,
+   "km_final": 331.0,
+   "local_inicio": "ENTR. R. ISIDORO TEIXEIRA MACHADO (TAVARES)",
+   "local_final": "BOJURU (SÃO JOSÉ DO NORTE)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101ERS4490",
+   "nome": "RSC-101",
+   "km_inicio": 331.0,
+   "km_final": 369.5,
+   "local_inicio": "BOJURU (SÃO JOSÉ DO NORTE)",
+   "local_final": "ESTREITO (SÃO JOSÉ DO NORTE)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101BRS4500",
+   "nome": "BRS-101",
+   "km_inicio": 369.5,
+   "km_final": 404.8,
+   "local_inicio": "ESTREITO (SÃO JOSÉ DO NORTE)",
+   "local_final": "ENTR. R. LUIZ GAUTÉRIO (SÃO JOSÉ DO NORTE)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "101BRS4510",
+   "nome": "BRS-101",
+   "km_inicio": 404.8,
+   "km_final": 409.3,
+   "local_inicio": "ENTR. R. LUIZ GAUTÉRIO (SÃO JOSÉ DO NORTE)",
+   "local_final": "RIO GRANDE",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3277",
+   "nome": "BRS-116",
+   "km_inicio": 299.4,
+   "km_final": 318.1,
+   "local_inicio": "ENTR. ERS-703 (P/ GUAÍBA)",
+   "local_final": "ENTR. BRS-470 (BARRA DO RIBEIRO)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3280",
+   "nome": "BRS-116",
+   "km_inicio": 318.1,
+   "km_final": 319.4,
+   "local_inicio": "ENTR. BRS-470 (BARRA DO RIBEIRO)",
+   "local_final": "ENTR. ERS-709 (P/ BARRA DO RIBEIRO)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3290",
+   "nome": "BRS-116",
+   "km_inicio": 319.4,
+   "km_final": 328.7,
+   "local_inicio": "ENTR. ERS-709 (P/ BARRA DO RIBEIRO)",
+   "local_final": "ENTR. ERS-711 (P/ MARIANA PIMENTEL)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3295",
+   "nome": "BRS-116",
+   "km_inicio": 328.7,
+   "km_final": 336.7,
+   "local_inicio": "ENTR. ERS-711 (P/ MARIANA PIMENTEL)",
+   "local_final": "ENTR. ERS-713 (P/ SERTÃO SANTANA)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3297",
+   "nome": "BRS-116",
+   "km_inicio": 336.7,
+   "km_final": 362.7,
+   "local_inicio": "ENTR. ERS-713 (P/ SERTÃO SANTANA)",
+   "local_final": "ENTR. ERS-715/717 (P/ TAPES)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3310",
+   "nome": "BRS-116",
+   "km_inicio": 362.7,
+   "km_final": 397.5,
+   "local_inicio": "ENTR. ERS-715/717 (P/ TAPES)",
+   "local_final": "ENTR. ERS-350(A) (CAMAQUÃ)",
+   "vdm": null,
+   "desvio_km": 300.0
+  },
+  {
+   "codigo_sre": "116BRS3320",
+   "nome": "BRS-116",
+   "km_inicio": 397.5,
+   "km_final": 399.9,
+   "local_inicio": "ENTR. ERS-350(A) (CAMAQUÃ)",
+   "local_final": "FIM DA PONTE S/ARROIO DURO (CAMAQUÃ)",
+   "vdm": null,
+   "desvio_km": 300.0
+  }
+ ],
+ "ranking_veiculos_km_dia_com_vdm": [
+  {
+   "codigo_sre": "453ERS0190",
+   "nome": "RSC-453",
+   "km_inicio": 121.41,
+   "km_final": 130.57,
+   "local_inicio": "ENTR. ERS-122(A) (P/ FARROUPILHA)",
+   "local_final": "ACESSO A CAXIAS DO SUL",
+   "vdm": 39094.0,
+   "desvio_km": 98.44920290660924,
+   "veiculos_km_dia": 3848773.138430982
+  },
+  {
+   "codigo_sre": "118ERS0110",
+   "nome": "ERS-118",
+   "km_inicio": 22.23,
+   "km_final": 27.2,
+   "local_inicio": "ENTR. BRS-290 (P/ PORTO ALEGRE)",
+   "local_final": "ACESSO A ALVORADA",
+   "vdm": 19524.0,
+   "desvio_km": 173.11036817488323,
+   "veiculos_km_dia": 3379806.8282464202
+  },
+  {
+   "codigo_sre": "392MRS0400",
+   "nome": "MRS-392",
+   "km_inicio": 588.86,
+   "km_final": 591.55,
+   "local_inicio": "ENTR. BRS-285/ERS-344(A) (ENTRE-IJUÍS - INÍCIO TRV-MUN)",
+   "local_final": "INÍCIO DA PONTE S/ RIO IJUÍ (ENTRE-IJUÍS - FIM TRV-MUN)",
+   "vdm": 11382.0,
+   "desvio_km": 201.40531313803967,
+   "veiculos_km_dia": 2292395.2741371677
+  },
+  {
+   "codigo_sre": "392ERS0410",
+   "nome": "RSC-392",
+   "km_inicio": 591.55,
+   "km_final": 598.19,
+   "local_inicio": "INÍCIO DA PONTE S/ RIO IJUÍ (ENTRE-IJUÍS - FIM TRV-MUN)",
+   "local_final": "ENTR. ERS-218 (SANTO ÂNGELO)",
+   "vdm": 11382.0,
+   "desvio_km": 201.30123133483383,
+   "veiculos_km_dia": 2291210.6150530786
+  },
+  {
+   "codigo_sre": "118ERS0120",
+   "nome": "ERS-118",
+   "km_inicio": 27.2,
+   "km_final": 34.68,
+   "local_inicio": "ACESSO A ALVORADA",
+   "local_final": "ENTR. ERS-762 (P/ AUTÓDROMO DE TARUMÃ)",
+   "vdm": 10592.0,
+   "desvio_km": 173.2155569612733,
+   "veiculos_km_dia": 1834699.179333807
+  },
+  {
+   "codigo_sre": "118ERS0130",
+   "nome": "ERS-118",
+   "km_inicio": 34.68,
+   "km_final": 38.23,
+   "local_inicio": "ENTR. ERS-762 (P/ AUTÓDROMO DE TARUMÃ)",
+   "local_final": "ENTR. ERS-040 (P/ VIAMÃO)",
+   "vdm": 10102.0,
+   "desvio_km": 173.3195504579244,
+   "veiculos_km_dia": 1750874.0987259524
+  },
+  {
+   "codigo_sre": "453ERS0180",
+   "nome": "RSC-453",
+   "km_inicio": 119.39,
+   "km_final": 121.41,
+   "local_inicio": "ACESSO A CARAVAGGIO",
+   "local_final": "ENTR. ERS-122(A) (P/ FARROUPILHA)",
+   "vdm": 26717.0,
+   "desvio_km": 64.03162795176414,
+   "veiculos_km_dia": 1710733.0039872825
+  },
+  {
+   "codigo_sre": "324ERS0210",
+   "nome": "ERS-324",
+   "km_inicio": 217.82,
+   "km_final": 224.75,
+   "local_inicio": "ACESSO SUL A MARAU",
+   "local_final": "ENTR. ERS-132 (P/ CAMARGO)",
+   "vdm": 10400.0,
+   "desvio_km": 162.91728785065644,
+   "veiculos_km_dia": 1694339.7936468269
+  },
+  {
+   "codigo_sre": "287ERS0010",
+   "nome": "RSC-287",
+   "km_inicio": 0.0,
+   "km_final": 3.23,
+   "local_inicio": "ENTR. RSC-470(A)/ERS-124(A)/240 (MONTENEGRO)",
+   "local_final": "ENTR. RSC-470(B) (P/ TRIUNFO)",
+   "vdm": 17251.0,
+   "desvio_km": 98.0677121171402,
+   "veiculos_km_dia": 1691766.1017327856
+  },
+  {
+   "codigo_sre": "342ERS0020",
+   "nome": "ERS-342",
+   "km_inicio": 32.59,
+   "km_final": 35.06,
+   "local_inicio": "ENTR. BRS-472 (P/ TRÊS DE MAIO)",
+   "local_final": "ACESSO A TRÊS DE MAIO",
+   "vdm": 8539.0,
+   "desvio_km": 193.93609519268227,
+   "veiculos_km_dia": 1656020.316850314
+  },
+  {
+   "codigo_sre": "287ERS0174",
+   "nome": "RSC-287",
+   "km_inicio": 184.49,
+   "km_final": 187.13,
+   "local_inicio": "ENTR. ERS-348(A) (P/ PORTO ALVES)",
+   "local_final": "ENTR. ERS-348(B) (P/ AGUDO)",
+   "vdm": 6852.0,
+   "desvio_km": 241.4763052824013,
+   "veiculos_km_dia": 1654595.643795014
+  },
+  {
+   "codigo_sre": "324ERS0190",
+   "nome": "ERS-324",
+   "km_inicio": 212.04,
+   "km_final": 217.82,
+   "local_inicio": "ACESSO NORTE A MARAU",
+   "local_final": "ACESSO SUL A MARAU",
+   "vdm": 9599.0,
+   "desvio_km": 162.95713581039405,
+   "veiculos_km_dia": 1564225.5466439724
+  },
+  {
+   "codigo_sre": "129ERS0190",
+   "nome": "ERS-129",
+   "km_inicio": 163.34,
+   "km_final": 165.81,
+   "local_inicio": "ENTR. ERS-324(A) (P/ NOVA ARAÇÁ)",
+   "local_final": "ENTR. ERS-324(B) (CASCA)",
+   "vdm": 7355.0,
+   "desvio_km": 209.39302571717852,
+   "veiculos_km_dia": 1540085.704149848
+  },
+  {
+   "codigo_sre": "020ERS0050",
+   "nome": "ERS-020",
+   "km_inicio": 3.95,
+   "km_final": 18.13,
+   "local_inicio": "ENTR. ERS-118 (P/ GRAVATAÍ)",
+   "local_final": "MORUNGAVA",
+   "vdm": 13151.0,
+   "desvio_km": 116.55694073119523,
+   "veiculos_km_dia": 1532840.3275559484
+  },
+  {
+   "codigo_sre": "472ERS0100",
+   "nome": "RSC-472",
+   "km_inicio": 162.91,
+   "km_final": 165.34,
+   "local_inicio": "ENTR. ERS-344(A) (P/ TUPARENDI)",
+   "local_final": "ENTR. ERS-344(B) (P/ SANTA ROSA)",
+   "vdm": 6392.0,
+   "desvio_km": 204.42160303593758,
+   "veiculos_km_dia": 1306662.886605713
+  }
+ ],
+ "rede": {
+  "segmentos": 17611,
+  "km": 17583,
+  "nos": 17502,
+  "componentes": 84,
+  "nos_rede_principal": 16597,
+  "pontes": 3448,
+  "municipios_com_no_no_poligono": 488,
+  "municipios_pelo_no_mais_proximo": 7,
+  "municipios_fora_da_rede": 2,
+  "populacao_ligada_a_rede": 0.9994,
+  "cobertura_vdm_segmentos": 0.383,
+  "cobertura_vdm_km": 0.383
+ }
+}

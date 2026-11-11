@@ -6,13 +6,14 @@ PY ?= .venv/bin/python
 M  := $(PY) -m flooding_mapping
 
 .PHONY: all help downloads validar preparar cenarios suscetibilidade chuva \
-        mobilidade robustez tipologia mapas criticidade abrir test coletar
+        mobilidade robustez tipologia mapas criticidade abrir test coletar \
+        estado-dados estado-chuva estado-modelo estado-avaliacao estado-site estado rede servir demo
 
 all: downloads validar preparar cenarios suscetibilidade chuva mobilidade \
      robustez tipologia mapas  ## roda as etapas 1 a 10 em ordem
 
 help:  ## lista as etapas
-	@grep -E '^[a-z]+:.*## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'
 
 downloads:  ## 1. GTFS, OSM, setores IBGE e MDT (reaproveita o que já existe)
 	$(M).ingest gtfs --source-date 2025-09-25
@@ -64,3 +65,36 @@ test:  ## roda os testes
 
 coletar:  ## testa o coletor da CRBM sem gravar nada (não precisa de R2)
 	$(M).collector --dry-run
+
+# --- Escopo estadual (RS): dados -> chuva -> modelo -> avaliação -> site -------------------
+estado-dados:  ## municípios, S2iD, malha DAER, segmentos de 1 km, impacto simulado e camadas
+	$(M).ingestion.municipios
+	$(M).ingestion.s2id build
+	$(M).ingestion.daer build
+	$(M).geospatial.segments
+	$(M).geospatial.impact
+	$(M).app.layers
+
+estado-chuva:  ## chuva diária por município (Open-Meteo; retoma de onde parou, respeita a cota)
+	$(M).ingestion.weather
+
+estado-modelo:  ## treina e valida o gatilho municipal (rótulos estrito e amplo)
+	$(M).models.gatilho --label estrito
+	$(M).models.gatilho --label amplo
+
+estado-avaliacao:  ## perda ao operar com previsão em vez de reanálise
+	$(M).evaluation.skew --label estrito
+
+estado-site:  ## monta o site local em site/ com o modelo mais recente (abre com: python -m http.server -d site)
+	$(M).app.build --model $$(ls -t artifacts/models/gatilho-estrito-*/modelo.joblib | head -1) --card reports/ml/gatilho_estrito.json --out site
+
+estado: estado-dados estado-chuva estado-modelo estado-avaliacao  ## fluxo estadual completo (sem publicar)
+
+rede:  ## tabela de ruas de Porto Alegre para o servidor (data/processed/rede_poa.parquet)
+	$(M).rede_poa
+
+servir:  ## dashboard, PWA (/pwa/) e API em http://127.0.0.1:8000
+	$(M).servidor
+
+demo:  ## demonstração controlada (dados SINTÉTICOS em memória): painel em :8766 e PWA em :8766/pwa/
+	$(PY) -W ignore tests/e2e/servidor_demo.py --porta 8766 --avisar

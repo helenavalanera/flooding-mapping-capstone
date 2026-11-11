@@ -1,0 +1,8 @@
+# Dependências do servidor (dashboard, PWA e API). São as mesmas do ambiente em que o servidor foi testado: sem o
+# stack geoespacial (geopandas, shapely, pyproj, GDAL), que só os pipelines de dados usam.
+numpy==2.5.4
+pandas==3.1.1
+pyarrow==26.0.1
+pyyaml==6.0.3
+requests==2.34.2
+scipy==1.18.1

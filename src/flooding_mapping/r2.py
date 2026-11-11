@@ -120,8 +120,8 @@ class R2Store:
         )
         return cls(client, env["R2_BUCKET"], budget)
 
-    def get_json(self, key: str) -> Any | None:
-        """Return the decoded object, or ``None`` when the key does not exist."""
+    def get_bytes(self, key: str) -> bytes | None:
+        """The raw object, or ``None`` when the key does not exist."""
         self.budget.charge("B")
         try:
             response = self.client.get_object(Bucket=self.bucket, Key=key)
@@ -129,22 +129,43 @@ class R2Store:
             if error_code(exc) in {"NoSuchKey", "404"} or _http_status(exc) == 404:
                 return None
             raise
-        return json.loads(response["Body"].read())
+        return response["Body"].read()
 
-    def put_json(self, key: str, obj: Any) -> None:
+    def get_json(self, key: str) -> Any | None:
+        """Return the decoded object, or ``None`` when the key does not exist."""
+        raw = self.get_bytes(key)
+        return None if raw is None else json.loads(raw)
+
+    def list_keys(self, prefix: str) -> list[str]:
+        """Keys under ``prefix``, one Class A operation per page of 1,000.
+
+        For analysis jobs only: the collector itself never lists the bucket.
+        """
+        keys: list[str] = []
+        token = None
+        while True:
+            self.budget.charge("A")
+            extra = {"ContinuationToken": token} if token else {}
+            page = self.client.list_objects_v2(Bucket=self.bucket, Prefix=prefix, **extra)
+            keys += [item["Key"] for item in page.get("Contents", [])]
+            if not page.get("IsTruncated"):
+                return sorted(keys)
+            token = page["NextContinuationToken"]
+
+    def put_bytes(self, key: str, body: bytes, content_type: str = CONTENT_TYPE) -> None:
         """Write the object, retrying only transient failures, within the cap."""
-        body = _dump(obj)
         for attempt in range(1, self.max_attempts + 1):
             self.budget.charge("A")
             try:
-                self.client.put_object(
-                    Bucket=self.bucket, Key=key, Body=body, ContentType=CONTENT_TYPE
-                )
+                self.client.put_object(Bucket=self.bucket, Key=key, Body=body, ContentType=content_type)
                 return
             except Exception as exc:  # noqa: BLE001
                 if attempt == self.max_attempts or not _is_transient(exc):
                     raise
                 self._sleep(2**attempt)
+
+    def put_json(self, key: str, obj: Any) -> None:
+        self.put_bytes(key, _dump(obj))
 
 
 class MemoryStore:
@@ -154,11 +175,21 @@ class MemoryStore:
         self.budget = budget or OpBudget()
         self.objects: dict[str, bytes] = {}
 
-    def get_json(self, key: str) -> Any | None:
+    def get_bytes(self, key: str) -> bytes | None:
         self.budget.charge("B")
-        raw = self.objects.get(key)
+        return self.objects.get(key)
+
+    def get_json(self, key: str) -> Any | None:
+        raw = self.get_bytes(key)
         return None if raw is None else json.loads(raw)
 
-    def put_json(self, key: str, obj: Any) -> None:
+    def put_bytes(self, key: str, body: bytes, content_type: str = CONTENT_TYPE) -> None:
         self.budget.charge("A")
-        self.objects[key] = _dump(obj)
+        self.objects[key] = body
+
+    def put_json(self, key: str, obj: Any) -> None:
+        self.put_bytes(key, _dump(obj))
+
+    def list_keys(self, prefix: str) -> list[str]:
+        self.budget.charge("A")
+        return sorted(k for k in self.objects if k.startswith(prefix))

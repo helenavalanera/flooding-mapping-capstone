@@ -113,6 +113,33 @@ def run(store: Any, payload: dict[str, Any], now: datetime) -> dict[str, Any]:
     return summary
 
 
+def read_events(store: Any) -> list[dict[str, Any]]:
+    """Every archived change event, oldest first (the state object is not an event)."""
+    return [store.get_json(key) for key in store.list_keys("bloqueios/2")]
+
+
+def records_from_events(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Replay the change events into one row per blockage id.
+
+    ``visto_primeira_vez`` and ``ultima_alteracao`` are the collection times of the
+    first and last event that carried the record; ``removido_em`` is the collection time
+    of the event that reported it gone (None while active). Resolution is the polling
+    interval (about 30 minutes), not the real start or end of the blockage; use the
+    record's own ``data`` field for the start.
+    """
+    rows: dict[str, dict[str, Any]] = {}
+    for event in sorted(events, key=lambda e: e["coletado_em"]):
+        for record in event["novos"] + event["alterados"]:
+            key = str(record["id"])
+            first = rows[key]["visto_primeira_vez"] if key in rows else event["coletado_em"]
+            rows[key] = {**record, "visto_primeira_vez": first,
+                         "ultima_alteracao": event["coletado_em"], "removido_em": None}
+        for key in event["removidos"]:
+            if key in rows:
+                rows[key]["removido_em"] = event["coletado_em"]
+    return list(rows.values())
+
+
 def main(argv: list[str] | None = None, fetcher: Callable[[], dict] = fetch) -> int:
     parser = argparse.ArgumentParser(description="Archive CPRv BM active blockages")
     parser.add_argument(

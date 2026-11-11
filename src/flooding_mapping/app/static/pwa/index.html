@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rotas na chuva · Flooding Mapping</title>
+  <meta name="description" content="Veja antes de sair se a sua rota passa por trechos com risco estimado de acúmulo de água e compare alternativas.">
+  <meta name="theme-color" content="#0b5d8f">
+  <meta name="api-base" content="">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="pwa.css">
+</head>
+<body>
+  <div id="mapa" role="application" aria-label="Mapa para marcar pontos e ver as rotas"></div>
+  <header id="orienta" aria-live="polite">
+    <div class="principal"><span id="orienta-seta" class="seta" aria-hidden="true">➜</span>
+      <div><p class="marca">Rotas na chuva · Porto Alegre</p><p id="orienta-linha" class="linha-principal">Planeje o deslocamento: escolha origem, destino e modal.</p></div></div>
+    <p id="orienta-detalhe" class="depois"></p>
+  </header>
+  <div id="perfil" role="img" aria-label="Perfil da rota" hidden></div>
+  <div id="aviso" role="status" hidden></div>
+  <p id="dica-mapa" class="dica" role="status" hidden></p>
+  <div id="flutuantes" role="group" aria-label="Controles do mapa">
+    <button type="button" class="fab" id="f-mais" aria-label="Aproximar o mapa">+</button>
+    <button type="button" class="fab" id="f-menos" aria-label="Afastar o mapa">−</button>
+    <button type="button" class="fab" id="f-loc" aria-label="Centralizar na minha localização (pede permissão)"><span aria-hidden="true">◎</span><small>Eu</small></button>
+    <button type="button" class="fab" id="f-rota" aria-label="Enquadrar a rota no mapa"><span aria-hidden="true">⤢</span><small>Rota</small></button>
+    <button type="button" class="fab" id="f-camadas" aria-label="Camadas e legenda do mapa" aria-expanded="false" aria-controls="popover"><span aria-hidden="true">▤</span><small>Mapa</small></button>
+  </div>
+  <button type="button" class="fab alerta-fab" id="f-relatar" aria-label="Relatar ocorrência na via"><span aria-hidden="true">⚠</span><small>Relatar</small></button>
+  <section id="popover" class="vidro" hidden aria-label="Camadas e legenda"></section>
+  <section id="vista3d" hidden aria-label="Rotas em 3D (opcional)">
+    <div class="cabeca"><b>Rotas em 3D</b><button type="button" class="chip" id="fechar3d">Fechar</button></div>
+    <div id="mapa3d" role="application" aria-label="Mapa 3D com relevo e as rotas"></div>
+    <p class="small">Relevo com exagero vertical de 1,5× só para visualização. Elevação pública, sem relação com o cálculo de risco; o modelo pode ter artefatos sobre água e vegetação.</p>
+  </section>
+  <div id="folha" class="folha vidro expandida">
+    <button type="button" class="alca" id="folha-alca" aria-expanded="true" aria-controls="tela">Recolher painel</button>
+    <main id="tela" tabindex="-1"></main>
+  </div>
+  <nav id="abas" aria-label="Seções">
+    <button data-tela="planejar" aria-current="page">Planejar</button>
+    <button data-tela="lugares">Lugares</button>
+    <button data-tela="relatar">Relatar</button>
+    <button data-tela="privacidade">Privacidade</button>
+  </nav>
+  <dialog id="consentimento" aria-labelledby="c-titulo">
+    <h2 id="c-titulo">Usar sua localização?</h2>
+    <p>Vamos pedir ao seu aparelho a posição <b>uma vez</b>, só com o app aberto, para marcar o ponto que você escolheu (origem, lugar ou relato).
+       Não acompanhamos você em segundo plano e não guardamos sua posição no servidor. Você pode revogar isto em Privacidade.</p>
+    <form method="dialog"><button class="btn" value="sim">Permitir agora</button> <button class="btn sec" value="nao">Agora não</button></form>
+  </dialog>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="../logic.js"></script>
+  <script src="dados.js"></script>
+  <script src="pwa.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "natureza": "descritivo; não valida o índice nem o risco por trecho",
+  "eventos_com_segmento": 19,
+  "datas_distintas": 4,
+  "segmentos_proximos": 279,
+  "raio_m": 50,
+  "segmentos_com_indice": 107869,
+  "indice_fisico": {
+    "mediana": 74.8,
+    "no_terco_superior": 0.591
+  },
+  "regra_so_cota_baixa": {
+    "mediana": 77.4,
+    "no_terco_superior": 0.627
+  },
+  "mediana_geral_do_indice": 50.0,
+  "mediana_por_evento_do_maximo_no_entorno": 85.7,
+  "mediana_em_sorteios_aleatorios": 69.5,
+  "p95_dos_sorteios": 83.8,
+  "limites": [
+    "poucos eventos (um ponto cada) concentrados em poucas datas: as unidades não são independentes",
+    "os mesmos eventos ancoraram os níveis de chuva; esta checagem só olha o terreno",
+    "se a regra de cota baixa se sai igual, os demais fatores não mostram ganho"
+  ]
+}

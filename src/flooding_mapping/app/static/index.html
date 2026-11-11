@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flooding Mapping · inteligência territorial e mobilidade preventiva</title>
+  <meta name="description" content="Monitoramento regional do Rio Grande do Sul e mobilidade preventiva em Porto Alegre: onde há dados, o que está estimado e o que foi confirmado.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="topo">
+      <div>
+        <h1>Flooding Mapping</h1>
+        <p class="sub" id="sub-territorio">Inteligência territorial e mobilidade preventiva</p>
+      </div>
+      <div id="territorios" role="radiogroup" aria-label="Território">
+        <button type="button" role="radio" data-territorio="rs" aria-checked="true"><b>Rio Grande do Sul</b><small>monitoramento regional</small></button>
+        <button type="button" role="radio" data-territorio="poa" aria-checked="false"><b>Porto Alegre</b><small>mobilidade preventiva</small></button>
+      </div>
+    </div>
+    <nav id="abas" role="tablist" aria-label="Áreas do painel">
+      <button role="tab" data-aba="geral" aria-selected="true">Visão geral</button>
+      <button role="tab" data-aba="mapa" aria-selected="false">Mapa</button>
+      <button role="tab" data-aba="previsao" aria-selected="false">Condições e previsão</button>
+      <button role="tab" data-aba="mobilidade" aria-selected="false">Mobilidade</button>
+      <button role="tab" data-aba="ocorrencias" aria-selected="false">Ocorrências</button>
+      <button role="tab" data-aba="proveniencia" aria-selected="false">Proveniência</button>
+    </nav>
+  </header>
+  <div id="banner" role="alert" hidden></div>
+
+  <section id="vista-geral" class="vista" role="tabpanel" aria-label="Visão geral"></section>
+
+  <div id="vista-mapa" class="vista" role="tabpanel" aria-label="Mapa" hidden>
+    <div id="mapa-3d" class="mapa-layout">
+      <div id="mapa-gl" role="application" aria-label="Mapa interativo. Use as setas para mover; no mapa 3D, Shift com as setas gira e inclina."></div>
+      <aside id="painel-mapa" aria-label="Controles, legenda e informações do mapa">
+        <div class="alca-linha"><button type="button" class="alca" id="painel-alca" aria-expanded="true" aria-controls="painel-mapa">Recolher painel</button></div>
+        <section id="contexto" aria-live="polite" aria-labelledby="h-contexto">
+          <h2 id="h-contexto">Seleção</h2>
+          <p class="muted" id="contexto-vazio">Clique em um município, uma rodovia ou (em Porto Alegre) um trecho de rua.</p>
+        </section>
+        <section aria-labelledby="h-vista">
+          <h2 id="h-vista">Vista</h2>
+          <div class="escopo" role="group" aria-label="Dimensão do mapa">
+            <button type="button" id="vista-3d" aria-pressed="true">3D com relevo</button>
+            <button type="button" id="vista-2d" aria-pressed="false">2D</button>
+          </div>
+          <label for="exagero">Exagero vertical do relevo <em>(só visual)</em></label>
+          <select id="exagero"><option value="1">1× (real)</option><option value="1.5" selected>1,5×</option><option value="2">2×</option><option value="3">3×</option></select>
+          <p class="small" id="nota-relevo">O relevo é elevação pública apenas para visualização: não entra em nenhum cálculo de risco, e o modelo pode ter artefatos sobre água e vegetação.</p>
+        </section>
+        <section id="cores" aria-labelledby="h-cores"></section>
+        <section aria-labelledby="h-camadas">
+          <h2 id="h-camadas">Camadas</h2>
+          <div id="camadas"></div>
+          <div id="poa-opcoes" hidden>
+            <label for="poa-hora">Hora do risco estimado: <b id="poa-hora-rotulo">agora</b> <span id="poa-hora-kind"></span></label>
+            <input type="range" id="poa-hora" min="0" max="48" step="1" value="0">
+            <p class="small" id="poa-resumo" aria-live="polite"></p>
+          </div>
+        </section>
+        <section aria-labelledby="h-legenda"><h2 id="h-legenda">Legenda</h2><ul class="legend" id="legenda-gl"></ul></section>
+        <p class="small"><button type="button" class="link" id="btn-motor">Usar o mapa 2D simples (sem WebGL)</button></p>
+      </aside>
+    </div>
+  </div>
+
+  <section id="vista-previsao" class="vista" role="tabpanel" aria-label="Condições e previsão" hidden></section>
+  <section id="vista-mobilidade" class="vista" role="tabpanel" aria-label="Mobilidade" hidden></section>
+  <section id="vista-ocorrencias" class="vista" role="tabpanel" aria-label="Ocorrências" hidden></section>
+  <section id="vista-proveniencia" class="vista" role="tabpanel" aria-label="Proveniência" hidden></section>
+
+  <footer>
+    Projeto acadêmico de código aberto. Não substitui os alertas oficiais da Defesa Civil.
+    Fontes: Open-Meteo (chuva), CPRv BM (bloqueios), S2iD/MIDR (registros), DAER (rodovias), IBGE (municípios), OpenStreetMap, Copernicus DEM e AWS Terrain Tiles (relevo).
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
+  <script src="logic.js"></script>
+  <script src="territorio.js"></script>
+  <script src="mapa2d.js"></script>
+  <script src="mapa.js"></script>
+  <script src="painel.js"></script>
+</body>
+</html>
