@@ -340,3 +340,72 @@ def test_the_operator_can_see_how_a_request_reached_the_server_to_find_the_proxy
     assert errado.status_code == 200 and "diagnostico_de_origem" not in errado.json()
     d = requests.get(base + "/api/saude", headers={"Authorization": "Bearer credencial-do-operador-longa-o-bastante", "X-Forwarded-For": "1.2.3.4"}).json()["diagnostico_de_origem"]
     assert d["conexao_direta"] == "127.0.0.1" and d["encaminhado"] == "1.2.3.4" and d["cliente_considerado"] == "127.0.0.1" and d["proxies_confiaveis"] == 0
+
+
+# ---- download verificado da tabela de ruas (hospedagem construída a partir do Git, sem data/)
+class _RespostaFalsa:
+    def __init__(self, conteudo: bytes):
+        self.conteudo = conteudo
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def raise_for_status(self):
+        pass
+
+    def iter_content(self, n):
+        for i in range(0, len(self.conteudo), n):
+            yield self.conteudo[i:i + n]
+
+
+def _com_resposta(monkeypatch, conteudo: bytes):
+    import requests
+
+    monkeypatch.setattr(requests, "get", lambda *a, **k: _RespostaFalsa(conteudo))
+
+
+def test_the_street_table_is_downloaded_only_with_a_matching_hash(tmp_path, monkeypatch):
+    import hashlib
+
+    dados = b"tabela-de-ruas" * 1000
+    _com_resposta(monkeypatch, dados)
+    alvo = tmp_path / "dados" / "rede.parquet"
+    srv.baixar_rede("https://exemplo.test/rede.parquet", hashlib.sha256(dados).hexdigest(), alvo)
+    assert alvo.read_bytes() == dados and not list(alvo.parent.glob("*.parte"))
+
+
+def test_a_download_with_the_wrong_hash_is_discarded(tmp_path, monkeypatch):
+    _com_resposta(monkeypatch, b"outro conteudo")
+    alvo = tmp_path / "rede.parquet"
+    with pytest.raises(SystemExit, match="não confere"):
+        srv.baixar_rede("https://exemplo.test/rede.parquet", "0" * 64, alvo)
+    assert not alvo.exists() and not list(tmp_path.glob("*.parte"))
+
+
+@pytest.mark.parametrize("url, sha, trecho", [
+    ("https://exemplo.test/x", "", "SHA-256"), ("https://exemplo.test/x", "abc", "SHA-256"),
+    ("http://exemplo.test/x", "0" * 64, "https"), ("ftp://exemplo.test/x", "0" * 64, "https")])
+def test_the_download_refuses_a_missing_hash_and_a_non_https_address(tmp_path, monkeypatch, url, sha, trecho):
+    _com_resposta(monkeypatch, b"x")
+    with pytest.raises(SystemExit, match=trecho):
+        srv.baixar_rede(url, sha, tmp_path / "rede.parquet")
+    assert not (tmp_path / "rede.parquet").exists()
+
+
+def test_plain_http_is_accepted_only_for_loopback(tmp_path, monkeypatch):
+    import hashlib
+
+    _com_resposta(monkeypatch, b"ok")
+    srv.baixar_rede("http://127.0.0.1:9/x", hashlib.sha256(b"ok").hexdigest(), tmp_path / "r.parquet")
+    assert (tmp_path / "r.parquet").read_bytes() == b"ok"
+
+
+def test_the_download_has_a_size_limit(tmp_path, monkeypatch):
+    monkeypatch.setattr(srv, "MAX_REDE_BYTES", 10)
+    _com_resposta(monkeypatch, b"x" * 100)
+    with pytest.raises(SystemExit, match="limite"):
+        srv.baixar_rede("https://exemplo.test/x", "0" * 64, tmp_path / "r.parquet")
+    assert not (tmp_path / "r.parquet").exists()

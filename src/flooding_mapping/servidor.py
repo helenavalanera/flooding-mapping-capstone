@@ -388,6 +388,45 @@ def resumo_da_auditoria() -> dict | None:
             "dias_avaliados": d["dias"], "dias_com_alguma_via_em_atencao": d["dias_com_alguma_via_em_atencao"], "dias_documentados": d["dias_documentados"], "leitura": d["leitura"]}
 
 
+MAX_REDE_BYTES = 300 * 1024 * 1024
+
+
+def baixar_rede(url: str, sha256: str, destino: Path) -> None:
+    """Fetches the street table when it is not on disk (a host built from Git has no ``data/``), and refuses it unless the hash matches.
+
+    The hash is mandatory: the file is loaded into the process, so a swapped file must never be accepted. HTTPS only (plain HTTP is allowed
+    for a loopback address, to test). The download goes to a temporary file and replaces the target atomically."""
+    import hashlib
+
+    import requests
+
+    partes = urlparse(url)
+    if partes.scheme != "https" and not (partes.scheme == "http" and partes.hostname in ("127.0.0.1", "localhost")):
+        raise SystemExit("FM_REDE_URL: use um endereço https")
+    if len(sha256) != 64 or any(c not in "0123456789abcdef" for c in sha256.lower()):
+        raise SystemExit("FM_REDE_SHA256: informe o SHA-256 (64 caracteres hexadecimais) do arquivo; sem ele a tabela não é baixada")
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    temporario = destino.with_name(destino.name + ".parte")
+    h, total = hashlib.sha256(), 0
+    try:
+        with requests.get(url, stream=True, timeout=(10, 60)) as r:
+            r.raise_for_status()
+            with temporario.open("wb") as f:
+                for bloco in r.iter_content(1 << 20):
+                    total += len(bloco)
+                    if total > MAX_REDE_BYTES:
+                        raise SystemExit("FM_REDE_URL: o arquivo excede o limite de 300 MB")
+                    h.update(bloco); f.write(bloco)
+        if h.hexdigest() != sha256.lower():
+            raise SystemExit("A tabela de ruas baixada não confere com FM_REDE_SHA256: arquivo descartado")
+        os.replace(temporario, destino)
+        print(f"tabela de ruas baixada ({total / 1e6:.1f} MB) e verificada", file=sys.stderr, flush=True)
+    except requests.RequestException as erro:
+        raise SystemExit(f"Não foi possível baixar a tabela de ruas: {type(erro).__name__}") from None
+    finally:
+        temporario.unlink(missing_ok=True)
+
+
 def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
     """The service wired from the repository's data and the environment; the CORS origin to use.
 
@@ -399,6 +438,8 @@ def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
         RAIZES = (STATIC, Path(env["FM_SITE"]))
     config = load_config()
     destino = Path(env.get("FM_REDE") or resolve("data/processed/rede_poa.parquet"))
+    if not destino.exists() and env.get("FM_REDE_URL"):
+        baixar_rede(env["FM_REDE_URL"], env.get("FM_REDE_SHA256", ""), destino)
     if not destino.exists():
         raise SystemExit(f"Falta a tabela de ruas ({destino}). Gere com: python -m flooding_mapping.rede_poa (ou aponte FM_REDE)")
     rede = rt.Rede(pd.read_parquet(destino), config["roteamento"])

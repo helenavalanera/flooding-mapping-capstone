@@ -1,6 +1,6 @@
 # Hospedagem do servidor
 
-Estado: **preparada e testada localmente; nada foi publicado.** Publicar exige autorização, conta e cobrança que não foram feitas.
+Estado: **preparada e testada localmente; nada foi publicado.** Para o Render, veja [`render.md`](render.md). Publicar exige autorização, conta e cobrança que não foram feitas.
 
 ## O que foi auditado
 
@@ -24,7 +24,7 @@ que use disco efêmero. O desenho mínimo é **uma máquina sempre ligada com um
 |---|---|---|---|
 | **Fly.io** (recomendada) | máquina `shared-cpu-1x` com 512 MB: US$ 3,69/mês; com **1 GB: US$ 6,70/mês**. Preço do volume: não extraído da página; confirmar | volume ligado à máquina | HTTPS e segredos nativos, health check, uma só máquina com volume |
 | Railway | plano Hobby com mínimo de US$ 5 de uso; cobrança por uso (memória ≈ US$ 0,0000039 por GB·s, o que dá cerca de US$ 10 por GB·mês ligado, mais CPU; volume ≈ US$ 0,00000006 por GB·s) | volumes disponíveis | mais caro ligado 24 h com 1 GB |
-| Render | não extraído da página (conteúdo dinâmico) | disco persistente exige instância paga | verificar preço antes |
+| Render | gratuito (sem disco, 512 MB, dorme após 15 min); pago de entrada US$ 7/mês (512 MB); 2 GB US$ 25/mês; disco US$ 0,25/GB/mês (consulta de 11/11/2026) | disco persistente só em plano pago | preparado, **não publicado**; detalhes e checklist em [`render.md`](render.md) |
 | VPS (ex.: Hetzner) | a página mostra planos a partir de € 5,49–5,99 por mês; o plano exato não foi identificado | disco da máquina | controle total, mas exige cuidar de TLS (por exemplo Caddy), atualizações e reinício |
 
 **512 MB não serve**: o pico medido foi 482 MB. O mínimo é **1 GB**. Estimativa de custo mensal na opção recomendada: cerca de US$ 7 pela máquina,

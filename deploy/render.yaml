@@ -1,0 +1,31 @@
+# MODELO INERTE para o Render (Blueprint). Nada aqui é usado até alguém copiar este arquivo para a raiz do repositório como render.yaml,
+# conectar o repositório no painel do Render e aprovar o deploy. Passo a passo e custos: docs/render.md.
+#
+# Um único Web Service Docker serve a API, o painel (desktop) e o PWA, na mesma origem (sem CORS).
+# Segredos NÃO ficam aqui: as chaves marcadas com sync: false são preenchidas à mão no painel do Render.
+services:
+  - type: web
+    name: flooding-mapping
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free                    # US$ 0, sem disco, 512 MB, dorme após 15 min sem tráfego. Mudar de plano é uma decisão de custo (ver docs/render.md)
+    healthCheckPath: /api/saude   # responde 200 mesmo degradado; o corpo diz o estado
+    autoDeploy: false             # nada é publicado por um simples push
+    envVars:
+      - key: OPERADOR_TOKEN       # mínimo de 24 caracteres; sem ele, a confirmação de ocorrências fica desativada
+        sync: false
+      - key: GEMINI_API_KEY       # opcional; sem ele há texto padrão
+        sync: false
+      - key: GEMINI_MODEL
+        sync: false
+      - key: FM_REDE_URL          # endereço https da tabela de ruas (data/ não vai ao Git nem à imagem)
+        sync: false
+      - key: FM_REDE_SHA256       # SHA-256 do arquivo; sem ele a tabela não é baixada
+        sync: false
+      - key: PROXIES_CONFIAVEIS   # endereço do proxy do Render (veja docs/render.md); sem ele o limite por cliente vê um só endereço
+        sync: false
+    # Persistência das ocorrências: só com plano pago. Descomente depois de escolher o plano.
+    # disk:
+    #   name: dados
+    #   mountPath: /dados         # o Dockerfile já aponta FM_OCORRENCIAS e FM_SITE para /dados
+    #   sizeGB: 1

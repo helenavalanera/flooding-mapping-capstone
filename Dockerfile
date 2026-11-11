@@ -20,5 +20,5 @@ USER app
 
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/api/saude', timeout=4).status == 200 else 1)"
+  CMD python -c "import os,urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:%s/api/saude' % os.environ.get('PORT', '8080'), timeout=4).status == 200 else 1)"
 CMD ["python", "-W", "ignore", "-m", "flooding_mapping.servidor"]
