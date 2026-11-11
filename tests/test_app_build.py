@@ -204,3 +204,13 @@ def test_the_page_policy_lets_the_map_work_and_nothing_more():
     assert "'self'" in csp["worker-src"] and "blob:" in csp["worker-src"]     # the map needs blob workers; the PWA needs its own service worker
     assert "https://s3.amazonaws.com" in csp["connect-src"] and "https://tile.openstreetmap.org" in csp["connect-src"]
     assert "'unsafe-eval'" not in servidor.CSP and csp["frame-ancestors"] == "'none'" and csp["script-src"] == "'self' https://cdnjs.cloudflare.com"
+
+
+def test_the_assistant_questions_in_the_page_match_the_backend():
+    """The page lists the suggested questions before the first call; the lists must be the ones the backend answers."""
+    from flooding_mapping.linguagem import assistente as asst
+    js = (build.STATIC / "painel.js").read_text()
+    for pid, texto in asst.PERGUNTAS.items():
+        assert f'{pid}: "{texto}"' in js, pid
+    for tipo, ids in asst.POR_CONTEXTO.items():
+        assert f'{tipo}: [' + ", ".join(f'"{i}"' for i in ids) + "]" in js, tipo

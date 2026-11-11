@@ -187,6 +187,34 @@
     return "<p class='small'>Última atualização: chuva " + Lg.esc(hora(d.previsao && d.previsao.fonte_chuva.emitido_em_utc)) + " · bloqueios " + Lg.esc(hora(d.bloqueios && d.bloqueios.coletado_em_utc)) +
       " · S2iD até " + (d.ocorrencias ? Lg.esc(d.ocorrencias.ate.split("-").reverse().join("/")) : "indisponível") + ".</p>";
   }
+  /* ---------------------------------------------------------------- assistente contextual */
+  var PERGUNTAS = { por_que_atencao: "Por que este trecho está em atenção?", o_que_explica: "O que explica esta classificação?", o_que_muda: "O que muda entre estas rotas?", indisponivel: "Quais informações estão indisponíveis?" };
+  var POR_CONTEXTO = { trecho: ["por_que_atencao", "o_que_explica", "indisponivel"], rota: ["o_que_muda", "por_que_atencao", "o_que_explica", "indisponivel"], municipio: ["o_que_explica", "indisponivel"], rodovia: ["o_que_explica", "indisponivel"] };
+  /* Questions about what is selected. Each suggested question has an answer from the structured summary; an external language
+     provider, when configured, only rephrases it. Without the analysis server there is nothing to ask, so the block is not drawn. */
+  function assistente(alvo, tipo, id, rotulo) {
+    if (!T.online || !POR_CONTEXTO[tipo]) return;
+    var box = document.createElement("details"); box.className = "assistente";
+    box.innerHTML = "<summary>Assistente · perguntar sobre esta seleção</summary><div class='perguntas' role='group' aria-label='Perguntas sugeridas'>" +
+      POR_CONTEXTO[tipo].map(function (q) { return "<button type='button' class='btn sec' data-q='" + q + "'>" + Lg.esc(PERGUNTAS[q]) + "</button>"; }).join("") + "</div>" +
+      "<form class='livre'><label>Pergunta livre <input type='text' maxlength='200' autocomplete='off'></label> <button class='btn' type='submit'>Perguntar</button></form>" +
+      "<div class='resposta' aria-live='polite'></div><p class='small'>As respostas usam só os resumos desta seleção, sem coordenadas, e repetem os limites dos dados. Estimativas de um baseline experimental, sem validação em vias.</p>";
+    alvo.appendChild(box);
+    var saida = box.querySelector(".resposta");
+    function perguntar(corpo) {
+      saida.innerHTML = "<p class='muted'>consultando…</p>";
+      Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) { b.disabled = true; });
+      api("assistente", { method: "POST", body: Object.assign({ tipo: tipo, id: id, rotulo: rotulo, contextualizar: true }, corpo) }).then(function (r) {
+        saida.innerHTML = "<p><b>" + Lg.esc(r.pergunta) + "</b></p><p>" + Lg.esc(r.texto) + "</p><p class='small'>" + (r.origem === "deterministico"
+          ? "Texto padrão, montado a partir dos dados" + (r.motivo === "nao_configurado" ? " (provedor de linguagem não configurado)" : "") + "."
+          : "Reformulado por um provedor de linguagem externo, a partir de resumos agregados.") + "</p>";
+      }).catch(function (e) { saida.innerHTML = "<p class='aviso'>" + Lg.esc(e.message) + "</p>"; })
+        .then(function () { Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) { b.disabled = false; }); });
+    }
+    Array.prototype.forEach.call(box.querySelectorAll("button[data-q]"), function (b) { b.addEventListener("click", function () { perguntar({ pergunta_id: b.dataset.q }); }); });
+    box.querySelector("form").addEventListener("submit", function (e) { e.preventDefault(); var v = box.querySelector("input").value.trim(); if (v) perguntar({ pergunta: v }); });
+  }
+
   function contextoMunicipio(ibge, alvo) {
     T.rs().then(function (d) {
       var f = d.municipios.features.filter(function (x) { return x.properties.ibge === ibge; })[0], p = f.properties, c = d.cobertura.municipios[ibge], prev = d.prevPorIbge[ibge], o = ocorrenciasDoMunicipio(d, p.nome, ibge);
@@ -202,6 +230,7 @@
             return "<tr><td>" + Lg.esc(Lg.dayLabel(x.horizonte_dias, x.data)) + "</td><td>" + Lg.mm(x.chuva_dia_mm) + "</td><td>" + Lg.esc(Lg.CLASS_LABEL[x.classe]) + "</td></tr>"; }).join("") + "</tbody></table><p class='small'>Probabilidade relativa de registro de desastre hídrico; não é previsão em vias.</p>"
           : "<p class='indisp'>Sem estimativa: faltam dados de chuva completos para este município.</p>") +
         atualizacoes(d) + "<h3>Limitações</h3>" + ul(limitacoes(["ocorrencias", "meteorologia", "risco_por_trecho", "rotas"]), "plain small");
+      assistente(alvo, "municipio", ibge, p.nome);
     }).catch(function (e) { fail(alvo, e); });
   }
   function contextoRodovia(p, alvo) {
@@ -215,6 +244,7 @@
         "<p class='small'>" + Lg.kindBadge("simulado") + " Se este trecho fechasse: " + (p.ponte ? "dividiria a malha mapeada" + (p.pop_isolada ? ", isolando ~" + Math.round(p.pop_isolada).toLocaleString("pt-BR") + " pessoas" : "") : (p.desvio_km == null ? "sem cálculo de desvio" : "desvio de " + Math.round(p.desvio_km) + " km")) + " (vias municipais ausentes tornam algumas 'pontes' falta de alternativa mapeada).</p>" +
         "<h3>Ocorrências " + Lg.kindBadge("observado") + "</h3>" + (bl.length ? ul(bl.map(function (b) { return Lg.esc(Lg.blockageSpan(b)) + " · " + Lg.esc(b.municipio) + " · " + (b.tipo === "total" ? "total" : "parcial") + " · desde " + Lg.esc(Lg.formatInstant(b.desde)); })) : "<p class='small'>Nenhum bloqueio ativo nesta rodovia.</p>") +
         atualizacoes(d) + "<h3>Limitações</h3>" + ul(limitacoes(["malha_rodoviaria", "caracteristicas_fisicas", "mobilidade_simulada", "risco_por_trecho"]), "plain small");
+      if (c) assistente(alvo, "rodovia", p.nome, p.nome);
     }).catch(function (e) { fail(alvo, e); });
   }
   function bloco2(titulo, kind, corpo) { return "<h3>" + Lg.esc(titulo) + " " + (kind ? Lg.kindBadge(kind) : "") + "</h3>" + corpo; }
@@ -233,6 +263,7 @@
         bloco2("Ocorrências próximas", "observado", t.ocorrencias_proximas.length ? ul(t.ocorrencias_proximas.map(function (o) { return "<span class='sit " + Lg.esc(o.situacao) + "'>" + Lg.esc(o.situacao) + "</span> · " + Lg.esc(o.tipo) + " · " + Lg.esc(o.fonte) + " · confiab. " + Lg.esc(o.confiabilidade); })) : "<p class='small'>Nenhuma ocorrência ativa a 100 m.</p>") +
         bloco2("Se este trecho fechasse", "simulado", "<ul class='plain'>" + sim("carro", "Carro") + sim("pe", "A pé") + "</ul>") +
         "<details><summary>Metodologia e limites</summary><p class='small'>" + Lg.esc(t.metodo) + "</p>" + ul(t.limites.map(Lg.esc), "plain small") + "</details>";
+      assistente(alvo, "trecho", id, t.nome || "Via sem nome");
     }).catch(function (e) { fail(alvo, e); });
   }
 
@@ -314,6 +345,7 @@
         "<p class='small'>Chuva na janela da viagem: " + Lg.mm(a.meteo.total_na_janela_mm) + ". Interdições confirmadas consideradas: " + a.interdicoes_consideradas + ".</p>" +
         "<p><button class='btn sec' id='mob-explicar'>Explicar com mais contexto</button> " + "<button class='btn sec' id='mob-3d'>Ver as rotas no mapa grande</button>" + " <span id='mob-explicacao'></span></p>" +
         "<details><summary>Trechos de atenção da rota habitual</summary>" + ul(Lg.groupStretches(a.rotas.habitual.trechos_de_risco).map(function (t) { return Lg.esc(t.nome) + " · " + (t.classe === "alto" ? "Alto" : "Atenção") + " · " + Lg.km(t.km) + " · passagem " + Lg.hhmm(t.inicio) + "–" + Lg.hhmm(t.fim); })) + "</details>" + ul(a.avisos.map(Lg.esc), "plain small");
+      assistente(out, "rota", a.analise_id, "rotas");
       el("mob-explicar").addEventListener("click", function () {
         var alvo = el("mob-explicacao"); alvo.textContent = "consultando…";
         api("explicacao", { method: "POST", body: { analise_id: a.analise_id, contextualizar: true } }).then(function (e) {

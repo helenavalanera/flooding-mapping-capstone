@@ -21,8 +21,15 @@ async function semTransbordo(page, larguras, passos) {
   }
   assert.deepStrictEqual(ruins, [], "transbordo horizontal em " + ruins.join(", "));
 }
+// A visible point of a feature: one that is not under the floating panel (the click must reach the map canvas).
 const pontoDe = (page, camada) => page.evaluate((c) => {
-  const m = window.Mapa.map, f = m.queryRenderedFeatures({ layers: [c] }); if (!f.length) return null;
-  const g = f[Math.floor(f.length / 2)].geometry, flat = []; (function w(a) { typeof a[0] === "number" ? flat.push(a) : a.forEach(w); })(g.coordinates);
-  const p = m.project(flat[Math.floor(flat.length / 2)]), r = m.getCanvas().getBoundingClientRect(); return { x: r.left + p.x, y: r.top + p.y }; }, camada);
+  const m = window.Mapa.map, f = m.queryRenderedFeatures({ layers: [c] }), cv = m.getCanvas(), r = cv.getBoundingClientRect();
+  for (let k = 0; k < f.length; k++) {
+    const g = f[(Math.floor(f.length / 2) + k) % f.length].geometry, flat = []; (function w(a) { typeof a[0] === "number" ? flat.push(a) : a.forEach(w); })(g.coordinates);
+    for (let j = 0; j < Math.min(flat.length, 12); j++) {
+      const p = m.project(flat[Math.floor((flat.length * (j + 1)) / 13)]), x = r.left + p.x, y = r.top + p.y;
+      if (x > 4 && y > 4 && x < innerWidth - 4 && y < innerHeight - 4 && p.x > 0 && p.y > 0 && p.x < r.width && p.y < r.height && document.elementFromPoint(x, y) === cv) return { x, y };
+    }
+  }
+  return null; }, camada);
 module.exports = { assert, abrir, BASE, semTransbordo, pontoDe };

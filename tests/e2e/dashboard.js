@@ -29,6 +29,12 @@ const { assert, abrir, BASE, semTransbordo, pontoDe } = require("./lib");
   const t = await pontoDe(page, "poa-risco-prev"); assert.ok(t, "há trechos com risco estimado"); await page.mouse.click(t.x, t.y);
   await page.waitForFunction(() => /Risco por hora/.test(document.getElementById("contexto").textContent), null, { timeout: 10000 });
   assert.match(await page.innerText("#contexto"), /não é probabilidade/);
+  // assistente contextual: perguntas sugeridas, resposta com a origem declarada
+  await page.click("#contexto .assistente summary"); assert.strictEqual(await page.locator("#contexto .assistente [data-q]").count(), 3);
+  await page.click("#contexto [data-q=por_que_atencao]");
+  await page.waitForFunction(() => /Texto padrão|Reformulado/.test(document.querySelector("#contexto .resposta").textContent), null, { timeout: 30000 });
+  assert.match(await page.innerText("#contexto .resposta"), /Por que este trecho está em atenção\?/);
+  assert.doesNotMatch(await page.innerText("#contexto .resposta"), /segur[oa]\b/i);
   // mobilidade e rotas no mapa 3D
   await page.click("[data-aba=mobilidade]"); await page.waitForSelector("#mapa-rotas.leaflet-container"); const mb = await page.locator("#mapa-rotas").boundingBox();
   await page.mouse.click(mb.x + mb.width / 2 + 30, mb.y + mb.height / 2 + 80); await page.mouse.click(mb.x + mb.width / 2 + 190, mb.y + mb.height / 2 - 70);

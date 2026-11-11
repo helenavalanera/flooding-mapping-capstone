@@ -164,7 +164,11 @@
     el("contexto").innerHTML = "<h2 id='h-contexto'>Seleção</h2><p class='muted' id='contexto-vazio'>Clique em " + (T.atual === "rs" ? "um município ou uma rodovia." : "um trecho de rua com risco estimado.") + "</p>";
   }
   M.limparSelecao = limparSelecao;
-  function mostrarContexto() { var p = el("painel-mapa"); if (p) { p.scrollTop = 0; p.classList.add("aberto"); } }
+  function mostrarContexto() {
+    var p = el("painel-mapa"); if (!p) return;
+    p.scrollTop = 0; p.classList.add("aberto"); p.classList.remove("recolhido");
+    el("painel-alca").setAttribute("aria-expanded", "true"); el("painel-alca").textContent = "Recolher painel";
+  }
   function aoClicar(alvo) {
     if (alvo.tipo === "municipio") M.selecionarMunicipio(alvo.props.ibge);
     else if (alvo.tipo === "rodovia") {
@@ -242,6 +246,11 @@
     el("vista-2d").addEventListener("click", function () { if (M.pronto) definir3D(false); });
     el("exagero").addEventListener("change", function (e) { M.exagero = Number(e.target.value); if (M.pronto && M.tres_d) definir3D(true, false); });
     el("poa-hora").addEventListener("input", function () { clearTimeout(M._t); M._t = setTimeout(carregarRisco, 250); });
+    el("painel-alca").addEventListener("click", function () {
+      var p = el("painel-mapa"), recolher = !p.classList.contains("recolhido");
+      p.classList.toggle("recolhido", recolher); if (!recolher) p.classList.add("aberto");
+      this.setAttribute("aria-expanded", String(!recolher)); this.textContent = recolher ? "Mostrar painel" : "Recolher painel";
+    });
     el("btn-motor").addEventListener("click", function () {
       var paraLeaflet = M.motorNome === "gl";
       if (!paraLeaflet && !M.webglOk()) return;
