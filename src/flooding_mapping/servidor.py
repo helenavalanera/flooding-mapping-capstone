@@ -313,7 +313,12 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
         def _api(self, metodo: str, caminho: str, consulta: dict):
             if metodo == "GET":
                 if caminho == "/api/saude":
-                    return {**servico.saude(), "metricas": metricas.resumo()}
+                    saude = {**servico.saude(), "metricas": metricas.resumo()}
+                    if servico.token_operador and self.headers.get("Authorization") and self._credencial_valida():
+                        # only for the operator: how this request reached the server, to find the proxy address to trust
+                        saude["diagnostico_de_origem"] = {"conexao_direta": self.client_address[0], "encaminhado": self.headers.get("X-Forwarded-For"),
+                                                         "cliente_considerado": self._cliente(), "proxies_confiaveis": len(confiaveis)}
+                    return saude
                 if caminho == "/api/visao-geral":
                     return servico.visao_geral()
                 if caminho == "/api/previsao":
@@ -389,6 +394,9 @@ def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
     Paths can be moved to a persistent volume with ``FM_REDE`` (street table) and ``FM_OCORRENCIAS`` (occurrence file)."""
     ler_env(raiz / ".env", env)
     token = validar_token(env.get("OPERADOR_TOKEN"))
+    if env.get("FM_SITE"):   # the generated site (state forecast and layers) on a persistent volume; source files still win
+        global RAIZES
+        RAIZES = (STATIC, Path(env["FM_SITE"]))
     config = load_config()
     destino = Path(env.get("FM_REDE") or resolve("data/processed/rede_poa.parquet"))
     if not destino.exists():

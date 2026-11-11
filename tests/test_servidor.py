@@ -330,3 +330,13 @@ def test_the_whole_operator_flow_over_http_ends_with_the_route_avoiding_the_clos
     reaberto = oc.Ocorrencias(arquivo)
     assert [r["situacao"] for r in reaberto.listar()] == ["confirmada"] and [h["para"] for h in reaberto.obter(rel["id"])["historico"]] == ["reportada", "confirmada"]
     assert [x["id"] for x in reaberto.interdicoes(72, pd.Timestamp(oc.agora()).to_pydatetime())] == [rel["id"]]
+
+
+def test_the_operator_can_see_how_a_request_reached_the_server_to_find_the_proxy_address(api):
+    base, _, _ = api(token="credencial-do-operador-longa-o-bastante")
+    publico = requests.get(base + "/api/saude", headers={"X-Forwarded-For": "1.2.3.4"}).json()
+    assert "diagnostico_de_origem" not in publico                                    # strangers do not learn it
+    errado = requests.get(base + "/api/saude", headers={"Authorization": "Bearer errado"})
+    assert errado.status_code == 200 and "diagnostico_de_origem" not in errado.json()
+    d = requests.get(base + "/api/saude", headers={"Authorization": "Bearer credencial-do-operador-longa-o-bastante", "X-Forwarded-For": "1.2.3.4"}).json()["diagnostico_de_origem"]
+    assert d["conexao_direta"] == "127.0.0.1" and d["encaminhado"] == "1.2.3.4" and d["cliente_considerado"] == "127.0.0.1" and d["proxies_confiaveis"] == 0
