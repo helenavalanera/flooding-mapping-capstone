@@ -430,7 +430,7 @@
   function afirmacoes(p) {
     var v = p.validacao_do_baseline, a = p.afirmacoes || { pode: [], nao_pode: [] };
     return "<h3>O que se pode e o que não se pode afirmar</h3><div class='duas'><div><p><b>Pode</b></p>" + ul(a.pode.map(Lg.esc), "plain small") + "</div><div><p><b>Não pode</b></p>" + ul(a.nao_pode.map(Lg.esc), "plain small") + "</div></div>" +
-      (v ? "<h3>Confronto com eventos documentados " + Lg.kindBadge("observado") + "</h3><p class='small'>Bloqueios geocodificados: <b>" + v.eventos_documentados + "</b> em <b>" + v.datas_distintas + "</b> datas. O baseline sinalizou <b>" + v.detectados_em_algum_horario_do_dia + "</b> em algum horário do dia e <b>" + v.detectados_na_hora_do_reporte + "</b> na hora do reporte (não detectados no dia: " + v.nao_detectados + "). Em " + v.dias_com_alguma_via_em_atencao + " de " + v.dias_avaliados + " dias avaliados alguma via ficou em atenção, e só " + v.dias_documentados + " dias têm registro. " + Lg.esc(v.leitura || "") + " Poucos eventos e sem rótulo de ausência: é um confronto, não uma validação.</p>"
+      (v ? "<h3>Confronto com eventos documentados " + Lg.kindBadge("observado") + "</h3><p class='small'>Bloqueios geocodificados: <b>" + v.eventos_documentados + "</b> em <b>" + v.datas_distintas + "</b> datas. O baseline sinalizou <b>" + v.detectados_em_algum_horario_do_dia + "</b> em algum horário do dia e <b>" + v.detectados_na_hora_do_reporte + "</b> na hora do reporte (não detectados no dia: " + v.nao_detectados + "). Em " + v.dias_com_alguma_via_em_atencao + " de " + v.dias_avaliados + " dias avaliados alguma via ficou em atenção, e só " + v.dias_documentados + " dias têm registro. " + Lg.esc(v.leitura ? v.leitura.charAt(0).toUpperCase() + v.leitura.slice(1) + "." : "") + " Poucos eventos e sem rótulo de ausência: é um confronto, não uma validação.</p>"
         : "<p class='indisp'>O confronto com os eventos documentados não está disponível nesta instalação.</p>");
   }
   function proveniencia() {
@@ -468,7 +468,7 @@
     show(st.aba);
   });
   T.carregar().then(function () {
-    return api("saude").then(function (s) { if (s.chuva && s.chuva.sintetica) { var b = el("banner"); b.textContent = "DEMONSTRAÇÃO: a chuva e as ocorrências deste servidor são sintéticas, não dados do mundo real."; b.hidden = false; } return s.status === "ok" || s.status === "degradado" ? T.atualizarComServidor() : null; }).catch(function () { return null; });
+    return api("saude").then(function (s) { if (s.chuva && s.chuva.sintetica) { var b = el("banner"); b.textContent = "DEMONSTRAÇÃO: em Porto Alegre, a chuva e as ocorrências deste servidor são sintéticas, não dados do mundo real. Os dados estaduais não são sintéticos."; b.hidden = false; } return s.status === "ok" || s.status === "degradado" ? T.atualizarComServidor() : null; }).catch(function () { return null; });
   }).then(function () {
     var h = Lg.parseHash(location.hash, ABAS, T.ids, "rs");
     T.atual = h.territorio; marcarTerritorio();
