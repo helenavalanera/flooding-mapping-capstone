@@ -60,3 +60,28 @@ Tabela 1 — Fontes de dados, situação atual e defasagem.
 **Validação, incerteza e atualização.** Como os rótulos do Modelo 2 provêm da simulação, a validação excluirá níveis de chuva e blocos espaciais de 2 km, será avaliada pelo erro absoluto médio (pontos percentuais), pela correlação de Spearman por célula e pelo percentil mediano dos eventos reais, e será confrontada com regras simples e, quando disponíveis, com GTFS e eventos atualizados. A incerteza decorrerá da sensibilidade ao fator de precariedade. Na fase 2, uma rede U-Net aplicada a imagens Sentinel-1 rotulará áreas alagadas e ampliará os eventos.
 
 **Justificativa.** Com poucos eventos, sem registros de chuva sem bloqueio e com dados defasados, regras fixas envelhecem rapidamente; um modelo treinado pode ser reajustado com dados novos e permite medir o ganho sobre regras simples. O aprendizado profundo só se justifica quando houver rótulos em escala. **Limitações.** Ajuste com três datas; GTFS de 2025; bloqueio binário; viés de notificação; temporais curtos podem fechar vias abaixo de 26 mm; o alerta é um nível heurístico, não uma probabilidade, e cobre apenas Porto Alegre.
+
+## 6. Atualização do escopo e estado final (11/11/2026)
+
+Esta seção foi acrescentada à proposta submetida. As seções 1 a 5 permanecem como foram escritas, porque registram o problema, a hipótese e o plano originais. O que segue diz o que foi entregue, o que mudou e o que não foi demonstrado.
+
+_Tabela 2 — Proposta e situação final._
+
+| Item proposto | Situação final | Evidência |
+|---|---|---|
+| (a) Mobilidade de base por modo (a pé, ônibus, carro) | Entregue no pipeline de pesquisa para Porto Alegre. O ônibus usa o GTFS vencido de 2025 | reports/qa/mobility_run.json; Documentação, seção 6 |
+| (b) Suscetibilidade por trecho viário | Entregue como protótipo e como índice físico relativo. Sem validação em vias | reports/qa/susceptibility_run.json; reports/ml/risco_trecho_auditoria.json |
+| (c) Estimador da mobilidade perdida (Modelo 2, gradient boosting) | Não treinado. A perda é calculada por simulação de roteamento com regra explícita; o estimador fica como trabalho futuro | ausente do repositório |
+| (d) Cartografia e painel de alerta com a previsão de chuva | Entregue e ampliado: mapa interativo, painel e aplicativo web de navegação (PWA) para Porto Alegre, com monitoramento regional do Rio Grande do Sul | docs/produto_preventivo.md |
+| Hipótese: um modelo treinado supera regras simples | Não confirmada. A regressão logística (percentil 0,86) empata com a regra de terreno baixo (0,85) no teste temporal de 2025, com poucos eventos; o random forest sobreajusta (0,28) | Documentação, seção 6.4 |
+| Fase 2: U-Net com imagens Sentinel-1 | Não realizada | — |
+
+**O que foi entregue.** Além do pipeline de pesquisa de Porto Alegre, o trabalho produziu (i) um gatilho municipal de risco hídrico para o Rio Grande do Sul (1.768.598 dias-município de 497 municípios, 99 episódios), no qual a regra de chuva é o gatilho em uso e o modelo de aprendizado de máquina permanece experimental, porque não passa na margem de PR-AUC na validação (docs/ml_gatilho.md); (ii) um serviço de análise para Porto Alegre, com roteamento de carro e a pé, meteorologia horária, ocorrências com confirmação humana e interdições; e (iii) um painel para análise e um aplicativo web (PWA) para quem vai se deslocar. Um provedor de linguagem (Gemini) apenas reformula textos que o sistema já calculou: não calcula, não classifica e não cria interdições.
+
+**Três conceitos que o produto mantém separados.** A suscetibilidade espacial é o índice físico do terreno, relativo e não uma probabilidade. A previsão temporal usa apenas a chuva futura e uma regra explícita. O impacto na mobilidade é o efeito de fechar trechos nas rotas e na cidade alcançável. O produto não afirma que prevê alagamentos por rua.
+
+**Resultados da auditoria.** O algoritmo de roteamento coincidiu com um caminho mínimo de referência (NetworkX) em 100 pares reais por modal, sem diferenças; isso valida o cálculo, não a qualidade da malha viária. O baseline de risco por trecho sinalizou 4 dos 19 bloqueios documentados em algum horário do dia e 2 na hora do reporte, e nenhum ajuste de parâmetro resolve essa baixa detecção sem sinalizar uma parcela grande da malha. Dias sinalizados sem registro não são falsos alertas comprovados: ausência de registro não é exemplo negativo (reports/ml/risco_trecho_auditoria.json).
+
+**Limites de validade.** A chuva usada pelo produto é uma série regional, com grade de cerca de 10 km, e o passado recente é análise de modelo, não medição de pluviômetro. A integração com o Gemini foi testada em chamadas reais de amostra pequena, com chuva sintética. Dados sintéticos (chuva inventada e ocorrências de demonstração) foram usados apenas em testes e na demonstração, sempre identificados, e não constituem validação empírica. O produto não foi testado em dispositivo físico e não foi publicado.
+
+**Conclusão.** A pergunta de pesquisa sobre a perda de mobilidade com chuvas de até 45 mm foi respondida no estudo preliminar, com as ressalvas dos dados. O trabalho entregou uma ferramenta integrada, demonstrável e reproduzível. A hipótese de que um modelo treinado supera regras simples não foi confirmada, e a previsão de alagamento por trecho viário não foi validada. Para validá-la faltam mais ocorrências georreferenciadas e por mais datas, chuva medida com resolução melhor que 10 km, rótulos de ausência verificados e o histórico de interdições confirmadas em uso real. Critérios de avaliação e formato exigidos pela instituição não foram fornecidos e não foram assumidos.

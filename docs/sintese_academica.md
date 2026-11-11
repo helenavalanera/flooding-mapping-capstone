@@ -60,6 +60,11 @@ O que **não** se pode afirmar: que o sistema prevê alagamentos em vias, que um
 que o desempenho vale fora das 4 datas e dos 19 pontos disponíveis. A pergunta de pesquisa sobre previsão viária **não foi respondida
 afirmativamente**: a evidência é negativa ou inconclusiva, e esse é um resultado do trabalho, não uma falha de entrega.
 
+**Hipótese da proposta.** A proposta supunha que um modelo treinado superaria regras simples. Com os dados disponíveis ela **não foi confirmada**: no teste temporal de
+2025 (9 eventos) a regressão logística (percentil mediano 0,86) empata com a regra de terreno baixo (0,85) e o random forest sobreajusta (0,28). O estimador de
+impacto (Modelo 2) **não foi treinado**; a perda de mobilidade é calculada por simulação de roteamento com regra explícita. A comparação completa entre o proposto e
+o entregue está na seção 6 de `proposta.md` e na seção 10 da documentação técnica (`.docx`, ambos preservados e atualizados).
+
 ## 6. Limitações
 
 Veja `docs/produto_preventivo.md` (limitações e pendências), `docs/seguranca_lgpd.md` e `docs/validacao_gemini.md`. Em resumo: dados de
