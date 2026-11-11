@@ -61,3 +61,7 @@ site/
 
 # Ocorrências operacionais (dados de operação, nunca versionados).
 data/operacional/
+
+# Apresentações geradas por tools/gerar_apresentacao.py (documentos de escritório ficam locais)
+*.pptx
+docs/apresentacao/

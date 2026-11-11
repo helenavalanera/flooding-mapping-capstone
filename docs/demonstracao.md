@@ -1,86 +1,119 @@
-# Demonstração controlada: preparo, roteiro, limpeza e checklists
+# Demonstração controlada: do preparo ao encerramento
 
-A demonstração roda **localmente**, sem publicar nada e sem depender de API externa para os fluxos essenciais. Ela usa a rede de ruas real
-de Porto Alegre com **dados sintéticos declarados**: uma tempestade inventada e ocorrências de demonstração, tudo em memória. Esses dados
-**não são evidência meteorológica nem de eventos reais**, e as telas dizem isso (faixa "DEMONSTRAÇÃO" no painel e na PWA).
+Este roteiro pode ser seguido por quem não conhece o código. A demonstração roda **localmente**, sem publicar nada, e **a jornada principal não depende de API externa**.
+Ela usa a rede de ruas real de Porto Alegre com **dados sintéticos declarados**: uma tempestade inventada e ocorrências de demonstração, tudo em memória.
+Esses dados **não são evidência meteorológica nem de eventos reais**, e as telas dizem isso (faixa "DEMONSTRAÇÃO" no painel e "DEMONSTRAÇÃO · dados sintéticos" na PWA).
 
-## Preparo (uma vez)
+Única dependência de rede: os **mapas-base** (tiles do OpenStreetMap). Sem internet, o mapa fica sem fundo, mas dados, rotas, ocorrências e interdições continuam funcionando.
+O assistente com provedor de linguagem é **opcional**: sem chave, ele responde com o texto padrão e diz isso na tela.
 
-```bash
-python -m venv .venv && .venv/bin/pip install -r requirements.lock.txt   # ou requirements-servidor.txt
-# a tabela de ruas de Porto Alegre precisa existir: data/processed/rede_poa.parquet
-.venv/bin/python -m flooding_mapping.rede_poa        # gera a tabela, se faltar
-# opcional, para a etapa do assistente com provedor real: GEMINI_API_KEY e GEMINI_MODEL no .env (nunca no Git)
-```
+## 1. Preparação (uma vez)
 
-Sem chave do provedor, o assistente responde com o **texto padrão** montado a partir dos dados (e diz isso na tela). Isso é um fluxo
-legítimo da demonstração; o provedor só reformula.
+1. Ter Python 3.12 e instalar as dependências do servidor: `python -m venv .venv && .venv/bin/pip install -r requirements-servidor.txt` (ou `requirements.lock.txt` para o ambiente completo).
+2. Ter a tabela de ruas `data/processed/rede_poa.parquet` (17 MB). Se faltar, `make rede` a gera (exige o ambiente completo e o recorte do OpenStreetMap; veja o README).
+3. Opcional, só para ver o assistente reformular com o provedor real: definir `GEMINI_API_KEY` e `GEMINI_MODEL` no arquivo `.env` (que o Git ignora) e iniciar com `DEMO_GEMINI=1 make demo`. **Nunca coloque a chave em arquivo versionado.**
 
-## Execução
+## 2. Inicialização
 
 ```bash
-make demo           # painel em http://127.0.0.1:8766/ e PWA em http://127.0.0.1:8766/pwa/
+make demo              # usa .venv/bin/python; com outro Python: make demo PY=python
 ```
 
-O comando imprime os endereços e a credencial do operador **desta demonstração** (um valor fixo e público, só válido neste servidor de
-demonstração). Para ver a PWA no celular, veja "Teste em dispositivo físico" abaixo.
+Aguarde a mensagem `pronto`. O comando imprime os endereços e a **credencial do operador desta demonstração** (um valor fixo e público, válido só neste servidor de demonstração):
 
-## Limpeza e reinício
+```
+painel (desktop): http://127.0.0.1:8766/
+PWA (celular):     http://127.0.0.1:8766/pwa/
+credencial do operador: demo-operador-com-mais-de-24-caracteres
+```
 
-Todo o estado vive em memória: **pare (Ctrl+C) e rode `make demo` de novo** para voltar ao cenário inicial (uma ocorrência pendente e uma
-interdição confirmada, ambas de demonstração). Nada é escrito em `data/operacional/`.
+Verificação rápida: `curl http://127.0.0.1:8766/api/saude` deve responder `"status": "ok"` e `"sintetica": true`.
 
-## Roteiro (cerca de 12 minutos)
+## 3. Acesso ao desktop
 
-Cada etapa diz o que mostrar e o que dizer sobre os limites.
+Abra `http://127.0.0.1:8766/` no navegador do computador. A faixa amarela "DEMONSTRAÇÃO" deve estar visível.
 
-**1. Desktop (painel).** Abra `/`. Mostre a faixa de demonstração. Troque para **Porto Alegre**. Em **Condições e previsão**, mostre a chuva, a fonte e a ressalva de que é uma série regional. Em **Ocorrências**, mostre o relato pendente e a interdição confirmada. Em **Mapa**, ative as camadas e clique em um trecho com risco estimado. Em **Proveniência**, mostre "O que se pode e o que não se pode afirmar" e o confronto com os eventos documentados (4 de 19 detectados): *o risco por trecho é um baseline experimental, sem validação em vias*.
+## 4. Acesso ao PWA
 
-**2. Assistente.** Com um trecho selecionado, abra **Assistente** e pergunte "Por que este trecho está em atenção?". Mostre a origem declarada da resposta (texto padrão ou reformulado). Faça uma pergunta sem contexto ("O vento amanhã?"): o assistente diz que não há dado.
+Abra `http://127.0.0.1:8766/pwa/` em uma janela estreita (largura de celular) ou, num aparelho real, siga `docs/qa_mobile_fisico.md`. O cartão escuro do topo deve dizer "DEMONSTRAÇÃO · dados sintéticos".
 
-**3. PWA.** Abra `/pwa/` num celular ou na janela estreita. Toque em **Origem → Escolher no mapa**, marque a origem, depois o destino; escolha **Carro** (e repita com **A pé**). Toque em **Analisar deslocamento**. Mostre o cartão de orientação, o painel inferior (tempo, distância, chegada, indicador de exposição), as rotas alternativas e **Ver detalhes** (condições, trade-offs, trechos, explicação).
+## 5. Consulta territorial (desktop)
 
-**4. Ocorrência.** Na PWA, toque em **Relatar**, marque um ponto **sobre a rota**, escreva "Rua alagada (demonstração, sintético)" e envie. Mostre que o relato **não interdita**: a rota é a mesma. No painel, **Ocorrências**, entre como operador com a credencial impressa, clique em **Revisar** no relato, escolha **Confirmar**, impacto **interdição**, escreva a evidência ("Confirmado em vistoria de demonstração, sintético") e registre.
+1. No canto superior direito, escolha **Porto Alegre**.
+2. Aba **Condições e previsão**: mostre a chuva, a fonte e a ressalva de que é uma série regional (e, na demonstração, sintética).
+3. Aba **Ocorrências**: mostre a lista, com **um relato pendente** e **uma interdição confirmada**, ambos de demonstração.
+4. Aba **Mapa**: deixe as camadas ligadas, mova o controle "Hora do risco estimado" para **+5 h** e clique em um trecho colorido. No painel **Assistente**, toque em "Por que este trecho está em atenção?".
+5. Aba **Proveniência**: mostre "O que se pode e o que não se pode afirmar" e o confronto com os eventos documentados (4 de 19 detectados).
 
-**5. Recalcular.** Na PWA, toque em **Editar trajeto** e **Analisar** de novo. Mostre que o cartão agora informa mais trechos evitados e que o **traçado da rota mudou**; explique o trade-off de tempo e distância. O teste automatizado `tests/e2e/jornada.js` verifica essa mudança.
+**O que dizer:** o risco por trecho é um baseline experimental, sem validação em vias; a chuva é regional; nada aqui prevê alagamento por rua.
 
-**6. Experiência mobile.** Com a rota na tela, mostre o painel inferior em modo compacto e expandido (botão, sem arrastar), os controles flutuantes (**Eu**, **Rota**, **Mapa** com camadas e legenda, **Relatar**), e que um relato pendente aparece como "!" e uma interdição como "✕", com texto, não só cor.
+## 6. Planejamento de rota (PWA)
 
-**Se algo falhar ao vivo:** pare e reinicie (`make demo`); o estado volta ao início. Nenhuma etapa depende de internet, exceto os mapas-base (tiles do OpenStreetMap) e, opcionalmente, o provedor de linguagem.
+1. Em **Planejar**, escolha **Origem → "Escolher no mapa…"**; o painel recolhe; toque no mapa **perto de uma via** (por exemplo, no bairro Floresta). Repita para o **Destino** (por exemplo, perto do bairro Humaitá, a nordeste).
+2. Deixe **Carro** e toque em **Analisar deslocamento**. Se aparecer "fora da cobertura" ou "nenhuma via", toque de novo mais perto de uma rua.
+3. Observe o **cartão do topo** (rota e distância até o primeiro trecho de atenção, ou a interdição considerada), o **painel inferior** (tempo, distância, chegada, exposição estimada) e os **cartões de rota** deslizantes.
+4. Toque em **Ver detalhes** para ver as condições, os trade-offs entre rotas e as perguntas sugeridas. Depois repita a análise escolhendo **A pé**.
 
-## Teste em dispositivo físico (checklist; **não executado** até haver aparelho e registro)
+Na demonstração, o cartão pode já mostrar "Interdição confirmada considerada: o cálculo evita N trecho(s)": é a interdição de demonstração que já existia (o número N depende de onde você tocou).
 
-Nenhum teste em aparelho real foi executado neste repositório. Os testes de navegador emulam tela, toque e tamanhos, e **não** substituem GPU, sensores, rede e Safari reais. Preencha a tabela abaixo ao executar.
+## 7. Registro de ocorrência
 
-**Como acessar do celular.** Geolocalização e service worker exigem contexto seguro (HTTPS ou `localhost`). Opções:
-- **Android + Chrome:** conecte por USB, ative a depuração e rode `adb reverse tcp:8766 tcp:8766`; abra `http://localhost:8766/pwa/` no celular.
-- **iPhone + Safari:** exige HTTPS. Use um túnel HTTPS temporário sob a sua responsabilidade (isso envia tráfego por um terceiro: faça só com os dados sintéticos da demonstração).
-- Sem HTTPS, o mapa e as rotas funcionam, mas a localização e a instalação como PWA podem ser bloqueadas. Registre isso, não o oculte.
+1. No PWA, toque em **Relatar** (botão flutuante).
+2. Toque no mapa **sobre a linha da rota** (a rota fica visível por baixo do painel recolhido).
+3. Toque em **Ver detalhes** para abrir o formulário, escreva por exemplo "Rua alagada (demonstração, sintético)" e toque em **Enviar relato**.
+4. A mensagem diz que o relato foi recebido **como reportado** e que ele **não interdita** vias. Volte para **Planejar**: a rota **não mudou**.
 
-| Verificação | Resultado | Observação |
-|---|---|---|
-| Instalar / adicionar à tela inicial | | |
-| Abrir o PWA em tela cheia | | |
-| Layout e áreas seguras (notch, barra inferior) | | |
-| Navegar no mapa (arrastar, pinça) | | |
-| Cartão, painel inferior e botão de expandir | | |
-| Localização com consentimento (negar e permitir) | | |
-| Formulários (teclado não cobre campos) | | |
-| Rotas e alternativas (carro e a pé) | | |
-| Reportar ocorrência | | |
-| Rede indisponível (modo avião): aviso honesto | | |
-| Orientação retrato e paisagem | | |
+## 8. Confirmação pelo operador
 
-Registre também: dispositivo, sistema, navegador e versão, data, quem testou, problemas e capturas de tela.
+1. No painel do computador, aba **Ocorrências**.
+2. Em **Credencial do operador**, cole `demo-operador-com-mais-de-24-caracteres` e toque em **Entrar como operador**. Agora o texto livre dos relatos fica visível.
+3. Na linha do seu relato (situação **reportada**), toque em **Revisar**.
+4. Escolha **Confirmar**, impacto **interdição**, e escreva a evidência (mínimo de 10 caracteres), por exemplo "Confirmado em vistoria de demonstração, sintético". Toque em **Registrar**.
+5. A linha passa a **confirmada**. Sem a credencial, qualquer tentativa de confirmar recebe erro 403.
+
+## 9. Recálculo da rota
+
+1. No PWA, toque em **Editar trajeto** e em **Analisar deslocamento** de novo.
+2. O cartão do topo agora informa **mais trechos evitados**, e o **traçado da rota muda** no mapa. Em **Ver detalhes → Ocorrências no trajeto** aparece a decisão.
+3. Explique o trade-off: o desvio pode custar tempo e distância; a escolha da rota é da pessoa, e o sistema nunca a chama de segura.
+
+O teste automatizado `tests/e2e/jornada.js` executa essa sequência (relato, confirmação e recálculo) e verifica que o traçado da rota muda.
+
+## 10. Encerramento e limpeza
+
+- Pare o servidor com **Ctrl+C**. Todo o estado vive em memória; **nada foi escrito em `data/operacional/`**.
+- Para voltar ao cenário inicial (um relato pendente e uma interdição confirmada), rode `make demo` de novo.
+- Feche as janelas do navegador. Se usou `DEMO_HOST=0.0.0.0`, confirme que o servidor foi parado (ele aceitava a rede local).
+- Se foi usado `adb reverse` ou um túnel, desfaça-os (veja `docs/qa_mobile_fisico.md`, seção 7).
+
+## Se algo falhar ao vivo
+
+Pare e reinicie (`make demo`): o estado volta ao início. Falhas comuns: porta 8766 ocupada (`lsof -i :8766`); tabela de ruas ausente (seção 1); mapa sem fundo (sem internet; as rotas continuam funcionando).
+
+## Dados sintéticos: o que é o quê
+
+| Elemento | Origem na demonstração |
+|---|---|
+| Rede de ruas | **real** (OpenStreetMap, 24/10/2026) |
+| Chuva horária | **sintética**: uma série inventada, declarada na fonte e na tela |
+| Relato pendente e interdição iniciais | **sintéticos**, marcados como de demonstração |
+| Relato e confirmação feitos por você | **sintéticos** (escreva isso na evidência) |
+| Credencial do operador | fixa e pública, só deste servidor de demonstração |
+
+Ocorrências sintéticas **nunca** são evidência de eventos reais, e a chuva sintética **nunca** é evidência meteorológica.
+
+## Teste em dispositivo físico
+
+Veja `docs/qa_mobile_fisico.md` (roteiro, método de acesso e tabela de registro). **Estado: não executado.**
 
 ## Checklist final de aceite
 
 - [ ] `make demo` sobe sem erro e `/api/saude` responde `ok`.
-- [ ] Faixa "DEMONSTRAÇÃO" visível no painel e na PWA.
+- [ ] Faixa de demonstração visível no painel e no PWA.
 - [ ] Rotas de carro e a pé calculadas, com alternativas e trade-offs.
-- [ ] Relato não interdita; confirmação do operador interdita; a rota muda.
-- [ ] Meteorologia mostra fonte, atualização, escopo regional e validade; sem dados, a tela diz que não há estimativa (e que isso não é rota sem risco).
-- [ ] Assistente responde com texto padrão sem chave e diz a origem da resposta.
-- [ ] Mapa 2D funciona sem WebGL (teste `sem_webgl.js`).
+- [ ] O relato não interdita; a confirmação do operador interdita; a rota muda.
+- [ ] A meteorologia mostra fonte, atualização, escopo regional e validade; sem dados, a tela diz que não há estimativa (e que isso não é rota sem risco).
+- [ ] O assistente responde com texto padrão sem chave e diz a origem da resposta.
+- [ ] O mapa 2D funciona sem WebGL (teste `sem_webgl.js`).
 - [ ] `pytest` e os testes de navegador passam (ver `qa_relatorio_final.md`).
-- [ ] Teste em dispositivo físico executado e registrado, **ou** registrado como pendente por falta de aparelho.
+- [ ] Teste em dispositivo físico executado e registrado, **ou** registrado como pendente (hoje: pendente).
