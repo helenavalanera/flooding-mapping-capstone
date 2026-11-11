@@ -34,7 +34,7 @@ const PWA = BASE + "pwa/", CASA = { latitude: -30.1250, longitude: -51.2330 }, T
   const titulos = await page.locator("#resultado h2").allInnerTexts();
   assert.strictEqual(titulos[1], "Condições · chuva na cidade", "as condições abrem os detalhes");
   assert.deepStrictEqual(titulos.slice(2), ["Rota e alternativas", "Trechos de atenção · Rota habitual", "Ocorrências no trajeto", "Entenda o resultado"], "ordem dos detalhes");
-  assert.match(await page.innerText("#resultado"), /análise do modelo e não de um pluviômetro/); assert.match(await page.innerText("#resultado"), /uma série para a cidade inteira/); assert.match(await page.innerText("#resultado"), /Fonte: Open-Meteo[\s\S]*válida por até 6 h/);
+  assert.match(await page.innerText("#resultado"), /análise do modelo e não de um pluviômetro/); assert.match(await page.innerText("#resultado"), /uma série para a cidade inteira/); assert.match(await page.innerText("#resultado"), /Fonte: (Open-Meteo|SÉRIE SINTÉTICA)[\s\S]*válida por até 6 h/);
   assert.doesNotMatch(await page.innerText("#resultado") + await page.innerText("#orienta"), /é segura|sem risco\b/i, "nenhuma rota é chamada de segura");
   assert.strictEqual(await page.locator("#resultado [data-q]").count(), 4, "as quatro perguntas sugeridas");
   await page.click("#resultado [data-q=o_que_muda]"); await page.waitForFunction(() => /O que muda entre estas rotas\?/.test(document.getElementById("resposta").textContent), null, { timeout: 20000 });

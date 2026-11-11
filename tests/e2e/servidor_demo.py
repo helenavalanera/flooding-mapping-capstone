@@ -4,7 +4,7 @@ The live forecast is often dry, which would leave the risk screens empty. Here t
 (and says so in its source), one occurrence is reported and one closure is confirmed, all in memory. Nothing
 of this is data about the world, and nothing is written to disk.
 
-    python tests/e2e/servidor_demo.py --porta 8766 [--estaticos PASTA]
+    python tests/e2e/servidor_demo.py --porta 8766 [--estaticos PASTA] [--avisar]    (ou: make demo)
 """
 
 import argparse
@@ -52,7 +52,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--porta", type=int, default=8766)
     parser.add_argument("--estaticos", type=Path, default=None)
+    parser.add_argument("--avisar", action="store_true", help="mostra os endereços e a credencial de demonstração")
     args = parser.parse_args()
     servico = montar_demo(args.estaticos)
     print("pronto", flush=True)
-    ThreadingHTTPServer(("127.0.0.1", args.porta), srv.criar_handler(servico, "")).serve_forever()
+    if args.avisar:
+        print(f"""
+DEMONSTRAÇÃO COM DADOS SINTÉTICOS (chuva inventada, ocorrências de demonstração; tudo em memória, some ao parar)
+  painel (desktop): http://127.0.0.1:{args.porta}/
+  PWA (celular):     http://127.0.0.1:{args.porta}/pwa/
+  credencial do operador (só desta demonstração): {servico.token_operador}
+  para limpar e recomeçar: pare (Ctrl+C) e rode de novo""", flush=True)
+    ThreadingHTTPServer((os.environ.get("DEMO_HOST", "127.0.0.1"), args.porta), srv.criar_handler(servico, "")).serve_forever()

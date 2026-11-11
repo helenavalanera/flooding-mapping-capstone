@@ -10,6 +10,6 @@ const BASE = process.env.BASE_URL, SW = process.env.STATIC_COPY + "/pwa/sw.js";
   await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
   await page.waitForFunction(() => /nova versão/i.test(document.getElementById("aviso").textContent), null, { timeout: 15000 }); await page.waitForTimeout(1500);
   assert.deepStrictEqual(await page.evaluate(() => caches.keys()), ["fm-pwa-teste-nova"], "o cache da versão antiga é removido");
-  await page.click("#aviso button"); await page.waitForSelector("#tela .passos"); await page.waitForTimeout(1000); assert.ok(!(await page.isVisible("#aviso")));
+  await page.click("#aviso button"); await page.waitForSelector("#tela .passos"); await page.waitForTimeout(1000); assert.ok(!/nova versão/i.test(await page.evaluate(() => document.getElementById("aviso").textContent)), "o aviso de nova versão some após atualizar");
   await browser.close(); console.log("sw: ok");
 })().catch((e) => { console.error("FALHOU:", e.message); process.exit(1); });

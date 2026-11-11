@@ -468,7 +468,7 @@
     show(st.aba);
   });
   T.carregar().then(function () {
-    return api("saude").then(function (s) { return s.status === "ok" || s.status === "degradado" ? T.atualizarComServidor() : null; }).catch(function () { return null; });
+    return api("saude").then(function (s) { if (s.chuva && s.chuva.sintetica) { var b = el("banner"); b.textContent = "DEMONSTRAÇÃO: a chuva e as ocorrências deste servidor são sintéticas, não dados do mundo real."; b.hidden = false; } return s.status === "ok" || s.status === "degradado" ? T.atualizarComServidor() : null; }).catch(function () { return null; });
   }).then(function () {
     var h = Lg.parseHash(location.hash, ABAS, T.ids, "rs");
     T.atual = h.territorio; marcarTerritorio();

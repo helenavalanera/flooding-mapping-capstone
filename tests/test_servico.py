@@ -453,3 +453,12 @@ def test_the_server_reads_the_audit_summary_from_the_report_in_the_repository():
     from flooding_mapping import servidor
     v = servidor.resumo_da_auditoria()
     assert v is None or (v["eventos_documentados"] > 0 and v["detectados_em_algum_horario_do_dia"] <= v["eventos_documentados"] and "ausência de registro não é exemplo negativo" in v["leitura"])
+
+
+def test_health_flags_a_synthetic_rain_source_so_the_screens_can_say_it_is_a_demonstration():
+    s, _ = montar()
+    assert s.saude()["chuva"]["sintetica"] is False
+    meta = {"fonte": "SÉRIE SINTÉTICA DE DEMONSTRAÇÃO (não é previsão)", "emitido_em_utc": "2026-11-09T14:00:00Z"}
+    s.chuva = ChuvaHoraria(0, 0, fonte=lambda lat, lon: (chuva(mm_h=15.0), meta))
+    h = s.saude()["chuva"]
+    assert h["sintetica"] is True and "SINTÉTICA" in h["fonte"]

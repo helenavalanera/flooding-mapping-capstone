@@ -238,7 +238,7 @@
     if (m.indisponivel) return "<div class='indisp' role='note'><b>Condições: chuva indisponível.</b> " + esc(SEM_CHUVA) + (m.ultima_atualizacao ? " Última atualização conhecida: " + esc(Lg.formatInstant(m.ultima_atualizacao)) + "." : "") + "</div>";
     var horas = m.horas, altura = Lg.barHeights(horas.map(function (h) { return h.mm; }), 64, 5);
     return "<h2>Condições · chuva na cidade</h2><p class='small'>" + (m.total_na_janela_mm >= 1 ? "Chuva prevista de " + esc(Lg.mm(m.total_na_janela_mm)) + " no período do deslocamento." : "Sem chuva relevante prevista no período do deslocamento.") +
-      " " + esc(frase(a.escopo_da_chuva)) + " Fonte: Open-Meteo (análise do modelo e previsão)" + (f.emitido_em_utc ? ", emitida em " + esc(Lg.formatInstant(f.emitido_em_utc)) : "") + (f.idade_min != null ? "; atualizada há " + idadeTxt(f) + ", válida por até 6 h" + (f.obsoleta ? " (a fonte não respondeu na última tentativa: os dados podem estar defasados)" : "") : "") + ".</p>" +
+      " " + esc(frase(a.escopo_da_chuva)) + " Fonte: " + (/open-meteo/i.test(f.fonte || "") || !f.fonte ? "Open-Meteo (análise do modelo e previsão)" : esc(f.fonte)) + (f.emitido_em_utc ? ", emitida em " + esc(Lg.formatInstant(f.emitido_em_utc)) : "") + (f.idade_min != null ? "; atualizada há " + idadeTxt(f) + ", válida por até 6 h" + (f.obsoleta ? " (a fonte não respondeu na última tentativa: os dados podem estar defasados)" : "") : "") + ".</p>" +
       "<div class='chuva' role='img' aria-label='Chuva nas próximas horas'>" + horas.map(function (h, i) { return "<span class='" + (h.natureza === "previsto" ? "prev" : "") + "' style='height:" + Math.max(altura[i], 2) + "px' title='" + esc(Lg.hhmm(h.hora)) + ": " + esc(Lg.mm(h.mm)) + " (" + esc(h.natureza) + ")'></span>"; }).join("") + "</div>" +
       "<div class='horas'><span>" + esc(Lg.hhmm(horas[0].hora)) + "</span><span>" + esc(Lg.hhmm(horas[horas.length - 1].hora)) + "</span></div><p class='small'>Barras tracejadas: previsão. Cheias: horas passadas, que vêm da análise do modelo e não de um pluviômetro.</p>";
   }
@@ -510,7 +510,7 @@
       });
     }).catch(function () {});
   }
-  api("saude").then(function (s) { ui.servidor = s; if (s.status === "degradado") aviso("Os dados de chuva não estão disponíveis agora; as análises podem falhar."); })
+  api("saude").then(function (s) { ui.servidor = s; if (s.chuva && s.chuva.sintetica) aviso("DEMONSTRAÇÃO: a chuva e as ocorrências deste servidor são sintéticas, não dados do mundo real."); else if (s.status === "degradado") aviso("Os dados de chuva não estão disponíveis agora; as análises podem falhar."); })
     .catch(function () { aviso("Sem conexão com o servidor de análise. Seus lugares continuam aqui; a análise de rotas precisa de conexão."); });
   ir("planejar");
 })();

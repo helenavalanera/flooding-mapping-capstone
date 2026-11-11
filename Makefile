@@ -7,7 +7,7 @@ M  := $(PY) -m flooding_mapping
 
 .PHONY: all help downloads validar preparar cenarios suscetibilidade chuva \
         mobilidade robustez tipologia mapas criticidade abrir test coletar \
-        estado-dados estado-chuva estado-modelo estado-avaliacao estado-site estado rede servir
+        estado-dados estado-chuva estado-modelo estado-avaliacao estado-site estado rede servir demo
 
 all: downloads validar preparar cenarios suscetibilidade chuva mobilidade \
      robustez tipologia mapas  ## roda as etapas 1 a 10 em ordem
@@ -95,3 +95,6 @@ rede:  ## tabela de ruas de Porto Alegre para o servidor (data/processed/rede_po
 
 servir:  ## dashboard, PWA (/pwa/) e API em http://127.0.0.1:8000
 	$(M).servidor
+
+demo:  ## demonstração controlada (dados SINTÉTICOS em memória): painel em :8766 e PWA em :8766/pwa/
+	$(PY) -W ignore tests/e2e/servidor_demo.py --porta 8766 --avisar

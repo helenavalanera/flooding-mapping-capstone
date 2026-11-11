@@ -7,7 +7,8 @@ async function abrir(opts, semWebgl) {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, args: semWebgl ? ["--disable-gpu", "--disable-3d-apis", "--disable-webgl", "--disable-webgl2"] : ARGS });
   const ctx = await browser.newContext(opts);
   const page = await ctx.newPage(), erros = [];
-  page.setDefaultTimeout(90000);   // software WebGL (no GPU) renders the 3D map slowly
+  page.setDefaultTimeout(90000);
+  if (process.env.TRACE) for (const m of ["click", "fill", "selectOption", "waitForSelector", "waitForFunction", "goto"]) { const o = page[m].bind(page); page[m] = (...a) => { console.error(new Date().toISOString().slice(14, 23), m, String(a[0]).slice(0, 70)); return o(...a); }; }   // software WebGL (no GPU) renders the 3D map slowly
   page.on("console", (m) => { if (m.type() === "error" && !/tile\.openstreetmap|amazonaws|ERR_|Failed to load resource/.test(m.text())) erros.push(m.text().slice(0, 200)); });
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
   return { browser, ctx, page, erros };

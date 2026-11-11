@@ -451,7 +451,8 @@ class Servico:
     def saude(self) -> dict:
         try:
             _, meta = self.chuva.obter()
-            chuva = {"ok": True, "obsoleta": bool(meta.get("obsoleta")), "idade_min": meta.get("idade_min"), "atualizada_em_utc": meta.get("emitido_em_utc")}
+            chuva = {"ok": True, "obsoleta": bool(meta.get("obsoleta")), "idade_min": meta.get("idade_min"), "atualizada_em_utc": meta.get("emitido_em_utc"),
+                     "fonte": meta.get("fonte"), "sintetica": "SINTÉTIC" in str(meta.get("fonte", "")).upper()}
         except ChuvaIndisponivel as erro:
             chuva = {"ok": False, "obsoleta": None, "ultima_atualizacao": erro.ultima_atualizacao}
         except Exception:

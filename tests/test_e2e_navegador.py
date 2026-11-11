@@ -59,7 +59,7 @@ def servidor():
     proc.kill()
 
 
-@pytest.mark.parametrize("script", ["dashboard.js", "pwa.js", "sem_webgl.js"])
+@pytest.mark.parametrize("script", ["dashboard.js", "pwa.js", "sem_webgl.js", "jornada.js"])
 def test_the_interfaces_work_end_to_end_in_a_real_browser(servidor, script):
     r = rodar(script, servidor)
     assert r.returncode == 0, (r.stdout + r.stderr)[-1500:]

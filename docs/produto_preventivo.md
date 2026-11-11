@@ -120,6 +120,7 @@ Parâmetros em `config/analysis.yaml` (bloco `risco_trecho`); os sem base nos da
 * **Dias sinalizados sem registro:** em 2.863 dias (2019-01-01 a 2026-11-02), alguma via ficou em Atenção em 682 e em Alto em 305; só 4 dias
   têm bloqueio documentado. **Ausência de registro não é exemplo negativo**: não são falsos alertas comprovados, apenas dias que não se consegue conferir.
 * **Testes de sensibilidade** (`tests/test_sensibilidade_risco.py`): a ordem dos trechos e as classes mudam de forma previsível com chuva, corte e peso.
+* **Três conceitos separados:** *suscetibilidade espacial* (índice físico do terreno, relativo, não é probabilidade), *previsão temporal* (apenas a chuva futura e a regra explícita do fator) e *impacto na mobilidade* (rotas e simulação de fechamento). O produto os mantém distintos e não promove o conjunto a previsão de alagamento.
 * **Não há previsão viária validada.** Faltam ocorrências georreferenciadas suficientes. A Proveniência da interface mostra o que se pode e o que
   não se pode afirmar (nunca "rota segura" nem "alagamento previsto nesta rua").
 
@@ -198,9 +199,14 @@ ou extensão de lâmina d'água é desenhada.
 
 **Assistente no painel:** ao selecionar um trecho, uma rota, um município ou uma rodovia, uma seção expansível oferece as perguntas sugeridas e a pergunta livre, e declara se a resposta é texto padrão ou reformulada por provedor externo.
 
-**PWA** (`/pwa/`): etapas visíveis; a análise segue a ordem condições da chuva (com escopo regional, idade dos dados e aviso de que o passado é análise do modelo), resultado, rota e alternativas, trechos de atenção por via, explicação (quatro perguntas sugeridas com resposta curta, sem serviço externo, e a explicação contextualizada sob pedido); sem dados de chuva a tela diz que não há estimativa de risco;
-verificação dos trajetos habituais sob demanda (sem segundo plano nem notificações), estados vazios e de erro com ação, 3D opcional baixado só
-ao pedir, aviso de nova versão. Funciona inteira sem localização (pontos no mapa).
+**PWA** (`/pwa/`): o mapa é a tela. Um cartão escuro de orientação mostra a rota selecionada e o que há adiante (distância até o primeiro trecho de atenção
+e interdições consideradas; **sem instruções de manobra**, porque o backend não as fornece); uma barra lateral mostra onde a exposição estimada se
+concentra ao longo da rota; a folha inferior alterna entre o resumo (tempo, distância, chegada, indicador de exposição, situação dos dados, rotas
+em cartões) e os detalhes (condições com fonte e validade, trade-offs, trechos de atenção, ocorrências no trajeto, quatro perguntas sugeridas e a
+explicação contextualizada sob pedido), por botão e sem depender de arrastar. Controles flutuantes: localização, enquadrar rota, camadas e
+legenda, relatar. Ocorrências e interdições aparecem com símbolo e texto, não só cor. Sem dados de chuva a tela diz que não há estimativa de risco.
+Verificação dos trajetos habituais sob demanda (sem segundo plano nem notificações), 3D opcional baixado só ao pedir, aviso de nova versão,
+funciona inteira sem localização. Guia completo: [`guia_de_uso.md`](guia_de_uso.md). Origem e destino não são buscados por endereço (exigiria um geocodificador de terceiros).
 
 **Privacidade.** Lugares e trajetos só no aparelho; localização com consentimento explícito, uma posição por ação, em primeiro plano; o
 servidor guarda a análise 30 min em memória e a apaga ao iniciar outra ou fechar o app; sem log de acesso; o service worker nunca guarda a API.
@@ -208,7 +214,7 @@ servidor guarda a análise 30 min em memória e a apaga ao iniciar outra ou fech
 ## Testes
 
 ```
-pytest                       # lógica, contratos, serviço, servidor, cobertura, auditorias (498 testes automatizados, 1 ignorado por falta do boto3)
+pytest                       # lógica, contratos, serviço, servidor, cobertura, auditorias (resultados em docs/qa_relatorio_final.md)
 PLAYWRIGHT_CORE=... CHROME_PATH=... pytest tests/test_e2e_navegador.py
 ```
 
@@ -225,6 +231,7 @@ testes de navegador emulam tela e toque, e não substituem GPU, sensores e rede 
 
 ## Limitações e pendências
 
+* **Documentos relacionados:** [`demonstracao.md`](demonstracao.md) (cenário, roteiro e checklists), [`operacao_ocorrencias.md`](operacao_ocorrencias.md), [`seguranca_lgpd.md`](seguranca_lgpd.md), [`sintese_academica.md`](sintese_academica.md).
 * **Hospedagem:** nada foi publicado. O servidor roda em contêiner com um volume persistente (ver [`hospedagem.md`](hospedagem.md)); o GitHub Pages
   não executa Python. Para front-end hospedado fora, `CORS_ORIGEM` e `<meta name="api-base">`. Atrás de proxy, `PROXIES_CONFIAVEIS` define de quem
   se lê o `X-Forwarded-For`; sem ele o limite por cliente enxerga um só endereço.
