@@ -31,7 +31,7 @@ make servir   # http://127.0.0.1:8000/  dashboard  |  /pwa/  mobilidade preventi
 ```
 
 O risco por trecho é um **baseline determinístico, sem validação em vias**; o roteamento e o risco por trecho existem só em Porto Alegre.
-Arquitetura, cobertura, API, privacidade, testes e pendências: [`docs/produto_preventivo.md`](docs/produto_preventivo.md).
+Arquitetura, cobertura, API, privacidade, testes e pendências: [`docs/produto_preventivo.md`](docs/produto_preventivo.md). Hospedagem (nada publicado): [`docs/hospedagem.md`](docs/hospedagem.md). Provedor de linguagem em chamadas reais: [`docs/validacao_gemini.md`](docs/validacao_gemini.md).
 
 ## Escopo estadual (RS): gatilho de risco, impacto e interface
 
