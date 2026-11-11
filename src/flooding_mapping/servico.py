@@ -421,8 +421,8 @@ class Servico:
         return bool(self.token_operador) and hmac.compare_digest(token or "", self.token_operador)
 
     def mudar_situacao(self, id_: str, dados: dict) -> dict:
-        return self.store.mudar_situacao(id_, dados.get("situacao"), por=str(dados.get("por") or "operador")[:40],
-                                         evidencia=dados.get("evidencia", ""), confiabilidade=dados.get("confiabilidade"))
+        return self.store.mudar_situacao(id_, dados.get("situacao"), por=str(dados.get("por") or "operador")[:40], evidencia=dados.get("evidencia", ""),
+                                         confiabilidade=dados.get("confiabilidade"), impacto=dados.get("impacto_circulacao"), severidade=dados.get("severidade"))
 
     # ------------------------------------------------------------------ territórios
     def territorios(self) -> dict:

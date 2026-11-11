@@ -21,7 +21,6 @@ from collections.abc import Callable
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-import geopandas as gpd
 import pandas as pd
 
 from ..config import resolve
@@ -170,6 +169,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-cost", type=float, default=9000,
                         help="stop after this much API cost (free daily limit is 10,000)")
     args = parser.parse_args(argv)
+    import geopandas as gpd  # only the download job needs it; the server imports this module for ``request`` and must stay light
+
     towns = gpd.read_parquet(resolve("data/interim/municipios.parquet"))[["ibge", "lat", "lon"]]
     end = (date.fromisoformat(args.end) if args.end
            else date.today() - timedelta(days=ARCHIVE_LAG_DAYS))

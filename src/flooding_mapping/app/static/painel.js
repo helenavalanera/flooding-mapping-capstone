@@ -378,10 +378,11 @@
   }
   function revisar(id) {
     el("oc-revisao").innerHTML = "<div class='card'><h3>Revisar ocorrência (operador)</h3><div class='form-linha'><label>Nova situação<select id='rv-sit'><option value='confirmada'>Confirmar</option><option value='descartada'>Descartar</option></select></label>" +
-      "<label>Confiabilidade<select id='rv-conf'><option value='alta'>alta</option><option value='media'>média</option><option value='baixa'>baixa</option></select></label></div>" +
+      "<label>Confiabilidade<select id='rv-conf'><option value='alta'>alta</option><option value='media'>média</option><option value='baixa'>baixa</option></select></label>" +
+      "<label>Impacto na circulação<select id='rv-imp'><option value='interdicao'>interdição (bloqueia o trecho nas rotas)</option><option value='parcial'>parcial (só eleva o risco)</option><option value='nenhum'>nenhum</option><option value='desconhecido'>desconhecido</option></select></label></div>" +
       "<label>Evidência (mín. 10 caracteres)<br><textarea id='rv-ev' rows='3' cols='60' maxlength='280'></textarea></label><p><button class='btn' id='rv-ok'>Registrar</button> <span id='rv-msg' class='small'></span></p></div>";
     el("rv-ok").addEventListener("click", function () {
-      api("ocorrencias/" + encodeURIComponent(id), { method: "POST", credencial: st.credencial, body: { situacao: el("rv-sit").value, confiabilidade: el("rv-conf").value, evidencia: el("rv-ev").value } })
+      api("ocorrencias/" + encodeURIComponent(id), { method: "POST", credencial: st.credencial, body: { situacao: el("rv-sit").value, confiabilidade: el("rv-conf").value, impacto_circulacao: el("rv-imp").value, evidencia: el("rv-ev").value } })
         .then(function () { ocorrencias(); }).catch(function (e) { el("rv-msg").textContent = e.message; });
     });
   }

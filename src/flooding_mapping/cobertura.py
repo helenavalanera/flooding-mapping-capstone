@@ -17,13 +17,15 @@ from __future__ import annotations
 import argparse
 import json
 from datetime import date
+from typing import TYPE_CHECKING
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 
 from .config import load_config, resolve
-from .ingestion import s2id
+
+if TYPE_CHECKING:   # geopandas is needed only to BUILD the state coverage; the server imports this module and stays light
+    import geopandas as gpd
 
 ESTADOS = ("disponivel", "parcial", "indisponivel")
 CLASSES = ("disponivel", "parcial", "insuficiente")
@@ -72,6 +74,8 @@ def classificar(km: float, km_indice: float, km_vdm: float, s2id_total: int | No
 
 def municipio_do_segmento(segmentos: gpd.GeoDataFrame, towns: gpd.GeoDataFrame) -> pd.Series:
     """Municipality (ibge) whose polygon contains the midpoint of each segment; ``segmento_id`` -> ibge."""
+    import geopandas as gpd
+
     meio = segmentos.set_index("segmento_id").geometry.interpolate(0.5, normalized=True)
     pontos = gpd.GeoDataFrame(index=meio.index, geometry=meio.values, crs=segmentos.crs).to_crs(towns.crs)
     dentro = gpd.sjoin(pontos, towns[["ibge", "geometry"]], predicate="within")
@@ -101,6 +105,8 @@ def tabela_de_segmentos(segmentos: gpd.GeoDataFrame, trechos: pd.DataFrame, indi
 
 def por_municipio(tabela: pd.DataFrame, towns: pd.DataFrame, records: pd.DataFrame, minimos: dict, ate: pd.Timestamp) -> dict:
     """Coverage and context of every municipality, including those with no mapped road (reported as insufficient)."""
+    from .ingestion import s2id
+
     hidro = records[records["cobrade"].isin(s2id.HYDRO_BROAD)]
     total = hidro.groupby("ibge").size()
     recente = hidro[hidro["data_evento"] >= ate - pd.Timedelta(days=90)].groupby("ibge").size()
@@ -170,6 +176,8 @@ def montar(config: dict, resumo_rs: dict | None, poa: dict | None, gerado_em: st
 
 
 def main() -> None:
+    import geopandas as gpd
+
     argparse.ArgumentParser(description="Cobertura dos territórios (RS e Porto Alegre)").parse_args()
     config = {**load_config(), **yaml_territorios()}
     minimos = config["classificacao"]

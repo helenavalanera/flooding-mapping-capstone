@@ -103,3 +103,17 @@ def test_retention_rewrites_the_file_aside_and_leaves_no_temporary_file(tmp_path
     novo = store.relato(PONTO)
     assert store.expirar(90) == 1 and [p.name for p in tmp_path.iterdir()] == ["o.jsonl"]
     assert [r["id"] for r in oc.Ocorrencias(caminho).listar()] == [novo["id"]]
+
+
+def test_the_operator_declares_the_impact_when_reviewing_and_only_then_can_a_report_close_a_segment():
+    store = oc.Ocorrencias()
+    r = store.relato(PONTO)                                                     # a report never says "interdicao" by itself
+    assert r["impacto_circulacao"] == "desconhecido"
+    store.mudar_situacao(r["id"], "confirmada", por="operador", evidencia="Guarda municipal no local, via fechada")
+    assert store.interdicoes(72) == []                                         # confirmed, but nobody said it is a closure
+    r2 = store.relato(PONTO)
+    c = store.mudar_situacao(r2["id"], "confirmada", por="operador", evidencia="Guarda municipal no local, via fechada", impacto="interdicao", severidade="alta")
+    assert [i["id"] for i in store.interdicoes(72)] == [r2["id"]] and c["impacto_circulacao"] == "interdicao" and c["severidade"] == "alta"
+    assert c["historico"][-1]["campos"] == {"impacto_circulacao": "interdicao", "severidade": "alta"}      # the decision is on the record
+    with pytest.raises(ValueError, match="impacto_circulacao"):
+        store.mudar_situacao(store.relato(PONTO)["id"], "confirmada", por="operador", evidencia="Guarda municipal no local, via fechada", impacto="bloqueado")

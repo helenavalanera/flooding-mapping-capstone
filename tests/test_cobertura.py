@@ -47,7 +47,8 @@ def mundo():
 
 
 def test_municipal_and_highway_coverage_are_computed_by_length_and_leave_planned_roads_out(monkeypatch):
-    monkeypatch.setattr(cb.s2id, "HYDRO_BROAD", (1,))
+    from flooding_mapping.ingestion import s2id
+    monkeypatch.setattr(s2id, "HYDRO_BROAD", (1,))
     segmentos, trechos, towns, impacto, records = mundo()
     tabela = cb.tabela_de_segmentos(segmentos, trechos, {"a", "c"}, impacto, towns)
     assert set(tabela["segmento_id"]) == {"a", "b", "c", "d"}                          # "e" is planned

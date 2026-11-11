@@ -149,7 +149,9 @@ class Ocorrencias:
         return self.registrar(dados, fonte="usuario", origem=origem, situacao="reportada", confiabilidade="baixa")
 
     def mudar_situacao(self, id_: str, nova: str, por: str, evidencia: str,
-                       confiabilidade: str | None = None) -> dict:
+                       confiabilidade: str | None = None, impacto: str | None = None, severidade: str | None = None) -> dict:
+        """An operator's decision on a record. Besides the new status, the operator states the impact on circulation and the
+        severity found on review: a report cannot declare its own closure, and only ``confirmada`` + ``interdicao`` closes a segment."""
         nova = _escolha(nova, SITUACOES, "situacao", "")
         evidencia = _texto(evidencia, "evidencia", MAX_TEXT)
         if len(evidencia) < 10:
@@ -162,10 +164,16 @@ class Ocorrencias:
             if atual == "descartada" or nova == atual or (atual == "confirmada" and nova == "reportada"):
                 raise ValueError(f"transição inválida: {atual} -> {nova}")
             agora_iso = agora().strftime("%Y-%m-%dT%H:%M:%SZ")
-            registro = {**registro, "situacao": nova, "atualizado_em": agora_iso,
+            campos = {}
+            if impacto is not None:
+                campos["impacto_circulacao"] = _escolha(impacto, IMPACTOS, "impacto_circulacao", "desconhecido")
+            if severidade is not None:
+                campos["severidade"] = _escolha(severidade, SEVERIDADES, "severidade", "desconhecida")
+            registro = {**registro, **campos, "situacao": nova, "atualizado_em": agora_iso,
                         "confiabilidade": _escolha(confiabilidade, CONFIABILIDADES, "confiabilidade", registro["confiabilidade"]),
                         "historico": registro["historico"] + [
-                            {"em": agora_iso, "de": atual, "para": nova, "por": _texto(por, "por", 40), "evidencia": evidencia}]}
+                            {"em": agora_iso, "de": atual, "para": nova, "por": _texto(por, "por", 40), "evidencia": evidencia,
+                             **({"campos": campos} if campos else {})}]}
             self._registros[id_] = registro
             self._gravar(registro)
         return registro

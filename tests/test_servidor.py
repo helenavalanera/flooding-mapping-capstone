@@ -299,3 +299,34 @@ def test_the_api_answers_503_with_the_last_update_when_the_rain_data_is_down(api
         assert requests.post(base + "/api/rotas", json=CORPO).json()["alerta"]["nivel"] == "sem_dados"
     finally:
         servidor.shutdown()
+
+
+def test_the_whole_operator_flow_over_http_ends_with_the_route_avoiding_the_closed_segment_and_survives_a_restart(api, tmp_path):
+    import pandas as pd
+    from flooding_mapping import ocorrencias as oc
+    from test_servico import montar as montar_servico
+    arquivo = tmp_path / "ocorrencias.jsonl"
+    base, servico, rede = api(token="credencial-do-operador-longa-o-bastante", store=oc.Ocorrencias(arquivo), mm_h=0.0)
+    from flooding_mapping.chuva_horaria import ChuvaHoraria
+    from flooding_mapping.risco_trecho import agora_local
+    servico.relogio = agora_local                                                  # a report is stamped with the real clock: so is the service now
+    agora = agora_local().floor("h")
+    seca = pd.Series(0.0, index=pd.date_range(agora - pd.Timedelta(days=5), agora + pd.Timedelta(days=3), freq="h"))
+    servico.chuva = ChuvaHoraria(0, 0, fonte=lambda a, b: (seca, {"fonte": "teste", "emitido_em_utc": "2026-01-01T00:00:00Z"}))
+    CORPO = {"origem": {"lon": O[0], "lat": O[1]}, "destino": {"lon": D[0], "lat": D[1]}, "modal": "carro"}   # departs now
+    antes = requests.post(base + "/api/rotas", json=CORPO).json()
+    habitual = lambda a: [str(servico.rede.ids[e]) for e in servico._analise(a["analise_id"])[2]["habitual"]["arestas"]]
+    assert habitual(antes) == ["S0", "S1"]
+    i = rede.indices(["S1"])[0]
+    rel = requests.post(base + "/api/relatos", json={"texto": "alagou", "lon": float(rede.no_lon[rede.u[i]]), "lat": float(rede.no_lat[rede.u[i]])}).json()
+    assert rel["situacao"] == "reportada" and habitual(requests.post(base + "/api/rotas", json=CORPO).json()) == ["S0", "S1"]       # a report closes nothing
+    corpo = {"situacao": "confirmada", "evidencia": "Guarda municipal no local, via fechada ao trânsito", "impacto_circulacao": "interdicao"}
+    assert requests.post(base + f"/api/ocorrencias/{rel['id']}", json=corpo).status_code == 403                                      # the public cannot confirm
+    assert requests.post(base + f"/api/ocorrencias/{rel['id']}", json=corpo, headers={"Authorization": "Bearer credencial-do-operador-longa-o-bastante"}).status_code == 200
+    # the segment is named by the position of the report, which is on a node of S1 and so also touches S0: both are closed here
+    depois = requests.post(base + "/api/rotas", json=CORPO).json()
+    assert depois["interdicoes_consideradas"] >= 1 and "S1" not in habitual(depois)
+    # a restart: a new store over the same file brings the confirmed record, with its history, and the closure keeps working
+    reaberto = oc.Ocorrencias(arquivo)
+    assert [r["situacao"] for r in reaberto.listar()] == ["confirmada"] and [h["para"] for h in reaberto.obter(rel["id"])["historico"]] == ["reportada", "confirmada"]
+    assert [x["id"] for x in reaberto.interdicoes(72, pd.Timestamp(oc.agora()).to_pydatetime())] == [rel["id"]]
