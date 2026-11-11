@@ -50,7 +50,7 @@ nas respostas são, portanto, do cenário de teste, **não** dados do mundo.
 ## O que não foi validado
 
 - **Volume e custo reais:** não há medição de uso sustentado, nem de cota diária, nem de custo mensal.
-- **Qualidade linguística ampla:** a amostra é pequena (as quatro perguntas sugeridas e três perguntas livres). Não há avaliação
+- **Qualidade linguística ampla:** a amostra é pequena (as perguntas sugeridas e duas perguntas livres). Não há avaliação
   por pessoas, e a validação automática garante formato, tamanho e palavras proibidas, não clareza nem exatidão dos números.
 - **Falha do provedor em produção:** o caminho de erro é coberto por testes automatizados (`tests/test_linguagem.py`), mas
   indisponibilidade prolongada do serviço não foi observada.
