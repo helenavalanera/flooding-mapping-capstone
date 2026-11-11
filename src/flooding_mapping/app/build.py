@@ -24,7 +24,7 @@ from ..inference import forecast as inference
 from .layers import BUILD_DATA, STATIC_DATA
 
 STATIC = Path(__file__).parent / "static"
-ASSETS = ("index.html", "app.js", "painel.js", "territorio.js", "mapa.js", "logic.js", "style.css")
+ASSETS = ("index.html", "painel.js", "territorio.js", "mapa.js", "mapa2d.js", "logic.js", "style.css")
 SOURCE_BLOCKAGES = "CPRv BM, bloqueios ativos (api pública), consulta no momento da publicação"
 
 

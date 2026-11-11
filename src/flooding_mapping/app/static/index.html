@@ -37,7 +37,7 @@
 
   <div id="vista-mapa" class="vista" role="tabpanel" aria-label="Mapa" hidden>
     <div id="mapa-3d" class="mapa-layout">
-      <div id="mapa-gl" role="application" aria-label="Mapa interativo com relevo. Use as setas para mover, Shift com as setas para girar e inclinar."></div>
+      <div id="mapa-gl" role="application" aria-label="Mapa interativo. Use as setas para mover; no mapa 3D, Shift com as setas gira e inclina."></div>
       <aside id="painel-mapa" aria-label="Controles, legenda e informações do mapa">
         <section id="contexto" aria-live="polite" aria-labelledby="h-contexto">
           <h2 id="h-contexto">Seleção</h2>
@@ -64,38 +64,8 @@
           </div>
         </section>
         <section aria-labelledby="h-legenda"><h2 id="h-legenda">Legenda</h2><ul class="legend" id="legenda-gl"></ul></section>
-        <p class="small"><button type="button" class="link" id="btn-classico">Usar o mapa clássico (2D, sem WebGL)</button></p>
+        <p class="small"><button type="button" class="link" id="btn-motor">Usar o mapa 2D simples (sem WebGL)</button></p>
       </aside>
-    </div>
-
-    <!-- Mapa clássico: alternativa 2D (Leaflet), também usada quando o navegador não tem WebGL. -->
-    <div id="mapa-classico" hidden>
-      <p class="small classico-topo"><span class="badge" id="status-badge">experimental</span> <strong id="updated">carregando…</strong>
-        <button type="button" class="link" id="btn-3d">Voltar ao mapa 3D</button></p>
-      <div class="layout">
-        <div id="map" role="application" aria-label="Mapa do Rio Grande do Sul com o risco estimado por município"></div>
-        <aside id="panel" aria-label="Controles e informações">
-          <section aria-labelledby="h-day">
-            <h2 id="h-day">Dia</h2>
-            <div id="days" role="radiogroup" aria-label="Dia da estimativa"></div>
-          </section>
-          <section aria-labelledby="h-layers">
-            <h2 id="h-layers">Camadas</h2>
-            <label><input type="checkbox" id="l-risk" checked> Risco municipal <em>(estimativa do modelo)</em></label>
-            <label><input type="checkbox" id="l-block" checked> Bloqueios ativos <em>(observado, CPRv BM)</em></label>
-            <label><input type="checkbox" id="l-occ"> Ocorrências recentes <em>(observado, S2iD)</em></label>
-            <label><input type="checkbox" id="l-road"> Rodovias por tráfego VDM <em>(DAER)</em></label>
-            <label><input type="checkbox" id="l-crit"> Trechos críticos <em>(simulação)</em></label>
-          </section>
-          <section aria-labelledby="h-legend"><h2 id="h-legend">Legenda</h2><ul class="legend" id="legend"></ul></section>
-          <section id="detail" aria-live="polite" aria-labelledby="h-detail">
-            <h2 id="h-detail">Município</h2>
-            <p class="muted">Clique em um município no mapa.</p>
-          </section>
-          <section id="model" aria-labelledby="h-model"><h2 id="h-model">Modelo</h2></section>
-          <section id="limits" aria-labelledby="h-limits"><h2 id="h-limits">Limites</h2></section>
-        </aside>
-      </div>
     </div>
   </div>
 
@@ -112,7 +82,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
   <script src="logic.js"></script>
   <script src="territorio.js"></script>
-  <script src="app.js"></script>
+  <script src="mapa2d.js"></script>
   <script src="mapa.js"></script>
   <script src="painel.js"></script>
 </body>

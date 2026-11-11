@@ -56,7 +56,7 @@ def make_site(tmp_path, blockages="default"):
 
 def test_site_has_the_page_the_data_and_no_jekyll_marker(tmp_path):
     out, published = make_site(tmp_path)
-    for name in ("index.html", "app.js", "logic.js", "style.css", "previsao_72h.json", "bloqueios.json",
+    for name in ("index.html", "mapa2d.js", "logic.js", "style.css", "previsao_72h.json", "bloqueios.json",
                  ".nojekyll", "data/municipios.geojson", "data/rodovias.geojson", "data/ocorrencias.json", "data/impacto_rs.json"):
         assert (out / name).exists(), name
     assert published["previsao"] and published["municipios"] == 3 and published["bloqueios"] == 1
@@ -66,9 +66,12 @@ def test_every_file_the_page_loads_exists_in_the_site(tmp_path):
     out, _ = make_site(tmp_path)
     html = (out / "index.html").read_text()
     local = [m for m in re.findall(r'(?:src|href)="([^"]+)"', html) if not m.startswith(("http", "data:"))]
-    assert {"style.css", "logic.js", "app.js", "painel.js"} <= set(local) and all((out / m).exists() for m in local)
-    js = (out / "app.js").read_text()
-    for name in re.findall(r'getJson\((?:DATA \+ )?"([^"]+)"', js):
+    assert {"style.css", "logic.js", "mapa.js", "mapa2d.js", "painel.js"} <= set(local) and all((out / m).exists() for m in local)
+    assert "app.js" not in local
+    js = (out / "territorio.js").read_text()
+    for name in re.findall(r'getJson\("([^"]+)"', js):
+        if name.startswith("api/"):
+            continue  # server endpoints: optional, the static page works without them
         assert (out / name).exists() or (out / "data" / name).exists(), name
 
 
@@ -104,9 +107,9 @@ def test_nothing_secret_reaches_the_published_site(tmp_path):
 
 
 def test_free_text_from_the_source_is_escaped_by_the_page_not_trusted():
-    js = (build.STATIC / "app.js").read_text()
-    assert "Lg.esc(b.informacoes" in js and "innerHTML" in js
-    assert "Lg.esc(" in js and js.count("Lg.esc(") > 20
+    js = (build.STATIC / "mapa2d.js").read_text() + (build.STATIC / "painel.js").read_text()
+    assert "innerHTML" in js and js.count("Lg.esc(") > 20
+    assert "bindTooltip(window.Logic.esc(" in js
 
 
 def test_the_site_refuses_a_model_that_its_card_does_not_document():

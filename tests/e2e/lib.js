@@ -3,8 +3,8 @@ const assert = require("assert");
 const { chromium } = require(process.env.PLAYWRIGHT_CORE);
 const BASE = process.env.BASE_URL || "http://127.0.0.1:8766/";
 const ARGS = ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"];   // WebGL without a GPU
-async function abrir(opts) {
-  const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, args: ARGS });
+async function abrir(opts, semWebgl) {
+  const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, args: semWebgl ? ["--disable-gpu", "--disable-3d-apis", "--disable-webgl", "--disable-webgl2"] : ARGS });
   const ctx = await browser.newContext(opts);
   const page = await ctx.newPage(), erros = [];
   page.setDefaultTimeout(90000);   // software WebGL (no GPU) renders the 3D map slowly

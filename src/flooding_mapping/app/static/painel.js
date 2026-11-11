@@ -5,7 +5,7 @@
   "use strict";
   var Lg = window.Logic, T = window.Territorio, L_ = window.L;
   var ABAS = ["geral", "mapa", "previsao", "mobilidade", "ocorrencias", "proveniencia"];
-  var st = { aba: "geral", mob: { pontos: {}, camadas: [] }, credencial: "", ultima: null, classico: false };
+  var st = { aba: "geral", mob: { pontos: {}, camadas: [] }, credencial: "", ultima: null };
   var CAP_NOME = { limites_territoriais: "Limites territoriais", malha_rodoviaria: "Malha rodoviária", meteorologia: "Meteorologia", ocorrencias: "Ocorrências e bloqueios",
                    caracteristicas_fisicas: "Características físicas", mobilidade_simulada: "Mobilidade simulada", relevo_3d: "Relevo em 3D", risco_por_trecho: "Risco por trecho", rotas: "Rotas" };
 
@@ -236,26 +236,19 @@
     }).catch(function (e) { fail(alvo, e); });
   }
 
-  /* ---------------------------------------------------------------- mapa (3D por padrão; clássico como alternativa 2D) */
+  /* ---------------------------------------------------------------- mapa (3D com WebGL; 2D simples sem WebGL, com as mesmas funções) */
   function abrirMapa() {
-    var gl = window.Mapa && window.Mapa.webglOk();
-    if (!gl || st.classico) return abrirClassico(!gl ? "Este navegador não oferece WebGL: usando o mapa clássico (2D)." : "");
-    el("mapa-3d").hidden = false; el("mapa-classico").hidden = true;
     window.Mapa.iniciar().then(function () {
       window.Mapa.redimensionar();
       if (T.atual === "poa") window.Mapa.recarregarPoa();
       if (st.rotasNoMapa) { var a = st.rotasNoMapa; st.rotasNoMapa = null; window.Mapa.mostrarRotas(a, "habitual"); }
       if (st.foco) { var f = st.foco; st.foco = null; window.Mapa.focarMunicipio(f); }
-    }).catch(function (e) { abrirClassico("Não foi possível iniciar o mapa 3D (" + e.message + "): usando o mapa clássico (2D)."); });
+    }).catch(function (e) {
+      if (window.Mapa.motorNome === "gl") { window.Mapa.trocarMotor(true).then(function () { window.Mapa.redimensionar(); }).catch(function (x) { aviso("Não foi possível iniciar o mapa: " + x.message); }); aviso("O mapa 3D não pôde iniciar (" + e.message + "): usando o mapa 2D simples."); }
+      else aviso("Não foi possível iniciar o mapa: " + e.message);
+    });
   }
-  function abrirClassico(aviso) {
-    st.classico = true;
-    el("mapa-3d").hidden = true; el("mapa-classico").hidden = false;
-    var b = el("banner"); b.textContent = aviso || ""; b.hidden = !aviso;
-    if (T.atual === "poa") { b.textContent = "O mapa clássico mostra só o Rio Grande do Sul. Para Porto Alegre, use o mapa 3D/2D (precisa de WebGL) ou a aba Mobilidade."; b.hidden = false; }
-    window.iniciarMapaClassico();
-    setTimeout(function () { window.FloodingMap && window.FloodingMap.invalidateSize(); }, 0);
-  }
+  function aviso(t) { var b = el("banner"); b.textContent = t; b.hidden = !t; }
 
   /* ---------------------------------------------------------------- mobilidade */
   var mobMap = null;
@@ -319,7 +312,7 @@
       out.innerHTML = "<div class='alerta " + Lg.esc(a.alerta.nivel) + "'><h3>" + Lg.esc(a.alerta.titulo) + " " + Lg.kindBadge("previsto") + "</h3><p>" + Lg.esc(a.alerta.texto) + "</p>" + (a.alerta.motivos.length ? ul(a.alerta.motivos.map(Lg.esc)) : "") + "</div>" +
         "<div class='rolagem'><table><thead><tr><th>Rota</th><th>Tempo</th><th>Diferença</th><th>Exposição estimada</th><th>Km em Atenção/Alto</th><th>Trajeto sem dado de terreno</th><th>Pico</th></tr></thead><tbody>" + linhas + "</tbody></table></div>" +
         "<p class='small'>Chuva na janela da viagem: " + Lg.mm(a.meteo.total_na_janela_mm) + ". Interdições confirmadas consideradas: " + a.interdicoes_consideradas + ".</p>" +
-        "<p><button class='btn sec' id='mob-explicar'>Explicar com mais contexto</button> " + (window.Mapa && window.Mapa.webglOk() ? "<button class='btn sec' id='mob-3d'>Ver as rotas no mapa 3D</button>" : "") + " <span id='mob-explicacao'></span></p>" +
+        "<p><button class='btn sec' id='mob-explicar'>Explicar com mais contexto</button> " + "<button class='btn sec' id='mob-3d'>Ver as rotas no mapa grande</button>" + " <span id='mob-explicacao'></span></p>" +
         "<details><summary>Trechos de atenção da rota habitual</summary>" + ul(Lg.groupStretches(a.rotas.habitual.trechos_de_risco).map(function (t) { return Lg.esc(t.nome) + " · " + (t.classe === "alto" ? "Alto" : "Atenção") + " · " + Lg.km(t.km) + " · passagem " + Lg.hhmm(t.inicio) + "–" + Lg.hhmm(t.fim); })) + "</details>" + ul(a.avisos.map(Lg.esc), "plain small");
       el("mob-explicar").addEventListener("click", function () {
         var alvo = el("mob-explicacao"); alvo.textContent = "consultando…";
@@ -423,8 +416,6 @@
   window.Painel = { contextoMunicipio: contextoMunicipio, contextoRodovia: contextoRodovia, segmento: segmento };
   Array.prototype.forEach.call(document.querySelectorAll("#abas button"), function (b) { b.addEventListener("click", function () { show(b.dataset.aba); }); });
   Array.prototype.forEach.call(document.querySelectorAll("#territorios button"), function (b) { b.addEventListener("click", function () { T.definir(b.dataset.territorio); }); });
-  el("btn-classico").addEventListener("click", function () { st.classico = true; abrirMapa(); });
-  el("btn-3d").addEventListener("click", function () { st.classico = false; el("banner").hidden = true; abrirMapa(); });
   T.aoMudar(function (id) {
     marcarTerritorio();
     if (window.Mapa && window.Mapa.pronto) window.Mapa.irParaTerritorio(id);
