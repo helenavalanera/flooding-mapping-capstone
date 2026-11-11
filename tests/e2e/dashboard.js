@@ -40,6 +40,18 @@ const { assert, abrir, BASE, semTransbordo, pontoDe } = require("./lib");
   await page.mouse.click(mb.x + mb.width / 2 + 30, mb.y + mb.height / 2 + 80); await page.mouse.click(mb.x + mb.width / 2 + 190, mb.y + mb.height / 2 - 70);
   await page.fill("#mob-saida", new Date(Date.now() - new Date().getTimezoneOffset() * 60000 + 3.5 * 3600000).toISOString().slice(0, 16)); await page.click("#mob-analisar");
   await page.waitForSelector("#mob-resultado table", { timeout: 60000 }); assert.match(await page.innerText("#mob-resultado"), /exposição estimada/);
+  // estado de interface sem chuva: a resposta real da análise, com a meteorologia marcada como indisponível no formato que o servidor produz
+  // (a produção desse formato é coberta em tests/test_servico.py). Aqui só se confere o que a tela diz.
+  await page.route("**/api/rotas", async (route) => {
+    const r = await route.fetch(), j = await r.json();
+    j.meteo = { indisponivel: true, ultima_atualizacao: "2026-11-10T09:00:00Z", total_na_janela_mm: null, maximo_hora_mm: null, horas: [] };
+    j.alerta = { nivel: "sem_dados", titulo: "Sem dados meteorológicos", texto: "A meteorologia está indisponível agora.", motivos: [] };
+    await route.fulfill({ response: r, json: j });
+  });
+  await page.click("#mob-analisar"); await page.waitForSelector("#mob-resultado .alerta.sem_dados", { timeout: 60000 });
+  assert.match(await page.innerText("#mob-resultado"), /Chuva indisponível[\s\S]*não significa rota sem risco/); await page.unroute("**/api/rotas");
+  await page.click("#mob-analisar"); await page.waitForSelector("#mob-resultado .alerta:not(.sem_dados)", { timeout: 60000 });
+
   await page.click("#mob-3d"); await page.waitForFunction(() => window.Mapa.rotas, null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => window.Mapa.map.getSource("rotas")._data.features.length) >= 2, "rotas destacadas no mapa");
   // áreas por território: o que não existe diz que não existe

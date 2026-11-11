@@ -50,3 +50,16 @@ dialog { border:1px solid var(--line); border-radius:14px; max-width:92vw; backg
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
 
 .verif .item { display:block; }
+
+/* Condições e explicação: mesma linguagem do painel (vidro, cantos grandes), sem depender de desfoque */
+:root { --vidro:rgba(255,255,255,.78); --seg:rgba(110,125,138,.16); }
+@media (prefers-color-scheme: dark) { :root { --vidro:rgba(24,34,41,.74); --seg:rgba(255,255,255,.1); } }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { :root { --vidro:rgba(255,255,255,.97); } @media (prefers-color-scheme: dark) { :root { --vidro:rgba(24,34,41,.97); } } }
+header { position:sticky; top:0; z-index:500; background:var(--vidro); -webkit-backdrop-filter:blur(20px) saturate(1.5); backdrop-filter:blur(20px) saturate(1.5); }
+#mapa { border-radius:20px; isolation:isolate; }
+.card, .decisao, .trecho { border-radius:18px; }
+.indisp { border-left:4px solid #8d99a0; background:#eef1f3; color:#37434b; padding:10px 12px; margin:10px 0; font-size:.9rem; border-radius:12px; }
+@media (prefers-color-scheme: dark) { .indisp { background:#242e34; color:#d3dbe0; } }
+.decisao.sem_dados { border-color:#8d99a0; }
+.perguntas { display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px; }
+.explica { padding:10px 14px; border-radius:16px; background:var(--seg); } .explica:empty { display:none; } .explica p { margin:4px 0; }

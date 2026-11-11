@@ -192,32 +192,45 @@
       .then(function () { var b = el("analisar"); if (b) b.disabled = false; });
   }
 
-  /* 5-7 · resultado: the alert first, then the comparison, the stretches of attention, the weather and the explanation. */
+  /* 5-7 · result, in the order a person decides: the conditions, the verdict, the routes and alternatives, the stretches of attention,
+     then the explanation (short answers to suggested questions, and the longer one on request). */
+  var SEM_CHUVA = "Chuva indisponível agora: não há estimativa de risco para este deslocamento, e isso não significa rota sem risco. Consulte os alertas oficiais.";
+  function condicoesDaAnalise(a) {
+    var m = a.meteo, f = a.fonte_chuva || {};
+    if (m.indisponivel) return "<div class='indisp' role='note'><b>Condições: chuva indisponível.</b> " + esc(SEM_CHUVA) + (m.ultima_atualizacao ? " Última atualização conhecida: " + esc(Lg.formatInstant(m.ultima_atualizacao)) + "." : "") + "</div>";
+    var horas = m.horas, altura = Lg.barHeights(horas.map(function (h) { return h.mm; }), 64, 5);
+    return "<h2>Condições · chuva na cidade</h2><p class='small'>" + (m.total_na_janela_mm >= 1 ? "Chuva prevista de " + esc(Lg.mm(m.total_na_janela_mm)) + " no período do deslocamento." : "Sem chuva relevante prevista no período do deslocamento.") +
+      " " + esc(a.escopo_da_chuva || "") + (f.idade_min != null ? " Atualizada há " + (f.idade_min < 90 ? f.idade_min + " min" : Math.round(f.idade_min / 60) + " h") + (f.obsoleta ? " (a fonte não respondeu na última tentativa: os dados podem estar defasados)" : "") + "." : "") + "</p>" +
+      "<div class='chuva' role='img' aria-label='Chuva nas próximas horas'>" + horas.map(function (h, i) { return "<span class='" + (h.natureza === "previsto" ? "prev" : "") + "' style='height:" + Math.max(altura[i], 2) + "px' title='" + esc(Lg.hhmm(h.hora)) + ": " + esc(Lg.mm(h.mm)) + " (" + esc(h.natureza) + ")'></span>"; }).join("") + "</div>" +
+      "<div class='horas'><span>" + esc(Lg.hhmm(horas[0].hora)) + "</span><span>" + esc(Lg.hhmm(horas[horas.length - 1].hora)) + "</span></div><p class='small'>Barras tracejadas: previsão. Cheias: horas passadas, que vêm da análise do modelo e não de um pluviômetro.</p>";
+  }
   function mostrar(a) {
     var out = el("resultado"), nomes = ["habitual", "menor_exposicao", "alternativa"].filter(function (n) { return a.rotas[n]; });
     var numero = 0, titulos = {}; nomes.forEach(function (n) { titulos[n] = n === "habitual" ? "Rota habitual" : "Alternativa " + (++numero); });
-    var nivel = a.alerta.nivel, selo = { alto: "Alta exposição estimada", atencao: "Atenção", sem_risco_estimado: "Sem exposição relevante" }[nivel] || "Atenção";
-    var horas = a.meteo.horas, altura = Lg.barHeights(horas.map(function (h) { return h.mm; }), 64, 5), sel = a.rotas[ui.selecionada];
+    var nivel = a.alerta.nivel, selo = { alto: "Alta exposição estimada", atencao: "Atenção", sem_risco_estimado: "Sem exposição relevante", sem_dados: "Sem dados de chuva" }[nivel] || "Atenção";
+    var sel = a.rotas[ui.selecionada], semChuva = !!a.meteo.indisponivel;
     var cards = nomes.map(function (n) {
       var c = a.comparacao.filter(function (x) { return x.rota === n; })[0], r = a.rotas[n];
       return "<div class='card" + (n === ui.selecionada ? " sel" : "") + "' data-rota='" + n + "' tabindex='0' role='button' aria-pressed='" + (n === ui.selecionada) + "' aria-label='" + esc(titulos[n]) + ", " + Lg.minutes(c.tempo_min) + ", " + esc(c.rotulo) + "'>" +
         "<div class='cabeca'><b>" + esc(titulos[n]) + "</b><span class='selo " + (c.rotulo.indexOf("menor exposição") === 0 && nomes.length > 1 ? "menor" : "neutro") + "'>" + esc(c.rotulo) + "</span></div><div class='tempo'>" + Lg.minutes(c.tempo_min) + "</div>" +
-        "<div class='small'>" + (n === "habitual" ? "menor tempo" : Lg.extraMinutes(c.acrescimo_min) + " · exposição estimada " + (c.reducao_exposicao_pct > 0 ? c.reducao_exposicao_pct + "% menor" : "semelhante")) + " · " + Lg.km(r.distancia_km) + "</div>" +
-        (c.pct_sem_estimativa >= 10 ? "<div class='small'>" + c.pct_sem_estimativa + "% do trajeto sem dado de terreno.</div>" : "") + "</div>";
+        "<div class='small'>" + (n === "habitual" ? "menor tempo" : Lg.extraMinutes(c.acrescimo_min) + (semChuva ? "" : " · exposição estimada " + (c.reducao_exposicao_pct > 0 ? c.reducao_exposicao_pct + "% menor" : "semelhante"))) + " · " + Lg.km(r.distancia_km) + "</div>" +
+        (c.pct_sem_estimativa >= 10 && !semChuva ? "<div class='small'>" + c.pct_sem_estimativa + "% do trajeto sem estimativa de risco (sem dado de terreno).</div>" : "") +
+        (r.km_escadas > 0.02 ? "<div class='small'>Inclui " + Math.round(r.km_escadas * 1000) + " m de escadas.</div>" : "") + "</div>";
     }).join("");
     var trechos = Lg.groupStretches(sel.trechos_de_risco);
-    out.innerHTML =
+    out.innerHTML = condicoesDaAnalise(a) +
       "<div class='decisao " + esc(nivel) + "'><span class='nivel'>" + Lg.kindBadge("previsto") + " " + esc(selo) + "</span><h2 id='res-titulo' tabindex='-1'>" + esc(a.alerta.titulo) + "</h2>" +
-      "<p class='small'>Saída prevista " + Lg.hhmm(a.saida) + " · " + (a.modal === "carro" ? "Carro" : "A pé") + " · " + (a.meteo.total_na_janela_mm >= 1 ? "chuva prevista (" + Lg.mm(a.meteo.total_na_janela_mm) + ") no período" : "sem chuva relevante no período") + "</p>" +
+      "<p class='small'>Saída prevista " + Lg.hhmm(a.saida) + " · " + (a.modal === "carro" ? "Carro" : "A pé") + "</p>" +
       "<p>" + esc(a.alerta.texto) + "</p>" + (a.alerta.motivos.length ? "<p class='small'>Por que você recebeu este alerta:</p>" + lista(a.alerta.motivos.map(esc), "small") : "") + "</div>" +
-      "<h2>Compare as rotas</h2><p class='small'>Toque em uma rota para vê-la no mapa. Você escolhe qual usar.</p>" + cards +
-      "<h2>Trechos de atenção · " + esc(titulos[ui.selecionada]) + "</h2>" + (trechos.length ? trechos.map(function (t) {
+      "<h2>Rota e alternativas</h2><p class='small'>Toque em uma rota para vê-la no mapa. Você escolhe qual usar.</p>" + cards +
+      "<h2>Trechos de atenção · " + esc(titulos[ui.selecionada]) + "</h2>" + (semChuva ? "<p class='small'>Sem estimativa de risco sem dados de chuva.</p>" : trechos.length ? trechos.map(function (t) {
         return "<div class='trecho'><b>" + esc(t.nome || "via sem nome") + "</b> · " + (t.classe === "alto" ? "Alto" : "Atenção") + " · " + Lg.km(t.km) + "<br><span class='small'>passagem estimada entre " + Lg.hhmm(t.inicio) + " e " + Lg.hhmm(t.fim) + (t.n > 1 ? " · " + t.n + " trechos" : "") + (t.ocorrencia ? " · há ocorrência próxima" : "") + "</span></div>"; }).join("")
         : "<p class='small'>Nenhum trecho em atenção nesta rota no horário estimado.</p>") +
-      "<h2>Chuva prevista</h2><div class='chuva' role='img' aria-label='Chuva prevista nas próximas horas'>" + horas.map(function (h, i) { return "<span class='" + (h.natureza === "previsto" ? "prev" : "") + "' style='height:" + Math.max(altura[i], 2) + "px' title='" + esc(Lg.hhmm(h.hora)) + ": " + esc(Lg.mm(h.mm)) + " (" + esc(h.natureza) + ")'></span>"; }).join("") + "</div>" +
-      "<div class='horas'><span>" + esc(Lg.hhmm(horas[0].hora)) + "</span><span>" + esc(Lg.hhmm(horas[horas.length - 1].hora)) + "</span></div><p class='small'>Barras tracejadas: previsão. Cheias: já ocorrido.</p>" +
+      "<h2>Entenda o resultado</h2><div class='perguntas' role='group' aria-label='Perguntas sugeridas'>" + PERGUNTAS_ROTA.map(function (q) { return "<button type='button' class='chip' data-q='" + q[0] + "'>" + esc(q[1]) + "</button>"; }).join("") + "</div>" +
+      "<div id='resposta' class='explica' aria-live='polite'></div>" +
       "<p class='linha'><button class='btn sec' id='explicar'>Explicar com mais contexto</button>" + (webglOk() ? "<button class='btn sec' id='ver3d'>Ver em 3D</button>" : "") + "</p><div id='explicacao' class='small' aria-live='polite'></div>" +
       lista(a.avisos.map(esc), "small");
+    Array.prototype.forEach.call(out.querySelectorAll("[data-q]"), function (b) { b.addEventListener("click", function () { responder(a, b.dataset.q); }); });
     Array.prototype.forEach.call(out.querySelectorAll("[data-rota]"), function (c) {
       var escolhe = function () { ui.selecionada = c.dataset.rota; mostrar(a); var novo = out.querySelector("[data-rota='" + ui.selecionada + "']"); if (novo) novo.focus(); };
       c.addEventListener("click", escolhe); c.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); escolhe(); } });
@@ -236,6 +249,14 @@
     var sel = a.rotas[ui.selecionada];
     sel.trechos_de_risco.forEach(function (t) { if (t.coordenadas) ui.riscos.push(L_.polyline(t.coordenadas.map(function (c) { return [c[1], c[0]]; }), { color: "#b3202a", weight: 11, opacity: 0.5, dashArray: "2 7" }).addTo(ui.mapa)); });
     ui.mapa.fitBounds(L_.polyline(sel.coordenadas.map(function (c) { return [c[1], c[0]]; })).getBounds().pad(0.15));
+  }
+  /* Short answers to the suggested questions: built from the analysis itself, with no external service. */
+  var PERGUNTAS_ROTA = [["o_que_muda", "O que muda entre estas rotas?"], ["por_que_atencao", "Por que este trecho está em atenção?"], ["o_que_explica", "O que explica esta classificação?"], ["indisponivel", "Quais informações estão indisponíveis?"]];
+  function responder(a, pid) {
+    var alvo = el("resposta"); alvo.textContent = "Consultando…";
+    api("assistente", { method: "POST", body: { tipo: "rota", id: a.analise_id, rotulo: "rotas", pergunta_id: pid, contextualizar: false } }).then(function (r) {
+      alvo.innerHTML = "<p><b>" + esc(r.pergunta) + "</b></p><p>" + esc(r.texto) + "</p>";
+    }).catch(function (e) { alvo.textContent = e.message; });
   }
   function explicar(a) {
     var alvo = el("explicacao"); alvo.textContent = "Consultando…";

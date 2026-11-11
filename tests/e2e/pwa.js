@@ -22,11 +22,17 @@ const PWA = BASE + "pwa/", CASA = { latitude: -30.1250, longitude: -51.2330 }, T
   assert.match(await page.innerText("#verif"), /Não há monitoramento em segundo plano/); assert.ok(chamadas.filter((c) => c.startsWith("DELETE")).length >= 1, "a análise da verificação é apagada");
   await page.click("[data-traj]"); await page.waitForSelector("#resultado .decisao", { timeout: 90000 });
   const titulos = await page.locator("#resultado h2").allInnerTexts();
-  assert.deepStrictEqual(titulos.slice(1), ["Compare as rotas", "Trechos de atenção · Rota habitual", "Chuva prevista"], "hierarquia: alerta, comparação, trechos, chuva");
+  assert.strictEqual(titulos[0], "Condições · chuva na cidade", "primeiro as condições");
+  assert.deepStrictEqual(titulos.slice(2), ["Rota e alternativas", "Trechos de atenção · Rota habitual", "Entenda o resultado"], "ordem: condições, resultado, rotas, trechos, explicação");
+  assert.match(await page.innerText("#resultado"), /análise do modelo e não de um pluviômetro/); assert.match(await page.innerText("#resultado"), /uma série para a cidade inteira/);
   assert.strictEqual(await page.evaluate(() => document.activeElement.id), "res-titulo", "o foco vai ao resultado");
   assert.ok(await page.locator("[data-rota]").count() >= 2, "rota habitual e ao menos uma alternativa");
   assert.strictEqual(await page.locator("[data-rota]").first().getAttribute("data-rota"), "habitual");
   assert.doesNotMatch(await page.innerText("#resultado"), /é segura|sem risco\b/i, "nenhuma rota é chamada de segura");
+  assert.strictEqual(await page.locator("#resultado [data-q]").count(), 4, "as quatro perguntas sugeridas");
+  await page.click("#resultado [data-q=o_que_muda]"); await page.waitForFunction(() => /O que muda entre estas rotas\?/.test(document.getElementById("resposta").textContent), null, { timeout: 20000 });
+  assert.doesNotMatch(await page.innerText("#resposta"), /segur[oa]\b/i);
+  await page.click("#resultado [data-q=indisponivel]"); await page.waitForFunction(() => /indispon/i.test(document.getElementById("resposta").textContent), null, { timeout: 20000 });
   const segunda = await page.locator("[data-rota]").nth(1).getAttribute("data-rota");
   await page.locator("[data-rota]").nth(1).click(); assert.strictEqual(await page.locator("[data-rota].sel").getAttribute("data-rota"), segunda);
   // 3D opcional

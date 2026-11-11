@@ -342,7 +342,7 @@
           "</td><td>" + (c.pct_sem_estimativa ? c.pct_sem_estimativa + "% sem dado" : "—") + "</td><td>" + (r.instante_do_pico ? Lg.hhmm(r.instante_do_pico) : "—") + "</td></tr>"; }).join("");
       out.innerHTML = "<div class='alerta " + Lg.esc(a.alerta.nivel) + "'><h3>" + Lg.esc(a.alerta.titulo) + " " + Lg.kindBadge("previsto") + "</h3><p>" + Lg.esc(a.alerta.texto) + "</p>" + (a.alerta.motivos.length ? ul(a.alerta.motivos.map(Lg.esc)) : "") + "</div>" +
         "<div class='rolagem'><table><thead><tr><th>Rota</th><th>Tempo</th><th>Diferença</th><th>Exposição estimada</th><th>Km em Atenção/Alto</th><th>Trajeto sem dado de terreno</th><th>Pico</th></tr></thead><tbody>" + linhas + "</tbody></table></div>" +
-        "<p class='small'>Chuva na janela da viagem: " + Lg.mm(a.meteo.total_na_janela_mm) + ". Interdições confirmadas consideradas: " + a.interdicoes_consideradas + ".</p>" +
+        "<p class='small'>" + chuvaDaAnalise(a) + " Interdições confirmadas consideradas: " + a.interdicoes_consideradas + ".</p>" +
         "<p><button class='btn sec' id='mob-explicar'>Explicar com mais contexto</button> " + "<button class='btn sec' id='mob-3d'>Ver as rotas no mapa grande</button>" + " <span id='mob-explicacao'></span></p>" +
         "<details><summary>Trechos de atenção da rota habitual</summary>" + ul(Lg.groupStretches(a.rotas.habitual.trechos_de_risco).map(function (t) { return Lg.esc(t.nome) + " · " + (t.classe === "alto" ? "Alto" : "Atenção") + " · " + Lg.km(t.km) + " · passagem " + Lg.hhmm(t.inicio) + "–" + Lg.hhmm(t.fim); })) + "</details>" + ul(a.avisos.map(Lg.esc), "plain small");
       assistente(out, "rota", a.analise_id, "rotas");
@@ -354,6 +354,13 @@
       });
       if (el("mob-3d")) el("mob-3d").addEventListener("click", function () { st.rotasNoMapa = a; show("mapa"); });
     }).catch(function (e) { out.innerHTML = "<p class='aviso'>" + Lg.esc(e.message) + "</p>"; });
+  }
+  /* What the analysis says about the rain: the total and how fresh it is, or that it is unavailable (no risk estimate then). */
+  function chuvaDaAnalise(a) {
+    var m = a.meteo, f = a.fonte_chuva || {};
+    if (m.indisponivel) return "<b>Chuva indisponível:</b> sem estimativa de risco para este deslocamento (não significa rota sem risco)." + (m.ultima_atualizacao ? " Última atualização conhecida: " + Lg.esc(Lg.formatInstant(m.ultima_atualizacao)) + "." : "");
+    return "Chuva na janela da viagem: " + Lg.mm(m.total_na_janela_mm) + ". " + Lg.esc(a.escopo_da_chuva || "") + (f.idade_min != null ? " Atualizada há " + (f.idade_min < 90 ? f.idade_min + " min" : Math.round(f.idade_min / 60) + " h") + (f.obsoleta ? " (a fonte não respondeu na última tentativa)" : "") + "." : "") +
+      " As horas passadas vêm da análise do modelo, não de pluviômetro.";
   }
   function vias() {
     var box = el("mob-vias");
