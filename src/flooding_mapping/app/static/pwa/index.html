@@ -14,19 +14,33 @@
   <link rel="stylesheet" href="pwa.css">
 </head>
 <body>
-  <header>
-    <h1>Rotas na chuva</h1>
-    <p class="sub">Porto Alegre · risco estimado de acúmulo de água na sua rota</p>
-  </header>
-  <div id="aviso" role="status" hidden></div>
   <div id="mapa" role="application" aria-label="Mapa para marcar pontos e ver as rotas"></div>
-  <p id="dica-mapa" class="dica" hidden></p>
+  <header id="orienta" aria-live="polite">
+    <div class="principal"><span id="orienta-seta" class="seta" aria-hidden="true">➜</span>
+      <div><p class="marca">Rotas na chuva · Porto Alegre</p><p id="orienta-linha" class="linha-principal">Planeje o deslocamento: escolha origem, destino e modal.</p></div></div>
+    <p id="orienta-detalhe" class="depois"></p>
+  </header>
+  <div id="perfil" role="img" aria-label="Perfil da rota" hidden></div>
+  <div id="aviso" role="status" hidden></div>
+  <p id="dica-mapa" class="dica" role="status" hidden></p>
+  <div id="flutuantes" role="group" aria-label="Controles do mapa">
+    <button type="button" class="fab" id="f-mais" aria-label="Aproximar o mapa">+</button>
+    <button type="button" class="fab" id="f-menos" aria-label="Afastar o mapa">−</button>
+    <button type="button" class="fab" id="f-loc" aria-label="Centralizar na minha localização (pede permissão)"><span aria-hidden="true">◎</span><small>Eu</small></button>
+    <button type="button" class="fab" id="f-rota" aria-label="Enquadrar a rota no mapa"><span aria-hidden="true">⤢</span><small>Rota</small></button>
+    <button type="button" class="fab" id="f-camadas" aria-label="Camadas e legenda do mapa" aria-expanded="false" aria-controls="popover"><span aria-hidden="true">▤</span><small>Mapa</small></button>
+  </div>
+  <button type="button" class="fab alerta-fab" id="f-relatar" aria-label="Relatar ocorrência na via"><span aria-hidden="true">⚠</span><small>Relatar</small></button>
+  <section id="popover" class="vidro" hidden aria-label="Camadas e legenda"></section>
   <section id="vista3d" hidden aria-label="Rotas em 3D (opcional)">
     <div class="cabeca"><b>Rotas em 3D</b><button type="button" class="chip" id="fechar3d">Fechar</button></div>
     <div id="mapa3d" role="application" aria-label="Mapa 3D com relevo e as rotas"></div>
     <p class="small">Relevo com exagero vertical de 1,5× só para visualização. Elevação pública, sem relação com o cálculo de risco; o modelo pode ter artefatos sobre água e vegetação.</p>
   </section>
-  <main id="tela" tabindex="-1"></main>
+  <div id="folha" class="folha vidro expandida">
+    <button type="button" class="alca" id="folha-alca" aria-expanded="true" aria-controls="tela">Recolher painel</button>
+    <main id="tela" tabindex="-1"></main>
+  </div>
   <nav id="abas" aria-label="Seções">
     <button data-tela="planejar" aria-current="page">Planejar</button>
     <button data-tela="lugares">Lugares</button>

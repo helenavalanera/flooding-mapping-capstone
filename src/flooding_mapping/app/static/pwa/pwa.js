@@ -35,23 +35,59 @@
 
   /* ---------------------------------------------------------------- mapa e localização */
   function iniciarMapa() {
-    ui.mapa = L_.map("mapa", { zoomControl: true }).setView([-30.03, -51.22], 12);
+    ui.mapa = L_.map("mapa", { zoomControl: false }).setView([-30.03, -51.22], 12);
+    ui.camadas = { ocorrencias: true, interdicoes: true, trechos: true }; ui.grupos = { ocorrencias: L_.layerGroup().addTo(ui.mapa), interdicoes: L_.layerGroup().addTo(ui.mapa) };
     L_.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "&copy; colaboradores do OpenStreetMap" }).addTo(ui.mapa);
     ui.mapa.on("click", function (e) {
       if (!ui.modo) return;
       var modo = ui.modo, p = { lon: e.latlng.lng, lat: e.latlng.lat };
-      ui.modo = null; el("dica-mapa").hidden = true;
+      ui.modo = null; el("dica-mapa").hidden = true; if (!ui.analise) definirFolha("expandida");
       if (modo === "origem" || modo === "destino") { ui[modo] = { nome: "Ponto no mapa", lon: p.lon, lat: p.lat }; marcar(modo, p); render(); }
       else { ui.rascunho[modo] = p; marcar(modo, p); render(); }
     });
   }
+  var MARCADORES = { origem: ["o", "O", "Origem"], destino: ["d", "D", "Destino"], lugar: ["o", "L", "Lugar"], relato: ["pend", "!", "Local do relato"], atual: ["eu", "Eu", "Sua posição (uma leitura)"] };
+  function icone(classe, simbolo, rotulo, tam) { return L_.divIcon({ className: "", html: "<div class='marc " + classe + "' role='img' aria-label='" + rotulo + "'>" + simbolo + "</div>", iconSize: [tam, tam], iconAnchor: [tam / 2, tam / 2] }); }
   function marcar(tipo, p) {
     if (ui.pontos[tipo]) ui.mapa.removeLayer(ui.pontos[tipo]);
-    var cor = { origem: "#1b7f5c", destino: "#b3202a", lugar: "#0b5d8f", relato: "#c27a00" }[tipo];
-    ui.pontos[tipo] = L_.circleMarker([p.lat, p.lon], { radius: 9, color: "#fff", weight: 2, fillColor: cor, fillOpacity: 1 }).addTo(ui.mapa);
+    var m = MARCADORES[tipo];
+    ui.pontos[tipo] = L_.marker([p.lat, p.lon], { keyboard: false, title: m[2], icon: icone(m[0], m[1], m[2], 26) }).addTo(ui.mapa);
   }
-  function escolherNoMapa(modo, texto) { ui.modo = modo; var d = el("dica-mapa"); d.textContent = texto; d.hidden = false; el("mapa").scrollIntoView({ behavior: "smooth", block: "nearest" }); }
-
+  /* The map is the screen: picking a point folds the sheet so the map can be touched. */
+  function escolherNoMapa(modo, texto) { ui.modo = modo; var d = el("dica-mapa"); d.textContent = texto; d.hidden = false; definirFolha("compacta"); }
+  function definirFolha(modo) {
+    var f = el("folha"); f.classList.toggle("compacta", modo === "compacta"); f.classList.toggle("expandida", modo !== "compacta");
+    document.body.classList.toggle("exp", modo !== "compacta");
+    var b = el("folha-alca"); b.setAttribute("aria-expanded", String(modo !== "compacta")); b.textContent = modo === "compacta" ? "Ver detalhes" : "Recolher painel";
+    medirFolha();
+  }
+  function medirFolha() {
+    var medir = function () {
+      var f = el("folha"), o = el("orienta"), r = document.documentElement.style;
+      if (f) r.setProperty("--folha-h", Math.round(f.getBoundingClientRect().height) + "px");
+      if (o) r.setProperty("--orienta-b", Math.round(o.getBoundingClientRect().bottom) + "px");
+    };
+    medir();
+    if (!ui.observador && window.ResizeObserver) { ui.observador = new ResizeObserver(medir); ui.observador.observe(el("folha")); ui.observador.observe(el("orienta")); }   // follows the animation and any change of size
+    else setTimeout(medir, 320);
+  }
+  /* Occurrences and confirmed closures on the map. Each marker has a symbol and a text, not only a colour. Offline or without the server, none is drawn. */
+  function carregarOcorrencias() {
+    api("ocorrencias").then(function (d) {
+      ui.grupos.ocorrencias.clearLayers(); ui.grupos.interdicoes.clearLayers(); ui.ocorrencias = d.ocorrencias.filter(function (o) { return o.situacao !== "descartada"; });
+      ui.ocorrencias.forEach(function (o) {
+        var inter = o.situacao === "confirmada" && o.impacto_circulacao === "interdicao", classe = inter ? "int" : (o.situacao === "confirmada" ? "conf" : "pend"), simbolo = inter ? "✕" : (o.situacao === "confirmada" ? "✓" : "!");
+        var rot = inter ? "Interdição confirmada" : (o.situacao === "confirmada" ? "Ocorrência confirmada" : "Relato pendente, sem verificação");
+        L_.marker([o.lat, o.lon], { title: rot, keyboard: false, icon: icone(classe, simbolo, rot, inter ? 30 : 26) }).bindTooltip(rot + " · " + o.tipo).addTo(inter ? ui.grupos.interdicoes : ui.grupos.ocorrencias);
+      });
+      aplicarCamadas();
+      if (ui.analise) ocorrenciasNoTrajeto(ui.analise.rotas[ui.selecionada]);
+    }).catch(function () { ui.ocorrencias = null; });
+  }
+  function aplicarCamadas() {
+    [["ocorrencias", ui.grupos.ocorrencias], ["interdicoes", ui.grupos.interdicoes]].forEach(function (g) { if (ui.camadas[g[0]]) { if (!ui.mapa.hasLayer(g[1])) g[1].addTo(ui.mapa); } else ui.mapa.removeLayer(g[1]); });
+    ui.riscos.forEach(function (l) { if (ui.camadas.trechos) { if (!ui.mapa.hasLayer(l)) l.addTo(ui.mapa); } else ui.mapa.removeLayer(l); });
+  }
   function consentir() {
     if (estado.consentimento) return Promise.resolve(true);
     return new Promise(function (resolve) {
@@ -80,7 +116,7 @@
   function ir(tela) {
     ui.tela = tela; ui.modo = null; el("dica-mapa").hidden = true;
     Array.prototype.forEach.call(document.querySelectorAll("#abas button"), function (b) { if (b.dataset.tela === tela) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
-    render(); el("tela").focus({ preventScroll: true });
+    definirFolha(tela === "planejar" && ui.analise ? "compacta" : "expandida"); render(); el("tela").focus({ preventScroll: true });
   }
   function opcoesLugares(sel) { return estado.lugares.map(function (p) { return "<option value='" + esc(p.id) + "'" + (p.id === sel ? " selected" : "") + ">" + esc(p.nome) + "</option>"; }).join(""); }
 
@@ -108,9 +144,9 @@
       "<li class='feito'>Modal e saída<b>" + (ui.modal === "carro" ? "Carro" : "A pé") + "</b></li></ol>";
   }
   function planejar() {
-    var t = el("tela"), agora = D.localField(new Date(Date.now() + 5 * 60000));
+    var t = el("tela"), agora = D.localField(new Date(Date.now() + 5 * 60000)); t.classList.toggle("tem-analise", !!ui.analise);
     var o = ui.origem && ui.origem.id ? ui.origem.id : (ui.origem ? "__ponto" : ""), d = ui.destino && ui.destino.id ? ui.destino.id : (ui.destino ? "__ponto" : "");
-    t.innerHTML = passos() + "<div class='cond' id='cond' aria-live='polite'></div>" +
+    t.innerHTML = "<div class='form-plan'>" + passos() + "<div class='cond' id='cond' aria-live='polite'></div>" +
       (estado.trajetos.length ? "<h2>Trajetos habituais</h2><div class='chips'>" + estado.trajetos.map(function (j) { return "<button type='button' class='chip' data-traj='" + esc(j.id) + "'>" + esc(j.nome) + " · " + esc(j.horario) + "</button>"; }).join("") + "</div>" +
         "<button type='button' class='btn sec block' id='verificar'>Verificar meus trajetos agora</button><div class='verif' id='verif' aria-live='polite'></div>" :
         (estado.lugares.length ? "" : "<div class='vazio'><b>Ainda não há lugares salvos.</b><p class='small'>Salve casa e trabalho para analisar com um toque. Você também pode escolher origem e destino direto no mapa.</p><button type='button' class='chip' id='ir-lugares'>Cadastrar lugares</button></div>")) +
@@ -120,7 +156,7 @@
       "<label for='sel-d'>Destino</label><select id='sel-d'><option value=''>Escolha…</option>" + opcoesLugares(d) + (ui.destino && !ui.destino.id ? "<option value='__ponto' selected>" + esc(ui.destino.nome) + "</option>" : "") + "<option value='__mapa'>Escolher no mapa…</option></select>" +
       "<div class='linha'><div><label for='sel-m'>Modal</label><select id='sel-m'><option value='carro'" + (ui.modal === "carro" ? " selected" : "") + ">Carro</option><option value='pe'" + (ui.modal === "pe" ? " selected" : "") + ">A pé</option></select></div>" +
       "<div><label for='in-saida'>Saída</label><input type='datetime-local' id='in-saida' value='" + esc(ui.saida || agora) + "'></div></div>" +
-      "<button class='btn block' id='analisar'>Analisar deslocamento</button><div id='resultado' aria-live='polite'></div>";
+      "<button class='btn block' id='analisar'>Analisar deslocamento</button></div><div id='resultado' aria-live='polite'></div>";
     Array.prototype.forEach.call(t.querySelectorAll("[data-traj]"), function (b) { b.addEventListener("click", function () { usarTrajeto(b.dataset.traj); }); });
     if (el("ir-lugares")) el("ir-lugares").addEventListener("click", function () { ir("lugares"); });
     if (el("verificar")) el("verificar").addEventListener("click", verificar);
@@ -195,49 +231,119 @@
   /* 5-7 · result, in the order a person decides: the conditions, the verdict, the routes and alternatives, the stretches of attention,
      then the explanation (short answers to suggested questions, and the longer one on request). */
   var SEM_CHUVA = "Chuva indisponível agora: não há estimativa de risco para este deslocamento, e isso não significa rota sem risco. Consulte os alertas oficiais.";
+  function frase(t) { t = String(t || "").trim(); if (!t) return ""; t = t.charAt(0).toUpperCase() + t.slice(1); return /[.!?]$/.test(t) ? t : t + "."; }
+  function idadeTxt(f) { return f.idade_min == null ? "" : (f.idade_min < 90 ? f.idade_min + " min" : Math.round(f.idade_min / 60) + " h"); }
   function condicoesDaAnalise(a) {
     var m = a.meteo, f = a.fonte_chuva || {};
     if (m.indisponivel) return "<div class='indisp' role='note'><b>Condições: chuva indisponível.</b> " + esc(SEM_CHUVA) + (m.ultima_atualizacao ? " Última atualização conhecida: " + esc(Lg.formatInstant(m.ultima_atualizacao)) + "." : "") + "</div>";
     var horas = m.horas, altura = Lg.barHeights(horas.map(function (h) { return h.mm; }), 64, 5);
     return "<h2>Condições · chuva na cidade</h2><p class='small'>" + (m.total_na_janela_mm >= 1 ? "Chuva prevista de " + esc(Lg.mm(m.total_na_janela_mm)) + " no período do deslocamento." : "Sem chuva relevante prevista no período do deslocamento.") +
-      " " + esc(a.escopo_da_chuva || "") + (f.idade_min != null ? " Atualizada há " + (f.idade_min < 90 ? f.idade_min + " min" : Math.round(f.idade_min / 60) + " h") + (f.obsoleta ? " (a fonte não respondeu na última tentativa: os dados podem estar defasados)" : "") + "." : "") + "</p>" +
+      " " + esc(frase(a.escopo_da_chuva)) + " Fonte: Open-Meteo (análise do modelo e previsão)" + (f.emitido_em_utc ? ", emitida em " + esc(Lg.formatInstant(f.emitido_em_utc)) : "") + (f.idade_min != null ? "; atualizada há " + idadeTxt(f) + ", válida por até 6 h" + (f.obsoleta ? " (a fonte não respondeu na última tentativa: os dados podem estar defasados)" : "") : "") + ".</p>" +
       "<div class='chuva' role='img' aria-label='Chuva nas próximas horas'>" + horas.map(function (h, i) { return "<span class='" + (h.natureza === "previsto" ? "prev" : "") + "' style='height:" + Math.max(altura[i], 2) + "px' title='" + esc(Lg.hhmm(h.hora)) + ": " + esc(Lg.mm(h.mm)) + " (" + esc(h.natureza) + ")'></span>"; }).join("") + "</div>" +
       "<div class='horas'><span>" + esc(Lg.hhmm(horas[0].hora)) + "</span><span>" + esc(Lg.hhmm(horas[horas.length - 1].hora)) + "</span></div><p class='small'>Barras tracejadas: previsão. Cheias: horas passadas, que vêm da análise do modelo e não de um pluviômetro.</p>";
+  }
+  /* Distance along a route (m) from its start to the vertex nearest to a point: the "in X m" of the orientation card, from the geometry the API returned. */
+  function percurso(coords) {
+    var cum = [0], rad = Math.PI / 180;
+    for (var i = 1; i < coords.length; i++) {
+      var a = coords[i - 1], b = coords[i], dl = (b[1] - a[1]) * rad, dg = (b[0] - a[0]) * rad, x = Math.sin(dl / 2) * Math.sin(dl / 2) + Math.cos(a[1] * rad) * Math.cos(b[1] * rad) * Math.sin(dg / 2) * Math.sin(dg / 2);
+      cum.push(cum[i - 1] + 12742000 * Math.asin(Math.sqrt(x)));
+    }
+    return cum;
+  }
+  function ate(coords, cum, alvo) {
+    var melhor = 0, dmin = Infinity;
+    for (var i = 0; i < coords.length; i++) { var q = Math.abs(coords[i][0] - alvo[0]) + Math.abs(coords[i][1] - alvo[1]); if (q < dmin) { dmin = q; melhor = cum[i]; } }
+    return melhor;
+  }
+  function distancia(m) { return m < 950 ? Math.max(10, Math.round(m / 10) * 10) + " m" : Lg.km(m / 1000); }
+  /* The dark card on top: where the route goes and what lies ahead, only from what the API returned. There are no turn instructions: the backend has none. */
+  function orientar(a) {
+    var sel = a.rotas[ui.selecionada], card = el("orienta"), semChuva = !!a.meteo.indisponivel, cum = percurso(sel.coordenadas);
+    var nome = { habitual: "Rota habitual", menor_exposicao: "Menor exposição estimada", alternativa: "Alternativa" }[ui.selecionada], cls = a.alerta.nivel, detalhe;
+    if (semChuva) detalhe = "Sem dados de chuva: só tempo e distância; não há estimativa de risco.";
+    else if (sel.trechos_de_risco.length && sel.trechos_de_risco[0].coordenadas) {
+      var t = sel.trechos_de_risco[0];
+      detalhe = "Em " + distancia(ate(sel.coordenadas, cum, t.coordenadas[0])) + ": " + (t.nome || "via sem nome") + ", exposição estimada " + (t.classe === "alto" ? "alta" : "de atenção") + " (passagem por volta de " + Lg.hhmm(t.inicio) + ").";
+    } else detalhe = "Nenhum trecho com exposição estimada nesta rota no horário previsto.";
+    if (a.interdicoes_consideradas > 0) { detalhe += " Interdição confirmada considerada: o cálculo evita " + a.interdicoes_consideradas + " trecho(s)."; if (cls !== "sem_dados") cls = "interdicao"; }
+    card.className = cls; el("orienta-seta").textContent = "➜"; el("orienta-linha").textContent = nome + " até o destino · " + Lg.km(sel.distancia_km);
+    el("orienta-detalhe").textContent = detalhe; medirFolha();
+    perfil(sel, cum, semChuva);
+  }
+  /* The side bar is the route itself, from start (top) to end (bottom), with the stretches of estimated exposure marked where they are. */
+  function perfil(sel, cum, semChuva) {
+    var p = el("perfil"), total = cum[cum.length - 1] || 1; p.hidden = false; p.innerHTML = "";
+    p.setAttribute("aria-label", semChuva ? "Perfil da rota: sem estimativa de risco" : "Perfil da rota: " + sel.trechos_de_risco.length + " trecho(s) com exposição estimada");
+    if (semChuva) return;
+    sel.trechos_de_risco.forEach(function (t, k) {
+      if (!t.coordenadas || t.coordenadas.length < 2) return;
+      var ini = ate(sel.coordenadas, cum, t.coordenadas[0]), fim = ate(sel.coordenadas, cum, t.coordenadas[t.coordenadas.length - 1]);
+      var m = document.createElement("i"); m.className = t.classe === "alto" ? "" : "atencao"; m.style.top = (Math.min(ini, fim) / total * 100) + "%"; m.style.height = Math.max(Math.abs(fim - ini) / total * 100, 1.5) + "%"; p.appendChild(m);
+      if (k === 0) { var b = document.createElement("b"); b.textContent = (t.classe === "alto" ? "Alto" : "Atenção"); b.style.top = "calc(" + (Math.min(ini, fim) / total * 100) + "% - 2px)"; p.appendChild(b); }
+    });
   }
   function mostrar(a) {
     var out = el("resultado"), nomes = ["habitual", "menor_exposicao", "alternativa"].filter(function (n) { return a.rotas[n]; });
     var numero = 0, titulos = {}; nomes.forEach(function (n) { titulos[n] = n === "habitual" ? "Rota habitual" : "Alternativa " + (++numero); });
     var nivel = a.alerta.nivel, selo = { alto: "Alta exposição estimada", atencao: "Atenção", sem_risco_estimado: "Sem exposição relevante", sem_dados: "Sem dados de chuva" }[nivel] || "Atenção";
-    var sel = a.rotas[ui.selecionada], semChuva = !!a.meteo.indisponivel;
-    var cards = nomes.map(function (n) {
-      var c = a.comparacao.filter(function (x) { return x.rota === n; })[0], r = a.rotas[n];
-      return "<div class='card" + (n === ui.selecionada ? " sel" : "") + "' data-rota='" + n + "' tabindex='0' role='button' aria-pressed='" + (n === ui.selecionada) + "' aria-label='" + esc(titulos[n]) + ", " + Lg.minutes(c.tempo_min) + ", " + esc(c.rotulo) + "'>" +
-        "<div class='cabeca'><b>" + esc(titulos[n]) + "</b><span class='selo " + (c.rotulo.indexOf("menor exposição") === 0 && nomes.length > 1 ? "menor" : "neutro") + "'>" + esc(c.rotulo) + "</span></div><div class='tempo'>" + Lg.minutes(c.tempo_min) + "</div>" +
-        "<div class='small'>" + (n === "habitual" ? "menor tempo" : Lg.extraMinutes(c.acrescimo_min) + (semChuva ? "" : " · exposição estimada " + (c.reducao_exposicao_pct > 0 ? c.reducao_exposicao_pct + "% menor" : "semelhante"))) + " · " + Lg.km(r.distancia_km) + "</div>" +
-        (c.pct_sem_estimativa >= 10 && !semChuva ? "<div class='small'>" + c.pct_sem_estimativa + "% do trajeto sem estimativa de risco (sem dado de terreno).</div>" : "") +
-        (r.km_escadas > 0.02 ? "<div class='small'>Inclui " + Math.round(r.km_escadas * 1000) + " m de escadas.</div>" : "") + "</div>";
+    var sel = a.rotas[ui.selecionada], semChuva = !!a.meteo.indisponivel, f = a.fonte_chuva || {};
+    var comp = function (n) { return a.comparacao.filter(function (x) { return x.rota === n; })[0]; };
+    var chips = nomes.map(function (n) {
+      var c = comp(n), r = a.rotas[n];
+      return "<button type='button' class='rota-chip' data-rota='" + n + "' aria-pressed='" + (n === ui.selecionada) + "' aria-label='" + esc(titulos[n]) + ", " + Lg.minutes(c.tempo_min) + ", " + esc(c.rotulo) + "'>" +
+        "<b>" + esc(titulos[n]) + "</b><span class='t'>" + Lg.minutes(c.tempo_min) + "</span><span class='small'> · " + Lg.km(r.distancia_km) + "</span><div class='small'>" + (semChuva ? "sem estimativa de risco" : esc(c.rotulo)) + "</div></button>";
     }).join("");
-    var trechos = Lg.groupStretches(sel.trechos_de_risco);
-    out.innerHTML = condicoesDaAnalise(a) +
-      "<div class='decisao " + esc(nivel) + "'><span class='nivel'>" + Lg.kindBadge("previsto") + " " + esc(selo) + "</span><h2 id='res-titulo' tabindex='-1'>" + esc(a.alerta.titulo) + "</h2>" +
-      "<p class='small'>Saída prevista " + Lg.hhmm(a.saida) + " · " + (a.modal === "carro" ? "Carro" : "A pé") + "</p>" +
-      "<p>" + esc(a.alerta.texto) + "</p>" + (a.alerta.motivos.length ? "<p class='small'>Por que você recebeu este alerta:</p>" + lista(a.alerta.motivos.map(esc), "small") : "") + "</div>" +
-      "<h2>Rota e alternativas</h2><p class='small'>Toque em uma rota para vê-la no mapa. Você escolhe qual usar.</p>" + cards +
+    var trade = nomes.filter(function (n) { return n !== "habitual"; }).map(function (n) {
+      var c = comp(n); return "<div class='tradeoff'><b>" + esc(titulos[n]) + "</b> (" + esc(a.rotas[n].rotulo) + "): " + Lg.extraMinutes(c.acrescimo_min) + " em relação à habitual, " + Lg.km(a.rotas[n].distancia_km) + (semChuva ? "." : "; exposição estimada " + (c.reducao_exposicao_pct > 0 ? c.reducao_exposicao_pct + "% menor" : "semelhante") + ", " + Lg.km(c.km_atencao_ou_alto) + " em atenção ou alto.") +
+        (c.pct_sem_estimativa >= 10 && !semChuva ? " " + c.pct_sem_estimativa + "% do trajeto sem estimativa de risco (sem dado de terreno)." : "") + (a.rotas[n].km_escadas > 0.02 ? " Inclui " + Math.round(a.rotas[n].km_escadas * 1000) + " m de escadas." : "") + "</div>";
+    }).join("");
+    var trechos = Lg.groupStretches(sel.trechos_de_risco), chegada = sel.chegada ? Lg.hhmm(sel.chegada) : null;
+    var estadoDados = semChuva ? "Dados de chuva indisponíveis" : "Chuva regional" + (f.idade_min != null ? ", atualizada há " + idadeTxt(f) : "") + (f.obsoleta ? " (defasada)" : "");
+    out.innerHTML =
+      "<div class='resumo'><div class='linha-tempo'><span class='tempo'>" + Lg.minutes(sel.tempo_min) + "</span><span>" + Lg.km(sel.distancia_km) + (chegada ? " · chegada prevista " + esc(chegada) : "") + " · " + (a.modal === "carro" ? "Carro" : "A pé") + "</span></div>" +
+      "<div class='decisao " + esc(nivel) + "'><span class='nivel'>" + Lg.kindBadge("previsto") + " " + esc(selo) + "</span><h2 id='res-titulo' tabindex='-1'>" + esc(a.alerta.titulo) + "</h2><p class='small'>" + esc(estadoDados) + ".</p></div>" +
+      "<div class='rotas-chips' role='group' aria-label='Rota e alternativas'>" + chips + "</div>" +
+      "<div class='acoes'><button type='button' class='btn sec' id='detalhes'>Ver detalhes</button><button type='button' class='btn sec' id='editar'>Editar trajeto</button></div></div>" +
+      "<div class='detalhe'>" + condicoesDaAnalise(a) +
+      "<p>" + esc(a.alerta.texto) + "</p>" + (a.alerta.motivos.length ? "<p class='small'>Por que você recebeu este alerta:</p>" + lista(a.alerta.motivos.map(esc), "small") : "") +
+      "<p class='small'>Orientação simplificada: o sistema indica a rota, a distância até os trechos de atenção e as interdições, mas não gera instruções de manobra.</p>" +
+      "<h2>Rota e alternativas</h2><p class='small'>Toque em uma rota para vê-la no mapa. Você escolhe qual usar; nenhuma é apresentada como segura.</p>" + (trade || "<p class='small'>Não há alternativa distinta para este par de pontos.</p>") +
+      (a.interdicoes_consideradas > 0 ? "<div class='indisp' role='note'><b>Interdição confirmada:</b> " + a.interdicoes_consideradas + " trecho(s) confirmado(s) por operador foram removidos do cálculo; nenhuma rota passa por eles.</div>" : "") +
       "<h2>Trechos de atenção · " + esc(titulos[ui.selecionada]) + "</h2>" + (semChuva ? "<p class='small'>Sem estimativa de risco sem dados de chuva.</p>" : trechos.length ? trechos.map(function (t) {
         return "<div class='trecho'><b>" + esc(t.nome || "via sem nome") + "</b> · " + (t.classe === "alto" ? "Alto" : "Atenção") + " · " + Lg.km(t.km) + "<br><span class='small'>passagem estimada entre " + Lg.hhmm(t.inicio) + " e " + Lg.hhmm(t.fim) + (t.n > 1 ? " · " + t.n + " trechos" : "") + (t.ocorrencia ? " · há ocorrência próxima" : "") + "</span></div>"; }).join("")
         : "<p class='small'>Nenhum trecho em atenção nesta rota no horário estimado.</p>") +
+      "<h2>Ocorrências no trajeto</h2><div id='oc-trajeto'></div>" +
       "<h2>Entenda o resultado</h2><div class='perguntas' role='group' aria-label='Perguntas sugeridas'>" + PERGUNTAS_ROTA.map(function (q) { return "<button type='button' class='chip' data-q='" + q[0] + "'>" + esc(q[1]) + "</button>"; }).join("") + "</div>" +
       "<div id='resposta' class='explica' aria-live='polite'></div>" +
       "<p class='linha'><button class='btn sec' id='explicar'>Explicar com mais contexto</button>" + (webglOk() ? "<button class='btn sec' id='ver3d'>Ver em 3D</button>" : "") + "</p><div id='explicacao' class='small' aria-live='polite'></div>" +
-      lista(a.avisos.map(esc), "small");
+      lista(a.avisos.map(esc), "small") + "</div>";
     Array.prototype.forEach.call(out.querySelectorAll("[data-q]"), function (b) { b.addEventListener("click", function () { responder(a, b.dataset.q); }); });
     Array.prototype.forEach.call(out.querySelectorAll("[data-rota]"), function (c) {
-      var escolhe = function () { ui.selecionada = c.dataset.rota; mostrar(a); var novo = out.querySelector("[data-rota='" + ui.selecionada + "']"); if (novo) novo.focus(); };
-      c.addEventListener("click", escolhe); c.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); escolhe(); } });
+      c.addEventListener("click", function () { ui.selecionada = c.dataset.rota; var abertas = !el("folha").classList.contains("compacta"); mostrar(a); definirFolha(abertas ? "expandida" : "compacta"); var novo = out.querySelector("[data-rota='" + ui.selecionada + "']"); if (novo) novo.focus(); });
     });
+    el("detalhes").addEventListener("click", function () { definirFolha(el("folha").classList.contains("compacta") ? "expandida" : "compacta"); });
+    el("editar").addEventListener("click", function () { el("tela").classList.remove("tem-analise"); liberarAnalise(); limparRotas(); orientarVazio(); definirFolha("expandida"); render(); });
     el("explicar").addEventListener("click", function () { explicar(a); });
     if (el("ver3d")) el("ver3d").addEventListener("click", function () { abrir3D(a); });
-    desenhar(a);
+    el("tela").classList.add("tem-analise"); desenhar(a); orientar(a); ocorrenciasNoTrajeto(sel); definirFolha("compacta");
+  }
+  function limparRotas() { ui.rotas.concat(ui.riscos).forEach(function (l) { ui.mapa.removeLayer(l); }); ui.rotas = []; ui.riscos = []; el("perfil").hidden = true; }
+  function orientarVazio() { el("orienta").className = ""; el("orienta-linha").textContent = "Planeje o deslocamento: escolha origem, destino e modal."; el("orienta-detalhe").textContent = ""; el("perfil").hidden = true; medirFolha(); }
+  /* Occurrences within about 150 m of the chosen route, from the public list; without it the section says it is unavailable. */
+  function ocorrenciasNoTrajeto(sel) {
+    var alvo = el("oc-trajeto"); if (!alvo) return;
+    if (!ui.ocorrencias) { alvo.innerHTML = "<p class='small'>Ocorrências indisponíveis agora (sem conexão ou sem resposta do servidor).</p>"; return; }
+    var perto = ui.ocorrencias.filter(function (o) { return sel.coordenadas.some(function (c) { return Math.abs(c[0] - o.lon) < 0.0016 && Math.abs(c[1] - o.lat) < 0.0014; }); });
+    alvo.innerHTML = perto.length ? lista(perto.map(function (o) {
+      var inter = o.situacao === "confirmada" && o.impacto_circulacao === "interdicao";
+      return "<b>" + (inter ? "Interdição confirmada" : o.situacao === "confirmada" ? "Ocorrência confirmada" : "Relato pendente, sem verificação") + "</b> · " + esc(o.tipo) + " · confiabilidade " + esc(o.confiabilidade); })) :
+      "<p class='small'>Nenhuma ocorrência registrada perto desta rota. Isso não prova que a via esteja livre.</p>";
+  }
+  function enquadrar(a) {
+    a = a || ui.analise; if (!a) { ui.mapa.setView([-30.03, -51.22], 12); return; }
+    var b = L_.polyline(a.rotas[ui.selecionada].coordenadas.map(function (c) { return [c[1], c[0]]; })).getBounds();
+    ui.mapa.fitBounds(b, { paddingTopLeft: [30, 190], paddingBottomRight: [30, Math.round(window.innerHeight * 0.42)] });
   }
   function desenhar(a) {
     ui.rotas.concat(ui.riscos).forEach(function (l) { ui.mapa.removeLayer(l); }); ui.rotas = []; ui.riscos = [];
@@ -247,8 +353,8 @@
       ui.rotas.push(L_.polyline(a.rotas[n].coordenadas.map(function (c) { return [c[1], c[0]]; }), { color: s.color, weight: sel ? 7 : 3, dashArray: s.dash, opacity: sel ? 0.95 : 0.55 }).addTo(ui.mapa));
     });
     var sel = a.rotas[ui.selecionada];
-    sel.trechos_de_risco.forEach(function (t) { if (t.coordenadas) ui.riscos.push(L_.polyline(t.coordenadas.map(function (c) { return [c[1], c[0]]; }), { color: "#b3202a", weight: 11, opacity: 0.5, dashArray: "2 7" }).addTo(ui.mapa)); });
-    ui.mapa.fitBounds(L_.polyline(sel.coordenadas.map(function (c) { return [c[1], c[0]]; })).getBounds().pad(0.15));
+    sel.trechos_de_risco.forEach(function (t) { if (t.coordenadas) ui.riscos.push(L_.polyline(t.coordenadas.map(function (c) { return [c[1], c[0]]; }), { color: "#b3202a", weight: 11, opacity: 0.5, dashArray: "2 7" })); });
+    aplicarCamadas(); enquadrar(a);
   }
   /* Short answers to the suggested questions: built from the analysis itself, with no external service. */
   var PERGUNTAS_ROTA = [["o_que_muda", "O que muda entre estas rotas?"], ["por_que_atencao", "Por que este trecho está em atenção?"], ["o_que_explica", "O que explica esta classificação?"], ["indisponivel", "Quais informações estão indisponíveis?"]];
@@ -367,7 +473,7 @@
     el("apagar").addEventListener("click", function () {
       liberarAnalise(); estado = D.wipe(store); ui.origem = ui.destino = null; ui.rascunho = {}; ui.verificacao = null;
       ["origem", "destino", "lugar", "relato"].forEach(function (k) { if (ui.pontos[k]) { ui.mapa.removeLayer(ui.pontos[k]); delete ui.pontos[k]; } });
-      ui.rotas.concat(ui.riscos).forEach(function (l) { ui.mapa.removeLayer(l); }); ui.rotas = []; ui.riscos = [];
+      limparRotas(); orientarVazio();
       el("apagado").textContent = "Dados apagados deste aparelho.";
     });
   }
@@ -376,7 +482,26 @@
   Array.prototype.forEach.call(document.querySelectorAll("#abas button"), function (b) { b.addEventListener("click", function () { ir(b.dataset.tela); }); });
   el("fechar3d").addEventListener("click", function () { el("vista3d").hidden = true; if (ui.mapa3d) { ui.mapa3d.remove(); ui.mapa3d = null; } });
   window.addEventListener("pagehide", liberarAnalise);
-  iniciarMapa();
+  iniciarMapa(); carregarOcorrencias(); medirFolha(); window.addEventListener("resize", medirFolha);
+  el("folha-alca").addEventListener("click", function () { definirFolha(el("folha").classList.contains("compacta") ? "expandida" : "compacta"); });
+  el("f-mais").addEventListener("click", function () { ui.mapa.zoomIn(); }); el("f-menos").addEventListener("click", function () { ui.mapa.zoomOut(); });
+  el("f-rota").addEventListener("click", function () { enquadrar(); });
+  el("f-loc").addEventListener("click", function () {
+    minhaLocalizacao().then(function (p) { marcar("atual", p); ui.mapa.setView([p.lat, p.lon], 15); aviso(""); }).catch(function (e) { aviso(e.message); });
+  });
+  el("f-relatar").addEventListener("click", function () { ir("relatar"); escolherNoMapa("relato", "Toque no mapa onde está o problema."); });
+  function popover() {
+    var pop = el("popover"), aberto = !pop.hidden, b = el("f-camadas");
+    if (aberto) { pop.hidden = true; b.setAttribute("aria-expanded", "false"); return; }
+    pop.hidden = false; b.setAttribute("aria-expanded", "true");
+    pop.innerHTML = "<h2>Camadas</h2>" + [["ocorrencias", "Ocorrências e relatos"], ["interdicoes", "Interdições confirmadas"], ["trechos", "Trechos de atenção da rota"]].map(function (c) {
+      return "<label><input type='checkbox' data-cam='" + c[0] + "'" + (ui.camadas[c[0]] ? " checked" : "") + "> " + c[1] + "</label>"; }).join("") + "<p class='small'>" + (ui.ocorrencias === null ? "Ocorrências indisponíveis agora." : "Relatos pendentes não interditam nenhuma via.") + "</p>" +
+      "<h2>Legenda</h2><div class='leg'><i><span class='marc pend' style='display:inline-flex'>!</span></i>Relato pendente, sem verificação</div><div class='leg'><i><span class='marc conf' style='display:inline-flex'>✓</span></i>Ocorrência confirmada</div>" +
+      "<div class='leg'><i><span class='marc int' style='display:inline-flex'>✕</span></i>Interdição confirmada: a rota não passa</div><div class='leg'><i><span class='tr' style='border-color:#333f48'></span></i>Rota habitual</div><div class='leg'><i><span class='tr' style='border-color:#1b7f5c'></span></i>Menor exposição estimada</div>" +
+      "<div class='leg'><i><span class='tr pt' style='border-color:#1f6fb2'></span></i>Alternativa</div><div class='leg'><i><span class='tr pt' style='border-color:#b3202a'></span></i>Trecho com exposição estimada (Alto)</div><p class='small'>Exposição estimada vem de um baseline sem validação em vias. Nunca indica rota segura.</p>";
+    Array.prototype.forEach.call(pop.querySelectorAll("[data-cam]"), function (i) { i.addEventListener("change", function () { ui.camadas[i.dataset.cam] = i.checked; aplicarCamadas(); }); });
+  }
+  el("f-camadas").addEventListener("click", popover);
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function (reg) {
       reg.addEventListener("updatefound", function () {
