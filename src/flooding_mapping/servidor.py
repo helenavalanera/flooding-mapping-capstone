@@ -371,6 +371,18 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
     return Handler
 
 
+def resumo_da_auditoria() -> dict | None:
+    """The summary of the baseline audit against documented events, from the report in the repository (None if absent)."""
+    arquivo = resolve("reports/ml/risco_trecho_auditoria.json")
+    if not arquivo.exists():
+        return None
+    a = json.loads(arquivo.read_text())
+    r, d = a["confronto_com_eventos_documentados"]["resumo"], a["dias_de_alerta_sem_registro"]
+    return {"eventos_documentados": r["eventos_geocodificados"], "datas_distintas": r["datas_distintas"], "detectados_em_algum_horario_do_dia": r["detectados_em_alguma_hora_do_dia"],
+            "detectados_na_hora_do_reporte": r["detectados_na_hora_do_reporte"], "nao_detectados": r["nao_detectados_no_dia"],
+            "dias_avaliados": d["dias"], "dias_com_alguma_via_em_atencao": d["dias_com_alguma_via_em_atencao"], "dias_documentados": d["dias_documentados"], "leitura": d["leitura"]}
+
+
 def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
     """The service wired from the repository's data and the environment; the CORS origin to use.
 
@@ -389,7 +401,7 @@ def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
     cobertura = json.loads(arquivo.read_text()) if arquivo.exists() else None
     servico = Servico(rede, ChuvaHoraria(lat, lon), oc.Ocorrencias(Path(env.get("FM_OCORRENCIAS") or resolve("data/operacional/ocorrencias.jsonl"))),
                       Explicador(gemini.do_ambiente(env)), config["risco_trecho"], token_operador=token,
-                      territorios=yaml_territorios(), resumo_rs=cobertura["estado"] if cobertura else None, cobertura_rs=cobertura,
+                      territorios=yaml_territorios(), resumo_rs=cobertura["estado"] if cobertura else None, cobertura_rs=cobertura, validacao=resumo_da_auditoria(),
                       meta_dados={"rede": destino.name, "gerada_em": time.strftime("%Y-%m-%d", time.localtime(destino.stat().st_mtime))})
     return servico, (env.get("CORS_ORIGEM") or "").strip()
 

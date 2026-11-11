@@ -436,3 +436,20 @@ def test_every_answer_that_uses_the_rain_states_that_it_is_regional():
     s, _ = montar()
     assert "grade de cerca de 10 km" in s.previsao(4)["escopo_da_chuva"] and "não medição neste trecho" in s.rotas(pedido())["escopo_da_chuva"]
     assert "estimativa regional" in s.risco_mapa(2)["escopo_da_chuva"] and "estimativa regional" in s.trecho("S0")["escopo_da_chuva"]
+
+
+def test_the_provenance_states_what_the_baseline_does_and_does_not_allow_one_to_say():
+    s, _ = montar()
+    s.validacao = {"eventos_documentados": 19, "detectados_em_algum_horario_do_dia": 4, "detectados_na_hora_do_reporte": 2, "nao_detectados": 15}
+    a = s.proveniencia()["afirmacoes"]
+    assert any("Uma interdição confirmada" in x for x in a["pode"]) and not any("segura" in x and "Que" not in x for x in a["pode"])
+    assert any("segura" in x for x in a["nao_pode"]) and any("regional" in x for x in a["nao_pode"])
+    assert any("dos 19 bloqueios documentados, ele sinalizou 4" in x and "2 na hora do reporte" in x for x in a["nao_pode"])
+    s.validacao = None
+    assert any("não está disponível" in x for x in s.proveniencia()["afirmacoes"]["nao_pode"])
+
+
+def test_the_server_reads_the_audit_summary_from_the_report_in_the_repository():
+    from flooding_mapping import servidor
+    v = servidor.resumo_da_auditoria()
+    assert v is None or (v["eventos_documentados"] > 0 and v["detectados_em_algum_horario_do_dia"] <= v["eventos_documentados"] and "ausência de registro não é exemplo negativo" in v["leitura"])

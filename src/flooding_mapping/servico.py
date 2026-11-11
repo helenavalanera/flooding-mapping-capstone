@@ -52,6 +52,21 @@ LIMITES = [
 ]
 
 
+def afirmacoes(validacao: dict | None) -> dict:
+    """What the baseline allows one to say and what it does not, with the evidence the audit found (nothing is typed by hand)."""
+    nao = ["Que haverá, ou não, alagamento neste trecho.", "Que uma rota é segura ou está livre de alagamento.",
+           "Que um trecho sem classe está livre de risco: ele pode estar sem dado de terreno ou de chuva.", "Que a chuva estimada seja a chuva neste trecho: ela é regional."]
+    if validacao:
+        nao.append(f"Que o baseline detecte os alagamentos que acontecem: dos {validacao['eventos_documentados']} bloqueios documentados, ele sinalizou "
+                   f"{validacao['detectados_em_algum_horario_do_dia']} em algum horário do dia e {validacao['detectados_na_hora_do_reporte']} na hora do reporte.")
+    else:
+        nao.append("Que o baseline detecte os alagamentos que acontecem: o confronto com os eventos documentados não está disponível nesta instalação.")
+    return {"pode": ["O terreno deste trecho tem mais tendência a acumular água do que o de outros trechos (índice relativo).",
+                     "Com a chuva estimada, uma regra explícita e reproduzível classifica o trecho como Atenção ou Alto.",
+                     "Entre as rotas calculadas, uma tem menor exposição ao risco estimado do que outra, segundo o baseline.",
+                     "Uma interdição confirmada por operador bloqueia o trecho no cálculo da rota."], "nao_pode": nao}
+
+
 def iso_local(ts) -> str | None:
     """ISO 8601 with the Brasilia offset, from a naive local timestamp (or its string)."""
     if ts is None:
@@ -72,10 +87,10 @@ def ponto(dados, campo: str, limites: tuple[float, float, float, float]) -> tupl
 class Servico:
     def __init__(self, rede: rt.Rede, chuva: ChuvaHoraria, store: oc.Ocorrencias, explicador: Explicador, params_risco: dict,
                  relogio=agora_local, token_operador: str = "", meta_dados: dict | None = None, territorios: dict | None = None,
-                 resumo_rs: dict | None = None, cobertura_rs: dict | None = None):
+                 resumo_rs: dict | None = None, cobertura_rs: dict | None = None, validacao: dict | None = None):
         self.rede, self.chuva, self.store, self.explicador, self.pr = rede, chuva, store, explicador, params_risco
         self.relogio, self.token_operador, self.meta_dados = relogio, token_operador, meta_dados or {}
-        self.territorios_config, self.resumo_rs, self.cobertura_rs = territorios, resumo_rs, cobertura_rs
+        self.territorios_config, self.resumo_rs, self.cobertura_rs, self.validacao = territorios, resumo_rs, cobertura_rs, validacao
         self._tabela: tuple[int, pd.DataFrame] | None = None
         self._analises: dict[str, tuple[float, rt.Analise, dict, dict]] = {}
         self._lock = threading.Lock()
@@ -429,7 +444,7 @@ class Servico:
         ], "cobertura": {"segmentos": r.n, "com_indice_fisico": int(np.isfinite(r.pct).sum()),
                          "fracao_com_indice_fisico": round(float(np.isfinite(r.pct).mean()), 3), "por_modal_em_km": cobertura_poa(r.arestas)},
             "parametros_provisorios": ["fator_no_medio", "antecedente_fator", "classes", "piso_ocorrencia", "confiabilidade", "penalidade_s_por_km_risco"],
-            "metodo": METODO, "limites": LIMITES, "dados_da_rede": self.meta_dados,
+            "metodo": METODO, "limites": LIMITES, "dados_da_rede": self.meta_dados, "validacao_do_baseline": self.validacao, "afirmacoes": afirmacoes(self.validacao),
             "natureza": {"observado": "chuva até agora; ocorrências com status", "previsto": "chuva futura e o risco estimado a partir dela",
                          "simulado": "efeito do fechamento de um trecho na rede mapeada", "confirmado": "interdição confirmada por operador com evidência"}}
 
