@@ -5,11 +5,11 @@
 | Dimensão | Estado | O que isso quer dizer |
 |---|---|---|
 | **Preparado para deploy** | **Sim** | Imagem Docker, porta dinâmica, health check, variáveis, download verificado da tabela de ruas e modelo `deploy/render.yaml`; tudo testado **localmente** em contêiner |
-| **Deploy realizado** | **Não** | Nada foi enviado ao GitHub nem ao Render; nenhum serviço existe |
-| **Deploy validado (HTTPS, remoto)** | **Não** | Depende de o serviço existir |
+| **Deploy realizado** | **Sim, em 11/11/2026** | Serviço no ar em `https://flooding-mapping-capstone.onrender.com` (código enviado à `develop`; tabela de ruas pela release `dados-rede-poa`) |
+| **Deploy validado (HTTPS, remoto)** | **Parcial** | Verificado por consultas à URL pública (seção "Validação remota"); faltam o fluxo do operador, a persistência e o proxy |
 | **Experiência validada em dispositivo físico** | **Não** | Ver `docs/qa_mobile_fisico.md` |
 
-Os testes abaixo valem para o **contêiner local**, que reproduz o que o Render faz com a imagem. Eles **não** provam o comportamento do Render (rede, proxy, limites do plano).
+As colunas "Local" valem para o **contêiner local**. A coluna "No Render" só vale onde diz "OK", e cada OK tem a evidência na seção "Validação remota".
 
 ## Arquitetura escolhida
 
@@ -118,3 +118,25 @@ Para o item 11 no Render, repita a chamada depois de preencher `GEMINI_API_KEY` 
 Sem chuva, as rotas seguem só com tempo e distância e as telas dizem isso. Sem o provedor, o texto padrão cobre o assistente. Se a tabela de ruas não puder ser baixada ou o hash não conferir, o servidor **não sobe** e diz o motivo no log (o serviço não chega a ficar saudável). Ao acordar do repouso (plano gratuito), o PWA mostra "Sem conexão com o servidor de análise" até o serviço responder.
 
 O service worker usa a rede primeiro para os arquivos do app e nunca guarda a API; a versão do cache (`VERSAO` em `pwa/sw.js`) é alterada à mão a cada versão do app (precisa lembrar disso ao publicar), e o aviso "Há uma nova versão" aparece ao atualizar (testado em `tests/e2e/pwa_sw.js`).
+
+## Validação remota (11/11/2026, `https://flooding-mapping-capstone.onrender.com`)
+
+Feita só com consultas de leitura e análises de rota (apagadas depois). Nenhum relato foi registrado e nenhuma credencial foi usada.
+
+| # | Verificação | Resultado remoto |
+|---|---|---|
+| 1, 2 | Build e inicialização | **OK**: serviço no ar; o download verificado da tabela de ruas funcionou (176.836 segmentos carregados) |
+| 3 | Saúde | **OK**: `status: ok`; chuva da Open-Meteo, não sintética, atualizada há 1 min |
+| 4 | Painel (`/`) | **OK** (HTTP 200, 0,3 s). A aparência não foi inspecionada visualmente por mim |
+| 5 | PWA (`/pwa/`, `sw.js`, `manifest`) | **OK** (HTTP 200) |
+| 6 | Rotas de carro e a pé | **OK**: carro 10,0 min e 5,9 km; a pé 61,6 min e 4,93 km; as duas com alternativa |
+| 7 | Meteorologia | **OK**: previsão real |
+| 8 | Registro e confirmação | **Parcial**: sem credencial a confirmação responde 403. O fluxo completo com o operador **não foi executado** |
+| 9 | Interdição e recálculo | **Não executado** (depende do item 8) |
+| 10 | Persistência após reinício | **Não executado**; depende do plano (sem disco, não persiste) |
+| 11 | Gemini com chamada real | **OK**: o assistente respondeu com `provedor_de_linguagem`, sem a palavra proibida |
+| 12 | Fallback sem o provedor | **Não executado** no Render (verificado só no contêiner local) |
+| 13 | Dispositivo físico | **Não executado** |
+| 14 | Proxy (`PROXIES_CONFIAVEIS`) | **Não executado**: exige a credencial do operador |
+
+Cabeçalhos observados: `Content-Security-Policy` restritiva, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store` na API. O cabeçalho `Strict-Transport-Security` **não apareceu** (o HTTPS é do Render). O servidor responde 501 a requisições `HEAD`: o health check do Render funciona (o serviço subiu), mas monitores externos que usem `HEAD` falhariam.
