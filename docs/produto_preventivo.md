@@ -231,7 +231,7 @@ testes de navegador emulam tela e toque, e não substituem GPU, sensores e rede 
 
 ## Limitações e pendências
 
-* **Documentos relacionados:** [`demonstracao.md`](demonstracao.md) (cenário, roteiro e checklists), [`operacao_ocorrencias.md`](operacao_ocorrencias.md), [`seguranca_lgpd.md`](seguranca_lgpd.md), [`sintese_academica.md`](sintese_academica.md).
+* **Documentos relacionados:** [`render.md`](render.md) (hospedagem no Render: custos, checklist, o que não foi feito), [`qa_mobile_fisico.md`](qa_mobile_fisico.md) (teste em celular, não executado), [`roteiro_apresentacao.md`](roteiro_apresentacao.md); [`demonstracao.md`](demonstracao.md) (cenário, roteiro e checklists), [`operacao_ocorrencias.md`](operacao_ocorrencias.md), [`seguranca_lgpd.md`](seguranca_lgpd.md), [`sintese_academica.md`](sintese_academica.md).
 * **Hospedagem:** nada foi publicado. O servidor roda em contêiner com um volume persistente (ver [`hospedagem.md`](hospedagem.md)); o GitHub Pages
   não executa Python. Para front-end hospedado fora, `CORS_ORIGEM` e `<meta name="api-base">`. Atrás de proxy, `PROXIES_CONFIAVEIS` define de quem
   se lê o `X-Forwarded-For`; sem ele o limite por cliente enxerga um só endereço.

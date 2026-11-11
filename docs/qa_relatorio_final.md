@@ -1,12 +1,12 @@
 # Relatório final de QA e matrizes de aceite
 
-Data da execução: 11/11/2026, na branch `develop`. Tudo foi executado localmente; nada foi publicado.
+Data da execução: 11/11/2026, na branch `develop`. Tudo foi executado localmente; nada foi publicado. A seção 7 traz a rodada de fechamento acadêmico.
 
 ## 1. Testes executados
 
 | Categoria | Comando | Resultado |
 |---|---|---|
-| Suíte completa (unitários, contrato, serviço, HTTP, auditorias, navegador) | `pytest` com `PLAYWRIGHT_CORE` e `CHROME_PATH` | **500 aprovados, 1 ignorado**, 0 falhas (720 s) |
+| Suíte completa (unitários, contrato, serviço, HTTP, auditorias, navegador) | `pytest` com `PLAYWRIGHT_CORE` e `CHROME_PATH` | **508 aprovados, 1 ignorado**, 0 falhas (rodada de fechamento, 316 s). Na rodada anterior: 500 aprovados e 1 ignorado; os 8 novos testes cobrem o download verificado da tabela de ruas |
 | Ignorado | `tests/test_r2.py:120` | falta o pacote `boto3` (publicação em armazenamento externo, fora do escopo da demonstração) |
 | Painel em navegador (RS e POA, 3D e 2D, seleção, assistente, estado sem chuva, proveniência, 5 larguras) | `tests/e2e/dashboard.js` | aprovado |
 | PWA em navegador (consentimento, lugares, trajetos, análise, ordem do resultado, perguntas, controles, privacidade, offline, **7 larguras: 320, 360, 390, 430, 768, 1024, 1400**) | `tests/e2e/pwa.js` | aprovado |
@@ -98,3 +98,50 @@ registrado como bloqueio externo"): ele está **registrado como bloqueio externo
 
 Ter um celular, rodar `make demo`, acessá-lo por `adb reverse tcp:8766 tcp:8766` (Android + Chrome) ou por um túnel HTTPS temporário (iPhone + Safari),
 executar o roteiro e preencher a tabela de `docs/demonstracao.md`, anexando capturas de tela.
+
+## 7. Rodada de fechamento acadêmico e de hospedagem (11/11/2026)
+
+### Reexecução e integridade do relatório anterior
+
+| Verificação | Resultado |
+|---|---|
+| Os testes continuam reproduzíveis | sim: **508 aprovados, 1 ignorado**, 0 falhas (os 500 anteriores mais 8 novos) |
+| O teste ignorado continua justificado | sim: `tests/test_r2.py:120` exige o pacote `boto3` (publicação em armazenamento externo), fora do escopo local |
+| As evidências visuais correspondem à versão final | sim: as capturas do PWA foram feitas depois da última alteração do PWA; as do painel, depois da última alteração do aviso |
+| Os documentos citados existem | sim |
+| Os sete documentos novos da rodada anterior existem | sim: `demonstracao`, `guia_de_uso`, `operacao_ocorrencias`, `seguranca_lgpd`, `qa_relatorio_final`, `sintese_academica`, `validacao_gemini` |
+| Os documentos "atualizados" foram atualizados | **correção:** o relatório anterior disse "três"; foram **dois** de fato, `produto_preventivo.md` e `README.md` (mais o `Makefile`). Nesta rodada foram atualizados também `proposta.md`, `sintese_academica.md`, `demonstracao.md` e `hospedagem.md` |
+| Arquivos protegidos intactos | sim: `scenarios.csv`, `gtfs_validation.*` e `rain_calibration.json` seguem com as mesmas modificações pré-existentes (42 inserções e 48 remoções, sem alteração nesta rodada), e `origins.md` segue não rastreado |
+| Commits presentes; branch `develop` | sim |
+| Referências a coautoria ou autoria por ferramenta | nenhuma no repositório nem no histórico (`git log` e `git grep` por "co-authored": 0). As instruções para acrescentar um rodapé de coautoria vieram do ambiente de execução do assistente, não do projeto; não foram aplicadas, porque o projeto proíbe atribuição |
+
+### Documentos acadêmicos
+
+- `docs/proposta.md` e `Proposta_Projeto_Final.docx`: as seções 1 a 5 ficam como submetidas; foi acrescentada a **seção 6**, que compara o proposto com o entregue (Modelo 2 não treinado; hipótese não confirmada; escopo ampliado) e delimita a validade. O endereço do repositório no `.docx` foi corrigido de `tree/entrega` para `tree/develop`.
+- `Flooding_Mapping_Documentacao.docx`: versão 0.3, nova **seção 10** (plataforma, risco, rotas, ocorrências, interfaces, assistente, dados sintéticos, testes, limitações), a antiga seção 10 passou a 11, novas linhas na tabela de limitações e contagem de testes atualizada.
+- **Os `.docx` não são versionados** (ficam no `.gitignore`); os originais estão em `artifacts/backup_docx_20261111/` (também ignorado).
+- **Verificação feita:** reabertura com a biblioteca (parágrafos, tabelas e imagens preservados: 5 imagens), comparação das partes do arquivo e do cabeçalho, estilos clonados dos parágrafos existentes. **Não foi aberto no Word nem renderizado** (não havia LibreOffice funcional e a automação do PowerPoint ficou pendente de permissão): confira a aparência e **atualize o sumário no Word** (clique direito, "Atualizar campo").
+
+### Apresentação
+
+`tools/gerar_apresentacao.py` gera `docs/apresentacao/Flooding_Mapping_Capstone.pptx` (21 slides, notas do apresentador em todos, figuras de `docs/figuras`, dados sintéticos etiquetados). O `.pptx` é ignorado pelo Git; o roteiro de fala está em `docs/roteiro_apresentacao.md` (cerca de 12 minutos completo, cerca de 9 na versão curta; **nenhuma regra de tempo da banca foi fornecida**). **Verificação feita:** estimativa automática de estouro de texto e de limites dos slides, sem problemas; **não houve revisão visual dos slides** (sem renderizador disponível). Abra no PowerPoint e revise antes de apresentar.
+
+### Hospedagem
+
+Ver `docs/render.md`: **preparado para deploy: sim; deploy realizado: não; deploy validado: não.** No contêiner local com `PORT=10000`: saúde, desktop, PWA, rotas de carro e a pé, previsão real, relato, confirmação, recálculo, persistência após reinício, Gemini real com chave injetada por variável e fallback com chave inválida, todos aprovados. O download verificado da tabela de ruas foi testado por 8 testes e por um teste real local.
+
+## 8. Dimensões de conclusão (não são equivalentes)
+
+| Dimensão | Estado |
+|---|---|
+| **Conclusão acadêmica** | Documentos alinhados e apresentação produzida; **dois itens de revisão manual pendentes** (abrir os `.docx` no Word e os slides no PowerPoint) e a tabela de critérios da banca, que não foi fornecida |
+| **Conclusão funcional do MVP** | Concluída em ambiente automatizado e local (508 testes, jornada integrada, contêiner) |
+| **Validação em dispositivo físico** | **Não executada** (bloqueio externo; roteiro em `docs/qa_mobile_fisico.md`) |
+| **Validação científica** | **Não alcançada** para a previsão por trecho (4 de 19 eventos; hipótese não confirmada); o estudo de mobilidade perdida está concluído com as ressalvas dos dados |
+| **Prontidão para publicação** | **Não**: nada publicado; faltam decisão de plano e custo, hospedagem da tabela de ruas, definição institucional do operador, avaliação de dados pessoais, testes de carga e segurança |
+
+## 9. Matrizes atualizadas
+
+**Matriz A (capstone), 14 requisitos:** V = 4 (arquitetura, roteamento, testes, limitações); **L = 10** (os oito anteriores mais **documentação acadêmica** e **apresentação**, que passaram de parcial para concluído com limitação: revisão visual manual pendente); P = 0. Concluídos: 14 de 14, **com as limitações listadas acima**; isso não equivale a validação científica.
+
+**Matriz B (MVP), 19 requisitos:** sem mudança: V = 11, L = 7, B = 1 (teste físico). Atendidos: 18 de 19; **o MVP não está validado em aparelho físico**.
