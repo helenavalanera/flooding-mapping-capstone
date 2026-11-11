@@ -261,7 +261,7 @@ class Servico:
         return {"rotulo": ROTULOS[nome], "coordenadas": rota["coordenadas"], "tempo_min": round(rota["tempo_s"] / 60, 1),
                 "distancia_km": round(rota["distancia_km"], 2), "exposicao_km_risco": round(rota["exposicao_km_risco"], 3),
                 "km_atencao_ou_alto": round(rota["km_atencao_ou_alto"], 2), "km_alto": round(rota["km_alto"], 2),
-                "km_sem_estimativa": round(rota["km_sem_estimativa"], 2), "escore_maximo": rota["escore_maximo"],
+                "km_sem_estimativa": round(rota["km_sem_estimativa"], 2), "km_escadas": round(rota.get("km_escadas", 0.0), 3), "escore_maximo": rota["escore_maximo"],
                 "instante_do_pico": iso_local(rota["instante_do_pico"]), "chegada": iso_local(rota["chegada"]), "trechos_de_risco": trechos}
 
     def _analise(self, identificador: str):

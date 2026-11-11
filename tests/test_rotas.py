@@ -133,3 +133,14 @@ def test_each_risk_stretch_carries_its_own_line_so_it_can_be_highlighted_on_the_
     assert len(t["coordenadas"]) == len(t["segmentos"]) + 1                         # n consecutive segments = n + 1 nodes
     assert all(c in rota["coordenadas"] for c in t["coordenadas"]) and "i0" not in t and "i1" not in t
     assert t["coordenadas"][0] == rota["coordenadas"][0]                            # the whole short path is the stretch here
+
+
+def test_the_best_route_is_found_even_when_it_goes_far_from_the_straight_line():
+    # A: short detour next to the line but slow (residential); B: a fast road that bows out 4.4 km from the line. A search area
+    # around the line would have kept A; the optimum is B.
+    df = pd.DataFrame([
+        aresta("A0", 0, 1, (0.0, 0.0), (0.01, 0.001), 8000.0, 50.0, highway="residential"), aresta("A1", 1, 2, (0.01, 0.001), (0.02, 0.0), 8000.0, 50.0, highway="residential"),
+        aresta("B0", 0, 3, (0.0, 0.0), (0.01, 0.04), 4400.0, 50.0, highway="motorway"), aresta("B1", 3, 2, (0.01, 0.04), (0.02, 0.0), 4400.0, 50.0, highway="motorway")])
+    r = rede(df)
+    rota = Analise(r, "carro", (-51.22, -30.03), (-51.20, -30.03), SAIDA, tabela(mm_h=0), sem_risco(r), np.zeros(r.n, bool), AGORA).caminho(0.0)
+    assert ids(r, rota) == ["B0", "B1"] and rota["tempo_s"] == pytest.approx(2 * 4400 / (80 / 3.6))

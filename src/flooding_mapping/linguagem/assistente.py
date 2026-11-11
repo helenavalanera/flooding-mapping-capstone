@@ -109,6 +109,11 @@ def contexto_rota(a: dict, brutas: dict, interdicoes: int) -> dict:
     for n, r in rotas.items():
         if r["pct_do_trajeto_sem_dado"] >= 10 and not meteo.get("indisponivel"):
             lacunas.append(f"{r['rotulo']}: {r['pct_do_trajeto_sem_dado']}% do trajeto não tem índice físico (trechos sem estimativa, que não são risco baixo).")
+    if a["modal"] == "pe":
+        lacunas.append("Rua caminhável não significa calçada: a existência e a condição de calçadas não estão nos dados.")
+        escadas = max((brutas[n].get("km_escadas", 0.0) for n in rotas), default=0.0)
+        if escadas > 0:
+            lacunas.append(f"Alguma rota inclui cerca de {round(escadas * 1000)} m de escadas, que nem todos conseguem usar.")
     if "menor_exposicao" not in rotas:
         lacunas.append("Não foi encontrada alternativa com menor exposição estimada.")
     return {"tipo": "rota", "modal": a["modal"], "chuva_na_janela_mm": meteo.get("total_na_janela_mm"), "interdicoes_confirmadas_consideradas": interdicoes, "rotas": rotas,

@@ -66,6 +66,7 @@ class Rede:
         self.no_lon[self.v], self.no_lat[self.v] = a["lon1"].to_numpy(), a["lat1"].to_numpy()
         self.comp_m = a["comprimento_m"].to_numpy(float)
         self.pct = a["percentil"].to_numpy(float)
+        self.escada = a["highway"].eq("steps").to_numpy()   # walkable, but a person who cannot take stairs cannot use it
         self._cos = math.cos(math.radians(float(np.mean(self.no_lat))))
         self._p0, self._p1 = self._xy(a["lon0"], a["lat0"]), self._xy(a["lon1"], a["lat1"])
         self._arvore_arestas = cKDTree((self._p0 + self._p1) / 2)
@@ -206,25 +207,13 @@ class Analise:
         self.saida_s = saida.value / 1e9
         self.peso = np.nan_to_num(risco["peso"]).tolist()
         self.confiab = np.nan_to_num(risco["confiabilidade"]).tolist()
-        xs = rede.no_lon[[self.no_o, self.no_d]], rede.no_lat[[self.no_o, self.no_d]]
-        self._limites = (xs[0].min(), xs[0].max(), xs[1].min(), xs[1].max())
-
-    def _caixa(self, margem_km: float) -> np.ndarray:
-        r = self.rede
-        dlat = margem_km / 110.54
-        dlon = margem_km / (111.32 * r._cos)
-        x0, x1, y0, y1 = self._limites
-        return (r.no_lon >= x0 - dlon) & (r.no_lon <= x1 + dlon) & (r.no_lat >= y0 - dlat) & (r.no_lat <= y1 + dlat)
 
     def caminho(self, aversao: float = 0.0, reuso: dict | None = None) -> dict | None:
-        p = self.rede.p
-        for margem in (p["corredor_margem_km"], p["corredor_margem_km"] * 4, None):
-            achado = _dijkstra(self.rede, self.modo, self.no_o, self.no_d, self.saida_s, self.base_s, self.fatores,
-                               self.peso, self.confiab, self.bloqueada, aversao * p["penalidade_s_por_km_risco"],
-                               reuso or {}, None if margem is None else self._caixa(margem))
-            if achado:
-                return self.descrever(*achado)
-        return None
+        """Best-cost path over the WHOLE graph. A search area around the straight line was tried and dropped: on a real pair it
+        cut the optimal walk (it left the area by 3.2 km) and returned one 12 minutes slower, while a full search takes ~0.1 s."""
+        achado = _dijkstra(self.rede, self.modo, self.no_o, self.no_d, self.saida_s, self.base_s, self.fatores, self.peso, self.confiab,
+                           self.bloqueada, aversao * self.rede.p["penalidade_s_por_km_risco"], reuso or {}, None)
+        return self.descrever(*achado) if achado else None
 
     def descrever(self, arestas: list[int], inicios: list[float], nos: list[int]) -> dict:
         """Metrics of a path: time, distance and exposure to the estimated risk at passage time."""
@@ -269,7 +258,7 @@ class Analise:
             "exposicao_km_risco": float((km * escore0).sum()),
             "km_atencao_ou_alto": float(km[np.isin(cls, ["atencao", "alto"])].sum()),
             "km_alto": float(km[cls == "alto"].sum()),
-            "km_sem_estimativa": float(km[sem].sum()),
+            "km_sem_estimativa": float(km[sem].sum()), "km_escadas": float(km[r.escada[arestas]].sum()),
             "escore_maximo": None if pico is None else float(escore[pico]),
             "instante_do_pico": None if pico is None else str(quando[pico]),
             "trechos_de_risco": [{**t, "inicio": str(t["inicio"]), "fim": str(t["fim"]), "km": round(t["km"], 3)} for t in trechos],

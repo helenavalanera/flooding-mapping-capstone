@@ -151,6 +151,4 @@ roteamento:
   aversoes_candidatas: [1, 3, 10]
   # Rotas distintas compartilham no máximo esta fração do comprimento com as já escolhidas.
   compartilhamento_maximo: 0.7
-  # Margem do corredor de busca em torno da reta origem-destino.
-  corredor_margem_km: 3.0
   snap_maximo_m: 500

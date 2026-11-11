@@ -25,17 +25,27 @@ OUTPUT = "data/processed/rede_poa.parquet"
 TERRENO = ["elev", "rel_elev_250", "slope", "height_above_water", "log_flow_acc"]
 
 
-def nomes_das_vias(pbf) -> dict[int, str]:
-    """OSM way id -> street name, for the ways that have one."""
-    nomes = {}
+SERVICOS_NAO_PUBLICOS = {"parking_aisle", "driveway", "drive-through", "emergency_access"}   # not streets a car goes through to somewhere else
+ROTATORIAS = {"roundabout", "circular"}
+LIBERA_PEDESTRE = {"yes", "designated", "permissive"}
+
+
+def atributos_das_vias(pbf) -> dict[int, dict]:
+    """OSM way id -> the tags the routing needs and the segment table does not carry (name, junction, service)."""
+    vias = {}
     for obj in osmium.FileProcessor(str(pbf), osmium.osm.WAY):
-        if obj.tags.get("highway") and obj.tags.get("name"):
-            nomes[obj.id] = obj.tags["name"]
-    return nomes
+        if obj.tags.get("highway"):
+            vias[obj.id] = {"nome": obj.tags.get("name"), "junction": obj.tags.get("junction"), "service": obj.tags.get("service")}
+    return vias
 
 
-def construir(segmentos: gpd.GeoDataFrame, terreno: pd.DataFrame, nomes: dict[int, str]) -> pd.DataFrame:
-    """One row per segment: graph columns, endpoints in lon/lat, terrain percentile and its parts."""
+def construir(segmentos: gpd.GeoDataFrame, terreno: pd.DataFrame, vias: dict[int, dict]) -> pd.DataFrame:
+    """One row per segment: graph columns, endpoints in lon/lat, terrain percentile and its parts.
+
+    Three rules the raw segment table does not apply, all from OSM conventions:
+    * a roundabout is one-way even when the tag is missing;
+    * a parking aisle, driveway, drive-through or emergency access is not a street a car crosses to go elsewhere;
+    * a private or closed way is not open to pedestrians either, unless it says so for foot."""
     lonlat = segmentos.geometry.to_crs("EPSG:4326")
     inicio, fim = shapely.get_point(lonlat.values, 0), shapely.get_point(lonlat.values, -1)
     tabela = pd.DataFrame({
@@ -43,7 +53,13 @@ def construir(segmentos: gpd.GeoDataFrame, terreno: pd.DataFrame, nomes: dict[in
         "comprimento_m": segmentos["length_m"].to_numpy(), "highway": segmentos["highway"].to_numpy(),
         "oneway": segmentos["oneway"].to_numpy(), "drive": segmentos["drive"].to_numpy(), "walk": segmentos["walk"].to_numpy(),
         "lon0": shapely.get_x(inicio), "lat0": shapely.get_y(inicio), "lon1": shapely.get_x(fim), "lat1": shapely.get_y(fim),
-        "nome": segmentos["way_id"].map(nomes).to_numpy()})
+        "nome": segmentos["way_id"].map(lambda w: (vias.get(w) or {}).get("nome")).to_numpy()})
+    junction = segmentos["way_id"].map(lambda w: (vias.get(w) or {}).get("junction"))
+    servico = segmentos["way_id"].map(lambda w: (vias.get(w) or {}).get("service"))
+    tabela.loc[junction.isin(ROTATORIAS).to_numpy() & tabela["oneway"].isin(["no"]).to_numpy(), "oneway"] = "yes"
+    tabela["drive"] = tabela["drive"].to_numpy() & ~servico.isin(SERVICOS_NAO_PUBLICOS).to_numpy()
+    fechada = segmentos["access"].isin(["no", "private"]) & ~segmentos["foot"].isin(LIBERA_PEDESTRE)
+    tabela["walk"] = tabela["walk"].to_numpy() & ~fechada.to_numpy()
     indice = indice_fisico(terreno.set_index("segment_id")[TERRENO])
     extras = indice[["percentil"] + COMPONENTES].join(terreno.set_index("segment_id")[TERRENO])
     return tabela.join(extras.astype("float32"), on="segmento_id")
@@ -101,7 +117,7 @@ def main() -> None:
         return
     segmentos = gpd.read_parquet(resolve("data/interim/segments.parquet"))
     terreno = pd.read_parquet(resolve("data/interim/susceptibility_features_v2.parquet"))
-    tabela = construir(segmentos, terreno, nomes_das_vias(resolve("data/interim/poa.osm.pbf")))
+    tabela = construir(segmentos, terreno, atributos_das_vias(resolve("data/interim/poa.osm.pbf")))
     saida = resolve(OUTPUT)
     saida.parent.mkdir(parents=True, exist_ok=True)
     tabela.to_parquet(saida)

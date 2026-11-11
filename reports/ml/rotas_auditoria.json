@@ -1,0 +1,65 @@
+{
+  "natureza": "auditoria do cálculo; não valida a segurança nem a qualidade real de nenhum deslocamento",
+  "conectividade": {
+    "carro": {
+      "km_permitido": 5306.1,
+      "km_alcancavel": 5129.4,
+      "km_isolado": 176.7,
+      "fracao_alcancavel": 0.9667,
+      "segmentos_isolados": 3794
+    },
+    "pe": {
+      "km_permitido": 5956.6,
+      "km_alcancavel": 5403.4,
+      "km_isolado": 553.2,
+      "fracao_alcancavel": 0.9071,
+      "segmentos_isolados": 12806
+    }
+  },
+  "conferencia_com_networkx": {
+    "carro": {
+      "pares": 100,
+      "pares_com_diferenca": 0,
+      "maior_diferenca_s": 0.0,
+      "maior_excesso_pct": 0.0,
+      "mais_lento_que_a_referencia": 0,
+      "mais_rapido_que_a_referencia": 0
+    },
+    "pe": {
+      "pares": 100,
+      "pares_com_diferenca": 0,
+      "maior_diferenca_s": 0.0,
+      "maior_excesso_pct": 0.0,
+      "mais_lento_que_a_referencia": 0,
+      "mais_rapido_que_a_referencia": 0
+    }
+  },
+  "atributos_osm": {
+    "vias": 47566,
+    "rotatorias": 227,
+    "rotatorias_sem_oneway": 69,
+    "escadas": 545,
+    "estacionamento_ou_garagem": 3987,
+    "acesso_privado_ou_fechado": 4164,
+    "com_calcada_informada": 5945,
+    "com_velocidade_maxima": 12092
+  },
+  "o_motor_usa": [
+    "geometria e comprimento dos segmentos",
+    "sentido único (incluindo rotatórias sem a marca)",
+    "acesso privado ou fechado (carro e pedestre)",
+    "serviços de estacionamento e garagem fora do carro",
+    "classe da via para a velocidade de fluxo livre",
+    "interdições confirmadas como bloqueio rígido",
+    "risco estimado no horário de passagem como penalidade"
+  ],
+  "o_motor_nao_usa": [
+    "velocidade máxima da via (limite legal não é velocidade de viagem)",
+    "restrições de conversão (relações do OSM)",
+    "semáforos e congestionamento",
+    "existência e condição de calçada",
+    "inclinação para o tempo a pé",
+    "passagens inferiores e túneis como pontos de alagamento",
+    "ônibus"
+  ]
+}
