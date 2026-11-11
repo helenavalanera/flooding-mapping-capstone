@@ -115,6 +115,8 @@ def test_static_files_are_served_with_security_headers_and_no_path_traversal(api
     r = requests.get(base + "/")
     assert r.status_code == 200 and "text/html" in r.headers["Content-Type"]
     assert "frame-ancestors 'none'" in r.headers["Content-Security-Policy"] and r.headers["X-Content-Type-Options"] == "nosniff"
+    # só a origem vai a outros domínios: o OpenStreetMap exige um Referer nos tiles, e o caminho da página nunca vaza
+    assert r.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
     host, port = base.removeprefix("http://").split(":")
     for caminho in ("/../../config/analysis.yaml", "/..%2f..%2fconfig/analysis.yaml", "/%2e%2e/%2e%2e/.env", "/index.html/../../servidor.py"):
         c = http.client.HTTPConnection(host, int(port))

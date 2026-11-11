@@ -189,7 +189,9 @@ def criar_handler(servico: Servico, cors_origem: str = "", limitador: Limitador 
             self.send_header("Content-Type", tipo)
             self.send_header("Content-Length", str(tamanho))
             self.send_header("X-Content-Type-Options", "nosniff")
-            self.send_header("Referrer-Policy", "no-referrer")
+            # Só a origem (nunca o caminho) vai a outros domínios. "no-referrer" fazia o navegador omitir o Referer nos mapas-base, e a política
+            # de uso dos tiles do OpenStreetMap exige um Referer válido. Dentro do próprio servidor o Referer completo continua indo.
+            self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
             self.send_header("Permissions-Policy", "geolocation=(self), camera=(), microphone=()")
             self.send_header("Cache-Control", "no-store" if api else "no-cache")
             if not api:
