@@ -510,7 +510,7 @@
       });
     }).catch(function () {});
   }
-  api("saude").then(function (s) { ui.servidor = s; if (s.chuva && s.chuva.sintetica) aviso("DEMONSTRAÇÃO: a chuva e as ocorrências deste servidor são sintéticas, não dados do mundo real."); else if (s.status === "degradado") aviso("Os dados de chuva não estão disponíveis agora; as análises podem falhar."); })
+  api("saude").then(function (s) { ui.servidor = s; if (s.chuva && s.chuva.sintetica) { aviso("DEMONSTRAÇÃO: a chuva e as ocorrências deste servidor são sintéticas, não dados do mundo real."); var m = document.querySelector("#orienta .marca"); m.textContent = "DEMONSTRAÇÃO · dados sintéticos"; m.classList.add("demo"); } else if (s.status === "degradado") aviso("Os dados de chuva não estão disponíveis agora; as análises podem falhar."); })
     .catch(function () { aviso("Sem conexão com o servidor de análise. Seus lugares continuam aqui; a análise de rotas precisa de conexão."); });
   ir("planejar");
 })();

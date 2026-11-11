@@ -22,6 +22,7 @@ const t0 = Date.now(), T = (e) => console.log(((Date.now() - t0) / 1000).toFixed
   await p.selectOption("#sel-o", "__mapa"); await p.mouse.click(390 / 2 + 30, 844 * 0.4); await p.waitForTimeout(300);
   await p.selectOption("#sel-d", "__mapa"); await p.mouse.click(390 / 2 + 100, 844 * 0.28); await p.waitForTimeout(300);
   await p.click("#analisar"); await p.waitForSelector("#resultado .decisao", { timeout: 90000 }); await p.waitForTimeout(800);
+  assert.match(await p.innerText("#orienta .marca"), /DEMONSTRAÇÃO · dados sintéticos/i, "o aviso de dados sintéticos permanece depois da análise");
   const antes = { orienta: await p.innerText("#orienta-linha"), tempo: await p.innerText("#resultado .resumo .tempo"), detalhe: await p.innerText("#orienta-detalhe") };
   const n0 = Number((/evita (\d+) trecho/.exec(antes.detalhe) || [0, 0])[1]);
   // Etapa 4: relato no meio da rota (ponto da própria rota desenhada), como um usuário faria
@@ -50,6 +51,7 @@ const t0 = Date.now(), T = (e) => console.log(((Date.now() - t0) / 1000).toFixed
   T("// Etapa 5: recalcular na PWA");
   await p.click("#editar"); await p.waitForSelector("#analisar"); 
   await p.click("#analisar"); await p.waitForSelector("#resultado .decisao", { timeout: 90000 }); await p.waitForTimeout(800);
+  T("recalculada");
   const depois = { orienta: await p.innerText("#orienta-linha"), tempo: await p.innerText("#resultado .resumo .tempo"), detalhe: await p.innerText("#orienta-detalhe") };
   const rotaDepois = await p.evaluate(() => Array.from(document.querySelectorAll("#mapa path.leaflet-interactive")).filter((x) => x.getTotalLength() > 150).sort((a, b) => b.getTotalLength() - a.getTotalLength())[0].getAttribute("d"));
   const n1 = Number((/evita (\d+) trecho/.exec(depois.detalhe) || [0, 0])[1]);
@@ -57,5 +59,7 @@ const t0 = Date.now(), T = (e) => console.log(((Date.now() - t0) / 1000).toFixed
   assert.ok(n1 > n0, `a interdição confirmada entra no cálculo (${n0} -> ${n1})`);
   console.log("antes:", JSON.stringify(antes)); console.log("depois:", JSON.stringify(depois));
   assert.deepStrictEqual(d.erros, [], "erros no desktop: " + d.erros.join(" | ")); assert.deepStrictEqual(m.erros, [], "erros no PWA: " + m.erros.join(" | "));
-  await d.browser.close(); await m.browser.close(); console.log("jornada: ok");
+  T("verificações concluídas"); console.log("jornada: ok");
+  // fechar o Chrome com WebGL por software pode levar minutos; o resultado já está decidido, então o fechamento tem prazo
+  await Promise.race([Promise.all([d.browser.close(), m.browser.close()]), new Promise((r) => setTimeout(r, 15000))]); process.exit(0);
 })().catch((e) => { console.error("FALHOU:", e.message); process.exit(1); });

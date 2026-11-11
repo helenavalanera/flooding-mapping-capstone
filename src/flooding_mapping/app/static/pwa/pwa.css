@@ -138,3 +138,5 @@ h1 { margin:0; font-size:1.25rem; } h2 { font-size:1rem; margin:14px 0 6px; } h3
 @media (max-height:520px) { .folha.expandida { max-height:calc(100dvh - var(--orienta-b) - var(--nav) - 16px); } }
 
 @media (max-height:700px) { #orienta .marca { display:none; } #orienta .principal { padding:8px 14px; } #orienta .linha-principal { font-size:1.02rem; } #orienta .depois { font-size:.78rem; padding:6px 14px; } .folha.compacta { max-height:38%; } }
+
+#orienta .marca.demo { display:block !important; color:#ffd479; font-weight:800; }
