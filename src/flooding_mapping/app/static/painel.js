@@ -426,6 +426,13 @@
     return "<div class='rolagem'><table><thead><tr><th>Funcionalidade</th><th>Rio Grande do Sul</th><th>Porto Alegre</th></tr></thead><tbody>" +
       Object.keys(CAP_NOME).map(function (k) { return "<tr><th scope='row'>" + Lg.esc(CAP_NOME[k]) + "</th>" + cel(rs, k) + cel(poa, k) + "</tr>"; }).join("") + "</tbody></table></div>";
   }
+  /* What the baseline allows one to say, what it does not, and how it compared with the documented events (all from the audit report). */
+  function afirmacoes(p) {
+    var v = p.validacao_do_baseline, a = p.afirmacoes || { pode: [], nao_pode: [] };
+    return "<h3>O que se pode e o que não se pode afirmar</h3><div class='duas'><div><p><b>Pode</b></p>" + ul(a.pode.map(Lg.esc), "plain small") + "</div><div><p><b>Não pode</b></p>" + ul(a.nao_pode.map(Lg.esc), "plain small") + "</div></div>" +
+      (v ? "<h3>Confronto com eventos documentados " + Lg.kindBadge("observado") + "</h3><p class='small'>Bloqueios geocodificados: <b>" + v.eventos_documentados + "</b> em <b>" + v.datas_distintas + "</b> datas. O baseline sinalizou <b>" + v.detectados_em_algum_horario_do_dia + "</b> em algum horário do dia e <b>" + v.detectados_na_hora_do_reporte + "</b> na hora do reporte (não detectados no dia: " + v.nao_detectados + "). Em " + v.dias_com_alguma_via_em_atencao + " de " + v.dias_avaliados + " dias avaliados alguma via ficou em atenção, e só " + v.dias_documentados + " dias têm registro. " + Lg.esc(v.leitura || "") + " Poucos eventos e sem rótulo de ausência: é um confronto, não uma validação.</p>"
+        : "<p class='indisp'>O confronto com os eventos documentados não está disponível nesta instalação.</p>");
+  }
   function proveniencia() {
     var box = el("vista-proveniencia");
     box.innerHTML = "<p class='muted'>Carregando…</p>";
@@ -446,7 +453,7 @@
         "<h3>Cobertura " + Lg.kindBadge("observado") + "</h3><p class='small'>" + Lg.esc(T.dados.metodo_de_cobertura) + "</p>" +
         (e ? "<p><b>Rio Grande do Sul:</b> " + e.municipios + " municípios — " + e.municipios_por_classe.disponivel + " com dados disponíveis, " + e.municipios_por_classe.parcial + " com cobertura parcial, " + e.municipios_por_classe.insuficiente + " com dados insuficientes. Malha DAER: " + e.segmentos.toLocaleString("pt-BR") + " segmentos, índice físico em " + Lg.pct(e.fracao_km_com_indice_fisico) + " do km e tráfego em " + Lg.pct(e.fracao_km_com_vdm) + ". " + e.rodovias + " rodovias (" + e.rodovias_por_classe.disponivel + " com dados disponíveis).</p>" : "<p class='indisp'>Cobertura estadual indisponível.</p>") +
         (poa ? "<p><b>Porto Alegre:</b> índice físico em " + Lg.pct(poa.dirigivel.fracao_com_indice) + " do km dirigível (" + Lg.km(poa.dirigivel.km) + "), " + Lg.pct(poa.caminhavel.fracao_com_indice) + " do km caminhável (" + Lg.km(poa.caminhavel.km) + ") e " + Lg.pct(poa.somente_a_pe.fracao_com_indice) + " dos " + Lg.km(poa.somente_a_pe.km) + " só de pedestres. Trechos sem índice ficam <b>sem estimativa</b>, não em risco baixo.</p>" : "<p class='indisp'>Cobertura de Porto Alegre indisponível (calculada a partir da rede de ruas).</p>") +
-        (p ? "<h3>Metodologia do risco por trecho (Porto Alegre)</h3><p>" + Lg.esc(p.metodo) + "</p><h3>Limitações</h3>" + ul(p.limites.map(Lg.esc)) + "<h3>Parâmetros provisórios</h3><p class='small'>" + p.parametros_provisorios.map(Lg.esc).join(", ") + " (em <code>config/analysis.yaml</code>, sem ajuste a ocorrências).</p>"
+        (p ? "<h3>Metodologia do risco por trecho (Porto Alegre)</h3><p>" + Lg.esc(p.metodo) + "</p>" + afirmacoes(p) + "<h3>Limitações</h3>" + ul(p.limites.map(Lg.esc)) + "<h3>Parâmetros provisórios</h3><p class='small'>" + p.parametros_provisorios.map(Lg.esc).join(", ") + " (em <code>config/analysis.yaml</code>, sem ajuste a ocorrências).</p>"
           : "<h3>Metodologia e limitações do risco por trecho</h3><p class='indisp'>Disponíveis com o servidor de análise ativo. Resumo: baseline determinístico, sem validação em vias, com parâmetros provisórios; o modelo municipal não é usado em vias.</p>");
     }).catch(function (e) { fail(box, e); });
   }

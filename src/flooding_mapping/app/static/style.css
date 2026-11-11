@@ -109,3 +109,5 @@ header { position:sticky; top:0; z-index:30; background:var(--vidro); -webkit-ba
 .assistente .resposta { margin-top:8px; padding:8px 12px; border-radius:14px; background:var(--seg); } .assistente .resposta:empty { display:none; } .assistente .resposta p { margin:4px 0; }
 .card, .alerta, .entrada { border-radius:16px; }
 @media (prefers-reduced-motion: reduce) { #painel-mapa { transition:none; } }
+
+.duas { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; } .duas p { margin:2px 0; }

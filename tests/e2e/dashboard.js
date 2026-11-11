@@ -57,10 +57,10 @@ const { assert, abrir, BASE, semTransbordo, pontoDe } = require("./lib");
   // áreas por território: o que não existe diz que não existe
   await page.click("[data-territorio=rs]"); await page.click("[data-aba=mobilidade]"); await page.waitForTimeout(1200);
   assert.match(await page.innerText("#vista-mobilidade"), /Rotas: Dados indisponíveis/);
-  await page.click("[data-aba=proveniencia]"); await page.waitForTimeout(1200); assert.match(await page.innerText("#vista-proveniencia"), /O que cada região oferece/);
+  await page.click("[data-aba=proveniencia]"); await page.waitForTimeout(1200); assert.match(await page.innerText("#vista-proveniencia"), /O que cada região oferece/); assert.match(await page.innerText("#vista-proveniencia"), /O que se pode e o que não se pode afirmar[\s\S]*Confronto com eventos documentados/);
   await page.click("[data-aba=ocorrencias]"); await page.waitForTimeout(1200); assert.match(await page.innerText("#vista-ocorrencias"), /S2iD/);
   // responsividade, nos dois territórios e nas seis áreas
   const passos = []; for (const ter of ["rs", "poa"]) for (const aba of ["geral", "mapa", "previsao", "mobilidade", "ocorrencias", "proveniencia"]) passos.push(async () => { await page.click(`[data-territorio=${ter}]`); await page.click(`[data-aba=${aba}]`); });
-  await semTransbordo(page, [360, 390, 768, 1400], passos);
+  await semTransbordo(page, [360, 390, 768, 1024, 1400], passos);
   assert.deepStrictEqual(erros, [], "erros de console: " + erros.join(" | ")); await browser.close(); console.log("dashboard: ok");
 })().catch((e) => { console.error("FALHOU:", e.message); process.exit(1); });

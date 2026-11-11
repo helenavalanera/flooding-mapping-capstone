@@ -46,6 +46,6 @@ const PWA = BASE + "pwa/", CASA = { latitude: -30.1250, longitude: -51.2330 }, T
   await page.click("[data-tela=planejar]"); await ctx.setOffline(true); await page.reload(); await page.waitForSelector("#tela .passos", { timeout: 15000 });
   assert.match(await page.innerText("#aviso"), /Sem conexão com o servidor de análise/); await ctx.setOffline(false);
   const passos = ["planejar", "lugares", "relatar", "privacidade"].map((t) => () => page.click(`[data-tela=${t}]`));
-  await semTransbordo(page, [360, 390, 768, 1400], passos);
+  await semTransbordo(page, [360, 390, 768, 1024, 1400], passos);
   assert.deepStrictEqual(erros, [], "erros de console: " + erros.join(" | ")); await browser.close(); console.log("pwa: ok");
 })().catch((e) => { console.error("FALHOU:", e.message); process.exit(1); });
