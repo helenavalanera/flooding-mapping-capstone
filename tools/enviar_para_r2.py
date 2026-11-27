@@ -10,6 +10,8 @@ se configuram no painel. Cada objeto sobe com Content-Type, Content-Encoding e C
 from __future__ import annotations
 
 import argparse
+import gzip
+import hashlib
 import json
 import os
 import sys
@@ -32,11 +34,36 @@ def plano(pasta: Path, prefixo: str | None = None) -> list[dict]:
     return itens
 
 
+def validar_local(pasta: Path, esperado: dict | None = None) -> dict:
+    """Confere, sem rede, a pasta preparada: versão (nome da pasta), quantidade e tamanho de objetos e o SHA-256 do conteúdo ORIGINAL de cada um (descomprimindo o gzip). Erros ficam em ``erros``."""
+    info = json.loads((pasta / "cabecalhos.json").read_text(encoding="utf-8"))
+    erros, total = [], 0
+    for chave, h in info["objetos"].items():
+        arq = pasta / chave
+        if not arq.is_file():
+            erros.append(f"{chave}: ausente")
+            continue
+        corpo = arq.read_bytes()
+        total += len(corpo)
+        try:
+            original = gzip.decompress(corpo) if h.get("content_encoding") == "gzip" else corpo
+        except (OSError, EOFError):
+            erros.append(f"{chave}: gzip corrompido")
+            continue
+        if len(corpo) != h["bytes"] or len(original) != h["bytes_originais"] or hashlib.sha256(original).hexdigest() != h["sha256_do_original"]:
+            erros.append(f"{chave}: tamanho ou SHA-256 diferente do cabecalhos.json")
+    r = {"versao": pasta.name, "objetos": len(info["objetos"]), "bytes": total, "mb": round(total / 1e6, 1), "resumo_confere": info["resumo"]["objetos"] == len(info["objetos"]) and info["resumo"]["bytes"] == total, "erros": erros}
+    for k, v in (esperado or {}).items():
+        if r.get(k) != v:
+            erros.append(f"{k}: esperado {v!r}, encontrado {r.get(k)!r}")
+    return r
+
+
 def politica_cors(origens: list[str]) -> dict:
     for o in origens:
         if not o.startswith("https://") or o.count("/") != 2:
             raise SystemExit(f"origem de CORS deve ser uma origem https sem caminho: {o!r}")
-    return {"CORSRules": [{"AllowedOrigins": origens, "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["Range", "If-None-Match"],
+    return {"CORSRules": [{"AllowedOrigins": origens, "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["Range", "If-Range", "If-None-Match"],
                            "ExposeHeaders": ["Content-Range", "Content-Length", "ETag", "Accept-Ranges"], "MaxAgeSeconds": 86400}]}
 
 
@@ -83,7 +110,15 @@ def main() -> None:
     ap.add_argument("--enviar", action="store_true", help="envia de verdade (sem isto é só um ensaio)")
     ap.add_argument("--cors", nargs="*", default=None, help="origens https do site (por exemplo https://flooding-mapping-capstone.pages.dev)")
     ap.add_argument("--prefixo", default=None)
+    ap.add_argument("--validar", action="store_true", help="só confere a pasta preparada (versão, quantidade, tamanho, SHA-256), sem rede nem credencial")
+    ap.add_argument("--esperar-versao", default=None)
+    ap.add_argument("--esperar-objetos", type=int, default=None)
     a = ap.parse_args()
+    if a.validar:
+        esperado = {k: v for k, v in (("versao", a.esperar_versao), ("objetos", a.esperar_objetos)) if v is not None}
+        r = validar_local(a.pasta, esperado)
+        print(json.dumps({k: v for k, v in r.items() if k != "erros"} | {"erros": r["erros"][:10], "n_erros": len(r["erros"])}, ensure_ascii=False, indent=1))
+        sys.exit(1 if r["erros"] or not r["resumo_confere"] else 0)
     itens = plano(a.pasta, a.prefixo)
     total = sum(i["bytes"] for i in itens)
     print(json.dumps({"objetos": len(itens), "mb": round(total / 1e6, 1), "prefixo": itens[0]["chave"].split("/")[0], "exemplo": {k: str(v) for k, v in itens[0].items() if k != "arquivo"}}, ensure_ascii=False, indent=1))

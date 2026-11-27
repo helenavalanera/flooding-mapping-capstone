@@ -66,7 +66,7 @@ def test_credentials_come_only_from_the_environment_and_are_required(monkeypatch
 
 def test_cors_allows_range_only_for_plain_https_origins():
     p = e.politica_cors(["https://flooding-mapping-capstone.pages.dev"])["CORSRules"][0]
-    assert p["AllowedMethods"] == ["GET", "HEAD"] and "Range" in p["AllowedHeaders"] and {"Content-Range", "Accept-Ranges"} <= set(p["ExposeHeaders"])
+    assert p["AllowedMethods"] == ["GET", "HEAD"] and {"Range", "If-Range"} <= set(p["AllowedHeaders"]) and {"Content-Range", "Accept-Ranges"} <= set(p["ExposeHeaders"])
     for ruim in ("http://x.org", "https://x.org/caminho", "*"):
         with pytest.raises(SystemExit):
             e.politica_cors([ruim])
@@ -83,3 +83,12 @@ def test_the_tool_has_no_secret_in_code_and_no_bucket_creation():
     codigo = (RAIZ / "tools/enviar_para_r2.py").read_text(encoding="utf-8").split('"""')[2]
     for proibido in ("create_bucket", "delete_object", "delete_bucket", "secret_key=", "AKIA"):
         assert proibido not in codigo, proibido
+
+
+def test_local_validation_checks_version_count_size_and_the_hash_of_the_original_content(pasta):
+    r = e.validar_local(pasta, {"versao": pasta.name})
+    assert r["erros"] == [] and r["resumo_confere"] and r["objetos"] > 0 and r["versao"] == pasta.name
+    assert e.validar_local(pasta, {"objetos": 4923})["erros"]                                  # a quantidade esperada diferente é apontada
+    alvo = next(pasta.rglob("2.pbf"))
+    alvo.write_bytes(alvo.read_bytes()[:-3] + b"xyz")                                          # corrompe um objeto
+    assert any("2.pbf" in x for x in e.validar_local(pasta)["erros"])
