@@ -1,0 +1,194 @@
+{
+ "A": {
+  "nome": "Geração de escoamento",
+  "unidade": "m³ de escoamento potencial gerado, por trecho, em um evento de 30 mm",
+  "chuva_mm": 30,
+  "pacote": "Método 1 (coeficientes fundamentados), limite superior do intervalo",
+  "imagem": {
+   "arquivo": "img/estudo/mapa-geracao.webp",
+   "largura_px": 1400,
+   "altura_px": 1722,
+   "bytes": 240698,
+   "celula_m": 100,
+   "agregacao": "máximo entre os trechos de cada célula"
+  },
+  "faixas": [
+   {
+    "de": 0.0,
+    "ate": 10.0,
+    "rotulo": "mais de 0 até 10 m³",
+    "cor": "#f7d6e6",
+    "trechos": 29482
+   },
+   {
+    "de": 10.0,
+    "ate": 20.0,
+    "rotulo": "10 a 20 m³",
+    "cor": "#eca3c8",
+    "trechos": 35951
+   },
+   {
+    "de": 20.0,
+    "ate": 40.0,
+    "rotulo": "20 a 40 m³",
+    "cor": "#d95f9f",
+    "trechos": 35865
+   },
+   {
+    "de": 40.0,
+    "ate": 80.0,
+    "rotulo": "40 a 80 m³",
+    "cor": "#a8266f",
+    "trechos": 19677
+   },
+   {
+    "de": 80.0,
+    "ate": null,
+    "rotulo": "mais de 80 m³",
+    "cor": "#5e0f45",
+    "trechos": 5043
+   }
+  ],
+  "trechos_total": 176836,
+  "trechos_com_dado": 173917,
+  "trechos_sem_dado": 2919,
+  "trechos_com_valor_positivo": 126018,
+  "trechos_com_valor_zero": 47899,
+  "mediana_m3": 19.0,
+  "p90_m3": 56.2,
+  "p99_m3": 118.5,
+  "area_com_coeficiente_fundamentado_pct": 17.3,
+  "fonte": "Escoamento potencial (Método 1): uso do solo Profill 2022, Prefeitura de Porto Alegre",
+  "bairros": {
+   "universo": "92 de 94 bairros (os demais têm poucos trechos com dados e ficam sem estimativa)",
+   "bairros_sem_estimativa": 2,
+   "itens": [
+    {
+     "bairro": "Bom Fim",
+     "valor": 188.9,
+     "trechos_com_dados": 232
+    },
+    {
+     "bairro": "São Geraldo",
+     "valor": 187.9,
+     "trechos_com_dados": 678
+    },
+    {
+     "bairro": "Cidade Baixa",
+     "valor": 184.6,
+     "trechos_com_dados": 645
+    },
+    {
+     "bairro": "Centro Histórico",
+     "valor": 182.5,
+     "trechos_com_dados": 3103
+    },
+    {
+     "bairro": "Floresta",
+     "valor": 169.5,
+     "trechos_com_dados": 702
+    }
+   ],
+   "metrica": "m³ por hectare em 30 mm (geração potencial por área classificada do bairro)"
+  },
+  "total_cidade_m3": {
+   "min": 1801492,
+   "max": 2326147
+  }
+ },
+ "B": {
+  "nome": "Concentração do escoamento",
+  "unidade": "m³ de escoamento potencial que converge ao trecho, em um evento de 30 mm",
+  "chuva_mm": 30,
+  "pacote": "Método 1 (coeficientes fundamentados), limite superior do intervalo",
+  "imagem": {
+   "arquivo": "img/estudo/mapa-concentracao.webp",
+   "largura_px": 1400,
+   "altura_px": 1722,
+   "bytes": 221220,
+   "celula_m": 100,
+   "agregacao": "máximo entre os trechos de cada célula"
+  },
+  "faixas": [
+   {
+    "de": 0.0,
+    "ate": 10.0,
+    "rotulo": "mais de 0 até 10 m³",
+    "cor": "#dcd9f2",
+    "trechos": 14839
+   },
+   {
+    "de": 10.0,
+    "ate": 100.0,
+    "rotulo": "10 a 100 m³",
+    "cor": "#b3aee0",
+    "trechos": 67702
+   },
+   {
+    "de": 100.0,
+    "ate": 1000.0,
+    "rotulo": "100 a 1.000 m³",
+    "cor": "#857bc7",
+    "trechos": 33792
+   },
+   {
+    "de": 1000.0,
+    "ate": 10000.0,
+    "rotulo": "1.000 a 10.000 m³",
+    "cor": "#5547a3",
+    "trechos": 12023
+   },
+   {
+    "de": 10000.0,
+    "ate": null,
+    "rotulo": "mais de 10.000 m³",
+    "cor": "#2d2166",
+    "trechos": 4842
+   }
+  ],
+  "trechos_total": 176836,
+  "trechos_com_dado": 173917,
+  "trechos_sem_dado": 2919,
+  "trechos_com_valor_positivo": 133198,
+  "trechos_com_valor_zero": 40719,
+  "mediana_m3": 58.2,
+  "p90_m3": 1638.7,
+  "p99_m3": 60276.3,
+  "area_com_coeficiente_fundamentado_pct": 17.3,
+  "fonte": "Escoamento potencial (Método 1): Profill 2022, Copernicus DEM",
+  "bairros": {
+   "universo": "92 de 94 bairros (os demais têm poucos trechos com dados e ficam sem estimativa)",
+   "bairros_sem_estimativa": 2,
+   "itens": [
+    {
+     "bairro": "Bom Fim",
+     "valor": 280.6,
+     "trechos_com_dados": 232
+    },
+    {
+     "bairro": "Floresta",
+     "valor": 173.4,
+     "trechos_com_dados": 702
+    },
+    {
+     "bairro": "Jardim Lindóia",
+     "valor": 172.6,
+     "trechos_com_dados": 459
+    },
+    {
+     "bairro": "Santa Maria Goretti",
+     "valor": 169.3,
+     "trechos_com_dados": 327
+    },
+    {
+     "bairro": "Bela Vista",
+     "valor": 168.8,
+     "trechos_com_dados": 617
+    }
+   ],
+   "metrica": "mediana, entre os trechos do bairro, do m³ de escoamento potencial que converge ao trecho em 30 mm"
+  },
+  "trechos_acima_de_1000_m3": 16865,
+  "trechos_acima_de_10000_m3": 4842
+ }
+}
