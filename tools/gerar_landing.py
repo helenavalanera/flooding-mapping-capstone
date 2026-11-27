@@ -432,8 +432,8 @@ def tabela_top5() -> str:
     linhas = "".join(f"<tr><th scope='row'>{i['posicao']}. {html.escape(i['bairro'])}</th><td>{br(100 * i['parcela_com_propensao_topografica'], 1)}%</td>"
                      f"<td>{br(100 * i['parcela_no_decil_superior_de_contribuicao'], 1)}%</td><td>{br(i['trechos_com_dados'])}</td><td>{br(100 * i['cobertura_do_coeficiente_a_montante_mediana'], 0)}%</td></tr>" for i in r["itens"])
     return (f"<p class='small'>Critério: {html.escape(r['criterio'])}. Universo: {html.escape(r['universo'])}.</p><div class='tabela-rolagem'><table class='tab-fontes'><caption>Top 5 bairros por propensão topográfica à retenção</caption>"
-            "<thead><tr><th scope='col'>Bairro</th><th scope='col'>Trechos com propensão topográfica</th><th scope='col'>Trechos no decil superior de contribuição da cidade</th><th scope='col'>Trechos com dados</th><th scope='col'>Cobertura do coeficiente a montante (mediana)</th></tr></thead>"
-            f"<tbody>{linhas}</tbody></table></div><p class='small'>As colunas não se combinam em índice. A cobertura baixa significa que parte da área a montante só tem coeficiente por cenário declarado.</p>")
+            "<thead><tr><th scope='col'>Bairro</th><th scope='col'>Ruas com propensão topográfica à retenção (parcela das ruas do bairro)</th><th scope='col'>Ruas entre as 10% de maior concentração da cidade (parcela)</th><th scope='col'>Trechos de rua com dados</th><th scope='col'>Área a montante com coeficiente publicado (mediana)</th></tr></thead>"
+            f"<tbody>{linhas}</tbody></table></div><p class='small'>As colunas não se combinam em índice. Cobertura baixa significa que parte da área a montante só tem coeficiente de escoamento (fração da chuva que escoa) por hipótese declarada.</p>")
 
 
 # --------------------------------------------------------------------------------------------------------------------- html

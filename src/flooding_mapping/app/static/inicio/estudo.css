@@ -201,3 +201,7 @@ th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--li
 
 .tabela-chuva { margin-top: 12px; font-size: .88rem; } .tabela-chuva summary { cursor: pointer; font-weight: 600; padding: 8px 0; } .tabela-chuva summary:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
 #resultados-executivos h3 { margin-top: 28px; }
+
+.numeros-detalhe { margin-top: 28px; } .numeros-detalhe > summary { cursor: pointer; font-weight: 600; padding: 10px 0; } .numeros-detalhe > summary:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.mais { margin-top: 24px; font-size: var(--pequeno); }
+.acoes + .small { margin-top: 14px; }
