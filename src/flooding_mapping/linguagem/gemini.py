@@ -135,12 +135,12 @@ class Gemini:
             conversa += [{"role": "model", "parts": partes}, {"role": "user", "parts": respostas}]
         raise LinguagemIndisponivel("resposta_invalida")  # kept asking for operations: give up
 
-    def estruturar(self, sistema: str, texto: str, esquema: dict) -> dict:
+    def estruturar(self, sistema: str, texto: str, esquema: dict, max_saida: int = 300) -> dict:
         """One call, no operations, answer forced into ``esquema`` (a JSON schema)."""
         self.ultimo_uso = self._uso_vazio()
         corpo = {"systemInstruction": {"parts": [{"text": sistema}]},
                  "contents": [{"role": "user", "parts": [{"text": texto}]}],
-                 "generationConfig": {"temperature": 0, "maxOutputTokens": 300, "responseMimeType": "application/json",
+                 "generationConfig": {"temperature": 0, "maxOutputTokens": max_saida, "responseMimeType": "application/json",
                                       "responseSchema": esquema}}
         partes = self._partes(self._chamar(corpo))
         try:
