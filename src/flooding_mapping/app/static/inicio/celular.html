@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flooding Mapping · no celular</title>
+  <meta name="description" content="A interface real do Flooding Mapping em largura de celular: visão territorial, camadas, consulta de um trecho, resultados e simulador de cenários.">
+  <meta name="theme-color" content="#0a1c27">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="../icone-192.png">
+  <link rel="stylesheet" href="estudo.css">
+  <link rel="stylesheet" href="celular.css">
+</head>
+<body>
+<header class="topo"><nav class="nav" aria-label="Navegação">
+  <a class="marca" href="./" aria-label="Flooding Mapping, estudo"><b>FM</b><span>Flooding Mapping</span></a>
+  <ol class="ancoras"><li><a href="./">Estudo</a></li><li><a href="../?painel=1#poa/resultados">Resultados</a></li><li><a href="../?painel=1#poa/mapa">Mapa</a></li><li><a href="../?painel=1#poa/simulador">Simulador</a></li></ol>
+</nav></header>
+<main class="cel">
+  <section class="cel-texto" aria-labelledby="t">
+    <p class="cel-etq">No celular</p>
+    <h1 id="t">A mesma aplicação, em largura de celular</h1>
+    <p>O aparelho ao lado não é uma imagem: é a aplicação de análise aberta em 390 px de largura, a mesma que você usa no computador. Escolha uma tela para ver como ela se comporta.</p>
+    <ol class="cel-telas" id="telas">
+      <li><button type="button" data-tela="territorio" aria-pressed="true"><b>1. Visão territorial</b><span>Porto Alegre com o relevo e os controles recolhidos.</span></button></li>
+      <li><button type="button" data-tela="camadas" aria-pressed="false"><b>2. Camadas</b><span>Geração potencial de escoamento (dimensão A) a 30 mm, com a legenda.</span></button></li>
+      <li><button type="button" data-tela="consulta" aria-pressed="false"><b>3. Consulta de um trecho</b><span>Indicadores, unidades, cobertura e limitações de um trecho de rua.</span></button></li>
+      <li><button type="button" data-tela="resultados" aria-pressed="false"><b>4. Resultados</b><span>A leitura executiva por contexto territorial.</span></button></li>
+      <li><button type="button" data-tela="simulador" aria-pressed="false"><b>5. Simulador de cenários</b><span>10, 20 e 30 mm: volumes, faixas de trechos e comparação territorial.</span></button></li>
+    </ol>
+    <p class="cel-nota" id="nota"></p>
+    <p class="cel-nota">Como no computador: é uma estimativa condicionada a uma chuva hipotética e uniforme, não uma previsão de alagamento. O mapa em 3D precisa de WebGL e baixa os tiles sob demanda; a primeira tela pode levar alguns segundos.</p>
+    <p><a class="btn" id="abrir" href="../?painel=1#poa/mapa">Abrir esta tela em tamanho real</a></p>
+  </section>
+  <section class="cel-aparelho" aria-label="Aplicação em largura de celular">
+    <div class="cel-corpo"><div class="cel-ilha" aria-hidden="true"></div>
+      <iframe id="tela" title="Flooding Mapping em largura de celular" src="../?painel=1#poa/mapa" loading="lazy"></iframe>
+    </div>
+  </section>
+</main>
+<script src="celular.js"></script>
+</body>
+</html>

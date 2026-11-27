@@ -1,0 +1,17 @@
+/* Página "no celular": moldura de aparelho em volta da aplicação real (iframe de 390 px). A moldura é só CSS. */
+.cel { max-width: 1180px; margin: 0 auto; padding: 36px var(--m) 64px; display: grid; grid-template-columns: minmax(0, 1fr) 430px; gap: 48px; align-items: start; }
+.cel-etq { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: var(--forte); margin-bottom: 8px; }
+.cel-texto h1 { font-size: clamp(1.8rem, 1.2rem + 2vw, 2.8rem); line-height: 1.12; letter-spacing: -.01em; margin-bottom: 16px; max-width: 16em; }
+.cel-texto > p { max-width: 36em; margin-bottom: 14px; }
+.cel-telas { display: grid; gap: 8px; margin: 22px 0; max-width: 36em; }
+.cel-telas button { width: 100%; text-align: left; font: inherit; padding: 12px 16px; border: 1px solid var(--linha); border-radius: 14px; background: #fff; color: inherit; cursor: pointer; display: block; }
+.cel-telas button b { display: block; } .cel-telas button span { display: block; font-size: var(--pequeno); color: rgba(10, 28, 39, .75); margin-top: 2px; }
+.cel-telas button[aria-pressed="true"] { border-color: var(--forte); box-shadow: inset 0 0 0 2px var(--forte); background: #f1f8fc; }
+.cel-nota { font-size: var(--pequeno); color: rgba(10, 28, 39, .78); max-width: 38em; margin-bottom: 12px; }
+.cel-aparelho { position: sticky; top: 76px; justify-self: center; }
+.cel-corpo { position: relative; width: 430px; height: 888px; padding: 50px 20px 18px; border-radius: 58px; background: #0a1c27; border: 2px solid #26475d; }
+.cel-ilha { position: absolute; top: 16px; left: 50%; width: 110px; height: 24px; margin-left: -55px; border-radius: 14px; background: #0a1c27; z-index: 2; pointer-events: none; }
+.cel-corpo iframe { width: 390px; height: 820px; border: 0; border-radius: 30px; background: #fff; display: block; }
+.btn { display: inline-block; padding: 12px 22px; border-radius: 999px; background: var(--acento); color: var(--acento-ink); font-weight: 600; text-decoration: none; }
+@media (max-width: 980px) { .cel { grid-template-columns: 1fr; gap: 28px; } .cel-aparelho { position: static; } }
+@media (max-width: 460px) { .cel-corpo { width: 100%; height: auto; padding: 12px; border-radius: 40px; } .cel-corpo iframe { width: 100%; height: 76vh; min-height: 520px; border-radius: 30px; } .cel-ilha { display: none; } }

@@ -1,0 +1,278 @@
+{
+ "numeros": [
+  {
+   "chave": "trechos_com_dados",
+   "grupo": "processamento",
+   "titulo": "Trechos viários com dados",
+   "valor": 173917,
+   "texto": "173.917",
+   "unidade": "trechos",
+   "definicao": "Trechos da rede de ruas com ao menos uma célula de 30 m com dado de uso do solo e relevo sob a sua pegada.",
+   "origem": "reports/qa/fase3_execucao.json · pegadas_dos_trechos.com_celulas_com_dados",
+   "ctx": "De 176.836 trechos da rede do OpenStreetMap em Porto Alegre (98,3%).",
+   "limite": "2.728 ficam fora da grade e 191 só tocam células sem dado ou de água: ficam sem valor, nunca zero."
+  },
+  {
+   "chave": "uso_do_solo",
+   "grupo": "processamento",
+   "titulo": "Município coberto pelo mapa de uso do solo",
+   "valor": 0.9508,
+   "texto": "95,1%",
+   "unidade": "% da área do município",
+   "definicao": "Parte da área municipal classificada pelos 605 mil polígonos de uso do solo, medida na grade de 3 m.",
+   "origem": "reports/qa/qualidade_uso_solo_fase2.json · pela_pintura.fracao_do_municipio_coberta",
+   "ctx": "605.245 polígonos, 15 classes, escala 1:2.500 (Profill 2022).",
+   "limite": "Os 24,4 km² sem classe são em 93% água do Guaíba; o restante não foi explicado."
+  },
+  {
+   "chave": "celulas",
+   "grupo": "processamento",
+   "titulo": "Células de 30 m processadas",
+   "valor": 1290058,
+   "texto": "1.290.058",
+   "unidade": "células",
+   "definicao": "Células da grade do modelo de elevação com dado, unidade de cálculo do fluxo e da geração de escoamento.",
+   "origem": "reports/qa/fase3_execucao.json · motor.celulas_com_dados",
+   "ctx": "O acúmulo é idêntico ao do índice de suscetibilidade do projeto e a massa se conserva (erro relativo máximo de 1,4 × 10⁻¹⁴).",
+   "limite": "O modelo de elevação é um modelo de superfície de 30 m (Copernicus GLO-30), com erro médio de 2,18 m contra marcos da Prefeitura."
+  },
+  {
+   "chave": "drenagem",
+   "grupo": "processamento",
+   "titulo": "Trechos de rede pluvial cadastrados",
+   "valor": 135856,
+   "texto": "135.856",
+   "unidade": "trechos (cadastro)",
+   "definicao": "Linhas do cadastro municipal de drenagem: rede, rede sem acesso e rede cadastrada como não interligada.",
+   "origem": "reports/qa/qualidade_drenagem_fase2.json · rede_pluvial.*.registros_processados (3 camadas de origem)",
+   "ctx": "Mais 88.899 poços de visita, 44.868 bocas de lobo e 24 casas de bomba. Camada contextual, fora do cálculo.",
+   "limite": "O cadastro diz o que está registrado, não capacidade de vazão, funcionamento nem conexão hidráulica; só o nome das casas de bomba está preenchido."
+  },
+  {
+   "chave": "cobertura_m1",
+   "grupo": "metodologico",
+   "titulo": "Área com coeficiente de escoamento fundamentado",
+   "valor": 0.173,
+   "texto": "17,3%",
+   "unidade": "% da área classificada",
+   "definicao": "Parte da área cujas classes (edificação e via pavimentada) têm coeficiente C em referência publicada (Método 1).",
+   "origem": "reports/qa/qualidade_uso_solo_fase2.json · cobertura_dos_metodos.metodo1_fracao_da_area_classificada",
+   "ctx": "75,1% da área não tem coeficiente fundamentado e 7,6% é água ou fica fora do cálculo.",
+   "limite": "Para o resto só há limites físicos (C = 0 a 1) e cenários por analogia, que são hipóteses declaradas."
+  },
+  {
+   "chave": "cobertura_trecho",
+   "grupo": "metodologico",
+   "titulo": "Área a montante com coeficiente fundamentado, por trecho",
+   "valor": 0.3017,
+   "texto": "30,2%",
+   "unidade": "% da área a montante (mediana)",
+   "definicao": "Para cada trecho, a fração da área que drena para ele cujo uso do solo tem coeficiente fundamentado; mediana entre os trechos.",
+   "origem": "reports/qa/fase3_execucao.json · descricao.fracoes_a_montante_medianas.fracao_montante_coberta_m1",
+   "ctx": "É o grau de confiança do valor de cada trecho; fica em cada trecho do mapa.",
+   "limite": "Com cobertura baixa o intervalo do Método 1 considera só uma parte da área: deve ser lido como parcial."
+  },
+  {
+   "chave": "contribuicao_mediana",
+   "grupo": "metodologico",
+   "titulo": "Contribuição potencial mediana por trecho",
+   "valor": 32.0625,
+   "texto": "32,1",
+   "unidade": "m³ (30 mm, Método 1, limite superior)",
+   "definicao": "Água que a superfície das áreas a montante pode escoar até o trecho para uma chuva hipotética de 30 mm, sem infiltração nem perdas.",
+   "origem": "reports/qa/fase3_execucao.json · descricao.nivel2_p30.metodo1.contrib_potencial_max_m3.q50",
+   "ctx": "A cauda é longa: percentil 90 de 942 m³ e percentil 99 de 42.420 m³.",
+   "limite": "É potencial, não volume transportado; não pode ser somado entre trechos, porque as áreas a montante se sobrepõem."
+  },
+  {
+   "chave": "sem_preenchimento",
+   "grupo": "metodologico",
+   "titulo": "Trechos sem preenchimento de depressão",
+   "valor": 0.7758930984320107,
+   "texto": "77,6%",
+   "unidade": "% dos trechos com dados",
+   "definicao": "Trechos em que o preenchimento de depressões não soma altura ao relevo do modelo: o indicador topográfico de retenção vale zero.",
+   "origem": "reports/qa/fase3_execucao.json · descricao.nivel1.trechos_com_preenchimento_zero / trechos_com_valor",
+   "ctx": "134.941 de 173.917 trechos; só os 38.976 restantes têm posto no indicador.",
+   "limite": "A altura não é interpretável em metros com um modelo de 30 m: serve só para comparar trechos entre si, não como profundidade."
+  },
+  {
+   "chave": "regra_atual",
+   "grupo": "validacao",
+   "titulo": "Regra de terreno atual (referência)",
+   "valor": 0.00205,
+   "texto": "0,00205",
+   "unidade": "precisão média",
+   "definicao": "Precisão média da regra atual (percentil de índice de terreno) para achar os trechos com alagamento registrado, em validação por blocos espaciais.",
+   "origem": "reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.regra_atual_percentil.precisao_media",
+   "ctx": "124 trechos positivos em 107.869; taxa base de 0,115%; AUC 0,666.",
+   "limite": "Os 124 registros são de 2013 e 2014, sem horário nem chuva associada: a comparação é exploratória."
+  },
+  {
+   "chave": "melhor_ganho",
+   "grupo": "validacao",
+   "titulo": "Maior ganho observado sobre a regra atual",
+   "valor": 0.1259,
+   "texto": "+12,6%",
+   "unidade": "de precisão média (indicador topográfico)",
+   "definicao": "Variação da precisão média do indicador topográfico em relação à regra atual na mesma amostra.",
+   "origem": "reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.nivel1_altura_de_preenchimento_max.ganho_sobre_a_regra",
+   "ctx": "Intervalo de 95% (blocos completos): -23% a +68%. Critério de adoção: ganho de 10% com limite inferior acima de zero.",
+   "limite": "Intervalo que inclui zero não é evidência de superioridade: nenhum candidato atende o critério e a regra atual permanece."
+  },
+  {
+   "chave": "blocos_atendem",
+   "grupo": "validacao",
+   "titulo": "Configurações de blocos que atendem o critério",
+   "valor": 0,
+   "texto": "0 de 16",
+   "unidade": "configurações espaciais",
+   "definicao": "Divisões do espaço em blocos (lados e origens diferentes) em que algum modelo físico atinge o critério de adoção.",
+   "origem": "reports/qa/robustez_espacial.json · resumo_das_configuracoes.por_modelo.*.configuracoes_que_atendem_o_criterio",
+   "ctx": "12 das 16 configurações têm positivos bem distribuídos; retirar o maior bloco não muda a conclusão.",
+   "limite": "Mas o ganho troca de sinal ao retirar até 2 blocos e a ordem dos modelos assume 6 formas: nenhum ganho pode ser lido como evidência."
+  },
+  {
+   "chave": "ml_melhor",
+   "grupo": "validacao",
+   "titulo": "Melhor ganho entre os modelos de aprendizado de máquina",
+   "valor": -0.059,
+   "texto": "-5,9%",
+   "unidade": "de precisão média sobre a regra",
+   "definicao": "Regressão logística, gradient boosting e rede MLP em validação por blocos espaciais, contra a regra de terreno atual.",
+   "origem": "reports/qa/modelos_exploratorio_alagamentos.json · modelos.*.ganho_sobre_a_regra",
+   "ctx": "Os três ficaram abaixo da regra (−7,3%, −11,2%, −5,9%), com intervalos que se sobrepõem. Nenhum seria adotado.",
+   "limite": "Cerca de 100 positivos e só terreno como entrada: o resultado diz que não há ganho demonstrável com estes dados, não que o aprendizado de máquina não sirva."
+  }
+ ],
+ "cenarios": {
+  "precipitacoes_mm": [
+   10.0,
+   20.0,
+   30.0
+  ],
+  "totais_m3": {
+   "10": {
+    "metodo1": {
+     "min_m3": 600497.451,
+     "max_m3": 775382.4
+    },
+    "limites_fisicos": {
+     "min_m3": 0.0,
+     "max_m3": 3539171.52
+    },
+    "referencia_analoga": {
+     "min_m3": 225392.3415,
+     "max_m3": 1151569.1520000002
+    }
+   },
+   "20": {
+    "metodo1": {
+     "min_m3": 1200994.902,
+     "max_m3": 1550764.8
+    },
+    "limites_fisicos": {
+     "min_m3": 0.0,
+     "max_m3": 7078343.04
+    },
+    "referencia_analoga": {
+     "min_m3": 450784.683,
+     "max_m3": 2303138.3040000005
+    }
+   },
+   "30": {
+    "metodo1": {
+     "min_m3": 1801492.353,
+     "max_m3": 2326147.2
+    },
+    "limites_fisicos": {
+     "min_m3": 0.0,
+     "max_m3": 10617514.56
+    },
+    "referencia_analoga": {
+     "min_m3": 676177.0245,
+     "max_m3": 3454707.4560000007
+    }
+   }
+  },
+  "por_trecho_p30_metodo1": {
+   "v_gerado_local_max_m3": {
+    "q50": 12.568499999999998,
+    "q90": 48.47849999999999,
+    "q99": 109.0125
+   },
+   "contrib_potencial_max_m3": {
+    "q50": 32.0625,
+    "q90": 942.3809999994635,
+    "q99": 42419.88791999459
+   }
+  },
+  "cortes_m2": {
+   "c_m1_max": [
+    555.75,
+    1308.1500000059605,
+    3035.25,
+    11730.600000003726,
+    214724.70000000484
+   ],
+   "l_m1_max": [
+    290.7,
+    513.0,
+    803.7,
+    1316.6999999999998,
+    2470.95
+   ]
+  },
+  "distribuicao": {
+   "quantis_m3": {
+    "50": 32.0625,
+    "90": 942.3809999994635,
+    "99": 42419.88791999459
+   },
+   "zeros": 40719,
+   "positivos": 133198
+  }
+ },
+ "paletas": {
+  "c": [
+   "#f7fbff",
+   "#edf8b1",
+   "#c7e9b4",
+   "#7fcdbb",
+   "#41b6c4",
+   "#2c7fb8",
+   "#253494"
+  ],
+  "l": [
+   "#f7fbff",
+   "#efedf5",
+   "#dadaeb",
+   "#bcbddc",
+   "#9e9ac8",
+   "#756bb1",
+   "#54278f"
+  ],
+  "tp": [
+   "#f7fbff",
+   "#e9dcc8",
+   "#c4a47c",
+   "#8f6a3f",
+   "#4e3320"
+  ],
+  "cb": [
+   "#f7fbff",
+   "#d9ead3",
+   "#a1d99b",
+   "#41ab5d",
+   "#00682f"
+  ]
+ },
+ "gerado_de": [
+  "reports/qa/fase3_execucao.json",
+  "reports/qa/qualidade_uso_solo_fase2.json",
+  "reports/qa/qualidade_drenagem_fase2.json",
+  "reports/qa/sensibilidade_hidrologica.json",
+  "reports/qa/robustez_espacial.json",
+  "reports/qa/modelos_exploratorio_alagamentos.json"
+ ]
+}
