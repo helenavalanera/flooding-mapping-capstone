@@ -1,0 +1,123 @@
+{
+ "media_mensal_de_chuva": {
+  "fonte": "Open-Meteo, arquivo de reanálise (base ERA5), total diário no ponto da grade de Porto Alegre; modelada, não é pluviômetro; a grade suaviza e subestima extremos locais",
+  "periodo_da_serie": [
+   "2017-01-01",
+   "2026-11-02"
+  ],
+  "o_que_e": "média, entre os anos, do total de chuva de cada mês do calendário (mm por mês). Não é chuva por evento nem por dia",
+  "meses": [
+   {
+    "mes": "janeiro",
+    "media_mm": 95.9,
+    "anos": 10
+   },
+   {
+    "mes": "fevereiro",
+    "media_mm": 71.1,
+    "anos": 10
+   },
+   {
+    "mes": "março",
+    "media_mm": 103.4,
+    "anos": 10
+   },
+   {
+    "mes": "abril",
+    "media_mm": 97.2,
+    "anos": 10
+   },
+   {
+    "mes": "maio",
+    "media_mm": 173.4,
+    "anos": 10
+   },
+   {
+    "mes": "junho",
+    "media_mm": 147.3,
+    "anos": 10
+   },
+   {
+    "mes": "julho",
+    "media_mm": 136.0,
+    "anos": 10
+   },
+   {
+    "mes": "agosto",
+    "media_mm": 119.7,
+    "anos": 10
+   },
+   {
+    "mes": "setembro",
+    "media_mm": 182.4,
+    "anos": 10
+   },
+   {
+    "mes": "outubro",
+    "media_mm": 130.4,
+    "anos": 10
+   },
+   {
+    "mes": "novembro",
+    "media_mm": 111.5,
+    "anos": 9
+   },
+   {
+    "mes": "dezembro",
+    "media_mm": 88.2,
+    "anos": 9
+   }
+  ],
+  "media_dos_meses_mm": 121.7
+ },
+ "top5_bairros": {
+  "criterio": "parcela dos trechos do bairro com propensão topográfica à retenção, isto é, em que o preenchimento de depressões do modelo de 30 m soma altura (indicador relativo; não é profundidade, volume nem duração)",
+  "universo": "92 dos 94 bairros: só os com trechos suficientes (os demais ficam de fora, sem estimativa)",
+  "itens": [
+   {
+    "posicao": 1,
+    "bairro": "Anchieta",
+    "parcela_com_propensao_topografica": 0.679,
+    "parcela_no_decil_superior_de_contribuicao": 0.16,
+    "trechos_com_dados": 4000,
+    "cobertura_do_coeficiente_a_montante_mediana": 0.39
+   },
+   {
+    "posicao": 2,
+    "bairro": "Santana",
+    "parcela_com_propensao_topografica": 0.595,
+    "parcela_no_decil_superior_de_contribuicao": 0.245,
+    "trechos_com_dados": 805,
+    "cobertura_do_coeficiente_a_montante_mediana": 0.56
+   },
+   {
+    "posicao": 3,
+    "bairro": "Floresta",
+    "parcela_com_propensao_topografica": 0.591,
+    "parcela_no_decil_superior_de_contribuicao": 0.302,
+    "trechos_com_dados": 702,
+    "cobertura_do_coeficiente_a_montante_mediana": 0.63
+   },
+   {
+    "posicao": 4,
+    "bairro": "Farrapos",
+    "parcela_com_propensao_topografica": 0.585,
+    "parcela_no_decil_superior_de_contribuicao": 0.167,
+    "trechos_com_dados": 2173,
+    "cobertura_do_coeficiente_a_montante_mediana": 0.56
+   },
+   {
+    "posicao": 5,
+    "bairro": "Bom Fim",
+    "parcela_com_propensao_topografica": 0.543,
+    "parcela_no_decil_superior_de_contribuicao": 0.405,
+    "trechos_com_dados": 232,
+    "cobertura_do_coeficiente_a_montante_mediana": 0.6
+   }
+  ]
+ },
+ "nao_publicados": {
+  "top10_trechos": "Os valores por trecho derivam do uso do solo da Profill, cuja redistribuição não foi confirmada, e a contribuição acumulada não se soma nem se ordena entre trechos de uma mesma rede sem leitura do contexto. Fica para quando a Prefeitura esclarecer a licença.",
+  "ranking_de_zonas": "Não há, nos dados do projeto, divisão de Porto Alegre em zonas (só os 94 bairros). Criar uma agrupando bairros seria inventar uma classificação."
+ }
+}
