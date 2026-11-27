@@ -19,7 +19,7 @@ Nome, finalidade e localização de cada documento do Flooding Mapping. Os docum
 | [Recorte municipal dos resultados por trecho](recorte_municipal.md) | Recorte municipal: só as ruas dentro de Porto Alegre (143.149 trechos), efeito nos números e como reproduzir. | `docs/recorte_municipal.md` |
 | [Resultados executivos (aba Resultados)](resultados_executivos.md) | Resultados executivos da aba Resultados. | `docs/resultados_executivos.md` |
 | [Robustez da validação espacial](robustez_espacial.md) | Robustez da validação espacial por blocos. | `docs/robustez_espacial.md` |
-| [Sensibilidade hidrológica: a física simplificada acrescenta informação ao índice atual?](sensibilidade_hidrologica.md) | Sensibilidade hidrológica: a física simplificada acrescenta informação ao índice atual? | `docs/sensibilidade_hidrologica.md` |
+| [Sensibilidade hidrológica: a física simplificada acrescenta informação ao índice atual?](sensibilidade_hidrologica.md) | Sensibilidade hidrológica: pergunta se a física simplificada acrescenta informação ao índice atual. | `docs/sensibilidade_hidrologica.md` |
 
 ## Dados, fontes e base legal
 

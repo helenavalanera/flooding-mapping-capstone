@@ -27,7 +27,7 @@ CATALOGO = {
     "fase4_integracao.md": (0, "A camada de escoamento potencial na aplicação: formato de distribuição e regras da tela."),
     "recorte_municipal.md": (0, "Recorte municipal: só as ruas dentro de Porto Alegre (143.149 trechos), efeito nos números e como reproduzir."),
     "resultados_executivos.md": (0, "Resultados executivos da aba Resultados."),
-    "sensibilidade_hidrologica.md": (0, "Sensibilidade hidrológica: a física simplificada acrescenta informação ao índice atual?"),
+    "sensibilidade_hidrologica.md": (0, "Sensibilidade hidrológica: pergunta se a física simplificada acrescenta informação ao índice atual."),
     "robustez_espacial.md": (0, "Robustez da validação espacial por blocos."),
     "modelo_retencao_viabilidade.md": (0, "Viabilidade do modelo de acúmulo superficial: o que os dados sustentam."),
     "mapa_simulador_pwa.md": (0, "Mapa de análise, simulador e auditoria final (26/11/2026)."),
