@@ -107,9 +107,10 @@ def test_the_archived_pwa_escapes_what_it_shows_and_never_watches_the_position()
 
 def test_the_map_library_is_pinned_with_an_integrity_hash_and_no_other_3d_engine_is_loaded():
     html = (build.STATIC / "index.html").read_text()
-    tag = re.search(r'<script src="https://cdnjs\.cloudflare\.com/ajax/libs/maplibre-gl/(\d+\.\d+\.\d+)/maplibre-gl\.js"([^>]*)>', html)
-    assert tag and re.fullmatch(r"\d+\.\d+\.\d+", tag.group(1)) and 'integrity="sha384-' in tag.group(2) and 'crossorigin="anonymous"' in tag.group(2)
-    assert not re.search(r"three(\.min)?\.js|cesium|deck\.gl", html, re.I)
+    js = (build.STATIC / "carregar-mapa.js").read_text()
+    m = re.search(r'ajax/libs/maplibre-gl/(\d+\.\d+\.\d+)/maplibre-gl\.js": "(sha384-[^"]+)"', js)
+    assert m and re.fullmatch(r"\d+\.\d+\.\d+", m.group(1)) and "crossOrigin" in js          # versão fixada e hash de integridade (carregamento sob demanda)
+    assert not re.search(r"three(\.min)?\.js|cesium|deck\.gl", html + js, re.I)
 
 
 def test_free_text_from_the_data_is_escaped_by_the_page_not_trusted():
