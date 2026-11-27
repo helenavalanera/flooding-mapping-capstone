@@ -73,3 +73,4 @@ docs/apresentacao/
 
 # Mapa-base do RS (Protomaps): regenerável com pmtiles extract; vai ao R2/Render, nunca ao Git.
 *.pmtiles
+documentacao_final/
