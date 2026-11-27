@@ -420,6 +420,19 @@ def grafico_chuva_mensal(caminho_svg: Path):
     plt.close(fig)
 
 
+def mapa_manchas() -> dict:
+    """Números, legenda e dimensões da imagem do mapa de manchas, lidos de mapa_manchas_poa.json (tools/gerar_mapa_manchas.py)."""
+    j = jcarrega("src/flooding_mapping/app/static/data/mapa_manchas_poa.json")
+    nomes = [f"{br(f['de'], 1)} a {br(f['ate'], 1)} m" if f["ate"] is not None else f"mais de {br(f['de'], 0)} m" for f in j["faixas_m"]]
+    leg = "".join(f'<li><span style="background:{f["cor"]}"></span>{n}</li>' for f, n in zip(j["faixas_m"], nomes))
+    leg += '<li><span style="background:#f4f6f7"></span>sem depressão no modelo (ruas em cinza)</li>'
+    leg += f'<li><span class="lin" style="border-color:#8c99a1;border-top-style:dashed"></span>sem dado de relevo ({br(j["trechos_sem_dado_de_relevo"])} trechos)</li>'
+    return {"MAPA_IMG_DIM": f'width="{j["imagem"]["largura_px"]}" height="{j["imagem"]["altura_px"]}"', "MAPA_LEGENDA": leg, "MAPA_TOTAL": br(j["trechos_total"]), "MAPA_COM_DEPRESSAO": br(j["trechos_com_depressao"]),
+            "MAPA_PCT_DEPRESSAO": br(j["trechos_com_depressao_pct"], 1), "MAPA_COBERTURA": br(j["cobertura_de_dado_pct"], 1), "MAPA_COM_DADO": br(j["trechos_com_dado_de_relevo"]),
+            "MAPA_SEM_DADO": br(j["trechos_sem_dado_de_relevo"]), "MAPA_PCT_SEM_DADO": br(round(100 - j["cobertura_de_dado_pct"], 1), 1), "MAPA_MEDIANA": br(j["altura_mediana_m"], 2),
+            "MAPA_P99": br(j["altura_p99_m"], 2), "MAPA_ACIMA_8": br(j["trechos_acima_de_8_m"])}
+
+
 def tabela_chuva_mensal() -> str:
     m = jcarrega(RANKINGS)["media_mensal_de_chuva"]
     linhas = "".join(f"<tr><th scope='row'>{html.escape(x['mes'].capitalize())}</th><td>{br(x['media_mm'], 1)}</td><td>{x['anos']}</td></tr>" for x in m["meses"])
@@ -504,6 +517,7 @@ def montar(figuras: bool = True) -> dict:
     subs = {
         "NUMEROS": bloco_numeros(lista),
         "CENARIOS_JSON": json.dumps(cen, ensure_ascii=False, separators=(",", ":")),
+        **mapa_manchas(),
         "TABELA_CHUVA_MENSAL": tabela_chuva_mensal(),
         "PERIODO_CHUVA": "de " + jcarrega(RANKINGS)["media_mensal_de_chuva"]["periodo_da_serie"][0][:4] + " a " + jcarrega(RANKINGS)["media_mensal_de_chuva"]["periodo_da_serie"][1][:4],
         "TOP5_BAIRROS": tabela_top5(),
