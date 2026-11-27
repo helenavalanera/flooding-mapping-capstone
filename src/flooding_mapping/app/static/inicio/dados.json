@@ -4,13 +4,13 @@
    "chave": "trechos_com_dados",
    "grupo": "processamento",
    "titulo": "Trechos viários com dados",
-   "valor": 173917,
-   "texto": "173.917",
+   "valor": 143081,
+   "texto": "143.081",
    "unidade": "trechos",
-   "definicao": "Trechos da rede de ruas com ao menos uma célula de 30 m com dado de uso do solo e relevo sob a sua pegada.",
-   "origem": "reports/qa/fase3_execucao.json · pegadas_dos_trechos.com_celulas_com_dados",
-   "ctx": "De 176.836 trechos da rede do OpenStreetMap em Porto Alegre (98,3%).",
-   "limite": "2.728 ficam fora da grade e 191 só tocam células sem dado ou de água: ficam sem valor, nunca zero."
+   "definicao": "Trechos de rua dentro de Porto Alegre com ao menos uma célula de 30 m com dado de uso do solo e relevo sob a sua pegada.",
+   "origem": "src/flooding_mapping/app/static/data/recorte_municipal_poa.json · no_municipio.com_dados (recorte municipal de reports/qa/fase3_execucao.json · pegadas_dos_trechos)",
+   "ctx": "De 143.149 trechos de rua dentro do município (99,95%). A malha do OpenStreetMap tem 176.836 trechos, e os 33.687 de cidades vizinhas ficam de fora da análise.",
+   "limite": "68 trechos de Porto Alegre não têm célula com dado: ficam sem valor, nunca zero."
   },
   {
    "chave": "uso_do_solo",
@@ -34,7 +34,7 @@
    "definicao": "Células da grade do modelo de elevação com dado, unidade de cálculo do fluxo e da geração de escoamento.",
    "origem": "reports/qa/fase3_execucao.json · motor.celulas_com_dados",
    "ctx": "O acúmulo é idêntico ao do índice de suscetibilidade do projeto e a massa se conserva (erro relativo máximo de 1,4 × 10⁻¹⁴).",
-   "limite": "O modelo de elevação é um modelo de superfície de 30 m (Copernicus GLO-30), com erro médio de 2,18 m contra marcos da Prefeitura."
+   "limite": "O modelo de elevação é um modelo de superfície de 30 m (Copernicus GLO-30), com erro médio de 2,18 m contra marcos da Prefeitura. A grade inclui células da borda fora do município."
   },
   {
    "chave": "drenagem",
@@ -46,7 +46,7 @@
    "definicao": "Linhas do cadastro municipal de drenagem: rede, rede sem acesso e rede cadastrada como não interligada.",
    "origem": "reports/qa/qualidade_drenagem_fase2.json · rede_pluvial.*.registros_processados (3 camadas de origem)",
    "ctx": "Mais 88.899 poços de visita, 44.868 bocas de lobo e 24 casas de bomba. Camada contextual, fora do cálculo.",
-   "limite": "O cadastro diz o que está registrado, não capacidade de vazão, funcionamento nem conexão hidráulica; só o nome das casas de bomba está preenchido."
+   "limite": "Registros processados, com duplicatas exatas: os mapas usam 135.779 trechos, 88.860 poços e 44.761 bocas de lobo, sem duplicatas. O cadastro diz o que está registrado, não capacidade de vazão, funcionamento nem conexão hidráulica; só o nome das casas de bomba está preenchido."
   },
   {
    "chave": "cobertura_m1",
@@ -64,11 +64,11 @@
    "chave": "cobertura_trecho",
    "grupo": "metodologico",
    "titulo": "Área a montante com coeficiente fundamentado, por trecho",
-   "valor": 0.3017,
-   "texto": "30,2%",
+   "valor": 0.385,
+   "texto": "38,5%",
    "unidade": "% da área a montante (mediana)",
    "definicao": "Para cada trecho, a fração da área que drena para ele cujo uso do solo tem coeficiente fundamentado; mediana entre os trechos.",
-   "origem": "reports/qa/fase3_execucao.json · descricao.fracoes_a_montante_medianas.fracao_montante_coberta_m1",
+   "origem": "src/flooding_mapping/app/static/data/recorte_municipal_poa.json · no_municipio.montante_coberta_m1_mediana",
    "ctx": "É o grau de confiança do valor de cada trecho; fica em cada trecho do mapa.",
    "limite": "Com cobertura baixa o intervalo do Método 1 considera só uma parte da área: deve ser lido como parcial."
   },
@@ -76,25 +76,25 @@
    "chave": "contribuicao_mediana",
    "grupo": "metodologico",
    "titulo": "Contribuição potencial mediana por trecho",
-   "valor": 32.0625,
-   "texto": "32,1",
+   "valor": 49.8,
+   "texto": "49,8",
    "unidade": "m³ (30 mm, Método 1, limite superior)",
-   "definicao": "Água que a superfície das áreas a montante pode escoar até o trecho para uma chuva hipotética de 30 mm, sem infiltração nem perdas.",
-   "origem": "reports/qa/fase3_execucao.json · descricao.nivel2_p30.metodo1.contrib_potencial_max_m3.q50",
-   "ctx": "A cauda é longa: percentil 90 de 942 m³ e percentil 99 de 42.420 m³.",
+   "definicao": "Água que a superfície das áreas a montante pode escoar até o trecho para uma chuva hipotética de 30 mm, sem infiltração nem perdas. Mediana entre todos os trechos de Porto Alegre com dado, inclusive os que ficam em zero.",
+   "origem": "src/flooding_mapping/app/static/data/recorte_municipal_poa.json · no_municipio.contrib_m1_max_30mm_m3.q50",
+   "ctx": "A cauda é longa: percentil 90 de 1.385 m³ e percentil 99 de 48.671 m³. Entre só os trechos com valor acima de zero (mapa B), a mediana é de 58 m³.",
    "limite": "É potencial, não volume transportado; não pode ser somado entre trechos, porque as áreas a montante se sobrepõem."
   },
   {
    "chave": "sem_preenchimento",
    "grupo": "metodologico",
    "titulo": "Trechos sem preenchimento de depressão",
-   "valor": 0.7758930984320107,
-   "texto": "77,6%",
+   "valor": 0.7795304757445084,
+   "texto": "78,0%",
    "unidade": "% dos trechos com dados",
    "definicao": "Trechos em que o preenchimento de depressões não soma altura ao relevo do modelo: o indicador topográfico de retenção vale zero.",
-   "origem": "reports/qa/fase3_execucao.json · descricao.nivel1.trechos_com_preenchimento_zero / trechos_com_valor",
-   "ctx": "134.941 de 173.917 trechos; só os 38.976 restantes têm posto no indicador.",
-   "limite": "A altura não é interpretável em metros com um modelo de 30 m: serve só para comparar trechos entre si, não como profundidade."
+   "origem": "src/flooding_mapping/app/static/data/recorte_municipal_poa.json · no_municipio.preenchimento.zero / preenchimento.com_valor",
+   "ctx": "111.536 de 143.081 trechos de Porto Alegre com dado; só os 31.545 restantes (22,0%) têm altura de preenchimento acima de zero.",
+   "limite": "A altura vem de um modelo de 30 m e está em metros do modelo: serve para comparar trechos entre si, e não é a profundidade que a água atingiria."
   },
   {
    "chave": "regra_atual",
@@ -225,12 +225,12 @@
   },
   "distribuicao": {
    "quantis_m3": {
-    "50": 32.0625,
-    "90": 942.3809999994635,
-    "99": 42419.88791999459
+    "50": 49.76100000008941,
+    "90": 1384.5869999997317,
+    "99": 48670.87499999549
    },
-   "zeros": 40719,
-   "positivos": 133198
+   "zeros": 10428,
+   "positivos": 132653
   }
  },
  "paletas": {

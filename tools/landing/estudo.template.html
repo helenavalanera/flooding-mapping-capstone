@@ -24,7 +24,7 @@
       <li><a href="#resultados">Resultados</a></li>
       <li><a href="#contato">Contato</a></li>
     </ol>
-    <a class="btn btn-sm" href="../?painel=1#poa/mapa?escoamento=1&amp;p=30">Abrir o mapa</a>
+    <a class="btn btn-sm" href="{{HREF_MAPA}}">Abrir o mapa</a>
   </nav>
 </header>
 
@@ -33,10 +33,10 @@
   <div class="hero-texto">
     <p class="selo"><span>Space Tech Bootcamp 2026</span><span>Projeto final</span><span>Porto Alegre, RS</span></p>
     <h1 id="titulo">Dada uma chuva, onde a água tende a se acumular?</h1>
-    <p class="lead"><b>Uma estimativa, trecho a trecho, de como a água da chuva escoa pelas ruas de Porto Alegre e de onde o relevo favorece o seu acúmulo.</b> O estudo usa dados geoespaciais (mapas e informações de localização) de relevo, uso do solo e drenagem. Explore o mapa e compare chuvas de 10, 20 e 30 mm.</p>
+    <p class="lead"><b>Uma estimativa, trecho a trecho, de como a água da chuva escoa pelas ruas de Porto Alegre e de onde o relevo favorece o seu acúmulo.</b> O estudo usa dados geoespaciais (mapas e informações de localização) de relevo, uso do solo e drenagem. {{HERO_FIM}}</p>
     <p class="hero-acoes">
       <a class="btn" href="#resultados">Ver os resultados</a>
-      <a class="btn btn-sec" href="../?painel=1#poa/mapa?escoamento=1&amp;p=30">Abrir o mapa</a>
+      <a class="btn btn-sec" href="{{HREF_MAPA}}">Abrir o mapa</a>
     </p>
     <p class="aviso-hero"><b>Leia antes.</b> Este estudo apresenta estimativas geoespaciais do escoamento superficial e das condições topográficas associadas à concentração e à retenção de água. Os resultados apoiam a análise territorial e o planejamento preventivo, mas não constituem previsão de alagamentos nem estimativa de profundidade ou duração da inundação.</p>
   </div>
@@ -97,7 +97,7 @@
     <p class="intro">Quatro mapas respondem a <b>quatro perguntas diferentes</b> sobre Porto Alegre: quanta água a superfície gera (A), para onde ela converge (B), onde o relevo favorece o acúmulo (C) e onde há rede de drenagem cadastrada (D). Cada um tem a sua cor, a sua unidade e a sua legenda. <b>Eles não se somam, não formam um índice e nenhum mostra ocorrência de alagamento.</b></p>
     {{PAINEIS_DIMENSOES}}
     <p class="acoes mapa-acoes"><a class="btn" href="#resultados">Visualizar resultados</a> <a class="btn btn-sec" href="../?painel=1#poa/mapa">Explorar dados</a></p>
-    <p class="intro mapa-dims">As quatro dimensões podem ser exploradas <b>individualmente no mapa completo</b>: um clique em um trecho mostra os valores, o que cada um significa e o que falta de dado. Como cada uma responde a uma pergunta diferente, <b>acúmulo favorecido pelo relevo não é o mesmo que alagamento</b>.</p>
+    <p class="intro mapa-dims">{{MAPA_COMPLETO_TXT}}</p>
     <div class="dimensoes-texto" id="dimensoes-texto">
       <article id="p-local">
         <h3><span class="dim-letra">A</span> Geração de escoamento</h3>
@@ -144,8 +144,8 @@
         <p class="small">Valores por trecho não são somáveis: as áreas a montante se sobrepõem.</p>
       </div>
     </div>
-    <p class="acoes"><a class="btn" id="cen-link" href="../?painel=1#poa/mapa?escoamento=1&amp;p=30">Abrir o simulador no mapa (30 mm)</a></p>
-    <p class="small cen-nota">No mapa você troca o pacote (Método 1, Método 2 ou limites físicos) e o limite do intervalo, e clica num trecho para ver os valores com unidade, descrição e interpretação.</p>
+    <p class="acoes"><a class="btn" id="cen-link" data-camadas="{{CAMADAS_FLAG}}" href="{{HREF_MAPA}}">{{SIM_LINK_TXT}}</a></p>
+    <p class="small cen-nota">{{SIM_NOTA}}</p>
   </div>
 </section>
 <section class="campo c-leve" id="resultados" aria-labelledby="h-res">

@@ -162,3 +162,27 @@ def test_the_weight_of_the_page_is_proportionate():
     assert imagens < 3_000_000 and (INICIO / "index.html").stat().st_size < 150_000
     assert (INICIO / "estudo.css").stat().st_size < 40_000 and (INICIO / "estudo.js").stat().st_size < 12_000
     assert not list((INICIO / "img/estudo").glob("*.tmp.png"))
+
+
+def test_the_page_uses_the_municipal_cut_and_gives_each_card_one_denominator(pagina):
+    texto, _ = pagina
+    rec = json.loads((RAIZ / "src/flooding_mapping/app/static/data/recorte_municipal_poa.json").read_text(encoding="utf-8"))
+    total = f"{rec['trechos_no_municipio']:,}".replace(",", ".")
+    assert f"Resultados para {total} trechos de rua" in texto and "176.836 trechos de rua" not in texto.replace(f"{rec['trechos_na_malha']:,}".replace(",", ".") + " trechos do OpenStreetMap", "")
+    assert "cidades vizinhas" in texto                                                                        # a landing diz que as vias de fora ficam de fora
+    for velho in ("2.919", "38.976 de", "98,3%", "57,0%", "2% dos trechos de menor"):
+        assert velho not in texto, velho                                                                       # números da malha inteira, que incluía vias de fora
+
+
+def test_zero_missing_data_and_missing_infrastructure_are_told_apart(pagina):
+    texto, _ = pagina
+    assert "Zero não é ausência de dado" in texto and "tracejados no mapa" in texto and "não prova que não exista" in texto
+    assert "Não é a profundidade que a água atingiria" in texto and "mais de 0 até 0,5 m" in texto and "0,0 a 0,5 m" not in texto
+
+
+def test_promises_about_the_interactive_map_follow_what_is_published(pagina):
+    texto, _ = pagina
+    cfg = (RAIZ / "src/flooding_mapping/app/static/config-dados.js").read_text(encoding="utf-8")
+    publicado = 'fase3: "https://' in cfg
+    assert ("Explore o mapa e compare chuvas" in texto) == publicado and ("Abrir o simulador no mapa" in texto) == publicado
+    assert publicado or "dependem da publicação dos arquivos derivados, em preparação" in texto

@@ -102,7 +102,7 @@
       var f = p / P0, c = D.por_trecho_p30_metodo1.contrib_potencial_max_m3, g = D.por_trecho_p30_metodo1.v_gerado_local_max_m3;
       var linha = function (q) { return "mediana <b>" + NUM0.format(q.q50 * f) + "</b> m³ · percentil 90: " + NUM0.format(q.q90 * f) + " m³ · percentil 99: " + NUM0.format(q.q99 * f) + " m³"; };
       $("#cen-trecho").innerHTML = "<div><dt>Contribuição potencial acumulada</dt><dd>" + linha(c) + "</dd></div><div><dt>Geração potencial local</dt><dd>" + linha(g) + "</dd></div>";
-      var a = $("#cen-link"); a.href = "../?painel=1#poa/mapa?escoamento=1&p=" + p; a.textContent = "Abrir o simulador no mapa (" + p + " mm)";
+      var a = $("#cen-link"); if (a.getAttribute("data-camadas") === "1") { a.href = "../?painel=1#poa/mapa?escoamento=1&p=" + p; a.textContent = "Abrir o simulador no mapa (" + p + " mm)"; }
       $$(".seletor button").forEach(function (b) { b.setAttribute("aria-pressed", String(Number(b.dataset.p) === p)); });
     };
     $$(".seletor button").forEach(function (b) { b.addEventListener("click", function () { desenhar(Number(b.dataset.p)); }); });
