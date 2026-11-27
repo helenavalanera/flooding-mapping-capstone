@@ -1,0 +1,45 @@
+{
+  "raio_m": 100,
+  "camadas": {
+    "pontos_2014": {
+      "coordenadas": 63,
+      "trechos_rotulados": 50,
+      "percentil_mediano": 66.0,
+      "no_quartil_mais_exposto": 0.46,
+      "no_decil_mais_exposto": 0.2,
+      "auc": 0.674,
+      "precisao_media": 0.0012,
+      "taxa_base": 0.00046
+    },
+    "defesa_civil_2013": {
+      "coordenadas": 21,
+      "trechos_rotulados": 18,
+      "percentil_mediano": 64.2,
+      "no_quartil_mais_exposto": 0.222,
+      "no_decil_mais_exposto": 0.111,
+      "auc": 0.595,
+      "precisao_media": 0.00026,
+      "taxa_base": 0.00017
+    },
+    "trechos_2014": {
+      "coordenadas": 43,
+      "trechos_rotulados": 37,
+      "percentil_mediano": 79.3,
+      "no_quartil_mais_exposto": 0.541,
+      "no_decil_mais_exposto": 0.162,
+      "auc": 0.715,
+      "precisao_media": 0.00066,
+      "taxa_base": 0.00034
+    },
+    "todos": {
+      "coordenadas": null,
+      "trechos_rotulados": 105,
+      "percentil_mediano": 70.3,
+      "no_quartil_mais_exposto": 0.448,
+      "no_decil_mais_exposto": 0.171,
+      "auc": 0.675,
+      "precisao_media": 0.00182,
+      "taxa_base": 0.00097
+    }
+  }
+}

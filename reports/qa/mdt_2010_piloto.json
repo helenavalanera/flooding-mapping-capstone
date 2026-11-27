@@ -1,0 +1,134 @@
+{
+  "fonte_mdt": "https://gis-smamus.portoalegre.rs.gov.br/server/rest/services/C01_URBAN/urb_mdt_2010_102100/ImageServer",
+  "exatidao_vertical": {
+    "marcos": 334,
+    "marcos_sem_valor_no_mdt": 0,
+    "marcos_sem_valor_no_copernicus": 0,
+    "marcos_nos_dois": 334,
+    "mdt_2010": {
+      "n": 334,
+      "vies_m": -0.68,
+      "mae_m": 0.77,
+      "rmse_m": 3.28,
+      "rmse_sem_vies_m": 3.21,
+      "spearman": 0.996,
+      "dentro_de_1m": 0.799,
+      "dentro_de_2m": 0.976,
+      "dentro_de_5m": 0.997
+    },
+    "copernicus_glo30": {
+      "n": 334,
+      "vies_m": 1.26,
+      "mae_m": 2.18,
+      "rmse_m": 3.96,
+      "rmse_sem_vies_m": 3.76,
+      "spearman": 0.987,
+      "dentro_de_1m": 0.326,
+      "dentro_de_2m": 0.626,
+      "dentro_de_5m": 0.919
+    },
+    "mesmos_pontos": {
+      "mdt_2010": {
+        "n": 334,
+        "vies_m": -0.68,
+        "mae_m": 0.77,
+        "rmse_m": 3.28,
+        "rmse_sem_vies_m": 3.21,
+        "spearman": 0.996,
+        "dentro_de_1m": 0.799,
+        "dentro_de_2m": 0.976,
+        "dentro_de_5m": 0.997
+      },
+      "copernicus_glo30": {
+        "n": 334,
+        "vies_m": 1.26,
+        "mae_m": 2.18,
+        "rmse_m": 3.96,
+        "rmse_sem_vies_m": 3.76,
+        "spearman": 0.987,
+        "dentro_de_1m": 0.326,
+        "dentro_de_2m": 0.626,
+        "dentro_de_5m": 0.919
+      }
+    },
+    "cotas_abaixo_de_10m": {
+      "n": 80,
+      "mdt_2010": {
+        "n": 80,
+        "vies_m": -0.56,
+        "mae_m": 0.62,
+        "rmse_m": 0.91,
+        "rmse_sem_vies_m": 0.72,
+        "spearman": 0.906,
+        "dentro_de_1m": 0.787,
+        "dentro_de_2m": 0.975,
+        "dentro_de_5m": 1.0
+      },
+      "copernicus_glo30": {
+        "n": 80,
+        "vies_m": 1.22,
+        "mae_m": 1.89,
+        "rmse_m": 2.52,
+        "rmse_sem_vies_m": 2.21,
+        "spearman": 0.544,
+        "dentro_de_1m": 0.338,
+        "dentro_de_2m": 0.688,
+        "dentro_de_5m": 0.925
+      }
+    }
+  },
+  "microrrelevo_na_area_piloto": {
+    "centro": {
+      "lon": -51.21772,
+      "lat": -30.05771
+    },
+    "registros_de_alagamento_na_vizinhanca_de_500m": 14,
+    "lado_m": 866,
+    "mdt_2010": {
+      "pixel_m": 0.866,
+      "pixels_validos": 1000000,
+      "altitude_min_max_m": [
+        4.3,
+        38.0
+      ],
+      "desnivel_p5_p95_m": 11.98,
+      "depressoes_acima_de_5cm": 2525,
+      "area_total_m2": 36269.0,
+      "maior_depressao_m2": 6542.1,
+      "profundidade_maxima_m": 4.83,
+      "profundidade_mediana_nas_depressoes_m": 0.109,
+      "armazenamento_potencial_do_modelo_m3": 7587.7
+    },
+    "copernicus_glo30": {
+      "pixel_m": 26.8,
+      "pixels_validos": 896,
+      "altitude_min_max_m": [
+        7.1,
+        46.3
+      ],
+      "desnivel_p5_p95_m": 15.02,
+      "depressoes_acima_de_5cm": 39,
+      "area_total_m2": 113175.9,
+      "maior_depressao_m2": 23638.0,
+      "profundidade_maxima_m": 3.37,
+      "profundidade_mediana_nas_depressoes_m": 0.852,
+      "armazenamento_potencial_do_modelo_m3": 118114.9
+    },
+    "mdt_reduzido_a_30m": {
+      "pixel_m": 26.8,
+      "depressoes_acima_de_5cm": 16,
+      "area_total_m2": 21597.3,
+      "maior_depressao_m2": 4319.5,
+      "profundidade_maxima_m": 1.41,
+      "profundidade_mediana_nas_depressoes_m": 0.173,
+      "armazenamento_potencial_do_modelo_m3": 6621.8
+    },
+    "leitura": "Capacidade de enxergar depressões, não volume retido: o preenchimento também acusa ruído, canais e lagos, e uma depressão só retém se não tiver saída por drenagem."
+  },
+  "limitacoes": [
+    "Licença e precisão vertical declaradas do MDT não constam no serviço: exigem confirmação formal com a Prefeitura.",
+    "O MDT é de 2010 (aerolevantamento): não representa mudanças posteriores no terreno.",
+    "Uma única área piloto de 1 km² e 334 marcos geodésicos (concentrados em cotas e locais de levantamento): resultado indicativo, não validação geral.",
+    "O serviço é um Image Service (identify e exportImage), sem opção de download do arquivo: uma versão local exigiria exportar por blocos e confirmar a licença."
+  ]
+}

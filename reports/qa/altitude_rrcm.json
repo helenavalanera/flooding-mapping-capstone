@@ -1,0 +1,17 @@
+{
+  "marcos_com_altitude_ortometrica": 334,
+  "comparados": 282,
+  "sem_altitude_na_rede": 48,
+  "raio_m": 100,
+  "vies_m": 2.09,
+  "mae_m": 2.77,
+  "rmse_m": 4.55,
+  "erro_sem_vies_rmse_m": 4.04,
+  "spearman": 0.99,
+  "dentro_de_5m": 0.887,
+  "cotas_abaixo_de_10m": {
+    "n": 61,
+    "vies_m": 1.87,
+    "mae_m": 2.13
+  }
+}
