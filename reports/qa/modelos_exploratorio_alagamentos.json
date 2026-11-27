@@ -1,0 +1,53 @@
+{
+  "trechos": 107869,
+  "trechos_rotulados": 124,
+  "taxa_base": 0.00115,
+  "dobras": 5,
+  "blocos_separados_entre_treino_e_teste": true,
+  "margem_exigida": 0.1,
+  "modelos": {
+    "regra_de_terreno": {
+      "auc": 0.666,
+      "precisao_media": 0.00205,
+      "positivos_no_topo_10pct": 0.169,
+      "intervalo_95_precisao_media": [
+        0.00167,
+        0.00283
+      ]
+    },
+    "regressao_logistica": {
+      "auc": 0.691,
+      "precisao_media": 0.0019,
+      "positivos_no_topo_10pct": 0.161,
+      "intervalo_95_precisao_media": [
+        0.00166,
+        0.00235
+      ],
+      "ganho_sobre_a_regra": -0.073,
+      "adotaria": false
+    },
+    "gradient_boosting": {
+      "auc": 0.686,
+      "precisao_media": 0.00182,
+      "positivos_no_topo_10pct": 0.145,
+      "intervalo_95_precisao_media": [
+        0.00163,
+        0.00207
+      ],
+      "ganho_sobre_a_regra": -0.112,
+      "adotaria": false
+    },
+    "mlp": {
+      "auc": 0.694,
+      "precisao_media": 0.00193,
+      "positivos_no_topo_10pct": 0.137,
+      "intervalo_95_precisao_media": [
+        0.0017,
+        0.00228
+      ],
+      "ganho_sobre_a_regra": -0.059,
+      "adotaria": false
+    }
+  },
+  "leitura": "exploratório: ~100 trechos positivos, rótulos de 2013-2014, só terreno (sem chuva). Um modelo só seria adotado com ganho de 10% de PR-AUC sobre a regra em blocos espaciais; intervalos que se sobrepõem não sustentam diferença."
+}
