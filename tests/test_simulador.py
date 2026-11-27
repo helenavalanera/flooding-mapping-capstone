@@ -77,6 +77,11 @@ def test_simulator_numbers_equal_the_engine_output_and_keep_the_order_of_the_str
     import pandas as pd
     d = json.loads(RES.read_text())["cenarios"]["dados"]
     n2 = pd.read_parquet(F3 / "trechos_nivel2_cenarios.parquet")
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+    from manchas_base import Quadro, carregar_rede
+    q = Quadro(carregar_rede())
+    n2 = n2[n2["segmento_id"].isin(set(q.ids[q.no_municipio()]))]                         # recorte municipal (docs/recorte_municipal.md): os resultados valem para as ruas dentro de Porto Alegre
     pivot = n2[n2["pacote"] == "metodo1"].pivot(index="segmento_id", columns="p_mm", values="contrib_potencial_max_m3").dropna()
     for P in (10, 20, 30):
         col = pivot[float(P)]
