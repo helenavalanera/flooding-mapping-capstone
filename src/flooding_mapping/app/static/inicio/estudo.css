@@ -198,3 +198,6 @@ th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--li
 .dim-letra { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--acento); color: var(--acento-ink); font-weight: 700; flex: none; }
 .dimensoes-texto p { font-size: var(--pequeno); color: rgba(234, 242, 246, .92); max-width: 36em; }
 @media (max-width: 900px) { .dimensoes-texto { grid-template-columns: 1fr; } }
+
+.tabela-chuva { margin-top: 12px; font-size: .88rem; } .tabela-chuva summary { cursor: pointer; font-weight: 600; padding: 8px 0; } .tabela-chuva summary:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+#resultados-executivos h3 { margin-top: 28px; }

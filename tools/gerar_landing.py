@@ -31,6 +31,7 @@ FIG_MAPAS_LOCAIS = RAIZ / "data/interim/landing_mapas_historicos"   # fora do Gi
 TEMPLATE = RAIZ / "tools/landing/estudo.template.html"
 REPO = "https://github.com/helenavalanera/flooding-mapping-capstone"
 
+RANKINGS = "src/flooding_mapping/app/static/data/rankings_poa.json"   # tools/gerar_rankings.py
 TINTA, SECO, LEVE, FORTE, ACENTO = "#0a1c27", "#e6f0f5", "#bcd7e6", "#0b5d8f", "#f2a33a"
 
 
@@ -399,6 +400,42 @@ def grafico_cobertura(caminho_svg: Path):
     plt.close(fig)
 
 
+def grafico_chuva_mensal(caminho_svg: Path):
+    """Média mensal de chuva (mm por mês) por mês do calendário, a partir de rankings_poa.json (tools/gerar_rankings.py)."""
+    import matplotlib.pyplot as plt
+
+    _estilo_svg()
+    m = jcarrega(RANKINGS)["media_mensal_de_chuva"]
+    nomes = [x["mes"][:3].capitalize() for x in m["meses"]]
+    vals = [x["media_mm"] for x in m["meses"]]
+    fig, ax = plt.subplots(figsize=(8.6, 3.4))
+    barras = ax.bar(nomes, vals, color=FORTE, width=0.7)
+    ax.axhline(m["media_dos_meses_mm"], color=ACENTO, linewidth=2, linestyle="--")
+    ax.text(11.45, m["media_dos_meses_mm"] + 4, f"média dos meses: {br(m['media_dos_meses_mm'], 0)} mm", ha="right", va="bottom", fontsize=9, color=TINTA)
+    for b, v in zip(barras, vals):
+        ax.text(b.get_x() + b.get_width() / 2, v + 3, br(v, 0), ha="center", va="bottom", fontsize=9, color=TINTA)
+    ax.set_ylabel("mm por mês")
+    ax.set_ylim(0, max(vals) * 1.18)
+    fig.savefig(caminho_svg, facecolor="none", bbox_inches="tight")
+    plt.close(fig)
+
+
+def tabela_chuva_mensal() -> str:
+    m = jcarrega(RANKINGS)["media_mensal_de_chuva"]
+    linhas = "".join(f"<tr><th scope='row'>{html.escape(x['mes'].capitalize())}</th><td>{br(x['media_mm'], 1)}</td><td>{x['anos']}</td></tr>" for x in m["meses"])
+    return ("<table class='tab-fontes'><caption>Média mensal de chuva, Porto Alegre</caption><thead><tr><th scope='col'>Mês</th><th scope='col'>Média (mm por mês)</th><th scope='col'>Anos na média</th></tr></thead>"
+            f"<tbody>{linhas}</tbody></table>")
+
+
+def tabela_top5() -> str:
+    r = jcarrega(RANKINGS)["top5_bairros"]
+    linhas = "".join(f"<tr><th scope='row'>{i['posicao']}. {html.escape(i['bairro'])}</th><td>{br(100 * i['parcela_com_propensao_topografica'], 1)}%</td>"
+                     f"<td>{br(100 * i['parcela_no_decil_superior_de_contribuicao'], 1)}%</td><td>{br(i['trechos_com_dados'])}</td><td>{br(100 * i['cobertura_do_coeficiente_a_montante_mediana'], 0)}%</td></tr>" for i in r["itens"])
+    return (f"<p class='small'>Critério: {html.escape(r['criterio'])}. Universo: {html.escape(r['universo'])}.</p><div class='tabela-rolagem'><table class='tab-fontes'><caption>Top 5 bairros por propensão topográfica à retenção</caption>"
+            "<thead><tr><th scope='col'>Bairro</th><th scope='col'>Trechos com propensão topográfica</th><th scope='col'>Trechos no decil superior de contribuição da cidade</th><th scope='col'>Trechos com dados</th><th scope='col'>Cobertura do coeficiente a montante (mediana)</th></tr></thead>"
+            f"<tbody>{linhas}</tbody></table></div><p class='small'>As colunas não se combinam em índice. A cobertura baixa significa que parte da área a montante só tem coeficiente por cenário declarado.</p>")
+
+
 # --------------------------------------------------------------------------------------------------------------------- html
 def cartao(n: dict) -> str:
     e = html.escape
@@ -459,6 +496,7 @@ def montar(figuras: bool = True) -> dict:
         grafico_metodos(FIG / "grafico-metodos.svg")
         grafico_ml(FIG / "grafico-ml.svg")
         grafico_cobertura(FIG / "grafico-cobertura.svg")
+        grafico_chuva_mensal(FIG / "grafico-chuva-mensal.svg")
         dist = grafico_distribuicao(FIG / "grafico-distribuicao.svg", t)
         cen["distribuicao"] = dist
     elif (SAIDA / "dados.json").exists():
@@ -466,6 +504,11 @@ def montar(figuras: bool = True) -> dict:
     subs = {
         "NUMEROS": bloco_numeros(lista),
         "CENARIOS_JSON": json.dumps(cen, ensure_ascii=False, separators=(",", ":")),
+        "TABELA_CHUVA_MENSAL": tabela_chuva_mensal(),
+        "PERIODO_CHUVA": "de " + jcarrega(RANKINGS)["media_mensal_de_chuva"]["periodo_da_serie"][0][:4] + " a " + jcarrega(RANKINGS)["media_mensal_de_chuva"]["periodo_da_serie"][1][:4],
+        "TOP5_BAIRROS": tabela_top5(),
+        "MOTIVO_TOP10": html.escape(jcarrega(RANKINGS)["nao_publicados"]["top10_trechos"]),
+        "MOTIVO_ZONAS": html.escape(jcarrega(RANKINGS)["nao_publicados"]["ranking_de_zonas"]),
         "REFERENCIAS": refs.bloco_html(refs.carregar()),
         **numeros_geoai(),
         "REPO": REPO,
