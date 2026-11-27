@@ -31,6 +31,8 @@ CONFIG = {
           "fonte": "Escoamento potencial (Método 1): uso do solo Profill 2022, Prefeitura de Porto Alegre"},
     "B": {"arquivo": "mapa-concentracao.webp", "bordas": [0, 10, 100, 1000, 10000, MAX], "cores": ["#dcd9f2", "#b3aee0", "#857bc7", "#5547a3", "#2d2166"], "unidade": "m³ de escoamento potencial que converge ao trecho, em um evento de 30 mm",
           "fonte": "Escoamento potencial (Método 1): Profill 2022, Copernicus DEM"},
+    "D": {"arquivo": "mapa-drenagem.webp", "bordas": [0, 50, 100, 200, 300, MAX], "cores": ["#d4ecd9", "#9fd4b0", "#5fb383", "#2d8a5d", "#0e5236"], "unidade": "metros de rede pluvial cadastrada por célula de 100 m (1 hectare)",
+          "fonte": "Cadastro de drenagem pluvial: Prefeitura de Porto Alegre (GeoPOA)"},
 }
 
 
@@ -90,16 +92,61 @@ def dimensao_a_ou_b(dim: str, q: Quadro, d: pd.DataFrame, agua, bairros) -> dict
     return r
 
 
+def rede_por_celula(q: Quadro) -> np.ndarray:
+    """Metros de rede pluvial cadastrada (sem duplicatas) que caem em cada célula de 100 m: o comprimento é repartido em pedaços de até 10 m, cada um na célula do seu centro."""
+    import geopandas as gpd
+    import shapely
+
+    g = gpd.read_parquet(RAIZ / "data/processed/drenagem/rede_pluvial.parquet", columns=["geometry", "usar_no_inventario"])
+    g = g[g["usar_no_inventario"]]
+    co, ix = shapely.get_coordinates(shapely.segmentize(g.geometry.values, 10), return_index=True)
+    mesma = ix[1:] == ix[:-1]
+    a, b = co[:-1][mesma], co[1:][mesma]
+    comp, m = np.hypot(*(b - a).T), (a + b) / 2
+    iy, ixc = q.celula(m[:, 0], m[:, 1])
+    ok = (iy >= 0) & (iy < q.ny) & (ixc >= 0) & (ixc < q.nx)
+    grade = np.zeros((q.ny, q.nx))
+    np.add.at(grade, (iy[ok], ixc[ok]), comp[ok])
+    return grade
+
+
+def dimensao_d(q: Quadro, agua, bairros) -> dict:
+    cfg = CONFIG["D"]
+    grade = rede_por_celula(q)
+    iy, ix = q.celula(q.xm, q.ym)
+    com_rede = grade[iy.clip(0, q.ny - 1), ix.clip(0, q.nx - 1)] > 0
+    w, hpx = desenhar(q, grade, cfg["bordas"], cfg["cores"], None, agua, bairros, IMG_DIR / cfg["arquivo"], cfg["fonte"])
+    cel = grade[grade > 0]
+    res = json.loads(RESULTADOS.read_text(encoding="utf-8"))
+    ind = {i["id"]: i["valor"] for i in res["indicadores"]}
+    rede, pontos, rel = ind["D-rede"], ind["D-pontos"], ind["D-relacao"]
+    q_nulos = json.loads((RAIZ / "data/processed/drenagem/qualidade_drenagem.json").read_text(encoding="utf-8"))["rede_pluvial"]["rede_pluvial"]["fracao_de_nulos_por_coluna"]
+    pb = res["dimensoes"]["D"]["dados"]["por_bairro"]
+    ok = {b["nome"] for b in res["bairros"] if b["suficiente"]}
+    ordem = sorted(((n, v) for n, v in pb.items() if n in ok), key=lambda t: (-t[1]["rede_km_por_km2"], t[0]))[:5]
+    km = sum(v["km"] for v in rede.values())
+    return {"nome": "Drenagem cadastrada", "unidade": cfg["unidade"], "natureza": "cadastro municipal: registro, não funcionamento nem capacidade",
+            "imagem": {"arquivo": f"img/estudo/{cfg['arquivo']}", "largura_px": w, "altura_px": hpx, "bytes": (IMG_DIR / cfg["arquivo"]).stat().st_size, "celula_m": 100, "agregacao": "soma do comprimento de rede em cada célula"},
+            "faixas": [{"de": float(a), "ate": None if b >= MAX else float(b), "rotulo": r, "cor": c, "celulas": int(((cel > a) & (cel <= b)).sum())}
+                       for (a, b), r, c in zip(zip(cfg["bordas"][:-1], cfg["bordas"][1:]), [f"mais de 0 até 50 m", "50 a 100 m", "100 a 200 m", "200 a 300 m", "mais de 300 m"], cfg["cores"])],
+            "rede_km": round(km), "rede_trechos": sum(v["trechos"] for v in rede.values()), "rede_sem_acesso_km": round(rede["rede_pluvial_sem_acesso"]["km"]), "pocos_de_visita": pontos["pocos"], "bocas_de_lobo": pontos["bocas"],
+            "casas_de_bomba": pontos["casas_de_bomba"], "celulas_com_rede": int(len(cel)), "mediana_m_por_celula": round(float(np.median(cel))), "p90_m_por_celula": round(float(np.quantile(cel, 0.9))),
+            "trechos_de_rua_total": int(len(q.ids)), "trechos_de_rua_em_celula_com_rede": int(com_rede.sum()), "trechos_de_rua_em_celula_com_rede_pct": round(100 * float(com_rede.mean()), 1),
+            "campos_sem_preenchimento_pct": {"material": round(100 * q_nulos["material"]), "declividade": round(100 * q_nulos["declividade"]), "classe_do_tubo": round(100 * q_nulos["classe_do_tubo"])},
+            "perto_de_boca_de_lobo_por_quintil_de_concentracao_pct": {"menor": round(100 * rel[0]["com_boca_de_lobo_ate_50m"]), "maior": round(100 * rel[-1]["com_boca_de_lobo_ate_50m"])},
+            "fonte": cfg["fonte"], "bairros": {"metrica": "km de rede pluvial cadastrada (parte urbana) por km² do bairro", "universo": f"{len(ok)} de {len(res['bairros'])} bairros (os demais têm poucos trechos com dados e ficam sem estimativa)",
+                                               "bairros_sem_estimativa": len(res["bairros"]) - len(ok), "itens": [{"bairro": n, "valor": round(v["rede_km_por_km2"], 1), "bocas_por_km2": round(v["bocas_por_km2"])} for n, v in ordem]}}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--so", nargs="+", default=["A", "B"], choices=["A", "B"])
+    ap.add_argument("--so", nargs="+", default=["A", "B", "D"], choices=["A", "B", "D"])
     args = ap.parse_args()
     q, agua, bairros = Quadro(carregar_rede()), carregar_agua(), carregar_bairros()
     saida = json.loads(DADOS.read_text(encoding="utf-8")) if DADOS.exists() else {}
     d = base_30mm() if ({"A", "B"} & set(args.so)) else None
     for dim in args.so:
-        if dim in ("A", "B"):
-            saida[dim] = dimensao_a_ou_b(dim, q, d, agua, bairros)
+        saida[dim] = dimensao_d(q, agua, bairros) if dim == "D" else dimensao_a_ou_b(dim, q, d, agua, bairros)
         print("gerado:", dim, saida[dim]["imagem"]["arquivo"], f"{saida[dim]['imagem']['bytes'] / 1024:.0f} KB")
     DADOS.write_text(json.dumps(dict(sorted(saida.items())), ensure_ascii=False, indent=1), encoding="utf-8")
 

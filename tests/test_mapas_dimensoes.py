@@ -72,3 +72,21 @@ def test_the_generator_makes_no_composite_index_and_no_ranking_across_dimensions
     for proibido in ("alagamentos", "events.csv", "indice_composto", "score", "risco"):
         assert proibido not in codigo.lower(), proibido
     assert "valores de dimensões diferentes não se comparam" in fonte
+
+
+def test_d_is_a_record_of_the_registry_with_its_gaps_stated():
+    r = J["D"]
+    assert "metros de rede" in r["unidade"] and "não funcionamento" in r["natureza"] and sum(f["celulas"] for f in r["faixas"]) == r["celulas_com_rede"]
+    assert r["rede_trechos"] == 135779 and r["rede_km"] == 2961 and r["bocas_de_lobo"] == 44761 and r["pocos_de_visita"] == 88860
+    assert r["trechos_de_rua_em_celula_com_rede"] < r["trechos_de_rua_total"] == 176836 and r["trechos_de_rua_em_celula_com_rede_pct"] == 57.0     # ruas sem rede cadastrada: lacuna do cadastro, não prova de ausência
+    assert r["campos_sem_preenchimento_pct"]["material"] > 90 and r["mediana_m_por_celula"] < r["p90_m_por_celula"]
+    assert r["perto_de_boca_de_lobo_por_quintil_de_concentracao_pct"] == {"menor": 2, "maior": 72}
+    assert len(r["bairros"]["itens"]) == 5 and r["bairros"]["bairros_sem_estimativa"] == 2
+
+
+def test_d_numbers_match_the_committed_results():
+    res = json.loads((ST / "data/resultados_poa.json").read_text(encoding="utf-8"))
+    ind = {i["id"]: i["valor"] for i in res["indicadores"]}
+    assert J["D"]["bocas_de_lobo"] == ind["D-pontos"]["bocas"] and J["D"]["rede_trechos"] == sum(v["trechos"] for v in ind["D-rede"].values())
+    pb = res["dimensoes"]["D"]["dados"]["por_bairro"]
+    assert all(round(pb[i["bairro"]]["rede_km_por_km2"], 1) == i["valor"] for i in J["D"]["bairros"]["itens"])

@@ -190,5 +190,109 @@
   },
   "trechos_acima_de_1000_m3": 16865,
   "trechos_acima_de_10000_m3": 4842
+ },
+ "D": {
+  "nome": "Drenagem cadastrada",
+  "unidade": "metros de rede pluvial cadastrada por célula de 100 m (1 hectare)",
+  "natureza": "cadastro municipal: registro, não funcionamento nem capacidade",
+  "imagem": {
+   "arquivo": "img/estudo/mapa-drenagem.webp",
+   "largura_px": 1400,
+   "altura_px": 1722,
+   "bytes": 210730,
+   "celula_m": 100,
+   "agregacao": "soma do comprimento de rede em cada célula"
+  },
+  "faixas": [
+   {
+    "de": 0.0,
+    "ate": 50.0,
+    "rotulo": "mais de 0 até 50 m",
+    "cor": "#d4ecd9",
+    "celulas": 1914
+   },
+   {
+    "de": 50.0,
+    "ate": 100.0,
+    "rotulo": "50 a 100 m",
+    "cor": "#9fd4b0",
+    "celulas": 2075
+   },
+   {
+    "de": 100.0,
+    "ate": 200.0,
+    "rotulo": "100 a 200 m",
+    "cor": "#5fb383",
+    "celulas": 4893
+   },
+   {
+    "de": 200.0,
+    "ate": 300.0,
+    "rotulo": "200 a 300 m",
+    "cor": "#2d8a5d",
+    "celulas": 4032
+   },
+   {
+    "de": 300.0,
+    "ate": null,
+    "rotulo": "mais de 300 m",
+    "cor": "#0e5236",
+    "celulas": 2775
+   }
+  ],
+  "rede_km": 2961,
+  "rede_trechos": 135779,
+  "rede_sem_acesso_km": 84,
+  "pocos_de_visita": 88860,
+  "bocas_de_lobo": 44761,
+  "casas_de_bomba": 24,
+  "celulas_com_rede": 15689,
+  "mediana_m_por_celula": 177,
+  "p90_m_por_celula": 349,
+  "trechos_de_rua_total": 176836,
+  "trechos_de_rua_em_celula_com_rede": 100836,
+  "trechos_de_rua_em_celula_com_rede_pct": 57.0,
+  "campos_sem_preenchimento_pct": {
+   "material": 92,
+   "declividade": 96,
+   "classe_do_tubo": 87
+  },
+  "perto_de_boca_de_lobo_por_quintil_de_concentracao_pct": {
+   "menor": 2,
+   "maior": 72
+  },
+  "fonte": "Cadastro de drenagem pluvial: Prefeitura de Porto Alegre (GeoPOA)",
+  "bairros": {
+   "metrica": "km de rede pluvial cadastrada (parte urbana) por km² do bairro",
+   "universo": "92 de 94 bairros (os demais têm poucos trechos com dados e ficam sem estimativa)",
+   "bairros_sem_estimativa": 2,
+   "itens": [
+    {
+     "bairro": "São Geraldo",
+     "valor": 29.6,
+     "bocas_por_km2": 324
+    },
+    {
+     "bairro": "Jardim Lindóia",
+     "valor": 28.1,
+     "bocas_por_km2": 279
+    },
+    {
+     "bairro": "Chácara das Pedras",
+     "valor": 27.3,
+     "bocas_por_km2": 440
+    },
+    {
+     "bairro": "Santa Maria Goretti",
+     "valor": 26.7,
+     "bocas_por_km2": 266
+    },
+    {
+     "bairro": "Vila Ipiranga",
+     "valor": 25.5,
+     "bocas_por_km2": 223
+    }
+   ]
+  }
  }
 }
