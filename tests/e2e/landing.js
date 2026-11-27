@@ -20,7 +20,7 @@ const fs = require("fs"), path = require("path");
   for (const id of ["p-contribuicao", "p-local", "p-topografico", "p-drenagem"]) assert.ok(await page.locator("#" + id).isVisible(), id + " visível");
   assert.strictEqual(await page.locator(".hero img").count(), 0); assert.strictEqual(await page.locator("#mapa canvas").count(), 0, "sem canvas (WebGL) na landing");
   assert.strictEqual(await page.locator("#mapa [role=tab]").count(), 4); assert.strictEqual(await page.locator("#mapa [role=tabpanel]:not([hidden])").count(), 1, "um painel por vez");
-  const ESPERADO = { a: [/mapa-geracao\.webp$/, /m³/, /Profill/], b: [/mapa-concentracao\.webp$/, /m³/, /Não é vazão/], c: [/mapa-propensao\.webp$/, /0,0 a 0,5 m/, /Não representa ocorrência nem risco de alagamento/], d: [/mapa-drenagem\.webp$/, /200 a 300 m[\s\S]*sem rede cadastrada/, /não o funcionamento nem a capacidade/] };
+  const ESPERADO = { a: [/mapa-geracao\.webp$/, /m³/, /Profill/], b: [/mapa-concentracao\.webp$/, /m³/, /Não é vazão/], c: [/mapa-propensao\.webp$/, /mais de 0 até 0,5 m/, /ocorrência ou risco de alagamento/], d: [/mapa-drenagem\.webp$/, /200 a 300 m[\s\S]*sem rede cadastrada/, /não o funcionamento nem a capacidade/] };
   for (const k of ["a", "b", "c", "d"]) {
     await page.click("#aba-" + k); await page.waitForFunction((id) => { const i = document.querySelector("#painel-" + id + " img"); return i.complete && i.naturalWidth > 0; }, k, { timeout: 8000 });
     assert.strictEqual(await page.locator("#mapa [role=tabpanel]:not([hidden])").count(), 1); assert.strictEqual(await page.getAttribute("#aba-" + k, "aria-selected"), "true");
@@ -31,6 +31,7 @@ const fs = require("fs"), path = require("path");
   await page.click("#painel-c .ampliar"); assert.ok(await page.evaluate(() => document.querySelector(".zoom").open), "o mapa amplia"); await page.keyboard.press("Escape"); assert.ok(!(await page.evaluate(() => document.querySelector(".zoom").open)));
   assert.match(await page.innerText("#p-drenagem"), /não prova capacidade, funcionamento nem conexão/); assert.match(await page.innerText("#p-topografico"), /Não é profundidade, volume nem duração/);
   assert.match(await page.innerText("#mapa"), /Decreto Municipal nº 20\.315\/2019/); assert.match(await page.innerText("#mapa"), /dependem da publicação dos arquivos derivados/);
+  assert.match(await page.innerText("#painel-a"), /Zero não é ausência de dado/); assert.match(await page.innerText("#painel-c"), /Não é a profundidade que a água atingiria/);
   // nenhuma imagem quebrada na página inteira
   await page.evaluate(() => document.querySelectorAll('img[loading=lazy]').forEach((i) => { i.loading = 'eager'; }));   // imagens preguiçosas só carregam ao rolar
   await page.waitForFunction(() => Array.from(document.images).every((i) => i.complete), null, { timeout: 20000 }).catch(() => {});
@@ -44,7 +45,8 @@ const fs = require("fs"), path = require("path");
     assert.strictEqual(await page.getAttribute(`.seletor button[data-p='${p}']`, "aria-pressed"), "true"); assert.match(await page.innerText("#cen-p"), new RegExp(p + " mm"));
     const t = dados.cenarios.totais_m3[String(p)], txt = await page.innerText("#cen-barras");
     for (const k of ["metodo1", "referencia_analoga", "limites_fisicos"]) assert.ok(txt.includes(mi(t[k].min_m3) + " a " + mi(t[k].max_m3) + " milhões de m³"), `${p} mm ${k}: ${mi(t[k].min_m3)} a ${mi(t[k].max_m3)}`);
-    assert.strictEqual(await page.getAttribute("#cen-link", "href"), `../?painel=1#poa/mapa?escoamento=1&p=${p}`);
+    const comCamadas = (await page.getAttribute("#cen-link", "data-camadas")) === "1";           // só promete a camada quando os derivados estão publicados
+    assert.strictEqual(await page.getAttribute("#cen-link", "href"), comCamadas ? `../?painel=1#poa/mapa?escoamento=1&p=${p}` : "../?painel=1#poa/mapa");
   }
   assert.match(await page.innerText("#cen-trecho"), /Contribuição potencial acumulada[\s\S]*mediana[\s\S]*percentil 99/); assert.match(await page.innerText("#cenarios"), /e não previsões/);
   // o link do simulador abre o mapa já configurado (camada ligada, chuva e pacote pedidos)
