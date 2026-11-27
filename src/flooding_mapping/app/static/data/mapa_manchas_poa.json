@@ -1,0 +1,45 @@
+{
+ "variavel": "altura que o preenchimento de depressões soma ao relevo (propensão topográfica à retenção, dimensão C), por trecho",
+ "fontes": "Copernicus DEM GLO-30 (relevo) e OpenStreetMap (ruas e água). Não usa a Profill, os limites de bairros da Prefeitura nem registros de alagamento",
+ "imagem": {
+  "arquivo": "img/estudo/mapa-propensao.webp",
+  "largura_px": 1400,
+  "altura_px": 1722,
+  "bytes": 233962,
+  "celula_m": 100,
+  "agregacao": "máximo entre os trechos de cada célula"
+ },
+ "faixas_m": [
+  {
+   "de": 0.0,
+   "ate": 0.5,
+   "cor": "#f1d9a8"
+  },
+  {
+   "de": 0.5,
+   "ate": 1.0,
+   "cor": "#dfa356"
+  },
+  {
+   "de": 1.0,
+   "ate": 2.0,
+   "cor": "#b3622a"
+  },
+  {
+   "de": 2.0,
+   "ate": null,
+   "cor": "#6a2a12"
+  }
+ ],
+ "trechos_total": 176836,
+ "trechos_com_dado_de_relevo": 173917,
+ "trechos_sem_dado_de_relevo": 2919,
+ "cobertura_de_dado_pct": 98.3,
+ "trechos_com_depressao": 38976,
+ "trechos_com_depressao_pct": 22.0,
+ "altura_mediana_m": 0.59,
+ "altura_p90_m": 1.93,
+ "altura_p99_m": 4.04,
+ "altura_maxima_m": 15.02,
+ "trechos_acima_de_8_m": 5
+}
