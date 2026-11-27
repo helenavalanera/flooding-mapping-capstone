@@ -271,3 +271,39 @@ def test_the_screen_code_never_sums_across_stretches_and_uses_no_forbidden_words
     for termo in termos:
         assert termo.lower() not in visivel.lower(), termo
     assert "motor da Fase 3" in (STATIC / "mapa.js").read_text(encoding="utf-8")
+
+
+def test_derived_layer_files_are_compressed_cached_and_revalidated_like_a_cdn_would(tmp_path, monkeypatch):
+    import gzip
+    import http.client
+    import threading
+    from http.server import ThreadingHTTPServer
+
+    from test_servico import montar
+
+    pasta = tmp_path / "web"
+    (pasta / "tiles" / "13" / "1").mkdir(parents=True)
+    grande = b"abcdefgh" * 4000
+    (pasta / "tiles" / "13" / "1" / "1.pbf").write_bytes(grande)
+    (pasta / "meta.json").write_text('{"ok":true}' + " " * 2000)
+    monkeypatch.setattr(srv, "FASE3_RAIZ", pasta)
+    servico, _ = montar()
+    servidor = ThreadingHTTPServer(("127.0.0.1", 0), srv.criar_handler(servico, "", srv.Limitador()))
+    threading.Thread(target=servidor.serve_forever, daemon=True).start()
+    try:
+        def pega(caminho, **cab):
+            con = http.client.HTTPConnection("127.0.0.1", servidor.server_address[1])
+            con.request("GET", caminho, headers=cab)
+            r = con.getresponse()
+            return r.status, r.read(), {k.lower(): v for k, v in r.getheaders()}
+
+        st, corpo, h = pega("/fase3/tiles/13/1/1.pbf", **{"Accept-Encoding": "gzip"})
+        assert st == 200 and h["content-encoding"] == "gzip" and gzip.decompress(corpo) == grande and len(corpo) < len(grande) / 5
+        assert "max-age=3600" in h["cache-control"] and "must-revalidate" in h["cache-control"] and "accept-encoding" in h["vary"].lower()
+        assert pega("/fase3/tiles/13/1/1.pbf", **{"If-None-Match": h["etag"]})[0] == 304                       # revalidação sem baixar de novo
+        st, corpo, h = pega("/fase3/tiles/13/1/1.pbf")
+        assert st == 200 and "content-encoding" not in h and corpo == grande                                    # sem Accept-Encoding, sem compressão
+        st, _, h = pega("/fase3/meta.json", **{"Accept-Encoding": "gzip"})
+        assert st == 200 and h["cache-control"] == "no-cache" and "etag" not in h                               # o meta.json decide a versão: sempre revalidado
+    finally:
+        servidor.shutdown()

@@ -17,6 +17,7 @@ Upgrade to a worker pool (or a compiled router) when concurrent analyses become 
 from __future__ import annotations
 
 import argparse
+import gzip
 import ipaddress
 import json
 import os
@@ -48,6 +49,7 @@ ARQUIVO = Path(__file__).parent / "app" / "arquivo"   # frente futura (monitoram
 MAX_CORPO = 8 * 1024
 MAPA_ROTA = "/mapa/rs.pmtiles"   # basemap (Protomaps, vector tiles of RS) served from our own disk; the app never calls a third-party tile server
 MAPA_ARQUIVO = ROOT / "data" / "raw" / "basemap" / "rs.pmtiles"
+CACHE_DERIVADOS = "public, max-age=3600, must-revalidate"   # tiles e fragmentos dos derivados; a publicação usa caminhos com hash e "immutable" (docs/r2_cache.md)
 FASE3_ROTA = "/fase3/"   # tiles e fragmentos da Fase 3 (derivados, fora do Git): tools/preparar_camada_fase3.py escreve em data/processed/fase3_web
 FASE3_RAIZ = ROOT / "data" / "processed" / "fase3_web"
 FASE3_TIPOS = (".pbf", ".json")
@@ -204,7 +206,7 @@ def criar_handler(servico_real: Servico, cors_origem: str = "", limitador: Limit
             pass
 
         # -------------------------------------------------------------- respostas
-        def _cabecalhos(self, tipo: str, tamanho: int, api: bool, csp: str = CSP) -> None:
+        def _cabecalhos(self, tipo: str, tamanho: int, api: bool, csp: str = CSP, cache: str | None = None) -> None:
             self.send_header("Content-Type", tipo)
             self.send_header("Content-Length", str(tamanho))
             self.send_header("X-Content-Type-Options", "nosniff")
@@ -212,7 +214,7 @@ def criar_handler(servico_real: Servico, cors_origem: str = "", limitador: Limit
             # de uso dos tiles do OpenStreetMap exige um Referer válido. Dentro do próprio servidor o Referer completo continua indo.
             self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
             self.send_header("Permissions-Policy", "geolocation=(self), camera=(), microphone=()")
-            self.send_header("Cache-Control", "no-store" if api else "no-cache")
+            self.send_header("Cache-Control", cache or ("no-store" if api else "no-cache"))
             if not api:
                 self.send_header("Content-Security-Policy", csp)
             if cors_origem:
@@ -488,8 +490,26 @@ def criar_handler(servico_real: Servico, cors_origem: str = "", limitador: Limit
                     return
                 return self._erro(HTTPStatus.NOT_FOUND, "não encontrado")
             corpo = alvo.read_bytes()
+            # Como o CDN faria na publicação: tiles e fragmentos são imutáveis por versão (ETag + cache do navegador por uma hora, revalidando), vão comprimidos
+            # (os tiles .pbf encolhem cerca de 3,7 vezes com gzip) e o meta.json, que decide qual versão vale, é sempre revalidado.
+            etag = f'"{alvo.stat().st_mtime_ns:x}-{len(corpo):x}"'
+            imutavel = alvo.name != "meta.json"
+            if imutavel and self.headers.get("If-None-Match") == etag:
+                self.send_response(HTTPStatus.NOT_MODIFIED)
+                self.send_header("ETag", etag)
+                self.send_header("Cache-Control", CACHE_DERIVADOS)
+                self.end_headers()
+                return
+            gz = len(corpo) > 512 and "gzip" in (self.headers.get("Accept-Encoding") or "")
+            if gz:
+                corpo = gzip.compress(corpo, 5)
             self.send_response(HTTPStatus.OK)
-            self._cabecalhos(TIPOS[alvo.suffix], len(corpo), False)
+            self._cabecalhos(TIPOS[alvo.suffix], len(corpo), False, cache=CACHE_DERIVADOS if imutavel else None)
+            if imutavel:
+                self.send_header("ETag", etag)
+            if gz:
+                self.send_header("Content-Encoding", "gzip")
+            self.send_header("Vary", "Accept-Encoding" if not cors_origem else "Origin, Accept-Encoding")
             self.end_headers()
             self.wfile.write(corpo)
 
