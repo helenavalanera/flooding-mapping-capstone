@@ -1,0 +1,52 @@
+{
+ "criterio": "ponto médio do trecho dentro do polígono do município (data/processed/municipality.parquet, 495,0 km²)",
+ "trechos_na_malha": 176836,
+ "trechos_no_municipio": 143149,
+ "trechos_fora_do_municipio": 33687,
+ "no_municipio": {
+  "trechos": 143149,
+  "com_dados": 143081,
+  "sem_dado": 68,
+  "montante_coberta_m1_mediana": 0.385,
+  "contrib_m1_max_30mm_m3": {
+   "q50": 49.8,
+   "q90": 1384.6,
+   "q99": 48670.9
+  },
+  "preenchimento": {
+   "com_valor": 143081,
+   "zero": 111536,
+   "positivo": 31545
+  },
+  "boca_de_lobo_ate_50m_por_quintil_de_contribuicao_pct": [
+   26.3,
+   52.9,
+   59.8,
+   67.1,
+   72.8
+  ]
+ },
+ "sem_recorte": {
+  "trechos": 176836,
+  "com_dados": 173917,
+  "sem_dado": 2919,
+  "montante_coberta_m1_mediana": 0.3017,
+  "contrib_m1_max_30mm_m3": {
+   "q50": 32.1,
+   "q90": 942.4,
+   "q99": 42419.9
+  },
+  "preenchimento": {
+   "com_valor": 173917,
+   "zero": 134941,
+   "positivo": 38976
+  },
+  "boca_de_lobo_ate_50m_por_quintil_de_contribuicao_pct": [
+   2.4,
+   35.0,
+   55.7,
+   64.7,
+   72.1
+  ]
+ }
+}

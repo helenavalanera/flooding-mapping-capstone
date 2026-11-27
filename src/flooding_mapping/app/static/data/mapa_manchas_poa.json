@@ -1,11 +1,11 @@
 {
- "variavel": "altura que o preenchimento de depressões soma ao relevo (propensão topográfica à retenção, dimensão C), por trecho",
+ "variavel": "altura de preenchimento de depressões do relevo (modelo de 30 m), por trecho: indicador de propensão topográfica à retenção (dimensão C); serve para comparar trechos, não é a profundidade da água",
  "fontes": "Copernicus DEM GLO-30 (relevo), OpenStreetMap (ruas e água) e limites de bairros da Prefeitura de Porto Alegre (linhas de contexto). Esta dimensão não usa a Profill nem registros de alagamento",
  "imagem": {
   "arquivo": "img/estudo/mapa-propensao.webp",
   "largura_px": 1400,
   "altura_px": 1722,
-  "bytes": 255474,
+  "bytes": 198686,
   "celula_m": 100,
   "agregacao": "máximo entre os trechos de cada célula"
  },
@@ -31,15 +31,18 @@
    "cor": "#6a2a12"
   }
  ],
- "trechos_total": 176836,
- "trechos_com_dado_de_relevo": 173917,
- "trechos_sem_dado_de_relevo": 2919,
- "cobertura_de_dado_pct": 98.3,
- "trechos_com_depressao": 38976,
+ "recorte": "trechos dentro do município de Porto Alegre",
+ "trechos_na_malha": 176836,
+ "trechos_fora_do_municipio": 33687,
+ "trechos_total": 143149,
+ "trechos_com_dado_de_relevo": 143081,
+ "trechos_sem_dado_de_relevo": 68,
+ "cobertura_de_dado_pct": 99.95,
+ "trechos_com_depressao": 31545,
  "trechos_com_depressao_pct": 22.0,
- "altura_mediana_m": 0.59,
- "altura_p90_m": 1.93,
- "altura_p99_m": 4.04,
- "altura_maxima_m": 15.02,
- "trechos_acima_de_8_m": 5
+ "altura_mediana_m": 0.63,
+ "altura_p90_m": 2.07,
+ "altura_p99_m": 4.12,
+ "altura_maxima_m": 9.99,
+ "trechos_acima_de_8_m": 1
 }

@@ -14,17 +14,18 @@ IMG = ST / "inicio/img/estudo/mapa-propensao.webp"
 PARQUET = RAIZ / "data/processed/fase3/trechos_nivel1_propensao_topografica.parquet"
 
 
-def test_the_numbers_are_internally_consistent_and_match_the_approved_figures():
-    assert J["trechos_total"] == 176836 and J["trechos_com_depressao"] == 38976 and J["trechos_sem_dado_de_relevo"] == 2919
-    assert J["trechos_com_dado_de_relevo"] + J["trechos_sem_dado_de_relevo"] == J["trechos_total"]
-    assert J["cobertura_de_dado_pct"] == 98.3 and J["trechos_com_depressao_pct"] == 22.0
-    assert J["altura_mediana_m"] == 0.59 and J["altura_p99_m"] == 4.04
+def test_the_numbers_are_internally_consistent_and_use_only_streets_inside_the_municipality():
+    assert J["trechos_na_malha"] == 176836 and J["trechos_total"] + J["trechos_fora_do_municipio"] == J["trechos_na_malha"] and J["trechos_total"] == 143149
+    assert J["trechos_com_dado_de_relevo"] + J["trechos_sem_dado_de_relevo"] == J["trechos_total"] and J["trechos_sem_dado_de_relevo"] == 68
+    assert J["cobertura_de_dado_pct"] == 99.95 and J["trechos_com_depressao"] == 31545 and J["trechos_com_depressao_pct"] == 22.0
+    assert J["altura_mediana_m"] == 0.63 and J["altura_p99_m"] == 4.12
+    assert "não é a profundidade da água" in J["variavel"]
 
 
 def test_the_extreme_maximum_is_recorded_as_an_outlier_and_not_highlighted():
-    assert J["altura_maxima_m"] > 10 and J["trechos_acima_de_8_m"] <= 10 and J["altura_p99_m"] < J["altura_maxima_m"] / 3
+    assert J["altura_maxima_m"] > 8 and J["trechos_acima_de_8_m"] <= 10 and J["altura_p99_m"] < J["altura_maxima_m"] / 2
     html = (ST / "inicio/index.html").read_text(encoding="utf-8")
-    assert str(J["altura_maxima_m"]).replace(".", ",") not in html and "15 m" not in html            # o máximo é valor extremo, provável artefato do modelo de superfície
+    assert str(J["altura_maxima_m"]).replace(".", ",") not in html            # o máximo é valor extremo, provável artefato do modelo de superfície
 
 
 @pytest.mark.skipif(not PARQUET.exists(), reason="falta data/processed/fase3 (fora do Git)")
@@ -32,8 +33,9 @@ def test_the_numbers_are_recomputed_from_the_existing_results():
     sys.path.insert(0, str(RAIZ / "tools"))
     import pandas as pd
 
-    from gerar_mapa_manchas import estatisticas
-    e = estatisticas(pd.read_parquet(PARQUET))
+    from gerar_mapa_manchas import do_municipio, estatisticas
+    from manchas_base import Quadro, carregar_rede
+    e = estatisticas(do_municipio(Quadro(carregar_rede()), pd.read_parquet(PARQUET)))
     assert {k: J[k] for k in e} == e
 
 

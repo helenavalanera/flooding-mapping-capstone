@@ -16,7 +16,7 @@ ESTATICO = RAIZ / "src/flooding_mapping/app/static"
 IMG_DIR = ESTATICO / "inicio/img/estudo"
 CELULA_M = 100
 LARGURA_PX = 1400
-FUNDO, AGUA, RUA, SEM_DADO, LIMITE = "#f4f6f7", "#cfe0ea", "#c3cbd0", "#8c99a1", "#7d8a93"
+FUNDO, AGUA, RUA, SEM_DADO, LIMITE, RUA_FORA = "#f4f6f7", "#cfe0ea", "#c3cbd0", "#8c99a1", "#7d8a93", "#e4e9ec"
 FONTE_OSM = "Ruas e água: © colaboradores do OpenStreetMap · Limites de bairros: Prefeitura de Porto Alegre"
 
 
@@ -47,6 +47,13 @@ def carregar_bairros():
     return list(zip(nomes, g))
 
 
+def carregar_municipio():
+    """Polígono do município de Porto Alegre em EPSG:31982 (o do pipeline: data/processed/municipality.parquet)."""
+    import geopandas as gpd
+
+    return gpd.read_parquet(RAIZ / "data/processed/municipality.parquet").to_crs("EPSG:31982").geometry.union_all()
+
+
 class Quadro:
     """Projeção das ruas e grade comum a todos os mapas."""
 
@@ -62,6 +69,14 @@ class Quadro:
         self.ymin, self.ymax = self.ym.min() - 400, self.ym.max() + 400
         self.nx = int(np.ceil((self.xmax - self.xmin) / CELULA_M))
         self.ny = int(np.ceil((self.ymax - self.ymin) / CELULA_M))
+
+    def no_municipio(self) -> np.ndarray:
+        """Verdadeiro para o trecho cujo ponto médio cai DENTRO do município. A malha de ruas vem de uma caixa em volta de Porto Alegre e traz vias de cidades vizinhas."""
+        import shapely
+
+        if not hasattr(self, "_dentro"):
+            self._dentro = shapely.contains(carregar_municipio(), shapely.points(self.xm, self.ym))
+        return self._dentro
 
     def celula(self, x, y):
         return ((y - self.ymin) // CELULA_M).astype(int), ((x - self.xmin) // CELULA_M).astype(int)
@@ -102,10 +117,11 @@ def desenhar(q: Quadro, grade: np.ndarray, bordas: list[float], cores: list[str]
                     px, py = poly.exterior.xy
                     ax.fill(px, py, color=AGUA, lw=0, zorder=1)
     seg = lambda m: np.stack([np.c_[q.x0[m], q.y0[m]], np.c_[q.x1[m], q.y1[m]]], axis=1)
-    todos = np.ones(len(q.x0), dtype=bool)
-    ax.add_collection(LineCollection(seg(todos), colors=RUA, linewidths=0.25, zorder=2))
-    if sem_dado is not None and sem_dado.any():
-        ax.add_collection(LineCollection(seg(sem_dado), colors=SEM_DADO, linewidths=0.5, linestyles=(0, (2, 2)), zorder=3))
+    dentro = q.no_municipio()                                          # vias de fora do município: só contexto, bem claras, sem análise
+    ax.add_collection(LineCollection(seg(~dentro), colors=RUA_FORA, linewidths=0.2, zorder=2))
+    ax.add_collection(LineCollection(seg(dentro), colors=RUA, linewidths=0.25, zorder=2))
+    if sem_dado is not None and (sem_dado & dentro).any():
+        ax.add_collection(LineCollection(seg(sem_dado & dentro), colors=SEM_DADO, linewidths=0.5, linestyles=(0, (2, 2)), zorder=3))
     acima = np.ma.masked_where(~(grade > 0), grade)
     ax.imshow(acima, extent=(q.xmin, q.xmax, q.ymin, q.ymax), origin="lower", cmap=ListedColormap(cores), norm=BoundaryNorm([*bordas[:-1], 1e12], len(cores)), interpolation="nearest", zorder=4, alpha=0.95)
     if bairros:
