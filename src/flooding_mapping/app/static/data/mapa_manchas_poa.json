@@ -1,11 +1,11 @@
 {
  "variavel": "altura que o preenchimento de depressões soma ao relevo (propensão topográfica à retenção, dimensão C), por trecho",
- "fontes": "Copernicus DEM GLO-30 (relevo) e OpenStreetMap (ruas e água). Não usa a Profill, os limites de bairros da Prefeitura nem registros de alagamento",
+ "fontes": "Copernicus DEM GLO-30 (relevo), OpenStreetMap (ruas e água) e limites de bairros da Prefeitura de Porto Alegre (linhas de contexto). Esta dimensão não usa a Profill nem registros de alagamento",
  "imagem": {
   "arquivo": "img/estudo/mapa-propensao.webp",
   "largura_px": 1400,
   "altura_px": 1722,
-  "bytes": 233962,
+  "bytes": 255474,
   "celula_m": 100,
   "agregacao": "máximo entre os trechos de cada célula"
  },

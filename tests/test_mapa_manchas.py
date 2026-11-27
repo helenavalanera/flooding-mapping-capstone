@@ -47,10 +47,10 @@ def test_the_image_is_a_light_webp_with_the_recorded_size_and_a_legend_in_metres
     assert lum == sorted(lum, reverse=True)                                                          # mais escuro = faixa mais profunda
 
 
-def test_the_generator_uses_neither_the_profill_nor_the_district_boundaries_nor_the_flood_records():
+def test_the_topographic_generator_keeps_to_dimension_c_and_does_not_use_the_profill_or_flood_records():
     fonte = (RAIZ / "tools/gerar_mapa_manchas.py").read_text(encoding="utf-8")
     codigo = re.sub(r'""".*?"""', "", fonte, count=1, flags=re.S)
     codigo = "\n".join(l for l in codigo.splitlines() if '"fontes":' not in l)                          # a frase que declara o que NÃO é usado
-    for proibido in ("uso_solo", "profill", "territorio_poa", "bairros", "alagamentos", "events.csv", "contrib_aeq", "acum_aeq"):
+    for proibido in ("uso_solo", "profill", "alagamentos", "events.csv", "contrib_aeq", "acum_aeq", "nivel2"):
         assert proibido not in codigo.lower(), proibido
-    assert "Copernicus" in J["fontes"] and "OpenStreetMap" in J["fontes"] and "Não usa a Profill" in J["fontes"]
+    assert "Copernicus" in J["fontes"] and "OpenStreetMap" in J["fontes"] and "não usa a Profill" in J["fontes"]
