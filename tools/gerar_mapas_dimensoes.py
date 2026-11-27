@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from manchas_base import IMG_DIR, RAIZ, Quadro, carregar_agua, carregar_bairros, carregar_rede, desenhar  # noqa: E402
+from manchas_base import ESTATICO, IMG_DIR, RAIZ, Quadro, carregar_agua, carregar_bairros, carregar_rede, desenhar  # noqa: E402
 
 DADOS = RAIZ / "src/flooding_mapping/app/static/data/mapa_dimensoes_poa.json"
 RESULTADOS = RAIZ / "src/flooding_mapping/app/static/data/resultados_poa.json"
@@ -46,8 +46,11 @@ def rotulos(bordas: list[float]) -> list[str]:
 
 
 def base_30mm() -> pd.DataFrame:
-    n = pd.read_parquet(RAIZ / "data/processed/fase3/trechos_nivel2_cenarios.parquet")
-    n = n[(n.p_mm == P_MM) & (n.pacote == "metodo1")]
+    n2 = pd.read_parquet(RAIZ / "data/processed/fase3/trechos_nivel2_cenarios.parquet")
+    n2 = n2[n2.p_mm == P_MM]
+    n = n2[n2.pacote == "metodo1"]
+    m2 = n2[n2.pacote == "referencia_analoga"][["segmento_id", "v_gerado_local_max_m3", "contrib_potencial_max_m3"]].rename(columns={"v_gerado_local_max_m3": "m2_v", "contrib_potencial_max_m3": "m2_contrib"})
+    n = n.merge(m2, on="segmento_id", how="left")
     b = pd.read_parquet(RAIZ / "data/processed/fase3/trechos_contribuicao_base.parquet", columns=["segmento_id", "n_celulas_com_dados"])
     d = n.merge(b, on="segmento_id")
     sem = d["n_celulas_com_dados"] == 0                        # trecho sem nenhuma célula com dado de uso do solo: lacuna, não zero
@@ -56,18 +59,24 @@ def base_30mm() -> pd.DataFrame:
     return d
 
 
-def por_bairro(coluna: str, fator: float, n: int = 5) -> dict:
+MIN_TRECHOS = 200   # mínimo de trechos de rua com dados para um bairro entrar nas listas (resultados.py: MINIMO_DE_TRECHOS_POR_BAIRRO); vale para as quatro dimensões
+
+
+def por_bairro(coluna: str, fator: float, n: int = 5, com_construido: bool = False) -> dict:
     """Maiores valores entre os bairros com trechos suficientes, só dentro da própria dimensão (valores de dimensões diferentes não se comparam)."""
     b = json.loads(RESULTADOS.read_text(encoding="utf-8"))["bairros"]
     ok = [x for x in b if x["suficiente"]]
     ordem = sorted(ok, key=lambda x: (-x[coluna], x["nome"]))[:n]
-    return {"universo": f"{len(ok)} de {len(b)} bairros (os demais têm poucos trechos com dados e ficam sem estimativa)", "bairros_sem_estimativa": len(b) - len(ok),
-            "itens": [{"bairro": x["nome"], "valor": round(x[coluna] * fator, 1), "trechos_com_dados": x["trechos_com_dados"]} for x in ordem]}
+    return {"universo": f"{len(ok)} de {len(b)} bairros (os com menos de {MIN_TRECHOS} trechos de rua com dados ficam sem estimativa; o mesmo critério vale para as quatro dimensões)", "bairros_sem_estimativa": len(b) - len(ok),
+            "itens": [{"bairro": x["nome"], "valor": round(x[coluna] * fator, 1), "trechos_com_dados": x["trechos_com_dados"],
+                       **({"construido_pct": round(100 * x["fracao_impermeavel"], 1)} if com_construido else {})} for x in ordem]}
 
 
 def dimensao_a_ou_b(dim: str, q: Quadro, d: pd.DataFrame, agua, bairros) -> dict:
     cfg = CONFIG[dim]
-    col = "v_gerado_local_max_m3" if dim == "A" else "contrib_potencial_max_m3"
+    col, col2 = ("v_gerado_local_max_m3", "m2_v") if dim == "A" else ("contrib_potencial_max_m3", "m2_contrib")
+    na_malha = len(d)
+    d = d[d["segmento_id"].isin(set(q.ids[q.no_municipio()]))]            # só ruas dentro de Porto Alegre (docs/recorte_municipal.md)
     v = d[col]
     h = q.valores_por_trecho(d, col)
     w, hpx = desenhar(q, q.grade_maximo(h), cfg["bordas"], cfg["cores"], ~np.isfinite(h), agua, bairros, IMG_DIR / cfg["arquivo"], cfg["fonte"])
@@ -78,9 +87,10 @@ def dimensao_a_ou_b(dim: str, q: Quadro, d: pd.DataFrame, agua, bairros) -> dict
     r = {"nome": "Geração de escoamento" if dim == "A" else "Concentração do escoamento", "unidade": cfg["unidade"], "chuva_mm": P_MM, "pacote": "Método 1 (coeficientes fundamentados), limite superior do intervalo",
          "imagem": {"arquivo": f"img/estudo/{cfg['arquivo']}", "largura_px": w, "altura_px": hpx, "bytes": (IMG_DIR / cfg["arquivo"]).stat().st_size, "celula_m": 100, "agregacao": "máximo entre os trechos de cada célula"},
          "faixas": faixas, "trechos_total": int(len(v)), "trechos_com_dado": int(len(com)), "trechos_sem_dado": int(v.isna().sum()), "trechos_com_valor_positivo": int(len(pos)),
-         "trechos_com_valor_zero": int((com == 0).sum()), "mediana_m3": round(float(pos.median()), 1), "p90_m3": round(float(pos.quantile(0.9)), 1), "p99_m3": round(float(pos.quantile(0.99)), 1),
+         "trechos_com_valor_zero": int((com == 0).sum()), "trechos_na_malha": int(na_malha), "trechos_fora_do_municipio": int(na_malha - len(d)),
+         "zero_com_hipotese_metodo2": int(((v == 0) & (d[col2] > 0)).sum()), "zero_sem_classe_com_coeficiente_nem_hipotese": int(((v == 0) & ~(d[col2] > 0)).sum()), "mediana_m3": round(float(pos.median()), 1), "p90_m3": round(float(pos.quantile(0.9)), 1), "p99_m3": round(float(pos.quantile(0.99)), 1),
          "area_com_coeficiente_fundamentado_pct": round(100 * ind["A-imp-frac"]["valor"], 1), "fonte": cfg["fonte"],
-         "bairros": por_bairro("geracao_m1_max_aeq_por_ha", P_MM / 1000) if dim == "A" else por_bairro("contribuicao_m1_max_aeq_mediana", P_MM / 1000)}
+         "bairros": por_bairro("geracao_m1_max_aeq_por_ha", P_MM / 1000, com_construido=True) if dim == "A" else por_bairro("contribuicao_m1_max_aeq_mediana", P_MM / 1000, com_construido=True)}
     if dim == "A":
         r["bairros"]["metrica"] = "m³ por hectare em 30 mm (geração potencial por área classificada do bairro)"
         tot = json.loads(RESULTADOS.read_text(encoding="utf-8"))["dimensoes"]["A"]["dados"]["totais_m3"]["metodo1"]
@@ -113,13 +123,15 @@ def rede_por_celula(q: Quadro) -> np.ndarray:
 def dimensao_d(q: Quadro, agua, bairros) -> dict:
     cfg = CONFIG["D"]
     grade = rede_por_celula(q)
+    dentro = q.no_municipio()
     iy, ix = q.celula(q.xm, q.ym)
-    com_rede = grade[iy.clip(0, q.ny - 1), ix.clip(0, q.nx - 1)] > 0
+    com_rede = (grade[iy.clip(0, q.ny - 1), ix.clip(0, q.nx - 1)] > 0)[dentro]            # só trechos de rua dentro de Porto Alegre
     w, hpx = desenhar(q, grade, cfg["bordas"], cfg["cores"], None, agua, bairros, IMG_DIR / cfg["arquivo"], cfg["fonte"])
     cel = grade[grade > 0]
     res = json.loads(RESULTADOS.read_text(encoding="utf-8"))
     ind = {i["id"]: i["valor"] for i in res["indicadores"]}
-    rede, pontos, rel = ind["D-rede"], ind["D-pontos"], ind["D-relacao"]
+    rede, pontos = ind["D-rede"], ind["D-pontos"]
+    rec = json.loads((ESTATICO / "data/recorte_municipal_poa.json").read_text(encoding="utf-8"))["no_municipio"]["boca_de_lobo_ate_50m_por_quintil_de_contribuicao_pct"]
     q_nulos = json.loads((RAIZ / "data/processed/drenagem/qualidade_drenagem.json").read_text(encoding="utf-8"))["rede_pluvial"]["rede_pluvial"]["fracao_de_nulos_por_coluna"]
     pb = res["dimensoes"]["D"]["dados"]["por_bairro"]
     ok = {b["nome"] for b in res["bairros"] if b["suficiente"]}
@@ -131,10 +143,10 @@ def dimensao_d(q: Quadro, agua, bairros) -> dict:
                        for (a, b), r, c in zip(zip(cfg["bordas"][:-1], cfg["bordas"][1:]), [f"mais de 0 até 50 m", "50 a 100 m", "100 a 200 m", "200 a 300 m", "mais de 300 m"], cfg["cores"])],
             "rede_km": round(km), "rede_trechos": sum(v["trechos"] for v in rede.values()), "rede_sem_acesso_km": round(rede["rede_pluvial_sem_acesso"]["km"]), "pocos_de_visita": pontos["pocos"], "bocas_de_lobo": pontos["bocas"],
             "casas_de_bomba": pontos["casas_de_bomba"], "celulas_com_rede": int(len(cel)), "mediana_m_por_celula": round(float(np.median(cel))), "p90_m_por_celula": round(float(np.quantile(cel, 0.9))),
-            "trechos_de_rua_total": int(len(q.ids)), "trechos_de_rua_em_celula_com_rede": int(com_rede.sum()), "trechos_de_rua_em_celula_com_rede_pct": round(100 * float(com_rede.mean()), 1),
+            "trechos_de_rua_total": int(len(com_rede)), "trechos_de_rua_em_celula_com_rede": int(com_rede.sum()), "trechos_de_rua_em_celula_com_rede_pct": round(100 * float(com_rede.mean()), 1),
             "campos_sem_preenchimento_pct": {"material": round(100 * q_nulos["material"]), "declividade": round(100 * q_nulos["declividade"]), "classe_do_tubo": round(100 * q_nulos["classe_do_tubo"])},
-            "perto_de_boca_de_lobo_por_quintil_de_concentracao_pct": {"menor": round(100 * rel[0]["com_boca_de_lobo_ate_50m"]), "maior": round(100 * rel[-1]["com_boca_de_lobo_ate_50m"])},
-            "fonte": cfg["fonte"], "bairros": {"metrica": "km de rede pluvial cadastrada (parte urbana) por km² do bairro", "universo": f"{len(ok)} de {len(res['bairros'])} bairros (os demais têm poucos trechos com dados e ficam sem estimativa)",
+            "perto_de_boca_de_lobo_por_quintil_de_concentracao_pct": {"menor": round(rec[0]), "maior": round(rec[-1])},
+            "fonte": cfg["fonte"], "bairros": {"metrica": "km de rede pluvial cadastrada (parte urbana) por km² do bairro", "universo": f"{len(ok)} de {len(res['bairros'])} bairros (mesmo critério das outras dimensões: os com menos de {MIN_TRECHOS} trechos de rua com dados ficam de fora; a rede cadastrada destes dois não é avaliada aqui)",
                                                "bairros_sem_estimativa": len(res["bairros"]) - len(ok), "itens": [{"bairro": n, "valor": round(v["rede_km_por_km2"], 1), "bocas_por_km2": round(v["bocas_por_km2"])} for n, v in ordem]}}
 
 

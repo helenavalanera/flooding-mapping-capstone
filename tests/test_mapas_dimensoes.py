@@ -37,13 +37,15 @@ def test_the_four_maps_use_distinct_palettes_and_the_same_framing():
 @pytest.mark.parametrize("d", [x for x in "AB" if x in J])
 def test_a_and_b_state_the_unit_the_gaps_and_the_numbers_add_up(d):
     r = J[d]
-    assert r["trechos_total"] == 176836 and r["trechos_com_dado"] + r["trechos_sem_dado"] == r["trechos_total"] and r["trechos_sem_dado"] == 2919
+    assert r["trechos_total"] == 143149 and r["trechos_total"] + r["trechos_fora_do_municipio"] == r["trechos_na_malha"] == 176836 and r["trechos_com_dado"] + r["trechos_sem_dado"] == r["trechos_total"] and r["trechos_sem_dado"] == 68
+    assert r["zero_com_hipotese_metodo2"] + r["zero_sem_classe_com_coeficiente_nem_hipotese"] == r["trechos_com_valor_zero"]            # zero separado de ausência de dado (68) e subdividido
     assert r["trechos_com_valor_positivo"] + r["trechos_com_valor_zero"] == r["trechos_com_dado"]
     assert sum(f["trechos"] for f in r["faixas"]) == r["trechos_com_valor_positivo"]
     assert "m³" in r["unidade"] and r["chuva_mm"] == 30 and all("m³" in f["rotulo"] for f in r["faixas"])
     assert r["mediana_m3"] < r["p90_m3"] < r["p99_m3"] and r["area_com_coeficiente_fundamentado_pct"] == 17.3
+    assert all("construido_pct" in i for i in r["bairros"]["itens"])
     itens = r["bairros"]["itens"]
-    assert len(itens) == 5 and [i["valor"] for i in itens] == sorted((i["valor"] for i in itens), reverse=True) and r["bairros"]["bairros_sem_estimativa"] == 2
+    assert len(itens) == 5 and [i["valor"] for i in itens] == sorted((i["valor"] for i in itens), reverse=True) and r["bairros"]["bairros_sem_estimativa"] == 2 and "200 trechos" in r["bairros"]["universo"]
 
 
 def test_the_neighbourhood_figures_come_from_the_committed_results():
@@ -59,7 +61,10 @@ def test_the_neighbourhood_figures_come_from_the_committed_results():
 def test_a_and_b_are_recomputed_from_the_phase_3_results():
     sys.path.insert(0, str(RAIZ / "tools"))
     from gerar_mapas_dimensoes import base_30mm
+    from manchas_base import Quadro, carregar_rede
+    q = Quadro(carregar_rede())
     d = base_30mm()
+    d = d[d["segmento_id"].isin(set(q.ids[q.no_municipio()]))]
     for dim, col in (("A", "v_gerado_local_max_m3"), ("B", "contrib_potencial_max_m3")):
         v = d[col]
         assert (J[dim]["trechos_sem_dado"], J[dim]["trechos_com_valor_positivo"], J[dim]["trechos_com_valor_zero"]) == (int(v.isna().sum()), int((v > 0).sum()), int((v == 0).sum()))
@@ -78,10 +83,15 @@ def test_d_is_a_record_of_the_registry_with_its_gaps_stated():
     r = J["D"]
     assert "metros de rede" in r["unidade"] and "não funcionamento" in r["natureza"] and sum(f["celulas"] for f in r["faixas"]) == r["celulas_com_rede"]
     assert r["rede_trechos"] == 135779 and r["rede_km"] == 2961 and r["bocas_de_lobo"] == 44761 and r["pocos_de_visita"] == 88860
-    assert r["trechos_de_rua_em_celula_com_rede"] < r["trechos_de_rua_total"] == 176836 and r["trechos_de_rua_em_celula_com_rede_pct"] == 57.0     # ruas sem rede cadastrada: lacuna do cadastro, não prova de ausência
+    assert r["trechos_de_rua_em_celula_com_rede"] < r["trechos_de_rua_total"] == 143149 and r["trechos_de_rua_em_celula_com_rede_pct"] == 70.3     # ruas sem rede cadastrada: lacuna do cadastro, não prova de ausência
     assert r["campos_sem_preenchimento_pct"]["material"] > 90 and r["mediana_m_por_celula"] < r["p90_m_por_celula"]
-    assert r["perto_de_boca_de_lobo_por_quintil_de_concentracao_pct"] == {"menor": 2, "maior": 72}
+    assert r["perto_de_boca_de_lobo_por_quintil_de_concentracao_pct"] == {"menor": 26, "maior": 73}
     assert len(r["bairros"]["itens"]) == 5 and r["bairros"]["bairros_sem_estimativa"] == 2
+
+
+def test_d_gap_and_quintile_figures_come_from_the_municipal_cut():
+    rec = json.loads((ST / "data/recorte_municipal_poa.json").read_text(encoding="utf-8"))["no_municipio"]["boca_de_lobo_ate_50m_por_quintil_de_contribuicao_pct"]
+    assert J["D"]["perto_de_boca_de_lobo_por_quintil_de_concentracao_pct"] == {"menor": round(rec[0]), "maior": round(rec[-1])}
 
 
 def test_d_numbers_match_the_committed_results():

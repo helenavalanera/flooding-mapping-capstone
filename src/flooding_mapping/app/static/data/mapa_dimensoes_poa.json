@@ -8,7 +8,7 @@
    "arquivo": "img/estudo/mapa-geracao.webp",
    "largura_px": 1400,
    "altura_px": 1722,
-   "bytes": 240698,
+   "bytes": 204232,
    "celula_m": 100,
    "agregacao": "máximo entre os trechos de cada célula"
   },
@@ -18,28 +18,28 @@
     "ate": 10.0,
     "rotulo": "mais de 0 até 10 m³",
     "cor": "#f7d6e6",
-    "trechos": 29482
+    "trechos": 29303
    },
    {
     "de": 10.0,
     "ate": 20.0,
     "rotulo": "10 a 20 m³",
     "cor": "#eca3c8",
-    "trechos": 35951
+    "trechos": 35897
    },
    {
     "de": 20.0,
     "ate": 40.0,
     "rotulo": "20 a 40 m³",
     "cor": "#d95f9f",
-    "trechos": 35865
+    "trechos": 35840
    },
    {
     "de": 40.0,
     "ate": 80.0,
     "rotulo": "40 a 80 m³",
     "cor": "#a8266f",
-    "trechos": 19677
+    "trechos": 19669
    },
    {
     "de": 80.0,
@@ -49,44 +49,53 @@
     "trechos": 5043
    }
   ],
-  "trechos_total": 176836,
-  "trechos_com_dado": 173917,
-  "trechos_sem_dado": 2919,
-  "trechos_com_valor_positivo": 126018,
-  "trechos_com_valor_zero": 47899,
+  "trechos_total": 143149,
+  "trechos_com_dado": 143081,
+  "trechos_sem_dado": 68,
+  "trechos_com_valor_positivo": 125752,
+  "trechos_com_valor_zero": 17329,
+  "trechos_na_malha": 176836,
+  "trechos_fora_do_municipio": 33687,
+  "zero_com_hipotese_metodo2": 14436,
+  "zero_sem_classe_com_coeficiente_nem_hipotese": 2893,
   "mediana_m3": 19.0,
-  "p90_m3": 56.2,
+  "p90_m3": 56.4,
   "p99_m3": 118.5,
   "area_com_coeficiente_fundamentado_pct": 17.3,
   "fonte": "Escoamento potencial (Método 1): uso do solo Profill 2022, Prefeitura de Porto Alegre",
   "bairros": {
-   "universo": "92 de 94 bairros (os demais têm poucos trechos com dados e ficam sem estimativa)",
+   "universo": "92 de 94 bairros (os com menos de 200 trechos de rua com dados ficam sem estimativa; o mesmo critério vale para as quatro dimensões)",
    "bairros_sem_estimativa": 2,
    "itens": [
     {
      "bairro": "Bom Fim",
      "valor": 188.9,
-     "trechos_com_dados": 232
+     "trechos_com_dados": 232,
+     "construido_pct": 66.3
     },
     {
      "bairro": "São Geraldo",
      "valor": 187.9,
-     "trechos_com_dados": 678
+     "trechos_com_dados": 678,
+     "construido_pct": 65.9
     },
     {
      "bairro": "Cidade Baixa",
      "valor": 184.6,
-     "trechos_com_dados": 645
+     "trechos_com_dados": 645,
+     "construido_pct": 64.8
     },
     {
      "bairro": "Centro Histórico",
      "valor": 182.5,
-     "trechos_com_dados": 3103
+     "trechos_com_dados": 3103,
+     "construido_pct": 64.0
     },
     {
      "bairro": "Floresta",
      "valor": 169.5,
-     "trechos_com_dados": 702
+     "trechos_com_dados": 702,
+     "construido_pct": 59.5
     }
    ],
    "metrica": "m³ por hectare em 30 mm (geração potencial por área classificada do bairro)"
@@ -105,7 +114,7 @@
    "arquivo": "img/estudo/mapa-concentracao.webp",
    "largura_px": 1400,
    "altura_px": 1722,
-   "bytes": 221220,
+   "bytes": 182578,
    "celula_m": 100,
    "agregacao": "máximo entre os trechos de cada célula"
   },
@@ -115,81 +124,90 @@
     "ate": 10.0,
     "rotulo": "mais de 0 até 10 m³",
     "cor": "#dcd9f2",
-    "trechos": 14839
+    "trechos": 14708
    },
    {
     "de": 10.0,
     "ate": 100.0,
     "rotulo": "10 a 100 m³",
     "cor": "#b3aee0",
-    "trechos": 67702
+    "trechos": 67487
    },
    {
     "de": 100.0,
     "ate": 1000.0,
     "rotulo": "100 a 1.000 m³",
     "cor": "#857bc7",
-    "trechos": 33792
+    "trechos": 33706
    },
    {
     "de": 1000.0,
     "ate": 10000.0,
     "rotulo": "1.000 a 10.000 m³",
     "cor": "#5547a3",
-    "trechos": 12023
+    "trechos": 11957
    },
    {
     "de": 10000.0,
     "ate": null,
     "rotulo": "mais de 10.000 m³",
     "cor": "#2d2166",
-    "trechos": 4842
+    "trechos": 4795
    }
   ],
-  "trechos_total": 176836,
-  "trechos_com_dado": 173917,
-  "trechos_sem_dado": 2919,
-  "trechos_com_valor_positivo": 133198,
-  "trechos_com_valor_zero": 40719,
+  "trechos_total": 143149,
+  "trechos_com_dado": 143081,
+  "trechos_sem_dado": 68,
+  "trechos_com_valor_positivo": 132653,
+  "trechos_com_valor_zero": 10428,
+  "trechos_na_malha": 176836,
+  "trechos_fora_do_municipio": 33687,
+  "zero_com_hipotese_metodo2": 8619,
+  "zero_sem_classe_com_coeficiente_nem_hipotese": 1809,
   "mediana_m3": 58.2,
-  "p90_m3": 1638.7,
-  "p99_m3": 60276.3,
+  "p90_m3": 1633.3,
+  "p99_m3": 60861.1,
   "area_com_coeficiente_fundamentado_pct": 17.3,
   "fonte": "Escoamento potencial (Método 1): Profill 2022, Copernicus DEM",
   "bairros": {
-   "universo": "92 de 94 bairros (os demais têm poucos trechos com dados e ficam sem estimativa)",
+   "universo": "92 de 94 bairros (os com menos de 200 trechos de rua com dados ficam sem estimativa; o mesmo critério vale para as quatro dimensões)",
    "bairros_sem_estimativa": 2,
    "itens": [
     {
      "bairro": "Bom Fim",
      "valor": 280.6,
-     "trechos_com_dados": 232
+     "trechos_com_dados": 232,
+     "construido_pct": 66.3
     },
     {
      "bairro": "Floresta",
      "valor": 173.4,
-     "trechos_com_dados": 702
+     "trechos_com_dados": 702,
+     "construido_pct": 59.5
     },
     {
      "bairro": "Jardim Lindóia",
      "valor": 172.6,
-     "trechos_com_dados": 459
+     "trechos_com_dados": 459,
+     "construido_pct": 48.4
     },
     {
      "bairro": "Santa Maria Goretti",
      "valor": 169.3,
-     "trechos_com_dados": 327
+     "trechos_com_dados": 327,
+     "construido_pct": 56.6
     },
     {
      "bairro": "Bela Vista",
      "valor": 168.8,
-     "trechos_com_dados": 617
+     "trechos_com_dados": 617,
+     "construido_pct": 49.4
     }
    ],
    "metrica": "mediana, entre os trechos do bairro, do m³ de escoamento potencial que converge ao trecho em 30 mm"
   },
-  "trechos_acima_de_1000_m3": 16865,
-  "trechos_acima_de_10000_m3": 4842
+  "trechos_acima_de_1000_m3": 16752,
+  "trechos_acima_de_10000_m3": 4795
  },
  "D": {
   "nome": "Drenagem cadastrada",
@@ -199,7 +217,7 @@
    "arquivo": "img/estudo/mapa-drenagem.webp",
    "largura_px": 1400,
    "altura_px": 1722,
-   "bytes": 210730,
+   "bytes": 180260,
    "celula_m": 100,
    "agregacao": "soma do comprimento de rede em cada célula"
   },
@@ -249,22 +267,22 @@
   "celulas_com_rede": 15689,
   "mediana_m_por_celula": 177,
   "p90_m_por_celula": 349,
-  "trechos_de_rua_total": 176836,
-  "trechos_de_rua_em_celula_com_rede": 100836,
-  "trechos_de_rua_em_celula_com_rede_pct": 57.0,
+  "trechos_de_rua_total": 143149,
+  "trechos_de_rua_em_celula_com_rede": 100649,
+  "trechos_de_rua_em_celula_com_rede_pct": 70.3,
   "campos_sem_preenchimento_pct": {
    "material": 92,
    "declividade": 96,
    "classe_do_tubo": 87
   },
   "perto_de_boca_de_lobo_por_quintil_de_concentracao_pct": {
-   "menor": 2,
-   "maior": 72
+   "menor": 26,
+   "maior": 73
   },
   "fonte": "Cadastro de drenagem pluvial: Prefeitura de Porto Alegre (GeoPOA)",
   "bairros": {
    "metrica": "km de rede pluvial cadastrada (parte urbana) por km² do bairro",
-   "universo": "92 de 94 bairros (os demais têm poucos trechos com dados e ficam sem estimativa)",
+   "universo": "92 de 94 bairros (mesmo critério das outras dimensões: os com menos de 200 trechos de rua com dados ficam de fora; a rede cadastrada destes dois não é avaliada aqui)",
    "bairros_sem_estimativa": 2,
    "itens": [
     {
