@@ -13,13 +13,14 @@ const fs = require("fs"), path = require("path");
   assert.deepStrictEqual(hrefs, ["#apresentacao", "#mapa", "#cenarios", "#resultados", "#contato"]);
   await page.click(".ancoras a[href='#resultados']");
   await page.waitForFunction(() => { const a = document.querySelector(".ancoras a[aria-current=true]"); return a && a.getAttribute("href") === "#resultados"; }, null, { timeout: 15000 });
+  await page.waitForFunction(() => { const r = document.getElementById("resultados").getBoundingClientRect(); return r.top >= 0 && r.top < 200; }, null, { timeout: 8000 }).catch(() => {});   // a rolagem é suave e a página ficou mais alta
   assert.ok(await page.evaluate(() => document.getElementById("resultados").getBoundingClientRect().top < 200), "a âncora rolou até a seção");
   // as quatro dimensões, em texto: os mapas de trechos e de drenagem não são publicados (redistribuição dos dados da Prefeitura não esclarecida)
   await page.click(".ancoras a[href='#mapa']"); await page.waitForTimeout(2500);
   for (const id of ["p-contribuicao", "p-local", "p-topografico", "p-drenagem"]) assert.ok(await page.locator("#" + id).isVisible(), id + " visível");
-  assert.strictEqual(await page.locator("#mapa img, .hero img, [role=tab]").count(), 0, "sem mapas nem abas de mapas");
+  assert.strictEqual(await page.locator("#mapa img").count(), 1, "só o mapa de manchas pré-renderizado"); assert.match(await page.getAttribute("#mapa img", "src"), /mapa-propensao\.webp$/); assert.strictEqual(await page.locator(".hero img, [role=tab]").count(), 0);
   assert.match(await page.innerText("#p-drenagem"), /não prova capacidade, funcionamento nem conexão/); assert.match(await page.innerText("#p-topografico"), /Não é profundidade, volume nem duração/);
-  assert.match(await page.innerText("#mapa"), /redistribuição desses dados ainda não foi esclarecida/);
+  assert.match(await page.innerText("#mapa"), /dependem da publicação dos arquivos derivados e da confirmação das permissões de redistribuição/);
   // nenhuma imagem quebrada na página inteira
   await page.evaluate(() => document.querySelectorAll('img[loading=lazy]').forEach((i) => { i.loading = 'eager'; }));   // imagens preguiçosas só carregam ao rolar
   await page.waitForFunction(() => Array.from(document.images).every((i) => i.complete), null, { timeout: 20000 }).catch(() => {});
