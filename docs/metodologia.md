@@ -18,7 +18,7 @@ Isso descreve a abordagem do estudo, e não uma autorização geral de redistrib
 |---|---|---|
 | Relevo | Copernicus DEM GLO-30, 30 m (EUROPEAN SPACE AGENCY; AIRBUS, 2022) | Fluxo, depressões e contribuição |
 | Uso e cobertura do solo | Profill 2022, 15 classes, 1:2.500 (PROFILL, 2023) | Área por classe em cada célula (geração) |
-| Rede viária e água | OpenStreetMap, 176.836 trechos (OPENSTREETMAP CONTRIBUTORS, 2026) | Unidade de apresentação (trechos) e máscara de água |
+| Rede viária e água | OpenStreetMap, 176.836 trechos na malha, dos quais 143.149 dentro de Porto Alegre (recorte municipal: [`recorte_municipal.md`](recorte_municipal.md)) (OPENSTREETMAP CONTRIBUTORS, 2026) | Unidade de apresentação (trechos) e máscara de água |
 | Coeficientes de escoamento C | Manuais públicos (TEXAS DEPARTMENT OF TRANSPORTATION, [s. d.]; COUNTY OF SAN DIEGO, [s. d.]) | Faixas por classe |
 | Drenagem | Cadastro da Prefeitura (PORTO ALEGRE, [s. d.]b) | Contexto, fora do cálculo |
 | Chuva | Série diária do Open-Meteo, 2017 a 2026, reanálise com base em ERA5 (ZIPPENFENIG, 2023; HERSBACH et al., 2020) | Posição dos cenários de 10, 20 e 30 mm na distribuição de eventos |
