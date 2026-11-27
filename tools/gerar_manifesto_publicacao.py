@@ -31,9 +31,9 @@ def listar(pasta: Path) -> dict[str, dict]:
     return {p.relative_to(pasta).as_posix(): {"bytes": p.stat().st_size, "sha256": sha256(p)} for p in sorted(pasta.rglob("*")) if p.is_file()}
 
 
-def montar(fase3: Path, drenagem: Path) -> dict:
+def montar(fase3: Path, drenagem: Path, geoai: Path | None = None) -> dict:
     camadas, resumo = {}, hashlib.sha256()
-    for nome, pasta in (("fase3", fase3), ("drenagem", drenagem)):
+    for nome, pasta in (("fase3", fase3), ("drenagem", drenagem), *((("geoai", geoai),) if geoai else ())):
         arquivos = listar(pasta)
         meta = json.loads((pasta / "meta.json").read_text())
         camadas[nome] = {"versao_da_camada": meta["versao"], "meta_sha256": arquivos["meta.json"]["sha256"], "arquivos": len(arquivos), "bytes": sum(a["bytes"] for a in arquivos.values()), "conteudo": arquivos}
@@ -44,9 +44,9 @@ def montar(fase3: Path, drenagem: Path) -> dict:
             "observacao": "A versão dos dados é derivada do conteúdo: se qualquer tile ou fragmento mudar, a versão muda. Os Parquets de origem não são publicados; seus hashes estão nos meta.json."}
 
 
-def verificar(manifesto: dict, fase3: Path, drenagem: Path) -> list[str]:
+def verificar(manifesto: dict, fase3: Path, drenagem: Path, geoai: Path | None = None) -> list[str]:
     erros = []
-    for nome, pasta in (("fase3", fase3), ("drenagem", drenagem)):
+    for nome, pasta in (("fase3", fase3), ("drenagem", drenagem), *((("geoai", geoai),) if geoai and "geoai" in manifesto["camadas"] else ())):
         esperado = manifesto["camadas"][nome]["conteudo"]
         real = {p.relative_to(pasta).as_posix() for p in pasta.rglob("*") if p.is_file()}
         erros += [f"{nome}: ausente {r}" for r in sorted(set(esperado) - real)] + [f"{nome}: a mais {r}" for r in sorted(real - set(esperado))]
@@ -61,13 +61,14 @@ def main() -> int:
     ap.add_argument("--fase3", type=Path, default=RAIZ / "data/processed/fase3_web")
     ap.add_argument("--drenagem", type=Path, default=RAIZ / "data/processed/drenagem_web")
     ap.add_argument("--saida", type=Path, default=None, help="padrão: data/processed/publicacao/manifesto_<versao>.json")
+    ap.add_argument("--geoai", type=Path, default=None, help="data/processed/geoai_web (tools/preparar_camada_geoai.py): inclui a camada E (experimental) no manifesto")
     ap.add_argument("--verificar", type=Path, default=None)
     a = ap.parse_args()
     if a.verificar:
-        erros = verificar(json.loads(a.verificar.read_text()), a.fase3, a.drenagem)
+        erros = verificar(json.loads(a.verificar.read_text()), a.fase3, a.drenagem, a.geoai)
         print("\n".join(erros[:50]) or "conjunto idêntico ao manifesto")
         return 1 if erros else 0
-    m = montar(a.fase3, a.drenagem)
+    m = montar(a.fase3, a.drenagem, a.geoai)
     saida = a.saida or RAIZ / "data/processed/publicacao" / f"manifesto_{m['versao_dos_dados']}.json"
     saida.parent.mkdir(parents=True, exist_ok=True)
     saida.write_text(json.dumps(m, ensure_ascii=False, indent=1))

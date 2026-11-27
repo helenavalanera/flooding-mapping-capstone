@@ -3,7 +3,7 @@
     PYTHONPATH=src .venv/bin/python tools/preparar_para_r2.py [--saida DIR] [--mapa-poa] [--sem-compressao]
 
 Lê data/processed/fase3_web e drenagem_web (não os altera) e escreve em ``DIR/<versão>/`` (padrão data/interim/r2_preparado, fora do Git):
-- ``fase3/`` e ``drenagem/``: tiles .pbf e fragmentos .json já comprimidos com gzip (os tiles encolhem cerca de 3,7 vezes), para o R2 guardar o objeto com
+- ``fase3/``, ``drenagem/`` e ``geoai/`` (camada E, experimental; a imagem WebP já é comprimida e vai como está): tiles .pbf e fragmentos .json já comprimidos com gzip (os tiles encolhem cerca de 3,7 vezes), para o R2 guardar o objeto com
   ``Content-Encoding: gzip`` e o CDN entregá-lo sem recomprimir (o R2 não comprime sozinho, e o CDN nem sempre comprime protobuf);
 - ``mapa/poa.pmtiles`` (com ``--mapa-poa`` e o CLI ``pmtiles``): recorte do mapa-base do estado só para o município (cerca de 7 MB, em vez de 217 MB);
 - ``cabecalhos.json``: para cada objeto, tipo, codificação, ``Cache-Control``, tamanho, tamanho original e SHA-256 do original, para o envio conferir e para o
@@ -28,7 +28,7 @@ import gerar_manifesto_publicacao as manifesto  # noqa: E402
 
 BBOX_POA = "-51.35,-30.30,-50.98,-29.90"                       # caixa em volta do município (EPSG:4326), com folga
 IMUTAVEL = "public, max-age=31536000, immutable"
-TIPOS = {".pbf": "application/x-protobuf", ".json": "application/json", ".pmtiles": "application/octet-stream"}
+TIPOS = {".pbf": "application/x-protobuf", ".json": "application/json", ".pmtiles": "application/octet-stream", ".webp": "image/webp"}
 
 
 def cabecalhos_do_objeto(chave: str, comprimido: bool) -> dict:
@@ -40,12 +40,12 @@ def cabecalhos_do_objeto(chave: str, comprimido: bool) -> dict:
     return h
 
 
-def preparar(fase3: Path, drenagem: Path, saida: Path, comprimir: bool = True, mapa_poa: bool = False, mapa_origem: Path | None = None) -> dict:
-    versao = manifesto.montar(fase3, drenagem)["versao_dos_dados"]
+def preparar(fase3: Path, drenagem: Path, saida: Path, comprimir: bool = True, mapa_poa: bool = False, mapa_origem: Path | None = None, geoai: Path | None = None) -> dict:
+    versao = manifesto.montar(fase3, drenagem, geoai)["versao_dos_dados"]
     raiz = saida / versao
     shutil.rmtree(raiz, ignore_errors=True)
     objetos = {}
-    for nome, pasta in (("fase3", fase3), ("drenagem", drenagem)):
+    for nome, pasta in (("fase3", fase3), ("drenagem", drenagem), *((("geoai", geoai),) if geoai else ())):
         for p in sorted(pasta.rglob("*")):
             if not p.is_file():
                 continue
@@ -77,10 +77,11 @@ def main() -> None:
     ap.add_argument("--fase3", type=Path, default=RAIZ / "data/processed/fase3_web")
     ap.add_argument("--drenagem", type=Path, default=RAIZ / "data/processed/drenagem_web")
     ap.add_argument("--saida", type=Path, default=RAIZ / "data/interim/r2_preparado")
+    ap.add_argument("--geoai", type=Path, default=RAIZ / "data/processed/geoai_web", help="a camada E (experimental) entra se a pasta existir")
     ap.add_argument("--mapa-poa", action="store_true")
     ap.add_argument("--sem-compressao", action="store_true")
     a = ap.parse_args()
-    r = preparar(a.fase3, a.drenagem, a.saida, not a.sem_compressao, a.mapa_poa)
+    r = preparar(a.fase3, a.drenagem, a.saida, not a.sem_compressao, a.mapa_poa, geoai=a.geoai if a.geoai.exists() else None)
     print(json.dumps(r | {"mb": round(r["bytes"] / 1e6, 1), "mb_originais": round(r["bytes_originais"] / 1e6, 1), "saida": str(a.saida / r["versao_dos_dados"])}, ensure_ascii=False, indent=1))
 
 

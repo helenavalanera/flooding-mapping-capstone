@@ -43,3 +43,18 @@ def test_the_tool_never_uploads_or_reads_credentials():
     codigo = (RAIZ / "tools/preparar_para_r2.py").read_text(encoding="utf-8")
     for proibido in ("boto3", "wrangler", "R2_SECRET", "R2_ACCESS", "requests", "environ", "token"):
         assert proibido not in codigo.split('"""')[2], proibido
+
+
+def test_the_geoai_layer_goes_with_the_webp_uncompressed_and_the_meta_revalidated(tmp_path):
+    f3, dr, ge = tmp_path / "f3", tmp_path / "dr", tmp_path / "ge"
+    camada(f3, "f3"), camada(dr, "dr")
+    ge.mkdir()
+    (ge / "fracao_construida.webp").write_bytes(b"RIFF" + b"x" * 3000)
+    (ge / "meta.json").write_text(json.dumps({"versao": 1}))
+    r = p.preparar(f3, dr, tmp_path / "out", geoai=ge)
+    sem = p.preparar(f3, dr, tmp_path / "out2")
+    assert r["versao_dos_dados"] != sem["versao_dos_dados"]                                       # a camada E muda o conjunto e, portanto, a versão
+    info = json.loads((tmp_path / "out" / r["versao_dos_dados"] / "cabecalhos.json").read_text())["objetos"]
+    img, meta = info["geoai/fracao_construida.webp"], info["geoai/meta.json"]
+    assert img["content_type"] == "image/webp" and "content_encoding" not in img and "immutable" in img["cache_control"]
+    assert meta["content_encoding"] == "gzip" and "immutable" not in meta["cache_control"]
