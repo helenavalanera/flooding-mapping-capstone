@@ -1,0 +1,420 @@
+{
+  "versao": "fase3-1",
+  "crs": "EPSG:31982",
+  "entradas_sha256": {
+    "uso_solo_grade30m": "386cc5c1001a579d2d4cb12146a88450f07a7e7a43ed98eca68fbd20bc0055f6",
+    "rede_poa": "c3d7a3bb5241d3f9969e7e7c5b7f9b8723b2b120bd7b5b9975847b6e2416ce48",
+    "metodo1": "2c8fb7da38f39210d6655906a8dc46441dac4eb642a15c17dde88253b54e27b3",
+    "metodo2": "33c745e364b9d7235c69d2928f2eb9d90a4065fa19e334e2f983950dff0f4023",
+    "config": "352c958f93bbf825d68ff7eb415dc34622ec775fdb23a727010ee757c00370ed"
+  },
+  "config": {
+    "precipitacoes_mm": [
+      10,
+      20,
+      30
+    ],
+    "passo_da_pegada_m": 6,
+    "exutorio_por_agua": {
+      "lacuna_minima_m2": 450,
+      "exigir_agua_osm": true
+    },
+    "comparacao_exploratoria": {
+      "raio_do_rotulo_m": 100
+    }
+  },
+  "verificacoes_do_nucleo": {
+    "acumulo_com_peso_1_identico_a_susceptibility_flow_accumulation": true,
+    "celulas_comparadas": 1290058,
+    "conservacao_de_massa_erro_relativo_maximo": 1.4221188517367425e-14
+  },
+  "pegadas_dos_trechos": {
+    "trechos": 176836,
+    "com_celulas_com_dados": 173917,
+    "fora_da_grade_sem_nenhuma_celula": 2728,
+    "so_em_celulas_sem_dado_ou_agua_mascarada": 191
+  },
+  "motor": {
+    "celulas_com_dados": 1290058,
+    "celulas_mascaradas_como_exutorio": 25225,
+    "exutorios": 3873,
+    "conservacao_de_massa": {
+      "erro_relativo_maximo": 1.4221188517367425e-14,
+      "colunas": [
+        "aeq_m1_min",
+        "aeq_m1_max",
+        "aeq_limites_min",
+        "aeq_limites_max",
+        "aeq_analoga_min",
+        "aeq_analoga_max",
+        "area_m1",
+        "area_limites_com_valor",
+        "area_analoga_com_valor",
+        "area_analoga_sem_valor",
+        "area_fora_do_calculo",
+        "area_sem_classe",
+        "area_total"
+      ]
+    },
+    "trechos": 176836,
+    "trechos_com_pegada_valida": 173917,
+    "celulas_da_pegada_por_trecho_mediana": 2.0,
+    "totais_da_cidade_soma_das_celulas_m3": {
+      "10": {
+        "metodo1": {
+          "min_m3": 600497.451,
+          "max_m3": 775382.4
+        },
+        "limites_fisicos": {
+          "min_m3": 0.0,
+          "max_m3": 3539171.52
+        },
+        "referencia_analoga": {
+          "min_m3": 225392.3415,
+          "max_m3": 1151569.1520000002
+        }
+      },
+      "20": {
+        "metodo1": {
+          "min_m3": 1200994.902,
+          "max_m3": 1550764.8
+        },
+        "limites_fisicos": {
+          "min_m3": 0.0,
+          "max_m3": 7078343.04
+        },
+        "referencia_analoga": {
+          "min_m3": 450784.683,
+          "max_m3": 2303138.3040000005
+        }
+      },
+      "30": {
+        "metodo1": {
+          "min_m3": 1801492.353,
+          "max_m3": 2326147.2
+        },
+        "limites_fisicos": {
+          "min_m3": 0.0,
+          "max_m3": 10617514.56
+        },
+        "referencia_analoga": {
+          "min_m3": 676177.0245,
+          "max_m3": 3454707.4560000007
+        }
+      }
+    },
+    "faixas_de_coeficiente_por_pacote": {
+      "metodo1": {
+        "Edificação": [
+          0.75,
+          0.95
+        ],
+        "Vias Pavimentadas": [
+          0.7,
+          0.95
+        ]
+      },
+      "limites_fisicos": {
+        "Vegetação Nativa": [
+          0.0,
+          1.0
+        ],
+        "Jardins, Passeios ou Áreas semi urbanizadas": [
+          0.0,
+          1.0
+        ],
+        "Campo": [
+          0.0,
+          1.0
+        ],
+        "Cultivo não Irrigado": [
+          0.0,
+          1.0
+        ],
+        "Vegetação Mista": [
+          0.0,
+          1.0
+        ],
+        "Cultivo Irrigado": [
+          0.0,
+          1.0
+        ],
+        "Reflorestamento ou Vegetação Exótica": [
+          0.0,
+          1.0
+        ],
+        "Pastagem": [
+          0.0,
+          1.0
+        ],
+        "Solo Exposto": [
+          0.0,
+          1.0
+        ],
+        "Área Degradada": [
+          0.0,
+          1.0
+        ],
+        "Vias não Pavimentadas": [
+          0.0,
+          1.0
+        ]
+      },
+      "referencia_analoga": {
+        "Campo": [
+          0.05,
+          0.8
+        ],
+        "Pastagem": [
+          0.05,
+          0.8
+        ],
+        "Jardins, Passeios ou Áreas semi urbanizadas": [
+          0.225,
+          0.8
+        ]
+      },
+      "fora_do_calculo": [
+        "Corpo Hídrico",
+        "Área Úmida"
+      ]
+    },
+    "precipitacoes_mm": [
+      10.0,
+      20.0,
+      30.0
+    ],
+    "passo_da_pegada_m": 6,
+    "celula_m": 30.0,
+    "nao_calculado": {
+      "volume_efetivamente_transportado": "não calculado: exigiria infiltração, perdas, capacidade de drenagem, rugosidade e condições de contorno, que não existem nos dados",
+      "volume_retido_ou_armazenado": "não calculado: a altura de preenchimento é indicador topográfico, não volume armazenável",
+      "profundidade_e_duracao": "não calculadas: não há chuva no tempo, vazão de saída nem registros com início e fim",
+      "conectividade_hidraulica": "não usada: o inventário de drenagem entra só como contexto, sem conexões confirmadas"
+    }
+  },
+  "descricao": {
+    "nivel2_p30": {
+      "limites_fisicos": {
+        "v_gerado_local_max_m3": {
+          "q50": 24.57,
+          "q90": 69.66,
+          "q99": 154.44
+        },
+        "contrib_potencial_max_m3": {
+          "q50": 66.42,
+          "q90": 1957.445999999997,
+          "q99": 132054.86159999957
+        }
+      },
+      "metodo1": {
+        "v_gerado_local_max_m3": {
+          "q50": 12.568499999999998,
+          "q90": 48.47849999999999,
+          "q99": 109.0125
+        },
+        "contrib_potencial_max_m3": {
+          "q50": 32.0625,
+          "q90": 942.3809999994635,
+          "q99": 42419.88791999459
+        }
+      },
+      "referencia_analoga": {
+        "v_gerado_local_max_m3": {
+          "q50": 13.608,
+          "q90": 41.256,
+          "q99": 87.264
+        },
+        "contrib_potencial_max_m3": {
+          "q50": 34.992000000011174,
+          "q90": 963.4464000007497,
+          "q99": 53381.12543999904
+        }
+      }
+    },
+    "fracoes_a_montante_medianas": {
+      "fracao_montante_coberta_m1": 0.3017,
+      "fracao_montante_com_valor_limites": 0.5408,
+      "fracao_montante_com_valor_analoga": 0.36,
+      "fracao_montante_sem_valor_analoga": 0.0724,
+      "fracao_montante_fora_do_calculo": 0.0,
+      "fracao_montante_sem_classe": 0.0
+    },
+    "nivel1": {
+      "trechos_com_valor": 173917,
+      "altura_de_preenchimento_max_m_quantis": {
+        "q50": 0.0,
+        "q90": 0.6825,
+        "q99": 2.688
+      },
+      "trechos_com_preenchimento_zero": 134941
+    }
+  },
+  "comparacao_exploratoria_com_os_registros": {
+    "amostra_do_experimento_anterior": {
+      "trechos": 107869,
+      "positivos": 124
+    },
+    "segmentos_comparados": 107827,
+    "positivos_com_valor": 124,
+    "positivos_sem_valor_no_motor": 0,
+    "taxa_base": 0.00115,
+    "criterio": "ganho de precisão média >= 10% e limite inferior do IC95% do ganho > 0, por trecho, por blocos de positivos e por blocos completos",
+    "metricas": {
+      "regra_atual_percentil": {
+        "auc": 0.666,
+        "precisao_media": 0.00205,
+        "ic95_precisao_media": [
+          0.001678,
+          0.002903
+        ]
+      },
+      "nivel1_altura_de_preenchimento_max": {
+        "auc": 0.639,
+        "precisao_media": 0.00231,
+        "ic95_precisao_media": [
+          0.001735,
+          0.003478
+        ],
+        "ganho_sobre_a_regra": 0.1259,
+        "ic95_ganho_por_trecho": [
+          -0.2123,
+          0.6287
+        ],
+        "ic95_ganho_por_blocos": [
+          -0.2591,
+          0.8134
+        ],
+        "ic95_ganho_por_blocos_completos": [
+          -0.2345,
+          0.6849
+        ],
+        "atende_criterio": false
+      },
+      "nivel2_contribuicao_m1_max": {
+        "auc": 0.636,
+        "precisao_media": 0.00228,
+        "ic95_precisao_media": [
+          0.001737,
+          0.003252
+        ],
+        "ganho_sobre_a_regra": 0.1101,
+        "ic95_ganho_por_trecho": [
+          -0.1432,
+          0.4224
+        ],
+        "ic95_ganho_por_blocos": [
+          -0.1693,
+          0.3716
+        ],
+        "ic95_ganho_por_blocos_completos": [
+          -0.1719,
+          0.3787
+        ],
+        "atende_criterio": false
+      },
+      "nivel2_contribuicao_analoga_max": {
+        "auc": 0.592,
+        "precisao_media": 0.002,
+        "ic95_precisao_media": [
+          0.001538,
+          0.002865
+        ],
+        "ganho_sobre_a_regra": -0.0262,
+        "ic95_ganho_por_trecho": [
+          -0.2406,
+          0.2305
+        ],
+        "ic95_ganho_por_blocos": [
+          -0.2509,
+          0.1917
+        ],
+        "ic95_ganho_por_blocos_completos": [
+          -0.2545,
+          0.1939
+        ],
+        "atende_criterio": false
+      },
+      "nivel2_contribuicao_limites_max": {
+        "auc": 0.567,
+        "precisao_media": 0.00184,
+        "ic95_precisao_media": [
+          0.001429,
+          0.002623
+        ],
+        "ganho_sobre_a_regra": -0.1035,
+        "ic95_ganho_por_trecho": [
+          -0.2872,
+          0.1157
+        ],
+        "ic95_ganho_por_blocos": [
+          -0.291,
+          0.0772
+        ],
+        "ic95_ganho_por_blocos_completos": [
+          -0.2996,
+          0.0894
+        ],
+        "atende_criterio": false
+      }
+    },
+    "leitura": "Comparação exploratória: os registros são de 2013-2014, sem horário e sem chuva, e o motor é condicionado à chuva; serve para discutir plausibilidade, não valida o motor. Diferença pequena ou intervalo que inclui zero não é evidência de superioridade, e a regra atual não é substituída."
+  },
+  "sobreposicao_qualitativa_com_cprm": {
+    "segmentos": 176836,
+    "por_classe": {
+      "Alto": {
+        "segmentos": 47009,
+        "percentil_mediano_da_contribuicao_m1_max": 62.9
+      },
+      "Médio": {
+        "segmentos": 2991,
+        "percentil_mediano_da_contribuicao_m1_max": 58.0
+      },
+      "Baixa": {
+        "segmentos": 559,
+        "percentil_mediano_da_contribuicao_m1_max": 45.2
+      },
+      "fora de risco mapeado": {
+        "segmentos": 126277,
+        "percentil_mediano_da_contribuicao_m1_max": 44.2
+      }
+    },
+    "leitura": "Risco mapeado (modelagem validada em campo, 2012-2014) é contexto: não é rótulo, ocorrência histórica nem simulação. A classe Alto cobre cerca da metade da cidade, então discrimina pouco."
+  },
+  "arquivos": {
+    "celulas_30m": {
+      "path": "data/processed/fase3/celulas_30m.parquet",
+      "sha256": "dbf48219391c13fd95bf63a68322641d68a5259a04f3686516e8745a12cd4eaf",
+      "linhas": 1290058,
+      "bytes": 6976056
+    },
+    "trechos_nivel1_propensao_topografica": {
+      "path": "data/processed/fase3/trechos_nivel1_propensao_topografica.parquet",
+      "sha256": "e08eb285bb651298a5f641722e1a0c5bf26a67b35638a82a35c2f1fad89f7f7e",
+      "linhas": 176836,
+      "bytes": 2153182
+    },
+    "trechos_contribuicao_base": {
+      "path": "data/processed/fase3/trechos_contribuicao_base.parquet",
+      "sha256": "62f32109dfb9d0ed36adb20ccee12c235f5683b87815d1331ab46218554f1536",
+      "linhas": 176836,
+      "bytes": 6722839
+    },
+    "trechos_nivel2_cenarios": {
+      "path": "data/processed/fase3/trechos_nivel2_cenarios.parquet",
+      "sha256": "893269184be7d3308571ada7f4429f57b40ca8726ada8a928cfb5821cd57344f",
+      "linhas": 1591524,
+      "bytes": 22481301
+    }
+  },
+  "limitacoes": [
+    "Chuva uniforme e hipotética: ela escala o volume, mas não diferencia ruas. O resultado é condicionado ao cenário, não é previsão.",
+    "Só 17,3% da área classificada tem coeficiente fundamentado (Método 1); o resto depende de cenários, e a fração a montante coberta por cada pacote vai em cada trecho.",
+    "O volume efetivamente transportado, o retido, a profundidade e a duração NÃO são calculados.",
+    "A altura de preenchimento é indicador topográfico: o Copernicus (DSM de 30 m, erro médio de 2,18 m contra marcos) não permite lê-la em metros nem como volume.",
+    "Valores por trecho não são somáveis entre trechos (bacias vizinhas se sobrepõem); o total da cidade existe só como soma das células.",
+    "A pegada do trecho (células atravessadas) pode perder células cortadas por cordas menores que o passo de amostragem.",
+    "O inventário de drenagem não entra no cálculo: sem capacidade, sem conexões confirmadas."
+  ]
+}

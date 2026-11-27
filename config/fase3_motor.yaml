@@ -1,0 +1,8 @@
+# Parâmetros do motor da Fase 3 (tools/executar_fase3.py). Nenhum deles é calibrado: são cenários e escolhas de método declaradas.
+precipitacoes_mm: [10, 20, 30]       # chuva UNIFORME e HIPOTÉTICA (não é previsão); o resultado é linear em P
+passo_da_pegada_m: 6                 # amostragem do trecho para achar as células que ele atravessa (célula / 5)
+exutorio_por_agua:                   # células de corpo d'água grande viram exutório (a água sai do modelo), em vez de bacias que o preenchimento alagaria
+  lacuna_minima_m2: 450              # a célula é "sem classificação" em pelo menos metade da área
+  exigir_agua_osm: true              # e o centro da célula cai em polígono de água do OpenStreetMap (data/interim/water.parquet)
+comparacao_exploratoria:
+  raio_do_rotulo_m: 100              # trecho a até 100 m de um registro de alagamento de 2013-2014; mesma amostra e mesmo rótulo do experimento anterior
