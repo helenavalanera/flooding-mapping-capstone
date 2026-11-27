@@ -1,7 +1,7 @@
 # Validação do GTFS
 
 - Arquivo: `/Users/helenaoliveirav/flooding-mapping/data/raw/gtfs_eptc.zip`
-- Verificado em: 2026-10-24
+- Verificado em: 2026-11-07
 - ZIP íntegro: sim
 - Arquivos obrigatórios ausentes: nenhum
 
