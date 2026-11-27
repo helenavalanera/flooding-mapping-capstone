@@ -598,3 +598,9 @@ def test_backing_does_not_need_the_operator_token_and_cannot_confirm(api):
     r = requests.post(base + f"/api/ocorrencias/{rel['id']}/apoio", json={"chave": "aparelho-aleatorio-9", "tipo": "ainda"})
     assert r.status_code == 200 and r.json()["situacao"] == "reportada"
     assert requests.post(base + f"/api/ocorrencias/{rel['id']}", json={"situacao": "confirmada", "evidencia": "tentativa sem token"}).status_code == 403
+
+
+def test_the_webp_map_of_the_landing_is_served_as_an_image(api):
+    base, _, _ = api()
+    r = requests.get(base + "/inicio/img/estudo/mapa-propensao.webp")
+    assert r.status_code == 200 and r.headers["Content-Type"] == "image/webp" and r.headers["X-Content-Type-Options"] == "nosniff" and r.content[:4] == b"RIFF"

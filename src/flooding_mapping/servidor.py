@@ -71,7 +71,7 @@ CSP_SW = CSP.replace("connect-src 'self'", "connect-src 'self' https://cdnjs.clo
 CSP_PAINEL = CSP.replace("frame-ancestors 'none'", "frame-ancestors 'self'")
 TIPOS = {".pbf": "application/x-protobuf", ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
          ".json": "application/json", ".geojson": "application/json", ".webmanifest": "application/manifest+json",
-         ".png": "image/png", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
+         ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
 
 
 def validar_token(token: str) -> str:
