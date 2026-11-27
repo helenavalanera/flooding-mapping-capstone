@@ -71,7 +71,7 @@
   "media_dos_meses_mm": 121.7
  },
  "top5_bairros": {
-  "criterio": "parcela dos trechos do bairro com propensão topográfica à retenção, isto é, em que o preenchimento de depressões do modelo de 30 m soma altura (indicador relativo; não é profundidade, volume nem duração)",
+  "criterio": "parcela dos trechos de rua do bairro com propensão topográfica à retenção, isto é, em que o relevo favorece o acúmulo de água segundo o modelo de 30 m (indicador relativo; não é profundidade, volume nem duração, e não confirma alagamento)",
   "universo": "92 dos 94 bairros: só os com trechos suficientes (os demais ficam de fora, sem estimativa)",
   "itens": [
    {

@@ -42,7 +42,7 @@ def top_bairros(n: int = 5) -> dict:
     b = json.loads((RAIZ / "src/flooding_mapping/app/static/data/resultados_poa.json").read_text(encoding="utf-8"))["bairros"]
     validos = [x for x in b if x["suficiente"]]
     ordem = sorted(validos, key=lambda x: (-x["parcela_com_preenchimento"], x["nome"]))[:n]
-    return {"criterio": "parcela dos trechos do bairro com propensão topográfica à retenção, isto é, em que o preenchimento de depressões do modelo de 30 m soma altura (indicador relativo; não é profundidade, volume nem duração)",
+    return {"criterio": "parcela dos trechos de rua do bairro com propensão topográfica à retenção, isto é, em que o relevo favorece o acúmulo de água segundo o modelo de 30 m (indicador relativo; não é profundidade, volume nem duração, e não confirma alagamento)",
             "universo": f"{len(validos)} dos {len(b)} bairros: só os com trechos suficientes (os demais ficam de fora, sem estimativa)",
             "itens": [{"posicao": i + 1, "bairro": x["nome"], "parcela_com_propensao_topografica": round(x["parcela_com_preenchimento"], 3),
                        "parcela_no_decil_superior_de_contribuicao": round(x["parcela_no_decil_superior_da_cidade"], 3), "trechos_com_dados": x["trechos_com_dados"],
