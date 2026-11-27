@@ -4,14 +4,13 @@
    está em app/arquivo/painel-estadual/. */
 (function () {
   "use strict";
-  var L_ = window.L;
   window.MotorLeaflet = function () {
     var m = { suporta: { tres_d: false, relevo: false } };
     var map;
     m.criar = function (vista) {
-      map = L_.map("mapa-gl", { zoomControl: true, preferCanvas: false, worldCopyJump: false }).setView([vista.centro[1], vista.centro[0]], Math.round(vista.zoom));
+      map = window.L.map("mapa-gl", { zoomControl: true, preferCanvas: false, worldCopyJump: false }).setView([vista.centro[1], vista.centro[0]], Math.round(vista.zoom));
       window.MapaBase.camadaLeaflet().addTo(map);
-      L_.control.scale({ metric: true, imperial: false }).addTo(map);
+      window.L.control.scale({ metric: true, imperial: false }).addTo(map);
       return Promise.resolve();
     };
     m.adicionar = function () {};
@@ -25,7 +24,7 @@
       if (sem_animacao) map.setView(c, z, { animate: false }); else map.flyTo(c, z, { duration: 1.6 });
     };
     m.ajustar = function (caixa, o) {
-      var b = L_.latLngBounds([caixa[0][1], caixa[0][0]], [caixa[1][1], caixa[1][0]]);
+      var b = window.L.latLngBounds([caixa[0][1], caixa[0][0]], [caixa[1][1], caixa[1][0]]);
       map.fitBounds(b, { padding: [o.padding || 40, o.padding || 40], animate: !o.reduzido, maxZoom: 17 });
     };
     m.aoClicar = function () {};

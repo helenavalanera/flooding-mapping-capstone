@@ -170,3 +170,19 @@ def test_the_r2_origin_is_added_only_to_connect_and_img_sources_and_only_when_it
     out = tmp_path / "s"
     build.build_site(out, r2_origem=r2)
     assert r2 in (out / "_headers").read_text(encoding="utf-8")
+
+
+def test_the_map_libraries_are_loaded_on_demand_with_integrity_hashes_and_not_with_the_panel_page(tmp_path):
+    out, _ = make_site(tmp_path)
+    painel = (out / "painel.html").read_text(encoding="utf-8")
+    for lib in ("maplibre-gl", "leaflet", "pmtiles.js", "protomaps-leaflet"):
+        assert lib not in painel, lib                                                     # a página do painel não baixa o mapa: só carregar-mapa.js, que o faz ao abrir a aba Mapa
+    assert 'src="carregar-mapa.js"' in painel and (out / "carregar-mapa.js").exists()
+    js = (out / "carregar-mapa.js").read_text(encoding="utf-8")
+    for url in ("maplibre-gl/4.7.1/maplibre-gl.js", "maplibre-gl/4.7.1/maplibre-gl.css", "leaflet/1.9.4/leaflet.min.js", "leaflet/1.9.4/leaflet.min.css"):
+        m = re.search(r'"https://cdnjs\.cloudflare\.com/ajax/libs/' + re.escape(url) + r'": "(sha\d+-[A-Za-z0-9+/=]+)"', js)
+        assert m, url                                                                     # cada arquivo de terceiros mantém o hash de integridade (SRI)
+    assert "crossOrigin" in js and "webgl" not in js
+    mapa = (out / "mapa.js").read_text(encoding="utf-8")
+    assert "window.CarregarMapa.gl()" in mapa and "gl = window.maplibregl" not in mapa
+    assert "maxzoom: 12" in (out / "mapa-base.js").read_text(encoding="utf-8")            # o relevo (30 m) não precisa de tiles além do zoom 12: menos pedidos e bytes

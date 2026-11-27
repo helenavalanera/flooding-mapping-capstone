@@ -5,7 +5,7 @@
    (Rio Grande do Sul e Porto Alegre) está arquivado em app/arquivo/painel-estadual/. */
 (function () {
   "use strict";
-  var Lg = window.Logic, T = window.Territorio, gl = window.maplibregl;
+  var Lg = window.Logic, T = window.Territorio;
   var M = { motor: null, motorNome: null, map: null, pronto: false, iniciando: null, tres_d: true, exagero: 1.5, marcadas: {}, selecionado: null, forcarLeaflet: false };
   window.Mapa = M;
 
@@ -21,7 +21,7 @@
   function reduzido() { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }
   M.reduzido = reduzido;
   M.webglOk = function () {
-    try { var c = document.createElement("canvas"); return !!(window.maplibregl && (c.getContext("webgl2") || c.getContext("webgl"))); } catch (e) { return false; }
+    try { var c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; }   // as bibliotecas só são baixadas ao abrir o mapa (carregar-mapa.js)
   };
 
   /* ---------------------------------------------------------------- creation */
@@ -30,7 +30,10 @@
     if (M.iniciando) return M.iniciando;
     M.motorNome = (M.forcarLeaflet || !M.webglOk()) ? "leaflet" : "gl";
     M.motor = M.motorNome === "gl" ? motorGL() : window.MotorLeaflet(M);
-    M.iniciando = M.motor.criar(T.territorio().vista).then(function () {
+    var bibliotecas = M.motorNome === "gl" ? window.CarregarMapa.gl().catch(function () {       // sem rede para o MapLibre: cai no mapa 2D simples, como antes
+      M.motorNome = "leaflet"; M.motor = window.MotorLeaflet(M); return window.CarregarMapa.leaflet();
+    }) : window.CarregarMapa.leaflet();                                                                // MapLibre ou Leaflet só são baixados aqui
+    M.iniciando = bibliotecas.then(function () { return M.motor.criar(T.territorio().vista); }).then(function () {
       M.motor.adicionar();
       M.motor.aoClicar(aoClicar);
       M.map = M.motorNome === "gl" ? M.motor.nativo() : null;
@@ -238,9 +241,9 @@
     var m = { suporta: { tres_d: true, relevo: true } };
     m.criar = function (vista) {
       return window.MapaBase.estiloGL({ relevo: { exagero: 0.4 } }).then(function (estilo) {
-        map = new gl.Map({ container: "mapa-gl", center: vista.centro, zoom: vista.zoom, pitch: vista.inclinacao, bearing: vista.rumo, maxPitch: 75, attributionControl: { compact: true }, style: estilo });
-        map.addControl(new gl.NavigationControl({ visualizePitch: true }), "top-left");
-        map.addControl(new gl.ScaleControl({ unit: "metric" }), "bottom-left");
+        map = new window.maplibregl.Map({ container: "mapa-gl", center: vista.centro, zoom: vista.zoom, pitch: vista.inclinacao, bearing: vista.rumo, maxPitch: 75, attributionControl: { compact: true }, style: estilo });
+        map.addControl(new window.maplibregl.NavigationControl({ visualizePitch: true }), "top-left");
+        map.addControl(new window.maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
         map.on("error", function (e) { var t = (e && e.error && e.error.message) || ""; if (/Failed to fetch|NetworkError|Load failed|ERR_/.test(t)) el("nota-relevo").textContent = "Parte dos mapas-base não carregou (sem conexão?). Os dados do painel continuam valendo."; });
         return new Promise(function (resolve) { map.on("load", resolve); });
       });

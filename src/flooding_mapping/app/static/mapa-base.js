@@ -33,7 +33,7 @@
     }).then(function (texto) {
       var estilo = JSON.parse(texto.split("__BASE__").join(VENDOR).split("__PMTILES__").join(ARQUIVO));
       if (opcoes.relevo) {
-        estilo.sources.dem = { type: "raster-dem", tiles: [DEM], encoding: "terrarium", tileSize: 256, maxzoom: 14, attribution: "Elevação: AWS Terrain Tiles" };
+        estilo.sources.dem = { type: "raster-dem", tiles: [DEM], encoding: "terrarium", tileSize: 256, maxzoom: 12, attribution: "Elevação: AWS Terrain Tiles" };
         var camada = { id: "sombra", type: "hillshade", source: "dem", paint: { "hillshade-exaggeration": opcoes.relevo.exagero || 0.4, "hillshade-shadow-color": escuro() ? "#05080a" : "#3b4750" } };
         var posicao = estilo.layers.findIndex(function (l) { return l.id === "roads_tunnels_other_casing"; });
         estilo.layers.splice(posicao < 0 ? 2 : posicao, 0, camada);

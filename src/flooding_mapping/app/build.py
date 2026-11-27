@@ -16,7 +16,7 @@ import shutil
 from pathlib import Path
 
 STATIC = Path(__file__).parent / "static"
-ASSETS = ("index.html", "painel.js", "territorio.js", "fase3-dados.js", "fase3.js", "drenagem.js", "resultados.js", "simulador.js", "mapa.js", "mapa2d.js", "mapa-base.js", "logic.js", "style.css", "config-dados.js", "icone-192.png", "icone-512.png")
+ASSETS = ("index.html", "painel.js", "territorio.js", "fase3-dados.js", "fase3.js", "drenagem.js", "resultados.js", "simulador.js", "mapa.js", "mapa2d.js", "mapa-base.js", "carregar-mapa.js", "logic.js", "style.css", "config-dados.js", "icone-192.png", "icone-512.png")
 ENTRADA = Path(__file__).parent / "entrada"   # raiz da versão estática: leva à landing (ou ao painel, quando o endereço pede)
 # O PWA de rotas, o painel estadual e a aplicação instalável estão arquivados em app/arquivo/ e não entram no site.
 
