@@ -1,5 +1,7 @@
 # Operação de ocorrências: como confirmar, declarar impacto e corrigir
 
+> **Frente arquivada (futuro monitoramento).** A operação de ocorrências descrita aqui não faz parte da versão atual do produto.
+
 Este guia define o procedimento humano que o sistema pressupõe. **O sistema impõe o mecanismo (credencial, evidência escrita,
 histórico); quem decide, e com que autoridade, é da instituição que operar o produto.** Os campos marcados **[PENDENTE DE APROVAÇÃO]**
 dependem dessa definição externa e não foram inventados aqui.

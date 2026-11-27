@@ -1,5 +1,7 @@
 # Hospedagem no Render: preparação, custos e checklist
 
+> **Frente arquivada.** O Render hospedaria o servidor da frente anterior (mobilidade, previsão e ocorrências). Não é a hospedagem prevista para a versão atual, que é estática (ver [`publicacao_pages_releases.md`](publicacao_pages_releases.md)).
+
 ## Estado (quatro coisas diferentes)
 
 | Dimensão | Estado | O que isso quer dizer |

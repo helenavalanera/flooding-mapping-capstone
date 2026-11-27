@@ -1,5 +1,7 @@
 # Demonstração controlada: do preparo ao encerramento
 
+> **Frente arquivada.** O roteiro abaixo é da demonstração da frente de mobilidade e do painel estadual (dados sintéticos). A demonstração da versão atual (landing, mapa de análise e simulador) está em [`metodologia.md`](metodologia.md) e em [`mapa_simulador_pwa.md`](mapa_simulador_pwa.md).
+
 Este roteiro pode ser seguido por quem não conhece o código. A demonstração roda **localmente**, sem publicar nada, e **a jornada principal não depende de API externa**.
 Ela usa a rede de ruas real de Porto Alegre com **dados sintéticos declarados**: uma tempestade inventada e ocorrências de demonstração, tudo em memória.
 Esses dados **não são evidência meteorológica nem de eventos reais**, e as telas dizem isso (faixa "DEMONSTRAÇÃO" no painel e "DEMONSTRAÇÃO · dados sintéticos" na PWA).

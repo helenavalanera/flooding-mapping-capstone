@@ -1,6 +1,91 @@
 # Flooding Mapping
 
-Alagamentos pluviais fecham cruzamentos e trechos de vias em Porto Alegre várias vezes por ano.
+Como a chuva transforma o território? O Flooding Mapping é um **estudo** de como o escoamento superficial tende a se distribuir em Porto Alegre e de onde há condições mais favoráveis à concentração e à retenção de água. Estima, por trecho de rua e para chuvas hipotéticas de 10, 20 e 30 mm, a **geração** de escoamento, a **concentração** (contribuição acumulada a montante) e a **propensão topográfica à retenção**, e mostra a **drenagem cadastrada** como contexto. O produto reúne uma landing page com os resultados, um WebGIS (mapa 3D com alternativa 2D), um simulador de cenários e uma frente experimental de **GeoAI**.
+
+**O que não é:** previsão de alagamentos, de profundidade ou de duração da água; serviço em tempo real; substituto da Defesa Civil. Os resultados são estimativas condicionadas a uma chuva hipotética e uniforme.
+
+**Dados:** O estudo utiliza dados geoespaciais públicos, provenientes de bases governamentais e iniciativas de dados abertos, reutilizados para fins de pesquisa, análise e desenvolvimento de produtos geoespaciais. As fontes originais são referenciadas na documentação técnica. Isso descreve a abordagem do estudo e **não** significa que todas as bases, dados derivados ou produtos processados tenham licença aberta irrestrita: a condição de cada fonte (inclusive as licenças ainda por confirmar) está em [`docs/inventario_fontes.md`](docs/inventario_fontes.md). A licença MIT cobre o código do projeto, não os dados de terceiros.
+
+**Documentação:** [metodologia](docs/metodologia.md) · [glossário](docs/glossario.md) · [inventário de fontes](docs/inventario_fontes.md) · [referências bibliográficas](docs/referencias_bibliograficas.md) · [aderência ao Capstone](docs/capstone_requisitos.md).
+
+## Território e escopo
+
+O produto ativo cobre **exclusivamente o município de Porto Alegre (RS)**: território, dados, resultados, mapas, simulador e documentação. O experimento de GeoAI usa o recorte territorial do município. A interface atual tem a landing (`inicio/`) e o painel
+com quatro áreas: Resultados, Mapa (dimensões A a D: geração, concentração, propensão topográfica à retenção e drenagem cadastrada), Simulador e Proveniência.
+
+As frentes que tratavam do Rio Grande do Sul (rodovias estaduais do DAER, bloqueios da CPRv BM, registros do S2iD, gatilho municipal e previsão de 72 h), da mobilidade e do PWA estão **arquivadas**, sem ter sido apagadas: ver
+[`src/flooding_mapping/app/arquivo/README.md`](src/flooding_mapping/app/arquivo/README.md). Nenhuma delas é carregada pela interface atual nem pela montagem do site.
+
+## Escoamento superficial e GeoAI (Fases 3 a 5)
+
+O projeto responde: **dada uma chuva (cenários de 10, 20 e 30 mm), como o escoamento superficial tende a se distribuir pelo território e onde há condições mais favoráveis à concentração e à retenção de água?**
+
+- **Motor determinístico (Fase 3):** V = P × A × C ÷ 1000 sobre a grade de 30 m, com contribuição acumulada a montante e indicador topográfico por trecho de rua. É a referência oficial e não é alterado pela GeoAI. Método e limites: [`docs/fase3_motor.md`](docs/fase3_motor.md).
+- **Aplicação (Fases 4 e 4.1):** landing page (`/inicio/`), mapa de análise (dimensões A a D: geração, concentração, topografia e drenagem), aba Resultados, Simulador de cenários e Proveniência, em um site estático (`make site`): a raiz leva à landing e o painel é `painel.html`. Não há servidor nem API na versão atual. Ver [`docs/mapa_simulador_pwa.md`](docs/mapa_simulador_pwa.md) e [`docs/resultados_executivos.md`](docs/resultados_executivos.md).
+- **GeoAI experimental (Fase 5):** estima, a partir do Sentinel-2 (Random Forest) e de embeddings AlphaEarth, a **fração construída por célula de 30 m**, com incerteza, e compara com a Profill 2022 em blocos espaciais não vistos. Módulo independente `src/flooding_mapping/geoai/`; **não alimenta o motor nem a interface**. Hipótese, protocolo, resultados e decisão: [`docs/geoai_fase5.md`](docs/geoai_fase5.md) e [`docs/geoai_resultados.md`](docs/geoai_resultados.md).
+
+Reproduzir o experimento (precisa de internet para as imagens; os dados ficam em `data/interim/geoai/` e `data/processed/geoai/`, fora do Git; ~3,3 GB de imagens e ~0,8 GB de embeddings):
+
+```bash
+export PYTHONPATH=src
+.venv/bin/python tools/executar_geoai.py cenas          # catálogo STAC e qualidade de cada cena no município
+.venv/bin/python tools/executar_geoai.py baixar         # recortes das 30 cenas escolhidas (~25 min)
+.venv/bin/python tools/executar_geoai.py atributos      # composição mediana e atributos de 30 m (~14 min)
+.venv/bin/python tools/executar_geoai.py aef-baixar     # embeddings AlphaEarth 2020 (~14 min)
+.venv/bin/python tools/executar_geoai.py aef-atributos  # embeddings agregados à grade (~30 s)
+.venv/bin/python tools/executar_geoai.py avaliar        # validação espacial, métricas, COG e manifesto (~1 h em 8 GB de RAM)
+.venv/bin/python tools/gerar_relatorio_geoai.py         # docs/geoai_resultados.md
+.venv/bin/python -m pytest tests/test_geoai.py          # testes das peças (dados sintéticos)
+```
+
+Pré-requisito: `data/processed/uso_solo/` (Profill) gerado como em `docs/fase3_motor.md`. Nada do experimento substitui os resultados oficiais.
+
+## Como executar (clone limpo)
+
+```bash
+uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -e ".[dev]"   # versões exatas testadas: requirements.lock.txt
+make site                         # monta site/ (interface estática); camadas derivadas e mapa-base não vão no Git: --fase3 e --drenagem os acrescentam
+python -m http.server -d site     # abre a landing; o painel é painel.html
+.venv/bin/python -m pytest -p no:cacheprovider -q
+```
+
+Um clone limpo executa os testes compatíveis com os dados que tem: os que dependem de dados que **não vão ao Git** (rede de ruas, Parquets derivados, tiles, mapa-base e a lista de alagamentos da Prefeitura) são ignorados com uma mensagem clara, e os testes com
+dados **sintéticos** (`tests/sinteticos.py`, `tests/dados/alagamentos_sinteticos.csv`) rodam sempre. Os testes de navegador exigem `PLAYWRIGHT_CORE` (caminho do `playwright-core`) e `CHROME_PATH`. As análises com dados reais rodam no ambiente local, quando os dados autorizados estão no disco (`data/raw/`, ver `docs/inventario_fontes.md`).
+
+## Fontes de dados do estudo atual e licenças
+
+| Fonte | Uso | Licença / atribuição |
+|---|---|---|
+| Sentinel-2 L2A (Copernicus; COG na AWS Open Data via catálogo Element 84 Earth Search) | Imagens da GeoAI (Fase 5) | Dados Copernicus Sentinel: livres, completos e abertos (aviso legal do Copernicus); contém dados Copernicus Sentinel modificados |
+| Satellite Embedding V1 anual / AlphaEarth Foundations (Google e Google DeepMind; `gs://alphaearth_foundations`) | Embeddings da GeoAI (Fase 5) | CC BY 4.0. Atribuição exigida: "The AlphaEarth Foundations Satellite Embedding dataset is produced by Google and Google DeepMind." |
+| Uso e ocupação do solo, Profill 2022 (Prefeitura de Porto Alegre) | Rótulos e referência da GeoAI; coeficientes do motor | Direitos: "PROFILL, 2023". **Licença de reuso não confirmada**: não redistribuir; derivados ficam fora do Git |
+| Copernicus DEM GLO-30 (AWS Open Data) | Relevo | © DLR e.V. 2010–2014 e © Airbus Defence and Space GmbH 2014–2018, fornecido no âmbito do COPERNICUS pela União Europeia e ESA |
+| OpenStreetMap via [Geofabrik](https://download.geofabrik.de/south-america/brazil/sul.html) | Rede viária (trechos), água e mapa-base | ODbL — © colaboradores do OpenStreetMap |
+| Drenagem cadastrada (Prefeitura de Porto Alegre) | Camada de contexto, fora do cálculo | **Licença de reuso não confirmada**: não redistribuir; derivados ficam fora do Git |
+| Open-Meteo (reanálise baseada em ERA5) | Posição dos cenários de 10, 20 e 30 mm entre os eventos de 2017 a 2026 | Registro do software em CC BY 4.0; termos da API de dados não relidos; só números agregados |
+
+Condição de cada fonte, derivados e pendências de licença: [`docs/inventario_fontes.md`](docs/inventario_fontes.md). Avisos de terceiros do mapa-base: `src/flooding_mapping/app/static/vendor/mapa/AVISOS.md`. O código está sob licença MIT (`LICENSE`); essa licença
+**não** cobre os dados de terceiros.
+
+## Estrutura do repositório (estudo atual)
+
+```text
+config/                     fase3_motor.yaml, geoai.yaml, referencias.yaml (59 referências), coeficientes do uso do solo
+src/flooding_mapping/       escoamento.py, fluxo.py, motor_acumulo.py (motor da Fase 3), camada_fase3.py e camada_drenagem.py (distribuição),
+                            resultados.py, geoai/ (experimento da Fase 5), dados_restritos.py (dados que não vão ao Git)
+src/flooding_mapping/app/   static/ (interface atual), entrada/ (raiz do site), build.py (montagem), arquivo/ (frentes arquivadas)
+tools/                      executar_fase3.py, preparar_camada_*.py, gerar_landing.py, gerar_referencias.py, executar_geoai.py, ...
+docs/                       metodologia.md, glossario.md, inventario_fontes.md, referencias_bibliograficas.md, fase3_*.md, geoai_*.md
+tests/                      pytest (com dados sintéticos) e tests/e2e (navegador); tests/arquivo/ guarda os testes das frentes arquivadas
+reports/qa/                 relatórios de qualidade e de resultados (números agregados)
+data/                       dados brutos, intermediários e derivados: NÃO versionados (só data/raw/manifest.json)
+```
+
+## Frentes arquivadas (histórico)
+
+**Não fazem parte do produto atual.** Antes do estudo de escoamento, o projeto tratou da mobilidade urbana perdida com chuvas, de um gatilho municipal de risco com previsão de 72 horas para o Rio Grande do Sul e de um aplicativo web (PWA) de rotas. O código e a documentação continuam no repositório (o PWA e a aplicação instalável estão em `src/flooding_mapping/app/arquivo/`, ver o `README.md` desse diretório), mas **o texto desta seção e dos documentos `docs/produto_preventivo.md`, `docs/ml_gatilho.md`, `docs/demonstracao.md`, `docs/publicacao.md`, `docs/render.md` e afins descreve essas frentes, e não as funcionalidades atuais**. Os dados de mobilidade (GTFS, IBGE, DAER, S2iD, CPRv BM) estão no inventário como "frente arquivada".
+
+(Frente de mobilidade.) Alagamentos pluviais fecham cruzamentos e trechos de vias em Porto Alegre várias vezes por ano.
 O projeto mede **quanto da mobilidade urbana — a pé, de ônibus e de carro — deixa de ser
 alcançável com até 45 mm de chuva em 24 horas**, diante das condições precárias de drenagem da
 cidade, quando trechos documentados são interditados.
@@ -20,7 +105,7 @@ pontos documentados de bloqueio total e mais N pontos apontados pelo modelo de s
 com N vindo de um ajuste linear entre chuva acumulada e número de bloqueios registrados por data,
 multiplicado por um fator de precariedade (1 = condição observada).
 
-## Plataforma: Rio Grande do Sul e Porto Alegre
+### (arquivado) Plataforma: Rio Grande do Sul e Porto Alegre
 
 Uma interface de duas escalas (dashboard e PWA de mobilidade preventiva) sobre o mesmo serviço: monitoramento regional no Rio Grande do Sul
 e mobilidade preventiva em Porto Alegre, com mapa 3D, cobertura de dados calculada e capacidades declaradas por região.
@@ -35,7 +120,7 @@ Arquitetura, cobertura, API, privacidade, testes e pendências: [`docs/produto_p
 
 **Demonstração controlada (dados sintéticos, sem internet para os fluxos essenciais):** `make demo`; roteiro, limpeza e checklists em [`docs/demonstracao.md`](docs/demonstracao.md). Guia de uso: [`docs/guia_de_uso.md`](docs/guia_de_uso.md). Operação de ocorrências: [`docs/operacao_ocorrencias.md`](docs/operacao_ocorrencias.md). Segurança e dados pessoais: [`docs/seguranca_lgpd.md`](docs/seguranca_lgpd.md). Resultados e limites para a apresentação: [`docs/sintese_academica.md`](docs/sintese_academica.md). QA: [`docs/qa_relatorio_final.md`](docs/qa_relatorio_final.md). Teste em celular (não executado; roteiro e tabela de registro): [`docs/qa_mobile_fisico.md`](docs/qa_mobile_fisico.md). Roteiro de apresentação: [`docs/roteiro_apresentacao.md`](docs/roteiro_apresentacao.md) (a apresentação `.pptx` é gerada por `tools/gerar_apresentacao.py` e fica local). Hospedagem no Render (preparada, **não publicada**): [`docs/render.md`](docs/render.md).
 
-## Escopo estadual (RS): gatilho de risco, impacto e interface
+### (arquivado) Escopo estadual (RS): gatilho de risco, impacto e interface
 
 O projeto foi ampliado de Porto Alegre para o Rio Grande do Sul, em duas camadas: um **gatilho
 municipal de risco hídrico** e o **estudo de caso urbano de Porto Alegre**, descrito nas seções
@@ -71,7 +156,7 @@ O gatilho **não prevê profundidade, extensão nem duração da água**, estima
 desastre; a precisão é um piso (negativos não rotulados) e o resultado vem com todas as
 ressalvas em `docs/ml_gatilho.md`. O artefato fica fora do git; o cartão registra o hash.
 
-## Escopo e limitações
+### (arquivado) Escopo e limitações
 
 - **Ônibus:** GTFS oficial da EPTC com vigência set–dez/2025 (vencido; único publicado). Os
   resultados representam a oferta desse período, não o serviço atual. No R5 os ônibus seguem
@@ -117,7 +202,7 @@ ressalvas em `docs/ml_gatilho.md`. O artefato fica fora do git; o cartão regist
   esses arquivos sem restringir a chave a domínios no painel do CARTO. Uma restrição por
   domínio pode bloquear páginas abertas via `file://`, que não enviam Referer.
 
-## Fontes de dados e atribuição
+### (arquivado) Fontes de dados e atribuição
 
 | Fonte | Uso | Licença / atribuição |
 |---|---|---|
@@ -125,13 +210,12 @@ ressalvas em `docs/ml_gatilho.md`. O artefato fica fora do git; o cartão regist
 | OpenStreetMap via [Geofabrik](https://download.geofabrik.de/south-america/brazil/sul.html) | Rede viária e drenagem | ODbL — © colaboradores do OpenStreetMap |
 | IBGE — Censo 2022, malha de setores com agregados | Território e população | Fonte: IBGE, Censo Demográfico 2022 |
 | Open-Meteo (previsão, reanálise e previsões arquivadas desde 2024) | Chuva prevista, calibração, frequência e treino do gatilho estadual | CC BY 4.0 — Open-Meteo.com |
-| Copernicus DEM GLO-30 (AWS Open Data) | Relevo | © DLR e.V. 2010–2014 e © Airbus Defence and Space GmbH 2014–2018, fornecido no âmbito do COPERNICUS pela União Europeia e ESA |
 | EPTC / Prefeitura de Porto Alegre; Jornal do Comércio; Sul21 | Eventos de bloqueio | Citados por URL em `data/events/events.csv` |
 
 URLs, hashes SHA-256, tamanhos e datas ficam em `data/raw/manifest.json`. Os dados externos
 permanecem sujeitos às suas licenças; o código está sob licença MIT (`LICENSE`).
 
-## Estrutura
+### (arquivado) Estrutura
 
 ```text
 config/analysis.yaml        parâmetros (CRS, data/horário, limite, grade, raios, semente)
@@ -170,7 +254,7 @@ reports/qa/                 relatórios de qualidade e registros de execução
 outputs/                    tabelas e mapas (não versionados)
 ```
 
-## Instalação
+### (arquivado) Instalação
 
 Requisitos: Python 3.12 (a cadeia r5py/pyrosm não tem wheels para 3.13+), Java 21 (r5py 1.1),
 `osmium-tool` e [uv](https://docs.astral.sh/uv/). No macOS:
@@ -183,7 +267,7 @@ uv pip install --python .venv/bin/python -e ".[dev]"
 export JAVA_HOME=/opt/homebrew/opt/openjdk@21   # obrigatório para o r5py
 ```
 
-## Execução
+### (arquivado) Execução
 
 Com um único comando (roda as etapas 1 a 10 abaixo, na ordem):
 
@@ -226,7 +310,7 @@ $PY -m flooding_mapping.dashboard && open outputs/maps/dashboard_alerta.html
 
 Testes: `make test` (ou `.venv/bin/python -m pytest`).
 
-## Indicadores
+### (arquivado) Indicadores
 
 - **A0 / A_s:** população da cidade alcançável em até 30 min (inclusivo) a partir de cada origem,
   sem chuva e no cenário de chuva; mediana dos tempos numa janela de partida de 60 min a partir
@@ -245,7 +329,7 @@ Testes: `make test` (ou `.venv/bin/python -m pytest`).
 - **Suscetibilidade:** avaliada pelo percentil, na cidade, do segmento mais próximo de cada
   evento retido (aleatório ≈ 0,5), em blocos espaciais de 2 km e no teste temporal (2025).
 
-## Versões relevantes
+### (arquivado) Versões relevantes
 
 Python 3.12.13 · Java OpenJDK 21.0.13 · r5py 1.1.7 · GeoPandas 1.1.4 · Pyrosm 0.24.0 ·
 NetworkX 3.7 · pyosmium 4.3.2 · osmium-tool 1.19.1 · scikit-learn 1.9.1 · rasterio 1.5.2

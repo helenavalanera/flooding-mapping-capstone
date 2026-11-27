@@ -1,5 +1,7 @@
 # Flooding Mapping: inteligência territorial e mobilidade preventiva
 
+> **Frente arquivada (mobilidade preventiva e painel estadual).** Este documento descreve a frente anterior do projeto, hoje fora do produto. As funcionalidades aqui descritas (rotas, previsão de 72 h, ocorrências, PWA) **não fazem parte da versão atual**, que é o estudo de escoamento superficial: ver [`metodologia.md`](metodologia.md). O código está em `src/flooding_mapping/app/arquivo/`.
+
 > **Foco no cidadão (nov/2026):** a aba **Avisos** do aplicativo (`/pwa/`), as áreas em exposição com pontos de interesse e o laço em que a comunidade confirma estão descritos em [avisos_comunidade.md](avisos_comunidade.md).
 
 Uma plataforma, duas escalas de demonstração, duas interfaces sobre **o mesmo serviço** (`servico.py`, exposto por

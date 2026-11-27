@@ -1,5 +1,7 @@
 # Hospedagem do servidor
 
+> **Frente arquivada.** Descreve a hospedagem do servidor da frente anterior (mobilidade e ocorrências). Nada foi publicado. A versão atual é estática: ver [`publicacao_pages_releases.md`](publicacao_pages_releases.md).
+
 Estado: **preparada e testada localmente; nada foi publicado.** Para o Render, veja [`render.md`](render.md). Publicar exige autorização, conta e cobrança que não foram feitas.
 
 ## O que foi auditado

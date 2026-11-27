@@ -1,5 +1,7 @@
 # Publicação da interface estadual (GitHub Pages)
 
+> **Frente arquivada.** Descreve a publicação da interface estadual anterior. A publicação da versão atual (estática) está em [`publicacao_pages_releases.md`](publicacao_pages_releases.md); nada foi publicado.
+
 A interface é uma página **estática**: o navegador só lê arquivos JSON. Todo o processamento
 (previsão de chuva, modelo, casamento dos bloqueios com a malha) roda em um fluxo do GitHub
 Actions que monta a pasta `site/` e a publica pelo próprio Pages, **sem fazer commits**

@@ -1,5 +1,7 @@
 # Gatilho municipal de risco hídrico: dados, método e resultados (estrito)
 
+> **Frente arquivada (gatilho municipal e previsão de 72 h).** O gatilho estima o registro de um desastre e **não** alimenta o estudo de escoamento. O que o estudo atual usa de aprendizado de máquina está em [`geoai_resultados.md`](geoai_resultados.md).
+
 _Documento gerado por `python -m flooding_mapping.evaluation.report`. Os números vêm de `reports/ml/gatilho_estrito.json`; nenhum foi digitado à mão._
 
 ## Resumo
