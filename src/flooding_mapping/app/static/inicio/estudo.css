@@ -207,10 +207,10 @@ th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--li
 .acoes + .small { margin-top: 14px; }
 
 /* Mapas de manchas das quatro dimensões (A a D): imagem pré-renderizada, uma cor por dimensão, legenda e números ao lado; seletor só com script. */
-.dim-a { --dim: #eca3c8; } .dim-b { --dim: #b3aee0; } .dim-c { --dim: #dfa356; } .dim-d { --dim: #9fd4b0; }
+.dim-a { --dim: #eca3c8; } .dim-b { --dim: #b3aee0; } .dim-c { --dim: #dfa356; } .dim-d { --dim: #9fd4b0; } .dim-e { --dim: #aab6c1; }
 .dim-seletor { margin-top: 32px; }
 .dim-abas[hidden] { display: none; }
-.dim-abas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+.dim-abas { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
 .dim-aba { display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 48px; border: 2px solid var(--dim); border-radius: 12px; background: transparent; color: var(--fundo-ink); font: 600 var(--pequeno)/1.25 var(--fonte); text-align: left; cursor: pointer; }
 .dim-aba:hover { background: rgba(234, 242, 246, .1); } .dim-aba[aria-selected="true"] { background: var(--dim); color: var(--acento-ink); }
 .dim-aba .dim-letra { background: var(--dim); } .dim-aba[aria-selected="true"] .dim-letra { background: var(--acento-ink); color: var(--dim); }
@@ -270,3 +270,9 @@ th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--li
 @media (max-width: 900px) { .numeros-grandes { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fontes-lista { grid-template-columns: 1fr; } }
 @media (max-width: 480px) { .numeros-grandes { grid-template-columns: 1fr; } }
 .hero-numeros dt { font-size: clamp(1.6rem, 1.1rem + 1.8vw, 2.6rem); line-height: 1.05; letter-spacing: -.02em; } .hero-numeros { gap: 22px !important; }
+.dim-aba.dim-e { border-style: dashed; } .dim-painel.dim-e { border-top-style: dashed; } .dim-painel.dim-e .dim-letra, .dim-aba.dim-e .dim-letra { background: transparent; color: var(--dim); border: 2px dashed var(--dim); }
+.dim-aba.dim-e[aria-selected="true"] .dim-letra { background: var(--acento-ink); color: var(--dim); border-color: var(--acento-ink); }
+@media (max-width: 1100px) { .dim-abas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.fontes-lista h3 { font-size: 1.02rem; margin: 0 0 4px; font-weight: 700; }
+.cartao-claro { background: var(--seco); color: var(--seco-ink); padding: clamp(14px, 2vw, 26px); border-radius: 12px; }
+.cartao-claro figure figcaption, .cartao-claro .small { color: var(--seco-ink); }

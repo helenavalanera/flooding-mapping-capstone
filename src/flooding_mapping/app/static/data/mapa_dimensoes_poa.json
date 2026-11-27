@@ -312,5 +312,103 @@
     }
    ]
   }
+ },
+ "E": {
+  "nome": "Fração construída estimada (GeoAI, experimental)",
+  "unidade": "fração da célula de 30 m estimada como construída (de 0% a 100%)",
+  "natureza": "EXPERIMENTAL, independente das dimensões A a D",
+  "imagem": {
+   "arquivo": "img/estudo/mapa-geoai.webp",
+   "largura_px": 1400,
+   "altura_px": 1722,
+   "bytes": 137314,
+   "celula_m": 100,
+   "agregacao": "média das células de 30 m em cada célula de 100 m"
+  },
+  "faixas": [
+   {
+    "de": 0.0,
+    "ate": 0.2,
+    "rotulo": "mais de 0% até 20%",
+    "cor": "#dfe5ea",
+    "celulas_pct": 63.8
+   },
+   {
+    "de": 0.2,
+    "ate": 0.4,
+    "rotulo": "20% a 40%",
+    "cor": "#aab6c1",
+    "celulas_pct": 6.0
+   },
+   {
+    "de": 0.4,
+    "ate": 0.6,
+    "rotulo": "40% a 60%",
+    "cor": "#76879a",
+    "celulas_pct": 5.8
+   },
+   {
+    "de": 0.6,
+    "ate": 0.8,
+    "rotulo": "60% a 80%",
+    "cor": "#46586b",
+    "celulas_pct": 7.2
+   },
+   {
+    "de": 0.8,
+    "ate": null,
+    "rotulo": "mais de 80%",
+    "cor": "#1f2d3d",
+    "celulas_pct": 17.2
+   }
+  ],
+  "celulas_no_municipio": 550001,
+  "celulas_sem_cor_pct": 4.7,
+  "media_da_fracao_pct": 25.8,
+  "celulas_acima_de_80_pct": 16.4,
+  "celulas_sem_rotulo_pct": 26.1,
+  "resultados": {
+   "mae_blocos_3km": 0.049,
+   "mae_quadrante_externo": 0.052,
+   "bairros_dentro_do_limite_pct": 57.4
+  },
+  "fonte": "GeoAI experimental: Random Forest com Sentinel-2, referência Profill 2022",
+  "bairros": {
+   "metrica": "fração construída média estimada nas células de 30 m do bairro",
+   "universo": "92 de 94 bairros (mesmo critério das outras dimensões: os com menos de 200 trechos de rua com dados ficam de fora)",
+   "bairros_sem_estimativa": 2,
+   "itens": [
+    {
+     "bairro": "São Geraldo",
+     "valor": 89.1,
+     "celulas": 1934,
+     "trechos_com_dados": 678
+    },
+    {
+     "bairro": "Cidade Baixa",
+     "valor": 86.1,
+     "celulas": 860,
+     "trechos_com_dados": 645
+    },
+    {
+     "bairro": "Navegantes",
+     "valor": 85.5,
+     "celulas": 2513,
+     "trechos_com_dados": 1443
+    },
+    {
+     "bairro": "Bom Fim",
+     "valor": 85.1,
+     "celulas": 534,
+     "trechos_com_dados": 232
+    },
+    {
+     "bairro": "Floresta",
+     "valor": 84.6,
+     "celulas": 2070,
+     "trechos_com_dados": 702
+    }
+   ]
+  }
  }
 }

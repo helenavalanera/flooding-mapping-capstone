@@ -11,7 +11,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 ST = RAIZ / "src/flooding_mapping/app/static"
 J = json.loads((ST / "data/mapa_dimensoes_poa.json").read_text(encoding="utf-8"))
 FASE3 = RAIZ / "data/processed/fase3/trechos_nivel2_cenarios.parquet"
-DIMS = [d for d in "ABD" if d in J]
+DIMS = [d for d in "ABDE" if d in J]
 
 
 def lum(c):
@@ -100,3 +100,15 @@ def test_d_numbers_match_the_committed_results():
     assert J["D"]["bocas_de_lobo"] == ind["D-pontos"]["bocas"] and J["D"]["rede_trechos"] == sum(v["trechos"] for v in ind["D-rede"].values())
     pb = res["dimensoes"]["D"]["dados"]["por_bairro"]
     assert all(round(pb[i["bairro"]]["rede_km_por_km2"], 1) == i["valor"] for i in J["D"]["bairros"]["itens"])
+
+
+def test_e_is_experimental_independent_of_the_engine_and_states_its_limits_and_gaps():
+    e = J["E"]
+    assert "EXPERIMENTAL" in e["natureza"] and "independente das dimensões A a D" in e["natureza"] and "fração" in e["unidade"]
+    assert sum(f["celulas_pct"] for f in e["faixas"]) == pytest.approx(100, abs=0.3) and len(e["faixas"]) == 5
+    assert e["resultados"] == {"mae_blocos_3km": 0.049, "mae_quadrante_externo": 0.052, "bairros_dentro_do_limite_pct": 57.4}
+    assert 0 < e["celulas_sem_rotulo_pct"] < 100 and e["celulas_no_municipio"] > 500000 and len(e["bairros"]["itens"]) == 5
+    codigo = re.sub(r'""".*?"""', "", (RAIZ / "tools/gerar_mapas_dimensoes.py").read_text(encoding="utf-8"), count=1, flags=re.S)
+    corpo_e = codigo.split("def dimensao_e")[1].split("\ndef main")[0]
+    for proibido in ("fase3", "contrib", "nivel2", "trechos_nivel", "trechos_contrib"):
+        assert proibido not in corpo_e, proibido                                                            # a camada E não lê o motor

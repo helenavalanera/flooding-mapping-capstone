@@ -19,15 +19,15 @@ const fs = require("fs"), path = require("path");
   await page.click(".ancoras a[href='#dimensoes']"); await page.waitForTimeout(2500);
   for (const id of ["p-contribuicao", "p-local", "p-topografico", "p-drenagem"]) assert.ok(await page.locator("#" + id).isVisible(), id + " visível");
   assert.strictEqual(await page.locator(".hero img").count(), 0); assert.strictEqual(await page.locator("#dimensoes canvas").count(), 0, "sem canvas (WebGL) na landing");
-  assert.strictEqual(await page.locator("#dimensoes [role=tab]").count(), 4);   // A a D; a camada E entra na etapa seguinte assert.strictEqual(await page.locator("#dimensoes [role=tabpanel]:not([hidden])").count(), 1, "um painel por vez");
-  const ESPERADO = { a: [/mapa-geracao\.webp$/, /m³/, /Profill/], b: [/mapa-concentracao\.webp$/, /m³/, /Não é vazão/], c: [/mapa-propensao\.webp$/, /mais de 0 até 0,5 m/, /ocorrência ou risco de alagamento/], d: [/mapa-drenagem\.webp$/, /200 a 300 m[\s\S]*sem rede cadastrada/, /não o funcionamento nem a capacidade/] };
-  for (const k of ["a", "b", "c", "d"]) {
+  assert.strictEqual(await page.locator("#dimensoes [role=tab]").count(), 5);   // A a D e a camada experimental E assert.strictEqual(await page.locator("#dimensoes [role=tabpanel]:not([hidden])").count(), 1, "um painel por vez");
+  const ESPERADO = { a: [/mapa-geracao\.webp$/, /m³/, /Profill/], b: [/mapa-concentracao\.webp$/, /m³/, /Não é vazão/], c: [/mapa-propensao\.webp$/, /mais de 0 até 0,5 m/, /ocorrência ou risco de alagamento/], d: [/mapa-drenagem\.webp$/, /200 a 300 m[\s\S]*sem rede cadastrada/, /não o funcionamento nem a capacidade/] , e: [/mapa-geoai\.webp$/, /80% a 100% da célula construída|mais de 80%/, /Não é impermeabilidade medida/]};
+  for (const k of ["a", "b", "c", "d", "e"]) {
     await page.click("#aba-" + k); await page.waitForFunction((id) => { const i = document.querySelector("#painel-" + id + " img"); return i.complete && i.naturalWidth > 0; }, k, { timeout: 8000 });
     assert.strictEqual(await page.locator("#dimensoes [role=tabpanel]:not([hidden])").count(), 1); assert.strictEqual(await page.getAttribute("#aba-" + k, "aria-selected"), "true");
     const [arq, leg, aviso] = ESPERADO[k]; assert.match(await page.getAttribute("#painel-" + k + " img", "src"), arq); assert.match(await page.innerText("#painel-" + k + " .leg"), leg); assert.match(await page.innerText("#painel-" + k), aviso);
-    assert.match(await page.innerText("#painel-" + k + " .mapa-lacunas"), /sem dado|sem rede|sem preenchimento/); assert.strictEqual(await page.locator("#painel-" + k + " .mapa-bairros tbody tr").count(), 5);
+    assert.match(await page.innerText("#painel-" + k + " .mapa-lacunas"), /sem dado|sem rede|sem preenchimento|sem rótulo/); assert.strictEqual(await page.locator("#painel-" + k + " .mapa-bairros tbody tr").count(), 5);
   }
-  await page.keyboard.press("ArrowLeft"); assert.strictEqual(await page.getAttribute("#aba-c", "aria-selected"), "true", "setas trocam de dimensão");
+  await page.keyboard.press("ArrowLeft"); assert.strictEqual(await page.getAttribute("#aba-d", "aria-selected"), "true", "setas trocam de dimensão"); await page.click("#aba-c");
   await page.click("#painel-c .ampliar"); assert.ok(await page.evaluate(() => document.querySelector(".zoom").open), "o mapa amplia"); await page.keyboard.press("Escape"); assert.ok(!(await page.evaluate(() => document.querySelector(".zoom").open)));
   assert.match(await page.innerText("#p-drenagem"), /não confirma a capacidade nem o funcionamento da rede/); assert.match(await page.innerText("#p-topografico"), /não é a profundidade real de um alagamento/);
   assert.match(await page.innerText("#dimensoes"), /Decreto Municipal nº 20\.315\/2019/); assert.match(await page.innerText("#dimensoes"), /dependem da publicação dos arquivos derivados/);

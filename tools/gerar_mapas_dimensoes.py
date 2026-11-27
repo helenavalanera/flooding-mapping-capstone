@@ -2,7 +2,7 @@
 
     PYTHONPATH=src .venv/bin/python tools/gerar_mapas_dimensoes.py [--so A B D]
 
-A dimensão C (propensão topográfica) tem gerador próprio: ``gerar_mapa_manchas.py``. Aqui só se reaproveitam resultados que já existem (Fase 3: Profill, coeficientes de
+A dimensão C (propensão topográfica) tem gerador próprio: ``gerar_mapa_manchas.py``. A camada E (GeoAI, experimental) também sai daqui, independente do motor. Aqui só se reaproveitam resultados que já existem (Fase 3: Profill, coeficientes de
 escoamento, DEM, OSM; cadastro de drenagem da Prefeitura); nada reexecuta o motor. A chuva é a de referência de 30 mm (percentil 75 dos totais por evento, 2017 a 2026) e o
 pacote é o Método 1 (coeficientes fundamentados), no limite superior do intervalo, o mesmo critério dos resultados por bairro. Valores em m³ de escoamento POTENCIAL de um
 evento de 30 mm: não são vazão, nem profundidade, nem alagamento. Escreve static/inicio/img/estudo/mapa-<dimensao>.webp e static/data/mapa_dimensoes_poa.json.
@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from manchas_base import ESTATICO, IMG_DIR, RAIZ, Quadro, carregar_agua, carregar_bairros, carregar_rede, desenhar  # noqa: E402
+from manchas_base import ESTATICO, IMG_DIR, RAIZ, Quadro, carregar_agua, carregar_bairros, carregar_municipio, carregar_rede, desenhar  # noqa: E402
 
 DADOS = RAIZ / "src/flooding_mapping/app/static/data/mapa_dimensoes_poa.json"
 RESULTADOS = RAIZ / "src/flooding_mapping/app/static/data/resultados_poa.json"
@@ -31,6 +31,8 @@ CONFIG = {
           "fonte": "Escoamento potencial (Método 1): uso do solo Profill 2022, Prefeitura de Porto Alegre"},
     "B": {"arquivo": "mapa-concentracao.webp", "bordas": [0, 10, 100, 1000, 10000, MAX], "cores": ["#dcd9f2", "#b3aee0", "#857bc7", "#5547a3", "#2d2166"], "unidade": "m³ de escoamento potencial que converge ao trecho, em um evento de 30 mm",
           "fonte": "Escoamento potencial (Método 1): Profill 2022, Copernicus DEM"},
+    "E": {"arquivo": "mapa-geoai.webp", "bordas": [0, 0.2, 0.4, 0.6, 0.8, MAX], "cores": ["#dfe5ea", "#aab6c1", "#76879a", "#46586b", "#1f2d3d"], "unidade": "fração da célula de 30 m estimada como construída (de 0% a 100%)",
+          "fonte": "GeoAI experimental: Random Forest com Sentinel-2, referência Profill 2022"},
     "D": {"arquivo": "mapa-drenagem.webp", "bordas": [0, 50, 100, 200, 300, MAX], "cores": ["#d4ecd9", "#9fd4b0", "#5fb383", "#2d8a5d", "#0e5236"], "unidade": "metros de rede pluvial cadastrada por célula de 100 m, ou 1 hectare",
           "fonte": "Cadastro de drenagem pluvial: Prefeitura de Porto Alegre (GeoPOA)"},
 }
@@ -150,15 +152,61 @@ def dimensao_d(q: Quadro, agua, bairros) -> dict:
                                                "bairros_sem_estimativa": len(res["bairros"]) - len(ok), "itens": [{"bairro": n, "valor": round(v["rede_km_por_km2"], 1), "bocas_por_km2": round(v["bocas_por_km2"])} for n, v in ordem]}}
 
 
+def dimensao_e(q: Quadro, agua, bairros) -> dict:
+    """Camada E (GeoAI, experimental): a fração construída estimada, média das células de 30 m em cada célula de 100 m, só dentro do município. Não toca A a D."""
+    import geopandas as gpd
+    import rasterio
+    from rasterio.features import rasterize
+
+    cfg = CONFIG["E"]
+    tif = sorted((RAIZ / "data/processed/geoai").glob("fracao_construida_30m_*.tif"))[-1]
+    poligono = carregar_municipio()
+    with rasterio.open(tif) as src:
+        fr, origem = src.read(1).astype("float64"), src.read(7)
+        dentro = rasterize([(poligono, 1)], out_shape=fr.shape, transform=src.transform, fill=0, dtype="uint8").astype(bool) & np.isfinite(fr)
+        linhas, colunas = np.indices(fr.shape)
+        xs, ys = src.transform * (colunas + 0.5, linhas + 0.5)
+        medias_bairro = []
+        for nome, g in bairros:
+            m = rasterize([(g, 1)], out_shape=fr.shape, transform=src.transform, fill=0, dtype="uint8").astype(bool) & dentro
+            medias_bairro.append((nome, float(fr[m].mean()) if m.any() else None, int(m.sum())))
+    iy, ix = q.celula(np.asarray(xs)[dentro], np.asarray(ys)[dentro])
+    ok = (iy >= 0) & (iy < q.ny) & (ix >= 0) & (ix < q.nx)
+    soma, n = np.zeros((q.ny, q.nx)), np.zeros((q.ny, q.nx))
+    np.add.at(soma, (iy[ok], ix[ok]), fr[dentro][ok])
+    np.add.at(n, (iy[ok], ix[ok]), 1)
+    grade = np.where(n > 0, soma / np.maximum(n, 1), np.nan)
+    w, hpx = desenhar(q, grade, cfg["bordas"], cfg["cores"], None, agua, bairros, IMG_DIR / cfg["arquivo"], cfg["fonte"])
+    v = fr[dentro]
+    cls = np.digitize(np.round(v, 6), [0.2, 0.4, 0.6, 0.8], right=True)
+    com_cor = v > 0
+    por_classe = [round(100 * float(((cls == k) & com_cor).sum() / max(1, com_cor.sum())), 1) for k in range(5)]
+    res = json.loads(RESULTADOS.read_text(encoding="utf-8"))
+    ok_b = {b["nome"]: b for b in res["bairros"] if b["suficiente"]}
+    ordem = sorted(((nome, m, c) for nome, m, c in medias_bairro if nome in ok_b and m is not None), key=lambda t: (-t[1], t[0]))[:5]
+    rot = ["mais de 0% até 20%", "20% a 40%", "40% a 60%", "60% a 80%", "mais de 80%"]
+    r = json.loads((RAIZ / "reports/qa/geoai_resultados.json").read_text(encoding="utf-8"))
+    prim = r["primario"]["modelo"]
+    return {"nome": "Fração construída estimada (GeoAI, experimental)", "unidade": cfg["unidade"], "natureza": "EXPERIMENTAL, independente das dimensões A a D",
+            "imagem": {"arquivo": f"img/estudo/{cfg['arquivo']}", "largura_px": w, "altura_px": hpx, "bytes": (IMG_DIR / cfg["arquivo"]).stat().st_size, "celula_m": 100, "agregacao": "média das células de 30 m em cada célula de 100 m"},
+            "faixas": [{"de": float(a), "ate": None if b >= MAX else float(b), "rotulo": rt, "cor": c, "celulas_pct": pc} for (a, b), rt, c, pc in zip(zip(cfg["bordas"][:-1], cfg["bordas"][1:]), rot, cfg["cores"], por_classe)],
+            "celulas_no_municipio": int(v.size), "celulas_sem_cor_pct": round(100 * float((~com_cor).mean()), 1), "media_da_fracao_pct": round(100 * float(v.mean()), 1),
+            "celulas_acima_de_80_pct": round(100 * float((v > 0.8).mean()), 1), "celulas_sem_rotulo_pct": round(100 * float((origem[dentro] == 2).mean()), 1),
+            "resultados": {"mae_blocos_3km": round(r["P1_blocos"][prim]["bootstrap_por_blocos"]["mae"]["valor"], 3), "mae_quadrante_externo": round(r["P2_quadrantes"][prim]["bootstrap_por_blocos"]["mae"]["valor"], 3),
+                           "bairros_dentro_do_limite_pct": round(100 * r["primario"]["erro_de_area_por_bairro"]["fracao_dentro_do_limite"], 1)},
+            "fonte": cfg["fonte"], "bairros": {"metrica": "fração construída média estimada nas células de 30 m do bairro", "universo": f"{len(ok_b)} de {len(res['bairros'])} bairros (mesmo critério das outras dimensões: os com menos de {MIN_TRECHOS} trechos de rua com dados ficam de fora)",
+                                               "bairros_sem_estimativa": len(res["bairros"]) - len(ok_b), "itens": [{"bairro": n_, "valor": round(100 * m, 1), "celulas": c, "trechos_com_dados": ok_b[n_]["trechos_com_dados"]} for n_, m, c in ordem]}}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--so", nargs="+", default=["A", "B", "D"], choices=["A", "B", "D"])
+    ap.add_argument("--so", nargs="+", default=["A", "B", "D", "E"], choices=["A", "B", "D", "E"])
     args = ap.parse_args()
     q, agua, bairros = Quadro(carregar_rede()), carregar_agua(), carregar_bairros()
     saida = json.loads(DADOS.read_text(encoding="utf-8")) if DADOS.exists() else {}
     d = base_30mm() if ({"A", "B"} & set(args.so)) else None
     for dim in args.so:
-        saida[dim] = dimensao_d(q, agua, bairros) if dim == "D" else dimensao_a_ou_b(dim, q, d, agua, bairros)
+        saida[dim] = dimensao_d(q, agua, bairros) if dim == "D" else dimensao_e(q, agua, bairros) if dim == "E" else dimensao_a_ou_b(dim, q, d, agua, bairros)
         print("gerado:", dim, saida[dim]["imagem"]["arquivo"], f"{saida[dim]['imagem']['bytes'] / 1024:.0f} KB")
     DADOS.write_text(json.dumps(dict(sorted(saida.items())), ensure_ascii=False, indent=1), encoding="utf-8")
 

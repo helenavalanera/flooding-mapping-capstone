@@ -43,7 +43,7 @@ def test_the_archived_fronts_are_kept_and_the_active_interface_does_not_load_the
 
 
 def test_raw_third_party_data_and_unconfirmed_coordinates_are_not_in_the_versionable_tree():
-    assert sorted(p.suffix for p in (STATIC / "inicio/img/estudo").iterdir()) == [".svg"] * 5 + [".webp"] * 4          # gráficos de números agregados e os quatro mapas de manchas (derivados, com atribuição)
+    assert sorted(p.suffix for p in (STATIC / "inicio/img/estudo").iterdir()) == [".svg"] * 5 + [".webp"] * 5          # gráficos de números agregados e os cinco mapas de manchas, A a E (derivados, com atribuição)
     assert not list((RAIZ / "docs/figuras").glob("geoai_*.png"))                                              # derivam da Profill
     assert not (APP / "arquivo/inicio/img/painel-rs.png").exists()                                            # mostrava a malha do DAER
     assert not (RAIZ / "tests/dados/alagamentos_pmpa_coordenadas.csv").exists()                               # coordenadas da Prefeitura

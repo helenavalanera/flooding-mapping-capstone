@@ -456,9 +456,12 @@ TEXTOS_DIM = {
     "D": ("Drenagem cadastrada", "Onde a Prefeitura registra rede pluvial?",
           "Quanto mais escuro, mais metros de rede pluvial cadastrada há na célula de 100 metros.",
           "É um registro do cadastro, e não o funcionamento nem a capacidade da rede. Onde não há mancha, o cadastro não registra rede; isso não prova que não exista drenagem."),
+    "E": ("GeoAI experimental: fração construída estimada", "Qual fração de cada célula de 30 metros um modelo de inteligência artificial estima como construída?",
+          "Quanto mais escuro, maior a fração construída estimada na célula pelo modelo (Random Forest com imagens Sentinel-2). É uma camada experimental e complementar.",
+          "Não é impermeabilidade medida, coeficiente de escoamento, vazão nem ocorrência de alagamento, e não entra no cálculo das dimensões A, B, C e D. A Profill foi a referência e a fonte dos rótulos, e não há validação independente.")
 }
 
-ABAS_CURTAS = {"A": "Geração", "B": "Concentração", "C": "Retenção", "D": "Drenagem"}      # rótulos do seletor; o nome completo está no título de cada painel
+ABAS_CURTAS = {"A": "Geração", "B": "Concentração", "C": "Retenção", "D": "Drenagem", "E": "GeoAI (experimental)"}      # rótulos do seletor; o nome completo está no título de cada painel
 
 
 def _leg(faixas: list[dict], extras: list[str]) -> str:
@@ -535,6 +538,17 @@ def paineis_dimensoes() -> str:
                     bairros=_bairros("D", dd["bairros"]["metrica"], dd["bairros"]["universo"], [(i["bairro"], f"{br(i['valor'], 1)} km/km²", br(i["bocas_por_km2"]) + " bocas/km²") for i in dd["bairros"]["itens"]], "Rede cadastrada (km por km²)", sem_comparar).replace("Trechos com dados", "Bocas de lobo"),
                     lacunas=[f"{br(100 - dd['trechos_de_rua_em_celula_com_rede_pct'], 1)}% dos trechos de rua de Porto Alegre estão em células sem rede cadastrada (vias rurais e áreas sem cadastro).", f"Campos sem preenchimento no cadastro: material {dd['campos_sem_preenchimento_pct']['material']}%, declividade {dd['campos_sem_preenchimento_pct']['declividade']}%, classe do tubo {dd['campos_sem_preenchimento_pct']['classe_do_tubo']}%. Das casas de bomba só o nome está preenchido.", "Perto de uma boca de lobo não significa que a água seja captada: o cadastro não traz capacidade nem estado de conservação."],
                     fonte="Cadastro de drenagem pluvial (Prefeitura de Porto Alegre, GeoPOA)")
+    e = d["E"]
+    cfg["E"] = dict(img=e["imagem"], alt="Mapa de manchas de Porto Alegre em tons de cinza-ardósia, do claro ao quase preto, com as ruas em cinza claro e a água em azul. As células mais escuras, de maior fração construída estimada, cobrem a zona norte, o centro e a orla do Guaíba; o sul rural tem células claras e esparsas",
+                    leg=_leg([{"cor": f["cor"], "rotulo": f["rotulo"]} for f in e["faixas"]], ['<li><span class="vazio"></span>sem cor: fração zero ou fora do município</li>']),
+                    nums=[_num(f"Média de {br(e['media_da_fracao_pct'], 1)}%", f"da célula construída, estimada para as {br(e['celulas_no_municipio'])} células de 30 m dentro de Porto Alegre"),
+                          _num(f"{br(e['celulas_acima_de_80_pct'], 1)}% das células", "com mais de 80% da célula estimada como construída"),
+                          _num(f"MAE de {br(e['resultados']['mae_blocos_3km'], 3)} e {br(e['resultados']['mae_quadrante_externo'], 3)}", "erro médio absoluto da fração construída, em blocos de 3 km e no quadrante externo, em relação à Profill"),
+                          _num(f"{br(e['resultados']['bairros_dentro_do_limite_pct'], 1)}% dos bairros", "com erro de área construída de até 10%: o critério de 80% <b>não foi atingido</b>")],
+                    bairros=_bairros("E", e["bairros"]["metrica"], e["bairros"]["universo"], [(i["bairro"], f"{br(i['valor'], 1)}%", br(i["trechos_com_dados"])) for i in e["bairros"]["itens"]], "Fração construída média estimada", sem_comparar + " Esta é uma camada experimental: a lista descreve a estimativa do modelo, e não uma medição."),
+                    lacunas=["A Profill foi a referência e a fonte dos rótulos: o resultado mede a concordância com ela, e não com a verdade de campo.", "Não há validação independente, e a transferência para outras áreas não foi testada.",
+                             f"{br(e['celulas_sem_rotulo_pct'], 1)}% das células de Porto Alegre são previsão em células sem rótulo utilizável da Profill, sem validação.", "AlphaEarth 2020 não trouxe ganho sobre o Random Forest, e o Prithvi (modelo de fundação) não foi executado."],
+                    fonte="GeoAI experimental: Random Forest com imagens Sentinel-2 (2019 a 2021), referência Profill 2022 (Prefeitura de Porto Alegre)")
     abas, paineis = [], []
     for k, (nome, pergunta, le, nao) in TEXTOS_DIM.items():
         x = cfg[k]
