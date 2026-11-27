@@ -22,3 +22,6 @@ Registro de 27/11/2026. **Problema encontrado na auditoria:** a malha de ruas do
 | Trechos com boca de lobo a até 50 m, quintil superior | 72,1% | 72,8% |
 
 A afirmação anterior de que o quintil inferior quase não tem bocas de lobo (2%) era um efeito das vias de fora; dentro do município, a presença de bocas de lobo cresce de 26% no quintil inferior para 73% no superior.
+
+## Resultados por bairro e painel de resultados
+`src/flooding_mapping/resultados.py` (`carregar`) aplica o mesmo recorte: só trechos com ponto médio dentro do município entram em `resultados_poa.json`. Os indicadores sem relação com ruas (volumes por célula, cadastro de drenagem) não mudam. Muda a associação com os bairros em cinco deles, cujo polígono do mapa compartilhado passa um pouco do limite municipal (225 trechos no total, por exemplo Vila Assunção, de 771 para 649 trechos), e o achado D2 do painel, que agora diz 26% de trechos com boca de lobo a até 50 m no quintil inferior de contribuição e 73% no superior (antes 2% e 72%, efeito das vias de fora). Para refazer: `PYTHONPATH=src .venv/bin/python tools/gerar_resultados.py`, depois `tools/gerar_rankings.py`, `tools/gerar_mapas_dimensoes.py` e `tools/gerar_landing.py`.

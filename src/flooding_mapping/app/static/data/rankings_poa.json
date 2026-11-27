@@ -78,7 +78,7 @@
     "posicao": 1,
     "bairro": "Anchieta",
     "parcela_com_propensao_topografica": 0.679,
-    "parcela_no_decil_superior_de_contribuicao": 0.16,
+    "parcela_no_decil_superior_de_contribuicao": 0.131,
     "trechos_com_dados": 4000,
     "cobertura_do_coeficiente_a_montante_mediana": 0.39
    },
@@ -86,7 +86,7 @@
     "posicao": 2,
     "bairro": "Santana",
     "parcela_com_propensao_topografica": 0.595,
-    "parcela_no_decil_superior_de_contribuicao": 0.245,
+    "parcela_no_decil_superior_de_contribuicao": 0.219,
     "trechos_com_dados": 805,
     "cobertura_do_coeficiente_a_montante_mediana": 0.56
    },
@@ -94,7 +94,7 @@
     "posicao": 3,
     "bairro": "Floresta",
     "parcela_com_propensao_topografica": 0.591,
-    "parcela_no_decil_superior_de_contribuicao": 0.302,
+    "parcela_no_decil_superior_de_contribuicao": 0.251,
     "trechos_com_dados": 702,
     "cobertura_do_coeficiente_a_montante_mediana": 0.63
    },
@@ -102,7 +102,7 @@
     "posicao": 4,
     "bairro": "Farrapos",
     "parcela_com_propensao_topografica": 0.585,
-    "parcela_no_decil_superior_de_contribuicao": 0.167,
+    "parcela_no_decil_superior_de_contribuicao": 0.154,
     "trechos_com_dados": 2173,
     "cobertura_do_coeficiente_a_montante_mediana": 0.56
    },
@@ -110,7 +110,7 @@
     "posicao": 5,
     "bairro": "Bom Fim",
     "parcela_com_propensao_topografica": 0.543,
-    "parcela_no_decil_superior_de_contribuicao": 0.405,
+    "parcela_no_decil_superior_de_contribuicao": 0.336,
     "trechos_com_dados": 232,
     "cobertura_do_coeficiente_a_montante_mediana": 0.6
    }

@@ -122,11 +122,16 @@ def test_the_package_totals_equal_the_cell_sums_the_engine_report_and_scale_line
 
 @real
 def test_the_trecho_quantiles_and_counts_match_the_parquets(d):
+    import sys
+    sys.path.insert(0, str(RAIZ / "tools"))
+    from manchas_base import Quadro, carregar_rede
     base = pd.read_parquet(RAIZ / "data/processed/fase3/trechos_contribuicao_base.parquet")
+    q_ = Quadro(carregar_rede())
+    base = base[base["segmento_id"].isin(set(q_.ids[q_.no_municipio()]))]                 # recorte municipal (docs/recorte_municipal.md)
     v = base["contrib_aeq_m1_max_m2"].dropna()
     q = d["dimensoes"]["C"]["dados"]["quantis_contribuicao_aeq"]
     assert q["p50"] == pytest.approx(float(v.median())) and q["p99"] == pytest.approx(float(v.quantile(.99)))
-    assert sum(l["trechos"] for l in d["dimensoes"]["D"]["dados"]["por_quintil"]) == len(v) == 173917
+    assert sum(l["trechos"] for l in d["dimensoes"]["D"]["dados"]["por_quintil"]) == len(v) == 143081
     ev = d["dimensoes"]["C"]["achados"][0]["evidencia"]
     assert ev["razao_p99_p50"] == pytest.approx(float(v.quantile(.99) / v.median()))
     c1 = d["dimensoes"]["C"]["achados"][0]

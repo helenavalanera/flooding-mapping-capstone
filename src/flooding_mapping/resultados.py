@@ -105,7 +105,7 @@ def carregar(raiz: Path) -> dict:
     t = base.merge(topo, on="segmento_id", validate="1:1").merge(rede, on="segmento_id", validate="1:1").merge(seg, on="segmento_id", validate="1:1")
     t = gpd.GeoDataFrame(t, geometry="geometry", crs=seg.crs)
     territorio = json.loads((raiz / "data/processed/territorio_poa.json").read_text())
-    from shapely import points
+    from shapely import contains as shapely_contains, points
     from shapely.geometry import shape
     from shapely.strtree import STRtree
 
@@ -116,6 +116,10 @@ def carregar(raiz: Path) -> dict:
     bairro = np.full(len(t), -1, dtype=np.int32)
     bairro[i] = j
     t["bairro"] = bairro
+    # Recorte municipal (docs/recorte_municipal.md): a malha de ruas traz vias de cidades vizinhas, sem uso do solo da Prefeitura. Só os trechos com ponto médio DENTRO do município entram nos resultados.
+    municipio = gpd.read_parquet(raiz / "data/processed/municipality.parquet").to_crs("EPSG:4326").geometry.union_all()
+    dentro = np.asarray(shapely_contains(municipio, meio))
+    t = t[dentro].reset_index(drop=True)
     celulas = pd.read_parquet(f3 / "celulas_30m.parquet")
     uso = pd.read_parquet(raiz / "data/processed/uso_solo/uso_solo_grade30m.parquet")
     c = celulas.merge(uso, on=["linha", "coluna"], validate="1:1")
