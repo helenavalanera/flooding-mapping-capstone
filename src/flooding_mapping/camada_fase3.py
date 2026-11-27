@@ -81,6 +81,22 @@ def carregar(fase3: Path, segmentos: Path, rede: Path) -> pd.DataFrame:
     return gpd.GeoDataFrame(tabela, geometry=geometria, crs=geo.crs)
 
 
+def ids_no_municipio(rede: Path, municipio: Path) -> set[str]:
+    """Identificadores dos trechos cujo ponto médio cai DENTRO do município (mesma definição de ``tools/manchas_base.Quadro.no_municipio``, docs/recorte_municipal.md).
+
+    A malha de ruas vem de uma caixa em volta de Porto Alegre e traz vias de cidades vizinhas, onde não há uso do solo da Prefeitura."""
+    import shapely
+    from pyproj import Transformer
+
+    r = pd.read_parquet(rede, columns=["segmento_id", "lon0", "lat0", "lon1", "lat1"])
+    tr = Transformer.from_crs("EPSG:4326", "EPSG:31982", always_xy=True)
+    x0, y0 = tr.transform(r["lon0"].to_numpy(), r["lat0"].to_numpy())
+    x1, y1 = tr.transform(r["lon1"].to_numpy(), r["lat1"].to_numpy())
+    poligono = gpd.read_parquet(municipio).to_crs("EPSG:31982").geometry.union_all()
+    dentro = shapely.contains(poligono, shapely.points((x0 + x1) / 2, (y0 + y1) / 2))
+    return set(r["segmento_id"][dentro])
+
+
 def cortes_por_quantis(valores: pd.Series) -> list[float]:
     positivos = valores[valores > 0].dropna()
     if positivos.empty:
@@ -242,8 +258,13 @@ def construir_meta(tabela: pd.DataFrame, cortes: dict, precipitacoes: list[float
     }
 
 
-def preparar(fase3: Path, segmentos: Path, rede: Path, saida: Path, trabalho: Path) -> dict:
+def preparar(fase3: Path, segmentos: Path, rede: Path, saida: Path, trabalho: Path, municipio: Path | None = None) -> dict:
     tabela = carregar(fase3, segmentos, rede)
+    recorte = None
+    if municipio is not None:   # só as ruas dentro de Porto Alegre: tiles, fragmentos, classes e meta usam a mesma tabela, então o número ``n`` de cada trecho continua valendo nos dois
+        dentro = ids_no_municipio(rede, municipio)
+        recorte = {"criterio": "ponto médio do trecho dentro do polígono do município", "trechos_na_malha": int(len(tabela)), "trechos_fora_excluidos": int((~tabela["segmento_id"].isin(dentro)).sum())}
+        tabela = tabela[tabela["segmento_id"].isin(dentro)].reset_index(drop=True)
     classes, cortes = classes_visuais(tabela)
     cenarios = pd.read_parquet(fase3 / "trechos_nivel2_cenarios.parquet", columns=["p_mm"])
     precipitacoes = sorted(float(p) for p in cenarios["p_mm"].unique())
@@ -259,6 +280,8 @@ def preparar(fase3: Path, segmentos: Path, rede: Path, saida: Path, trabalho: Pa
         (saida / "detalhe" / f"{k:04d}.json").write_text(json.dumps(frag, ensure_ascii=False, separators=(",", ":")))
     meta = construir_meta(tabela, cortes, precipitacoes, entradas)
     meta["tiles_vazios_dentro_da_caixa_dos_dados"] = tiles_vazios
+    if recorte:
+        meta["recorte_municipal"] = recorte
     (saida / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
     return meta
 

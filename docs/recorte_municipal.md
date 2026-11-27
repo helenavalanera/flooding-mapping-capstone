@@ -25,3 +25,17 @@ A afirmação anterior de que o quintil inferior quase não tem bocas de lobo (2
 
 ## Resultados por bairro e painel de resultados
 `src/flooding_mapping/resultados.py` (`carregar`) aplica o mesmo recorte: só trechos com ponto médio dentro do município entram em `resultados_poa.json`. Os indicadores sem relação com ruas (volumes por célula, cadastro de drenagem) não mudam. Muda a associação com os bairros em cinco deles, cujo polígono do mapa compartilhado passa um pouco do limite municipal (225 trechos no total, por exemplo Vila Assunção, de 771 para 649 trechos), e o achado D2 do painel, que agora diz 26% de trechos com boca de lobo a até 50 m no quintil inferior de contribuição e 73% no superior (antes 2% e 72%, efeito das vias de fora). Para refazer: `PYTHONPATH=src .venv/bin/python tools/gerar_resultados.py`, depois `tools/gerar_rankings.py`, `tools/gerar_mapas_dimensoes.py` e `tools/gerar_landing.py`.
+
+## Tiles de escoamento (regenerados com o recorte)
+Gerados em 27/11/2026 por `PYTHONPATH=src .venv/bin/python tools/preparar_camada_fase3.py` (o recorte é o padrão; `--sem-recorte` reproduz a versão anterior). Tiles, fragmentos de detalhe, classes visuais e `meta.json` saem da mesma tabela filtrada, então o número `n` de cada trecho vale nos dois. O `meta.json` registra `recorte_municipal` (33.687 trechos de fora excluídos de 176.836). Nenhum parquet da Fase 3 foi alterado.
+
+| | Antes (malha inteira) | Depois (dentro do município) |
+|---|---|---|
+| Trechos nos tiles e nos fragmentos | 176.836 | 143.149 (143.081 com dado, 68 sem dado) |
+| Tiles .pbf z13, z14, z15 | 99, 357 e 1.428 | 80, 252 e 910 |
+| Tamanho dos tiles (sem compressão) | 33,3 MB | 27,1 MB (menos 18%) |
+| Fragmentos de detalhe | 36,4 MB | 30,6 MB |
+| Maior tile (z13) | 798 KB | 798 KB (o centro, que é de dentro) |
+| Extensão dos tiles z13 (oeste a leste, sul a norte) | -51,372 a -50,977 e -30,297 a -29,879 | -51,328 a -50,977 e -30,297 a -29,917 |
+
+As classes visuais seguem o mesmo critério (quantis dos trechos analisados) e mudaram só nos decimais dos cortes das classes de contribuição, por usarem agora o universo municipal (por exemplo, o corte da classe mais alta de contribuição do Método 1, limite superior, foi de 214.725 para 212.343 m²); os cortes de cobertura, de posto topográfico e a lista de quantis são idênticos. Validação: 35 testes de integridade contra os parquets passam (identificadores únicos e na ordem, valores iguais aos parquets, ausência continua ausência, os três pacotes não se misturam, conversão de unidade para as três chuvas e todos os trechos, menos os de poucos decímetros, presentes no zoom máximo).

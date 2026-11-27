@@ -138,6 +138,8 @@ def test_the_server_serves_only_the_layer_files_and_nothing_outside_the_folder(c
 @pytest.fixture(scope="module")
 def dados():
     t = c.carregar(FASE3, RAIZ / "data/interim/segments.parquet", RAIZ / "data/processed/rede_poa.parquet")
+    dentro = c.ids_no_municipio(RAIZ / "data/processed/rede_poa.parquet", RAIZ / "data/processed/municipality.parquet")      # recorte municipal (docs/recorte_municipal.md)
+    t = t[t["segmento_id"].isin(dentro)].reset_index(drop=True)
     meta = json.loads((WEB / "meta.json").read_text())
     frags = [json.loads(p.read_text()) for p in sorted((WEB / "detalhe").glob("*.json"))]
     linhas = [l for f in frags for l in f["linhas"]]
@@ -147,7 +149,8 @@ def dados():
 @real
 def test_the_distributed_files_correspond_to_the_phase_3_parquets(dados):
     t, meta, frags, d = dados
-    assert meta["trechos"] == len(t) == len(d) == 176836 and meta["trechos_com_dados"] == 173917 and meta["trechos_sem_dados"] == 2919
+    assert meta["trechos"] == len(t) == len(d) == 143149 and meta["trechos_com_dados"] == 143081 and meta["trechos_sem_dados"] == 68
+    assert meta["recorte_municipal"]["trechos_na_malha"] == 176836 and meta["recorte_municipal"]["trechos_fora_excluidos"] == 33687          # as vias de cidades vizinhas não estão nos tiles
     assert meta["entradas_sha256"] == {p.name: c.sha256(p) for p in sorted(FASE3.glob("*.parquet"))}   # os arquivos de entrada não mudaram desde a preparação
     assert all(f["primeiro_n"] == i * meta["tamanho_do_fragmento"] for i, f in enumerate(frags))
 
@@ -156,6 +159,7 @@ def test_the_distributed_files_correspond_to_the_phase_3_parquets(dados):
 def test_identifiers_are_preserved_unique_and_in_the_order_of_the_index(dados):
     t, _, _, d = dados
     base = pd.read_parquet(FASE3 / "trechos_contribuicao_base.parquet", columns=["segmento_id"])
+    base = base[base["segmento_id"].isin(set(t["segmento_id"]))]
     assert d["id"].is_unique and list(d["id"]) == sorted(base["segmento_id"]) and list(d["id"]) == list(t["segmento_id"])
 
 
@@ -175,7 +179,7 @@ def test_values_equal_the_parquets_and_absence_stays_absence(dados):
     for k, col in {"topo_altura_max_m": "altura_de_preenchimento_max_m", "topo_altura_media_m": "altura_de_preenchimento_media_m", "topo_posto": "propensao_topografica_percentil"}.items():
         original, mostrado = t1[col].to_numpy(float), d[k].astype(float).to_numpy()
         assert (np.isnan(original) == np.isnan(mostrado)).all() and np.allclose(original, mostrado, rtol=1e-8, equal_nan=True), k
-    assert d["l_m1_max"].isna().sum() == 2919 and (d["l_m1_max"] == 0).sum() > 0                # zero e ausência são coisas diferentes
+    assert d["l_m1_max"].isna().sum() == 68 and (d["l_m1_max"] == 0).sum() > 0                # zero e ausência são coisas diferentes
     assert (d["n_cel"].to_numpy() == b["n_celulas_com_dados"].to_numpy()).all()
 
 
@@ -307,3 +311,12 @@ def test_derived_layer_files_are_compressed_cached_and_revalidated_like_a_cdn_wo
         assert st == 200 and h["cache-control"] == "no-cache" and "etag" not in h                               # o meta.json decide a versão: sempre revalidado
     finally:
         servidor.shutdown()
+
+
+def test_the_municipal_cut_keeps_only_streets_whose_midpoint_is_inside_the_polygon(tmp_path):
+    import geopandas as gpd
+    from shapely.geometry import box
+
+    gpd.GeoDataFrame(geometry=[box(-51.2, -30.1, -51.1, -30.0)], crs="EPSG:4326").to_parquet(tmp_path / "m.parquet")
+    pd.DataFrame({"segmento_id": ["dentro", "borda_para_fora", "fora"], "lon0": [-51.15, -51.12, -51.5], "lat0": [-30.05, -30.05, -30.05], "lon1": [-51.14, -51.0, -51.4], "lat1": [-30.05, -30.05, -30.05]}).to_parquet(tmp_path / "r.parquet")
+    assert c.ids_no_municipio(tmp_path / "r.parquet", tmp_path / "m.parquet") == {"dentro"}      # o ponto médio de "borda_para_fora" (-51,06) já está fora
