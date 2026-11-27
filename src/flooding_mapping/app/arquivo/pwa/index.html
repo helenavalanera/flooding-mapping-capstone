@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Avisos e rotas na chuva · Flooding Mapping</title>
+  <meta name="description" content="Veja antes de sair se a sua rota passa por trechos com risco estimado de acúmulo de água e compare alternativas.">
+  <meta name="theme-color" content="#161B26">
+  <meta name="color-scheme" content="light">
+  <meta name="api-base" content="">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="pwa.css">
+</head>
+<body>
+  <div id="mapa" role="application" aria-label="Mapa para marcar pontos e ver as rotas"></div>
+  <p id="faixa-demo" role="status" hidden></p>
+  <div id="modo" role="group" aria-label="Dados exibidos" hidden>
+    <button type="button" data-modo="real" aria-pressed="true">Dados reais</button>
+    <button type="button" data-modo="demo" aria-pressed="false">Demonstração</button>
+  </div>
+  <header id="orienta" aria-live="polite" hidden>
+    <div class="principal"><span id="orienta-seta" class="seta" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.2L20.5 3.5l-7.7 17-2.2-7.1-7.1-2.2z"/></svg></span>
+      <div><p id="orienta-linha" class="linha-principal"></p><p id="orienta-detalhe" class="depois"></p></div></div>
+  </header>
+  <div id="perfil" role="img" aria-label="Perfil da rota" hidden></div>
+  <div id="aviso" role="status" hidden></div>
+  <p id="dica-mapa" class="dica" role="status" hidden></p>
+  <div id="flutuantes" role="group" aria-label="Controles do mapa">
+    <button type="button" class="fab" id="f-mais" aria-label="Aproximar o mapa"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button type="button" class="fab" id="f-menos" aria-label="Afastar o mapa"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/></svg></button>
+    <button type="button" class="fab" id="f-loc" aria-label="Centralizar na minha localização (pede permissão)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/></svg></button>
+    <button type="button" class="fab" id="f-rota" aria-label="Enquadrar a rota no mapa"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button type="button" class="fab" id="f-camadas" aria-label="Camadas e legenda do mapa" aria-expanded="false" aria-controls="popover"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3L3 8l9 5 9-5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
+  </div>
+  <button type="button" class="fab alerta-fab" id="f-relatar" aria-label="Relatar ocorrência na via"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.5l9.5 16.5h-19L12 3.5z"/><path d="M12 10v4.5M12 17.5h.01"/></svg><span>Relatar</span></button>
+  <section id="popover" hidden aria-label="Camadas e legenda"></section>
+  <section id="vista3d" hidden aria-label="Rotas em 3D (opcional)">
+    <div class="cabeca"><b>Rotas em 3D</b><button type="button" class="chip" id="fechar3d">Fechar</button></div>
+    <div id="mapa3d" role="application" aria-label="Mapa 3D com relevo e as rotas"></div>
+    <p class="small">Relevo com exagero vertical de 1,5× só para visualização. Elevação pública, sem relação com o cálculo de risco; o modelo pode ter artefatos sobre água e vegetação.</p>
+  </section>
+  <div id="folha" class="folha expandida">
+    <button type="button" class="alca" id="folha-alca" aria-expanded="true" aria-controls="tela">Recolher painel</button>
+    <main id="tela" tabindex="-1"></main>
+  </div>
+  <nav id="abas" aria-label="Seções">
+    <button data-tela="avisos" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15L6 17z"/><path d="M10 21h4"/></svg><span>Avisos</span></button>
+    <button data-tela="planejar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.8"/></svg><span>Planejar</span></button>
+    <button data-tela="lugares"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-6.2 7-11.5a7 7 0 1 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Lugares</span></button>
+    <button data-tela="relatar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4"/><path d="M5 4.5h11.5l-2 4 2 4H5"/></svg><span>Relatar</span></button>
+    <button data-tela="privacidade"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l8 3v6c0 4.8-3.4 7.9-8 9-4.6-1.1-8-4.2-8-9V6l8-3z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg><span>Privacidade</span></button>
+  </nav>
+  <dialog id="consentimento" aria-labelledby="c-titulo">
+    <h2 id="c-titulo">Usar sua localização?</h2>
+    <p>Vamos pedir ao seu aparelho a posição <b>uma vez</b>, só com o app aberto, para marcar o ponto que você escolheu (origem, lugar ou relato).
+       Não acompanhamos você em segundo plano e não guardamos sua posição no servidor. Você pode revogar isto em Privacidade.</p>
+    <form method="dialog"><button class="btn" value="sim">Permitir agora</button> <button class="btn sec" value="nao">Agora não</button></form>
+  </dialog>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="../vendor/mapa/pmtiles.js"></script>
+  <script src="../vendor/mapa/protomaps-leaflet.js"></script>
+  <script src="../mapa-base.js"></script>
+  <script src="../logic.js"></script>
+  <script src="dados.js"></script>
+  <script src="avisos.js"></script>
+  <script src="pwa.js"></script>
+</body>
+</html>

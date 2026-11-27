@@ -1,11 +1,11 @@
 name: publicar-site
 
-# Monta a interface estadual (previsão de 72 h + bloqueios ativos + camadas estáticas) e a
-# publica no GitHub Pages SEM fazer commits. Detalhes e pré-requisitos: docs/publicacao.md
+# Monta o site estático de Porto Alegre (landing, painel de análise e simulador; sem modelo, previsão nem bloqueios) e o
+# publica no GitHub Pages SEM fazer commits. A montagem de duas escalas (RS, com previsão de 72 h e bloqueios) está arquivada
+# em src/flooding_mapping/app/arquivo/site_estadual.py. Detalhes e pré-requisitos: docs/publicacao_pages_releases.md
+# Só dispara manualmente: o site é estático e não precisa ser remontado de tempos em tempos.
 
 on:
-  schedule:
-    - cron: "17 */3 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -18,8 +18,7 @@ permissions:
 jobs:
   construir:
     # Adesão: só roda no repositório original e depois que SITE_ATIVO = true for definida em
-    # Settings > Secrets and variables > Actions > Variables (ver docs/publicacao.md). Antes disso o
-    # modelo ainda não está no R2 e cada execução agendada falharia. Para pausar: remova a variável.
+    # Settings > Secrets and variables > Actions > Variables (ver docs/publicacao_pages_releases.md). Para pausar: remova a variável.
     if: github.repository == 'helenavalanera/flooding-mapping-capstone' && vars.SITE_ATIVO == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -37,21 +36,11 @@ jobs:
       - name: Instalar dependências
         run: pip install -r requirements-site.txt
 
-      # Os segredos do R2 existem só neste passo. O modelo é conferido contra o hash do cartão.
-      - name: Baixar o modelo verificado
-        env:
-          PYTHONPATH: src
-          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET: ${{ secrets.R2_BUCKET || vars.R2_BUCKET }}
-        run: python -m flooding_mapping.models.publish download --card reports/ml/gatilho_estrito.json --out artifacts/modelo.joblib
-
-      # Sem segredos no ambiente: só consulta as APIs públicas e grava arquivos estáticos.
+      # Sem segredos nem rede: só copia a interface estática. As camadas derivadas e o mapa-base são publicados à parte (docs/publicacao_pages_releases.md).
       - name: Montar o site
         env:
           PYTHONPATH: src
-        run: python -m flooding_mapping.app.build --model artifacts/modelo.joblib --card reports/ml/gatilho_estrito.json --out site
+        run: python -m flooding_mapping.app.build --out site
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

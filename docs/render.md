@@ -40,7 +40,9 @@ Por isso: sem CORS, sem URL de API para configurar, sem segundo serviço, e desk
 | `FM_REDE_URL`, `FM_REDE_SHA256` | sim, no Render | tabela de ruas (https + hash) |
 | `PROXIES_CONFIAVEIS` | recomendada | ver a próxima seção |
 | `FM_OCORRENCIAS`, `FM_SITE` | já definidas no Dockerfile | apontam para `/dados` |
+| `FM_MAPA_URL`, `FM_MAPA_SHA256` | sim, no Render | mapa-base do RS, arquivo `.pmtiles` (https + hash); sem eles os mapas ficam sem fundo (ver `docs/mapa_base.md`) |
 
+| `FM_DEMONSTRACAO` | opcional | `1` liga o seletor **Dados reais | Demonstração** (chuva fictícia, ocorrências só em memória, isoladas do real); ver `docs/demonstracao.md` |
 Nenhuma credencial está no código, no Dockerfile, em `render.yaml` ou nesta documentação.
 
 ## Proxy e limite de uso

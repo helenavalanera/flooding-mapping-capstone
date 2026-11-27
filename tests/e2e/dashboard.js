@@ -1,66 +1,41 @@
-const { assert, abrir, BASE, semTransbordo, pontoDe } = require("./lib");
+// Painel atual, restrito a Porto Alegre: quatro áreas (Resultados, Mapa, Simulador e Proveniência), sem território estadual, previsão, mobilidade nem ocorrências.
+// O roteiro do painel de duas escalas está arquivado em tests/e2e/arquivo/painel_estadual.js.
+const { assert, abrir, BASE, semTransbordo } = require("./lib");
+const ESTADUAL = /rodovia|bloqueio|S2iD|DAER|CPRv|munic[ií]pio|Rio Grande do Sul|Risco estimado|Rotas da|Ocorr[eê]ncias|Interdi/i;
 (async () => {
   const { browser, page, erros } = await abrir({ viewport: { width: 1400, height: 900 } });
-  await page.goto(BASE); await page.waitForSelector("#vista-geral .pergunta");
-  assert.strictEqual(await page.locator("#vista-geral .pergunta h2").count(), 5, "a visão geral responde às cinco perguntas");
-  assert.strictEqual(await page.getAttribute("#territorios [aria-checked=true]", "data-territorio"), "rs");
-  assert.strictEqual(await page.locator(".entrada").count(), 2, "acesso às duas demonstrações");
-  // mapa estadual em 3D
+  await page.goto(BASE); await page.waitForSelector("#vista-resultados .rs-achado", { timeout: 60000 });
+  // só as quatro áreas do estudo, e um único território
+  const abas = await page.evaluate(() => Array.from(document.querySelectorAll("#abas button")).map((b) => [b.dataset.aba, b.hidden]));
+  assert.deepStrictEqual(abas, [["resultados", false], ["mapa", false], ["simulador", false], ["proveniencia", false]]);
+  assert.strictEqual(await page.locator("#territorios, #modo, [data-territorio], #vista-previsao, #vista-mobilidade, #vista-ocorrencias, #vista-geral").count(), 0);
+  const sub = await page.innerText("#sub-territorio"); assert.match(sub, /Porto Alegre · escala municipal/); assert.doesNotMatch(sub, /Rio Grande do Sul/);
+  assert.strictEqual(await page.getAttribute("#abas [aria-selected=true]", "data-aba"), "resultados");
+  // mapa em 3D, com relevo
   await page.click("[data-aba=mapa]"); await page.waitForFunction(() => window.Mapa && window.Mapa.pronto, null, { timeout: 60000 }); await page.waitForTimeout(2000);
   assert.ok(await page.evaluate(() => !!window.Mapa.map.getTerrain()), "relevo 3D ligado");
   assert.ok(await page.evaluate(() => window.Mapa.map.getPitch()) > 20, "mapa inclinado");
-  const inativas = (await page.locator("#camadas label.inativa").allInnerTexts()).join(" ");
-  assert.match(inativas, /Risco estimado por trecho[\s\S]*Dados indisponíveis/); assert.match(inativas, /Rotas[\s\S]*Dados indisponíveis/);
-  await page.evaluate(() => window.Mapa.map.jumpTo({ center: [-51.2, -29.8], zoom: 8, pitch: 50 })); await page.waitForTimeout(1800);
-  const m = await pontoDe(page, "mun-fill"); await page.mouse.click(m.x, m.y); await page.waitForSelector("#contexto h3", { timeout: 8000 });
-  const ctx = await page.innerText("#contexto"); assert.match(ctx, /Dados disponíveis/); assert.match(ctx, /Malha rodoviária DAER/); assert.match(ctx, /sem dado, não tráfego zero|Sem malha DAER/); assert.match(ctx, /Limitações/);
-  const r = await pontoDe(page, "rod"); if (r) { await page.mouse.click(r.x, r.y); await page.waitForTimeout(800); assert.match(await page.innerText("#contexto"), /Trecho selecionado/); }
+  const centro = await page.evaluate(() => window.Mapa.map.getCenter().toArray()); assert.ok(Math.abs(centro[0] + 51.22) < 0.1 && Math.abs(centro[1] + 30.03) < 0.1, "o mapa abre em Porto Alegre");
+  const camadas = (await page.locator("#camadas label").allInnerTexts()).join(" | ");
+  assert.match(camadas, /Relevo sombreado/); assert.match(camadas, /Drenagem cadastrada/); assert.match(camadas, /Escoamento potencial/); assert.doesNotMatch(camadas, ESTADUAL);
+  assert.strictEqual(await page.locator("#camadas input[data-camada]").count(), 3, "só as camadas do estudo");
+  assert.match(await page.innerText("#contexto"), /Ligue uma dimensão e clique em um trecho de rua/); assert.doesNotMatch(await page.innerText("#contexto"), ESTADUAL);
+  assert.strictEqual(await page.locator("#poa-opcoes, #cores, #poa-hora").count(), 0, "sem controle de hora à frente nem de cores estaduais");
+  // 2D sem relevo, 3D com exagero declarado
   await page.click("#vista-2d"); await page.waitForTimeout(1000);
   assert.strictEqual(await page.evaluate(() => window.Mapa.map.getTerrain()), null, "2D sem relevo"); assert.ok(await page.isDisabled("#exagero"));
   await page.click("#vista-3d"); await page.waitForTimeout(600); await page.selectOption("#exagero", "3");
   assert.strictEqual(await page.evaluate(() => window.Mapa.map.getTerrain().exaggeration), 3); assert.match(await page.innerText("#nota-relevo"), /apenas para visualização/);
-  await page.selectOption("#cor-mun", "risco"); assert.match(await page.innerText("#legenda-gl"), /Sem estimativa \(não é risco baixo\)/);
-  // Porto Alegre: transição, camadas, seleção de trecho
-  await page.click("[data-territorio=poa]"); await page.waitForTimeout(3500);
-  const centro = await page.evaluate(() => window.Mapa.map.getCenter().toArray()); assert.ok(Math.abs(centro[0] + 51.22) < 0.05 && Math.abs(centro[1] + 30.03) < 0.05, "voou para Porto Alegre");
-  assert.match((await page.locator("#camadas label").allInnerTexts()).join(" "), /Risco estimado por trecho[\s\S]*Interdições confirmadas/);
-  await page.fill("#poa-hora", "5"); await page.waitForFunction(() => /[+]5 h/.test(document.getElementById("poa-hora-rotulo").textContent), null, { timeout: 15000 }); await page.waitForTimeout(2500);
-  await page.evaluate(() => window.Mapa.map.jumpTo({ center: [-51.2, -30.05], zoom: 13.5, pitch: 60 })); await page.waitForTimeout(2500);
-  const t = await pontoDe(page, "poa-risco-prev"); assert.ok(t, "há trechos com risco estimado"); await page.mouse.click(t.x, t.y);
-  await page.waitForFunction(() => /Risco por hora/.test(document.getElementById("contexto").textContent), null, { timeout: 10000 });
-  assert.match(await page.innerText("#contexto"), /não é probabilidade/);
-  // assistente contextual: perguntas sugeridas, resposta com a origem declarada
-  await page.click("#contexto .assistente summary"); assert.strictEqual(await page.locator("#contexto .assistente [data-q]").count(), 3);
-  await page.click("#contexto [data-q=por_que_atencao]");
-  await page.waitForFunction(() => /Texto padrão|Reformulado/.test(document.querySelector("#contexto .resposta").textContent), null, { timeout: 30000 });
-  assert.match(await page.innerText("#contexto .resposta"), /Por que este trecho está em atenção\?/);
-  assert.doesNotMatch(await page.innerText("#contexto .resposta"), /segur[oa]\b/i);
-  // mobilidade e rotas no mapa 3D
-  await page.click("[data-aba=mobilidade]"); await page.waitForSelector("#mapa-rotas.leaflet-container"); const mb = await page.locator("#mapa-rotas").boundingBox();
-  await page.mouse.click(mb.x + mb.width / 2 + 30, mb.y + mb.height / 2 + 80); await page.mouse.click(mb.x + mb.width / 2 + 190, mb.y + mb.height / 2 - 70);
-  await page.fill("#mob-saida", new Date(Date.now() - new Date().getTimezoneOffset() * 60000 + 3.5 * 3600000).toISOString().slice(0, 16)); await page.click("#mob-analisar");
-  await page.waitForSelector("#mob-resultado table", { timeout: 60000 }); assert.match(await page.innerText("#mob-resultado"), /exposição estimada/);
-  // estado de interface sem chuva: a resposta real da análise, com a meteorologia marcada como indisponível no formato que o servidor produz
-  // (a produção desse formato é coberta em tests/test_servico.py). Aqui só se confere o que a tela diz.
-  await page.route("**/api/rotas", async (route) => {
-    const r = await route.fetch(), j = await r.json();
-    j.meteo = { indisponivel: true, ultima_atualizacao: "2026-11-10T09:00:00Z", total_na_janela_mm: null, maximo_hora_mm: null, horas: [] };
-    j.alerta = { nivel: "sem_dados", titulo: "Sem dados meteorológicos", texto: "A meteorologia está indisponível agora.", motivos: [] };
-    await route.fulfill({ response: r, json: j });
-  });
-  await page.click("#mob-analisar"); await page.waitForSelector("#mob-resultado .alerta.sem_dados", { timeout: 60000 });
-  assert.match(await page.innerText("#mob-resultado"), /Chuva indisponível[\s\S]*não significa rota sem risco/); await page.unroute("**/api/rotas");
-  await page.click("#mob-analisar"); await page.waitForSelector("#mob-resultado .alerta:not(.sem_dados)", { timeout: 60000 });
-
-  await page.click("#mob-3d"); await page.waitForFunction(() => window.Mapa.rotas, null, { timeout: 15000 });
-  assert.ok(await page.evaluate(() => window.Mapa.map.getSource("rotas")._data.features.length) >= 2, "rotas destacadas no mapa");
-  // áreas por território: o que não existe diz que não existe
-  await page.click("[data-territorio=rs]"); await page.click("[data-aba=mobilidade]"); await page.waitForTimeout(1200);
-  assert.match(await page.innerText("#vista-mobilidade"), /Rotas: Dados indisponíveis/);
-  await page.click("[data-aba=proveniencia]"); await page.waitForTimeout(1200); assert.match(await page.innerText("#vista-proveniencia"), /O que cada região oferece/); assert.match(await page.innerText("#vista-proveniencia"), /O que se pode e o que não se pode afirmar[\s\S]*Confronto com eventos documentados/);
-  await page.click("[data-aba=ocorrencias]"); await page.waitForTimeout(1200); assert.match(await page.innerText("#vista-ocorrencias"), /S2iD/);
-  // responsividade, nos dois territórios e nas seis áreas
-  const passos = []; for (const ter of ["rs", "poa"]) for (const aba of ["geral", "mapa", "previsao", "mobilidade", "ocorrencias", "proveniencia"]) passos.push(async () => { await page.click(`[data-territorio=${ter}]`); await page.click(`[data-aba=${aba}]`); });
+  // proveniência: só as fontes do estudo, com a condição de uso, e o que cada dimensão é e não é
+  await page.click("[data-aba=proveniencia]"); await page.waitForSelector("#vista-proveniencia table");
+  const prov = await page.innerText("#vista-proveniencia");
+  for (const t of ["Profill 2022", "Licença não confirmada", "Copernicus DEM GLO-30", "OpenStreetMap", "Open-Meteo", "O que cada dimensão do mapa é, e o que não é", "não afirma que as bases tenham licença aberta irrestrita", "não prevê alagamentos"]) assert.ok(prov.includes(t), t);
+  assert.doesNotMatch(prov, /S2iD|DAER|CPRv|bloqueio|rodovia|Rio Grande do Sul/i);
+  // endereço antigo de uma área que não existe mais cai em Resultados
+  await page.goto(BASE + "#poa/mobilidade"); await page.reload(); await page.waitForSelector("#vista-resultados .rs-achado", { timeout: 60000 });
+  assert.strictEqual(await page.getAttribute("#abas [aria-selected=true]", "data-aba"), "resultados");
+  // responsividade nas quatro áreas
+  const passos = ["resultados", "mapa", "simulador", "proveniencia"].map((aba) => async () => { await page.click(`[data-aba=${aba}]`); });
   await semTransbordo(page, [360, 390, 768, 1024, 1400], passos);
   assert.deepStrictEqual(erros, [], "erros de console: " + erros.join(" | ")); await browser.close(); console.log("dashboard: ok");
 })().catch((e) => { console.error("FALHOU:", e.message); process.exit(1); });

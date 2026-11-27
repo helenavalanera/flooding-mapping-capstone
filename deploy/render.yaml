@@ -22,6 +22,12 @@ services:
         sync: false
       - key: FM_REDE_SHA256       # SHA-256 do arquivo; sem ele a tabela não é baixada
         sync: false
+      - key: FM_MAPA_URL          # endereço https do mapa-base do RS (.pmtiles, ~217 MB; data/ não vai ao Git); ver docs/mapa_base.md
+        sync: false
+      - key: FM_MAPA_SHA256       # SHA-256 do arquivo; sem ele o mapa-base não é baixado
+        sync: false
+      - key: FM_DEMONSTRACAO      # 1 liga o seletor Dados reais | Demonstração (dados sintéticos, isolados do real)
+        value: "1"
       - key: PROXIES_CONFIAVEIS   # endereço do proxy do Render (veja docs/render.md); sem ele o limite por cliente vê um só endereço
         sync: false
     # Persistência das ocorrências: só com plano pago. Descomente depois de escolher o plano.

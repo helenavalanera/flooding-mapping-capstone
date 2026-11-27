@@ -23,7 +23,11 @@ import time
 import numpy as np
 import pandas as pd
 
+from . import aprendizado as ap
+from . import bolsoes as bs
+from . import territorio as terr
 from . import ocorrencias as oc
+from . import pois as pois_mod
 from . import rotas as rt
 from .chuva_horaria import ESCOPO as ESCOPO_CHUVA
 from .chuva_horaria import ChuvaHoraria, ChuvaIndisponivel
@@ -50,6 +54,13 @@ LIMITES = [
     "O modelo municipal por dia (registros do S2iD) não é usado e não prevê alagamento em vias.",
     "Velocidades de fluxo livre, sem trânsito, semáforos ou restrições de conversão; sem ônibus.",
 ]
+
+
+def bs_in(bolsao: dict, registro: dict) -> bool:
+    """Whether a record's point lies inside a pocket's polygon."""
+    import shapely
+    from shapely.geometry import Point, shape
+    return bool(shape(bolsao["geometria"]).contains(Point(registro["lon"], registro["lat"])))
 
 
 def afirmacoes(validacao: dict | None) -> dict:
@@ -87,13 +98,19 @@ def ponto(dados, campo: str, limites: tuple[float, float, float, float]) -> tupl
 class Servico:
     def __init__(self, rede: rt.Rede, chuva: ChuvaHoraria, store: oc.Ocorrencias, explicador: Explicador, params_risco: dict,
                  relogio=agora_local, token_operador: str = "", meta_dados: dict | None = None, territorios: dict | None = None,
-                 resumo_rs: dict | None = None, cobertura_rs: dict | None = None, validacao: dict | None = None):
+                 resumo_rs: dict | None = None, cobertura_rs: dict | None = None, validacao: dict | None = None,
+                 pois=None, params_aprendizado: dict | None = None, territorio: dict | None = None):
         self.rede, self.chuva, self.store, self.explicador, self.pr = rede, chuva, store, explicador, params_risco
         self.relogio, self.token_operador, self.meta_dados = relogio, token_operador, meta_dados or {}
         self.territorios_config, self.resumo_rs, self.cobertura_rs, self.validacao = territorios, resumo_rs, cobertura_rs, validacao
         self._tabela: tuple[int, pd.DataFrame] | None = None
         self._analises: dict[str, tuple[float, rt.Analise, dict, dict]] = {}
         self._lock = threading.Lock()
+        self.pois, self.pa = pois, params_aprendizado or {"apoios_minimos": 2, "min_ocorrencias": 8, "min_positivos": 30, "raio_rotulo_m": 100, "bloco_m": 1500,
+                                                          "dobras": 5, "margem_ap": 0.1, "fracao_sugerida": 0.01, "raio_bolsao_m": 120, "raio_aviso_m": 150}
+        self.sal_apoios = secrets.token_hex(16)   # per process: the stored vote hashes cannot be linked to a device, nor across restarts
+        self._aprendido: dict | None = None
+        self.territorio, self._bairro_do_trecho = territorio, None
         margem = 0.05
         self.limites = (float(rede.no_lon.min()) - margem, float(rede.no_lon.max()) + margem,
                         float(rede.no_lat.min()) - margem, float(rede.no_lat.max()) + margem)
@@ -405,12 +422,23 @@ class Servico:
         return {"id": registro["id"], "situacao": registro["situacao"], "confiabilidade": registro["confiabilidade"],
                 "mensagem": "Relato recebido como reportado. Ele não interdita vias: só uma confirmação com evidência o faz."}
 
+    def _rua(self, r: dict) -> str | None:
+        """Name of the nearest named street (public OpenStreetMap data), so a person can tell which report is which; cached by record."""
+        cache = self.__dict__.setdefault("_ruas", {})
+        if r["id"] not in cache:
+            idx = self.rede.proximos(r["lon"], r["lat"], 120)
+            nomes = [self.rede.arestas["nome"].iat[i] for i in idx if self.rede.arestas["nome"].iat[i]]
+            cache[r["id"]] = nomes[0] if nomes else None
+        return cache[r["id"]]
+
     def listar_ocorrencias(self, situacao: str | None = None, completo: bool = False) -> dict:
         """The public list leaves out the free text: an unverified report may carry personal data typed by a stranger.
         Only an authenticated operator (``completo``) sees it."""
         if situacao and situacao not in oc.SITUACOES:
             raise ValueError(f"situacao: use um de {', '.join(oc.SITUACOES)}")
         itens = self.store.listar(situacao)[:500]
+        itens = [{**{k: v for k, v in r.items() if k not in ("apoios", "secou")}, "apoios": len(r.get("apoios", [])), "secou": len(r.get("secou", [])),
+                  "rua": self._rua(r)} for r in itens]
         if not completo:
             itens = [{k: v for k, v in r.items() if k != "descricao"} for r in itens]
         return {"total": len(self.store.listar(situacao)), "ocorrencias": itens, "texto_livre_incluido": completo,
@@ -423,6 +451,144 @@ class Servico:
     def mudar_situacao(self, id_: str, dados: dict) -> dict:
         return self.store.mudar_situacao(id_, dados.get("situacao"), por=str(dados.get("por") or "operador")[:40], evidencia=dados.get("evidencia", ""),
                                          confiabilidade=dados.get("confiabilidade"), impacto=dados.get("impacto_circulacao"), severidade=dados.get("severidade"))
+
+
+    # ------------------------------------------------------------------ pontos de interesse, bolsões e avisos
+    def _hora(self, e: dict, deslocamento_h: float) -> pd.Timestamp:
+        return e["agora"].floor("h") + pd.Timedelta(hours=max(0, min(float(deslocamento_h), 48)))
+
+    def _escore_na_hora(self, e: dict, t: pd.Timestamp):
+        fator = fator_em(e["tabela"], t)
+        return None if np.isnan(fator) else fator * e["risco"]["peso"]
+
+    def bolsoes(self, deslocamento_h: float = 0) -> dict:
+        """Pockets of estimated exposure at ``agora + deslocamento_h``, with the points of interest inside each."""
+        e = self._estado()
+        t = self._hora(e, deslocamento_h)
+        base = {"hora": iso_local(t), "natureza": natureza(t, e["agora"]), "escopo_da_chuva": ESCOPO_CHUVA,
+                "aviso": "Estimativa de um baseline sem validação em vias; não é alerta oficial. Em emergência, ligue 199 (Defesa Civil).",
+                "pois_disponiveis": self.pois is not None}
+        escore = self._escore_na_hora(e, t)
+        if escore is None:
+            return {**base, "sem_estimativa": True, "bolsoes": []}
+        marcados = np.flatnonzero(np.isin(classe(escore, self.pr), ["atencao", "alto"]))
+        lista = bs.formar(self.rede, marcados, escore, self.pois, self.pa["raio_bolsao_m"], maximo=15, simplificar_m=25.0)
+        for b in lista:
+            b["texto"] = bs.texto(b, t.strftime("%H:%M"), base["natureza"])
+        return {**base, "sem_estimativa": False, "total_trechos": int(len(marcados)), "bolsoes": lista}
+
+    def territorio_geo(self) -> dict:
+        """Static geometry of the City's public maps (neighbourhoods, streams, pumping stations); fetched once by the page."""
+        t = self.territorio
+        if t is None:
+            return {"disponivel": False, "bairros": [], "arroios": [], "bombas": []}
+        return {"disponivel": True, "fonte": t["fonte"], "bairros": [{"id": i, "nome": b["nome"], "geometria": b["geom"]} for i, b in enumerate(t["bairros"])],
+                "arroios": [{"ordem": a["ordem"], "nome": a["nome"], "geometria": a["geom"]} for a in t["arroios"]], "bombas": t["bombas"]}
+
+    def bairros(self, deslocamento_h: float = 0) -> dict:
+        """Exposure estimate read by neighbourhood at ``agora + deslocamento_h``: kilometres of street in attention or high, and the
+        informal-settlement context of each neighbourhood (context only: it is not part of the score)."""
+        base = {"disponivel": self.territorio is not None, "aviso": "Estimativa de um baseline sem validação em vias; não é alerta oficial. Em emergência, ligue 199 (Defesa Civil).",
+                "contexto": "Aglomerados subnormais: IBGE 2010 (via ObservaPOA). É contexto de quem mora na área, não entra no cálculo da exposição."}
+        if self.territorio is None:
+            return {**base, "bairros": []}
+        e = self._estado()
+        t = self._hora(e, deslocamento_h)
+        base.update(hora=iso_local(t), natureza=natureza(t, e["agora"]), escopo_da_chuva=ESCOPO_CHUVA)
+        escore = self._escore_na_hora(e, t)
+        if escore is None:
+            return {**base, "sem_estimativa": True, "bairros": []}
+        with self._lock:
+            if self._bairro_do_trecho is None:
+                self._bairro_do_trecho = terr.vincular(self.rede, self.territorio)
+        linhas = terr.por_bairro(self.territorio, self._bairro_do_trecho, self.rede.arestas.comprimento_m.to_numpy(float), classe(escore, self.pr))
+        for l in linhas:
+            l.pop("geometria")
+        return {**base, "sem_estimativa": False, "bairros": linhas}
+
+    def avisos(self, dados: dict) -> dict:
+        """For up to five places the person saved: how exposed the surroundings are in the next hours and which points of interest
+        sit inside a pocket. The places are used to compute and then forgotten, like the origins of a route."""
+        if not isinstance(dados, dict) or not isinstance(dados.get("lugares"), list) or not 1 <= len(dados["lugares"]) <= 5:
+            raise ValueError("lugares: informe de 1 a 5 lugares")
+        horas = max(1, min(int(dados.get("horas", 12)), 48))
+        e = self._estado()
+        lugares = []
+        for l in dados["lugares"]:
+            lon, lat = ponto({"lugar": l}, "lugar", self.limites)
+            idx = self.rede.proximos(lon, lat, self.pa["raio_aviso_m"])
+            lugares.append((str(l.get("nome") or "Lugar")[:40], lon, lat, idx))
+        saidas = [{"nome": n, "serie": [], "sem_trechos": not idx} for n, _, _, idx in lugares]
+        pico = None
+        for k in range(0, horas + 1):
+            t = self._hora(e, k)
+            escore = self._escore_na_hora(e, t)
+            for s, (_, _, _, idx) in zip(saidas, lugares):
+                if escore is None or not idx:
+                    s["serie"].append({"hora": iso_local(t), "classe": None, "escore": None})
+                    continue
+                m = float(np.nanmax(escore[idx])) if np.isfinite(escore[idx]).any() else float("nan")
+                s["serie"].append({"hora": iso_local(t), "classe": None if np.isnan(m) else classe(m, self.pr), "escore": None if np.isnan(m) else round(m, 3),
+                                   "natureza": natureza(t, e["agora"])})
+        ordem = {"alto": 2, "atencao": 1, "baixo": 0}
+        for s in saidas:
+            piores = [x for x in s["serie"] if x["classe"]]
+            s["pior"] = max(piores, key=lambda x: (ordem[x["classe"]], x["escore"]), default=None)
+            nivel = s["pior"]["classe"] if s["pior"] else None
+            s["resumo"] = ("Sem estimativa para este lugar (sem dado de terreno ou de chuva); isso não significa que esteja livre de risco." if nivel is None else
+                           "Nas próximas horas, as vias ao redor ficam em nível baixo de exposição estimada." if nivel == "baixo" else
+                           f"As vias ao redor entram em {'atenção' if nivel == 'atencao' else 'alto'} por volta das {s['pior']['hora'][11:16]} ({s['pior']['natureza']}).")
+        return {"lugares": saidas, "raio_m": self.pa["raio_aviso_m"], "horas": horas, "escopo_da_chuva": ESCOPO_CHUVA,
+                "aviso": "Estimativa de um baseline sem validação em vias; não é alerta oficial. Em emergência, ligue 199 (Defesa Civil)."}
+
+    # ------------------------------------------------------------------ o laço: comunidade, aprendizado e áreas sugeridas
+    def apoiar(self, id_: str, dados: dict) -> dict:
+        if not isinstance(dados, dict):
+            raise ValueError("corpo inválido")
+        registro, novo = self.store.apoiar(id_, dados.get("chave"), dados.get("tipo"), self.sal_apoios, self.pa["apoios_minimos"])
+        return {"id": id_, "contado": novo, "apoios": len(registro.get("apoios", [])), "secou": len(registro.get("secou", [])),
+                "confiabilidade": registro["confiabilidade"], "situacao": registro["situacao"],
+                "mensagem": ("Obrigado: seu apoio foi contado. Ele ajuda a priorizar a verificação, mas não interdita nenhuma via." if novo
+                             else "Seu apoio a esta ocorrência já tinha sido contado.")}
+
+    def aprendizado(self) -> dict:
+        """The model trained on what the community confirmed, retrained only when the set of labels changes."""
+        rotuladas = self.store.rotuladas(self.pa["apoios_minimos"])
+        assinatura = ap.assinatura(rotuladas)
+        with self._lock:
+            if self._aprendido is None or self._aprendido["assinatura"] != assinatura:
+                self._aprendido = ap.treinar(self.rede, rotuladas, self.pa)
+            return self._aprendido
+
+    def aprendizado_status(self) -> dict:
+        a = self.aprendizado()
+        return {k: a[k] for k in ("fonte", "adotado", "motivo", "n_ocorrencias", "n_positivos", "ap_modelo", "ap_regra", "pesos")} | {
+            "rotulos": "ocorrências confirmadas por operador ou apoiadas por pessoas distintas; ausência de relato não é rótulo negativo",
+            "natureza": "ranking de prioridade para verificar, não probabilidade de alagamento; herda o viés de quem reporta"}
+
+    def areas_sugeridas(self) -> dict:
+        """Areas to verify first: the top share of the network by the learned rank (or by the terrain rule while there is no gain)."""
+        a = self.aprendizado()
+        idx = ap.sugeridas(self.rede, a["rank"], self.pa["fracao_sugerida"])
+        e = self._estado()
+        lista = bs.formar(self.rede, idx, np.nan_to_num(a["rank"]), self.pois, self.pa["raio_bolsao_m"], maximo=15, simplificar_m=25.0)
+        recentes = [r for r in e["ativas"]]
+        for b in lista:
+            b["ja_reportada"] = any(bs_in(b, r) for r in recentes)
+            b["texto"] = (f"Área sugerida para verificação: {bs.extensao(b['km'])} de vias parecidas, pelo terreno, com onde já houve bloqueio"
+                          + (f" ({', '.join(b['ruas'][:2])})" if b["ruas"] else "") + (f"; {b['n_pois']} pontos de interesse dentro" if b["n_pois"] else "")
+                          + (". Já há relato ativo nela." if b["ja_reportada"] else ". Ainda sem relato.") + " Sugestão a verificar, não previsão de alagamento.")
+        return {"fonte": a["fonte"], "adotado": a["adotado"], "motivo": a["motivo"], "fracao_da_malha": self.pa["fracao_sugerida"], "areas": lista,
+                "aviso": "Ranking de prioridade para verificar, não previsão de alagamento. Herda o viés de quem reporta."}
+
+    def lista_de_pois(self) -> dict:
+        if self.pois is None:
+            return {"disponivel": False, "pois": [], "motivo": "camada de pontos de interesse não carregada"}
+        p = self.pois
+        return {"disponivel": True, "total": int(len(p)), "fonte": "OpenStreetMap (voluntários): pode estar desatualizado ou incompleto; não indica se o local está aberto",
+                "categorias": {c: pois_mod.ROTULOS[c] for c in pois_mod.ROTULOS},
+                "pois": [{"id": r.poi_id, "nome": r.nome if isinstance(r.nome, str) and r.nome else None, "categoria": r.categoria, "tipo": r.tipo,
+                          "lon": float(r.lon), "lat": float(r.lat)} for r in p.itertuples()]}
 
     # ------------------------------------------------------------------ territórios
     def territorios(self) -> dict:

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-DADOS = Path(__file__).parent.parent / "src/flooding_mapping/app/static/pwa/dados.js"
+DADOS = Path(__file__).parent.parent / "src/flooding_mapping/app/arquivo/pwa/dados.js"   # PWA arquivado (app/arquivo/README.md)
 node = shutil.which("node")
 pytestmark = pytest.mark.skipif(node is None, reason="node not installed")
 

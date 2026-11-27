@@ -462,3 +462,109 @@ def test_health_flags_a_synthetic_rain_source_so_the_screens_can_say_it_is_a_dem
     s.chuva = ChuvaHoraria(0, 0, fonte=lambda lat, lon: (chuva(mm_h=15.0), meta))
     h = s.saude()["chuva"]
     assert h["sintetica"] is True and "SINTÉTICA" in h["fonte"]
+
+
+# ---------------------------------------------------------------- pontos de interesse, bolsões, avisos e o laço
+from rede_sintetica import LAT0, LON0  # noqa: E402
+
+
+def pois_teste():
+    return pd.DataFrame([{"poi_id": "n1", "nome": "Hospital Teste", "categoria": "saude", "tipo": "hospital", "lon": LON0 + 0.015, "lat": LAT0 + 0.004}])
+
+
+def com_pois(**kw):
+    s, r = montar(**kw)
+    s.pois = pois_teste()
+    return s, r
+
+
+def test_pockets_group_the_flagged_stretches_with_the_places_inside_and_say_it_is_an_estimate():
+    s, _ = com_pois(mm_h=15.0)
+    b = s.bolsoes(2)
+    assert not b["sem_estimativa"] and b["bolsoes"] and "199" in b["aviso"]
+    assert b["bolsoes"][0]["n_pois"] == 1 and b["bolsoes"][0]["pois"][0]["nome"] == "Hospital Teste"
+    assert "estimativa" in b["bolsoes"][0]["texto"]
+    s.pois = None
+    assert s.bolsoes(2)["pois_disponiveis"] is False
+
+
+def test_pockets_are_empty_and_say_so_when_there_is_no_rain_data():
+    s, _ = montar()
+    s.chuva = ChuvaHoraria(0, 0, fonte=lambda lat, lon: (_ for _ in ()).throw(ChuvaIndisponivel("fora do ar", None)))
+    with pytest.raises(ChuvaIndisponivel):
+        s.bolsoes(0)
+
+
+def test_an_alert_for_saved_places_reports_the_worst_hour_and_never_says_safe():
+    s, _ = com_pois(mm_h=15.0)
+    r = s.avisos({"lugares": [{"nome": "Casa", "lon": LON0 + 0.015, "lat": LAT0 + 0.004}, {"nome": "Longe", "lon": LON0 + 0.015, "lat": LAT0 + 0.04}], "horas": 6})
+    casa = r["lugares"][0]
+    assert casa["pior"]["classe"] in ("atencao", "alto") and "ao redor" in casa["resumo"] and len(casa["serie"]) == 7
+    assert "estimativa" in r["aviso"].lower() and "199" in r["aviso"]
+    longe = r["lugares"][1]
+    assert longe["sem_trechos"] and "não significa" in longe["resumo"]
+    with pytest.raises(ValueError, match="fora da área"):
+        s.avisos({"lugares": [{"lon": LON0 + 0.5, "lat": LAT0 + 0.5}]})
+
+
+@pytest.mark.parametrize("corpo", [{}, {"lugares": []}, {"lugares": [{"lon": 0, "lat": 0}] * 6}, {"lugares": [{"lon": "x", "lat": 1}]}, "texto"])
+def test_alerts_refuse_bad_input(corpo):
+    s, _ = montar()
+    with pytest.raises(ValueError):
+        s.avisos(corpo)
+
+
+def test_the_loop_community_backing_feeds_the_labels_without_closing_any_street():
+    s, r = com_pois(mm_h=15.0)
+    rel = s.relato({"lon": LON0 + 0.015, "lat": LAT0 + 0.004, "tipo": "alagamento_via"})
+    assert s.aprendizado_status()["n_ocorrencias"] == 0
+    a = s.apoiar(rel["id"], {"chave": "aparelho-aleatorio-001", "tipo": "ainda"})
+    assert a["contado"] and a["situacao"] == "reportada" and "não interdita" in a["mensagem"]
+    assert s.apoiar(rel["id"], {"chave": "aparelho-aleatorio-001", "tipo": "ainda"})["contado"] is False
+    b = s.apoiar(rel["id"], {"chave": "aparelho-aleatorio-002", "tipo": "ainda"})
+    assert b["confiabilidade"] == "media"
+    assert s.aprendizado_status()["n_ocorrencias"] == 1 and "regra" in s.aprendizado_status()["motivo"]
+    assert not s._estado()["bloqueada"].any()                                                  # backing never closes a street
+    publico = s.listar_ocorrencias()["ocorrencias"][0]
+    assert publico["apoios"] == 2 and "chave" not in str(publico) and "descricao" not in publico
+
+
+def test_suggested_areas_come_from_the_rule_until_the_model_earns_it_and_flag_existing_reports():
+    s, _ = com_pois(mm_h=15.0)
+    s.pa = {**s.pa, "fracao_sugerida": 0.5}
+    r = s.areas_sugeridas()
+    assert r["fonte"] == "regra de terreno" and not r["adotado"] and r["areas"]
+    assert "não previsão" in r["aviso"] and all("Sugestão a verificar" in a["texto"] for a in r["areas"])
+    assert all(a["ja_reportada"] is False for a in r["areas"])
+    s.store.relato({"lon": LON0 + 0.015, "lat": LAT0 + 0.004, "tipo": "alagamento_via", "data_hora": "2026-11-09T14:00:00Z"})
+    assert any(a["ja_reportada"] for a in s.areas_sugeridas()["areas"])
+
+
+def test_the_point_of_interest_list_says_where_it_comes_from_and_works_without_the_layer():
+    s, _ = com_pois()
+    p = s.lista_de_pois()
+    assert p["disponivel"] and p["total"] == 1 and "OpenStreetMap" in p["fonte"] and "aberto" in p["fonte"]
+    s.pois = None
+    assert s.lista_de_pois()["disponivel"] is False
+
+
+def test_neighbourhood_exposure_reads_streets_by_neighbourhood(servico_poa_sintetico=None):
+    import numpy as np
+    from flooding_mapping import territorio as terr
+
+    t = {"fonte": "teste", "arroios": [], "bombas": [], "bairros": [
+        {"nome": "Oeste", "geom": {"type": "Polygon", "coordinates": [[[0, -1], [1, -1], [1, 1], [0, 1], [0, -1]]]}, "aglomerados": 2, "pop_aglomerados": 500, "domicilios_aglomerados": 150},
+        {"nome": "Leste", "geom": {"type": "Polygon", "coordinates": [[[1, -1], [2, -1], [2, 1], [1, 1], [1, -1]]]}, "aglomerados": 0, "pop_aglomerados": 0, "domicilios_aglomerados": 0}]}
+
+    class R:
+        n = 3
+        class arestas:
+            import pandas as pd
+            lon0, lon1 = pd.Series([0.1, 0.4, 1.5]), pd.Series([0.2, 0.5, 1.6])
+            lat0 = lat1 = pd.Series([0.0, 0.0, 0.0])
+    vinc = terr.vincular(R, t)
+    assert list(vinc) == [0, 0, 1]
+    linhas = terr.por_bairro(t, vinc, np.array([100.0, 100.0, 400.0]), np.array(["alto", "baixo", "atencao"]))
+    oeste, leste = linhas
+    assert oeste["parcela_exposta"] == 0.5 and oeste["km_alto"] == 0.1 and oeste["pop_aglomerados"] == 500
+    assert leste["parcela_exposta"] == 1.0 and leste["km_atencao"] == 0.4

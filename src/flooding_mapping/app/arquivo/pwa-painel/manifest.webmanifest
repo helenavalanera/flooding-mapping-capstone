@@ -1,0 +1,18 @@
+{
+  "name": "Flooding Mapping · análise territorial",
+  "short_name": "Flooding Mapping",
+  "description": "Mapa, resultados e simulador de cenários do escoamento potencial em Porto Alegre, e monitoramento regional do Rio Grande do Sul.",
+  "lang": "pt-BR",
+  "id": "./?painel=1",
+  "start_url": "./?painel=1",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EDEFF2",
+  "theme_color": "#161B26",
+  "icons": [
+    {"src": "pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

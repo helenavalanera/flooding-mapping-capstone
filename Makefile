@@ -7,7 +7,7 @@ M  := $(PY) -m flooding_mapping
 
 .PHONY: all help downloads validar preparar cenarios suscetibilidade chuva \
         mobilidade robustez tipologia mapas criticidade abrir test coletar \
-        estado-dados estado-chuva estado-modelo estado-avaliacao estado-site estado rede servir demo
+        estado-dados estado-chuva estado-modelo estado-avaliacao estado rede site servir demo
 
 all: downloads validar preparar cenarios suscetibilidade chuva mobilidade \
      robustez tipologia mapas  ## roda as etapas 1 a 10 em ordem
@@ -85,13 +85,16 @@ estado-modelo:  ## treina e valida o gatilho municipal (rótulos estrito e amplo
 estado-avaliacao:  ## perda ao operar com previsão em vez de reanálise
 	$(M).evaluation.skew --label estrito
 
-estado-site:  ## monta o site local em site/ com o modelo mais recente (abre com: python -m http.server -d site)
-	$(M).app.build --model $$(ls -t artifacts/models/gatilho-estrito-*/modelo.joblib | head -1) --card reports/ml/gatilho_estrito.json --out site
+site:  ## monta o site estático de Porto Alegre em site/ (abre com: python -m http.server -d site); camadas derivadas: --fase3 e --drenagem
+	$(M).app.build --out site
 
 estado: estado-dados estado-chuva estado-modelo estado-avaliacao  ## fluxo estadual completo (sem publicar)
 
 rede:  ## tabela de ruas de Porto Alegre para o servidor (data/processed/rede_poa.parquet)
 	$(M).rede_poa
+
+pois:  ## pontos de interesse de Porto Alegre (OpenStreetMap) para os avisos (data/processed/pois_poa.parquet)
+	$(M).pois
 
 servir:  ## dashboard, PWA (/pwa/) e API em http://127.0.0.1:8000
 	$(M).servidor

@@ -11,6 +11,8 @@ async function abrir(opts, semWebgl) {
   if (process.env.TRACE) for (const m of ["click", "fill", "selectOption", "waitForSelector", "waitForFunction", "goto"]) { const o = page[m].bind(page); page[m] = (...a) => { console.error(new Date().toISOString().slice(14, 23), m, String(a[0]).slice(0, 70)); return o(...a); }; }   // software WebGL (no GPU) renders the 3D map slowly
   page.on("console", (m) => { if (m.type() === "error" && !/tile\.openstreetmap|amazonaws|ERR_|Failed to load resource/.test(m.text())) erros.push(m.text().slice(0, 200)); });
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
+  // A static file of ours that answers 4xx/5xx is a bug even when the browser only logs "Failed to load resource" (e.g. a label font that is never found).
+  page.on("response", (r) => { const u = new URL(r.url()); if (r.status() >= 400 && u.origin === new URL(BASE).origin && !u.pathname.startsWith("/api/")) erros.push("HTTP " + r.status() + " " + u.pathname); });
   return { browser, ctx, page, erros };
 }
 async function semTransbordo(page, larguras, passos) {

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flooding Mapping · o que a chuva pode afetar perto de você</title>
+  <meta name="description" content="Veja o que a chuva pode afetar perto de você em Porto Alegre e ajude a confirmar o que já alagou. Projeto final do Future Tech Leaders Brasil.">
+  <meta name="theme-color" content="#e6f0f5">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="inicio.css">
+  <script src="marca-js.js"></script>
+</head>
+<body>
+
+<main id="topo">
+
+  <section class="campo c-seco hero" aria-labelledby="titulo">
+    <nav class="nav" aria-label="Principal">
+      <a class="marca" href="index.html" aria-label="Flooding Mapping, estudo científico">FM</a>
+      <a href="index.html">Estudo</a>
+      <a href="#chuva">Resultados</a>
+      <a href="#como">Como funciona</a>
+      <a href="#quem">Para quem</a>
+      <a class="btn btn-sm" href="../?painel=1">Painel</a>
+      <a class="btn btn-sm" href="../pwa/">App</a>
+    </nav>
+    <h1 id="titulo" class="nome"><span class="linha"><span>Flooding</span></span><span class="linha l2"><span>Mapping</span></span></h1>
+    <p class="hero-texto">Veja o que a chuva pode afetar perto de você e ajude a confirmar o que já alagou.</p>
+    <div class="hero-acoes">
+      <a class="btn" href="../pwa/">Demonstração no celular (PWA)</a>
+      <a class="link" href="../?painel=1">Demonstração no computador (painel)</a>
+    </div>
+  </section>
+
+  <section class="campo c-produto" aria-labelledby="h-produto">
+    <div class="grade">
+      <div class="produto-texto rv">
+        <h2 id="h-produto" class="titulo">Avisos antes de sair</h2>
+        <p>Cadastre casa, trabalho ou escola e veja se as ruas ao redor entram em exposição estimada nas próximas horas, com os hospitais, escolas e mercados que ficam dentro de cada área.</p>
+        <a class="link" href="../pwa/">Abrir o aplicativo</a>
+      </div>
+      <figure class="produto-figura fones rv">
+        <div class="fones-par">
+          <img src="img/app-avisos.png" width="560" height="1212" alt="Tela de avisos do aplicativo: duas barras por hora mostram a exposição estimada das ruas ao redor de dois lugares salvos nas próximas 12 horas">
+          <img src="img/app-mapa.png" width="560" height="1212" alt="Mapa do aplicativo com uma área em exposição estimada contornada e os pontos de interesse dentro dela">
+        </div>
+        <figcaption><b>Dados sintéticos de demonstração:</b> a chuva e os relatos desta tela são sintéticos e não são registros reais. A rede de ruas e os pontos de interesse são reais.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="campo c-chuva" id="chuva" aria-labelledby="h-chuva" data-nivel="0">
+    <div class="grade">
+      <h2 id="h-chuva" class="titulo grande">Quanto chove,<br>quanto se perde</h2>
+      <div class="chuva-painel">
+        <label for="mm" class="chuva-rotulo">Chuva em 24 horas: <b id="mm-rotulo">abaixo de 26,2 mm</b></label>
+        <input id="mm" type="range" min="0" max="2" step="1" value="0" aria-describedby="mm-leitura" aria-valuetext="abaixo de 26,2 milímetros">
+        <p class="chuva-numero" id="mm-numero">0%</p>
+        <p class="chuva-leitura" id="mm-leitura">Nenhum bloqueio é atribuído a chuvas abaixo de 26,2 mm. A cidade alcançável em 30 minutos não muda.</p>
+      </div>
+      <ul class="chuva-lista">
+        <li><b>Abaixo de 26,2 mm:</b> nenhum bloqueio atribuído.</li>
+        <li><b>26 a 35 mm:</b> 3,5% da mobilidade de carro perdida.</li>
+        <li><b>40 a 45 mm:</b> 7% perdida; 190 mil pessoas perdem ao menos 10% do que alcançam, e em algumas áreas a perda chega a 79%.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="campo c-numeros" aria-labelledby="h-numeros">
+    <div class="grade">
+      <h2 id="h-numeros" class="titulo">Chuva comum, não só a extrema</h2>
+    </div>
+    <div class="mosaico">
+      <img class="rv" src="img/mobilidade-carro-45mm.png" width="1380" height="1530" alt="Mapa de Porto Alegre com a parcela da cidade alcançável de carro que se perde com 45 mm de chuva; as perdas se concentram na zona leste e no centro">
+      <div class="tile t1 rv"><p class="fig">14 dias</p><p>por ano em média, a chuva iguala ou passa de 26,2 mm (variação de 8 a 21, reanálise 2015–2024).</p></div>
+      <div class="tile t2 rv"><p class="fig">26,2 mm</p><p>é o menor acumulado em 24 horas que já coincidiu com bloqueios registrados pela EPTC.</p></div>
+    </div>
+  </section>
+
+  <section class="campo c-como" id="como" aria-labelledby="h-como">
+    <div class="grade intro">
+      <h2 id="h-como" class="titulo">Da chuva ao seu bairro</h2>
+      <p>Quatro etapas, cada uma dizendo o que é observado, estimado ou confirmado por gente.</p>
+    </div>
+    <div class="acordeao" id="acordeao">
+      <article class="etapa aberta" data-i="0">
+        <h3><button type="button" aria-expanded="true" aria-controls="e0"><span>Chuva</span></button></h3>
+        <div class="etapa-fig" aria-hidden="true"><b>26,2 mm</b><span>limite abaixo do qual nada fecha</span></div>
+        <div class="etapa-corpo" id="e0"><p>Previsão horária e histórico de reanálise, em grade de cerca de 10 km. Abaixo de 26,2 mm, nenhum trecho fecha.</p></div>
+      </article>
+      <article class="etapa" data-i="1">
+        <h3><button type="button" aria-expanded="false" aria-controls="e1"><span>Trechos</span></button></h3>
+        <div class="etapa-fig" aria-hidden="true"><b>176 mil</b><span>trechos de rua na rede</span></div>
+        <div class="etapa-corpo" id="e1"><p>Bloqueios documentados pela EPTC e pontos de maior suscetibilidade do terreno entram como trechos fechados. É uma regra explícita, não um modelo treinado.</p></div>
+      </article>
+      <article class="etapa" data-i="2">
+        <h3><button type="button" aria-expanded="false" aria-controls="e2"><span>Áreas e lugares</span></button></h3>
+        <div class="etapa-fig" aria-hidden="true"><b>1.720</b><span>pontos de interesse do OpenStreetMap em Porto Alegre</span></div>
+        <div class="etapa-corpo" id="e2"><p>Os trechos em exposição se juntam em áreas. Cruzamos cada área com hospitais, escolas, mercados e terminais, e com os lugares que você salvou no aparelho.</p></div>
+      </article>
+      <article class="etapa" data-i="3">
+        <h3><button type="button" aria-expanded="false" aria-controls="e3"><span>Comunidade</span></button></h3>
+        <div class="etapa-fig" aria-hidden="true"><b>2 apoios</b><span>sobem a confiabilidade de um relato</span></div>
+        <div class="etapa-corpo" id="e3"><p>Quem está na rua confirma ou diz que secou. As confirmações viram rótulos e o sistema sugere onde verificar primeiro. Nenhum apoio interdita uma via, e o modelo só entra no lugar da regra se mostrar ganho.</p></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="campo c-quem" id="quem" aria-labelledby="h-quem">
+    <div class="eixo">
+      <h2 id="h-quem" class="titulo grande">Feito para quem mora na cidade</h2>
+      <div class="linha-quem rv">
+        <div><h3>Quem sai de casa</h3><p>Veja se as ruas ao redor de casa, do trabalho e da escola entram em exposição estimada nas próximas horas, e trace uma rota com menor exposição.</p></div>
+        <img class="m1" src="img/app-avisos.png" width="560" height="1212" alt="" loading="lazy">
+      </div>
+      <div class="linha-quem rv">
+        <div><h3>Quem viu a rua alagada</h3><p>Diga se ainda está alagado ou se já secou. Cada confirmação ajuda a priorizar onde verificar primeiro, sem interditar rua nenhuma.</p></div>
+        <img class="m2" src="img/app-comunidade.png" width="560" height="1212" alt="" loading="lazy">
+      </div>
+      <div class="linha-quem rv">
+        <div><h3>Quem cuida da cidade</h3><p>A mesma informação, aberta, mostra à Defesa Civil, à EPTC e ao planejamento onde a perda de acesso é maior.</p></div>
+        <!-- A captura do painel estadual (painel-rs.png) mostrava a malha do DAER, de licença não confirmada: fica só no disco local (data/raw/arquivo_estadual/figuras/), fora do Git. -->
+      </div>
+    </div>
+  </section>
+
+  <section class="campo c-limites" aria-labelledby="h-limites">
+    <div class="grade duas-col">
+      <h2 id="h-limites" class="titulo grande">Uma estimativa,<br>não uma previsão</h2>
+      <ul class="limites">
+        <li>O baseline de risco por trecho detectou 4 dos 19 bloqueios documentados.</li>
+        <li>Um modelo treinado não superou regras simples de decisão.</li>
+        <li>A chuva é de reanálise, em grade de cerca de 10 km, não de pluviômetro.</li>
+        <li>O ajuste entre chuva e bloqueios usa só três datas.</li>
+        <li>Os relatos da comunidade carregam o viés de quem reporta: bairros com menos relatos aparecem menos.</li>
+        <li>Ainda não houve teste em celular físico nem com moradores.</li>
+      </ul>
+    </div>
+  </section>
+
+  <a class="campo c-cta" href="../pwa/" aria-label="Explorar o aplicativo">
+    <span class="cta-frase">Veja o que a chuva pode afetar perto de você.</span>
+    <svg class="cta-seta" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><path d="M12 36 36 12M16 12h20v20" fill="none" stroke="currentColor" stroke-width="4"/></svg>
+    <span class="cta-palavra" aria-hidden="true">Explorar</span>
+  </a>
+
+</main>
+
+<footer class="rodape">
+  <p class="rodape-nome" aria-hidden="true">Flooding Mapping</p>
+  <div class="rodape-linhas">
+    <ul class="lugares">
+      <li><a href="../pwa/">Demonstração no celular (PWA)</a></li>
+      <li><a href="../?painel=1">Demonstração no computador (painel)</a></li>
+      <li><a href="https://github.com/helenavalanera/flooding-mapping-capstone/tree/develop" rel="noopener">Código no GitHub</a></li>
+    </ul>
+    <p class="fontes">Dados abertos: OpenStreetMap, IBGE, Copernicus, EPTC, DAER e Open-Meteo. As telas de Porto Alegre na demonstração usam chuva e ocorrências sintéticas, identificadas na interface.</p>
+  </div>
+  <p class="rodape-fim"><span>Projeto final · Future Tech Leaders Brasil · Space Tech Bootcamp 2026 · Helena de Oliveira Valanera</span><a href="#topo">Voltar ao topo</a></p>
+</footer>
+
+<script src="inicio.js"></script>
+</body>
+</html>

@@ -9,6 +9,27 @@ O assistente com provedor de linguagem é **opcional**: sem chave, ele responde 
 
 ## 1. Preparação (uma vez)
 
+## Dois jeitos de demonstrar
+
+1. **Local** (`make demo`, seções abaixo): o servidor inteiro é a demonstração, com dados sintéticos.
+2. **No serviço publicado, com o seletor no topo**: o mesmo servidor atende **dados reais** e uma **demonstração isolada**. No topo do PWA (e do painel) há um seletor
+   **Dados reais | Demonstração**. A escolha vive num cookie de sessão (`fm_modo`, sem dado pessoal) e a página recarrega ao trocar. O seletor só aparece se o servidor
+   estiver com `FM_DEMONSTRACAO=1`.
+
+**O que a demonstração é.** Não é uma rota pronta. Você usa o aplicativo normalmente: **a sua localização como origem** (botão "Minha localização", com consentimento),
+o destino que quiser, carro ou a pé. O que muda é só a chuva: no modo de demonstração cai uma **chuva forte e fictícia, agora, sobre a cidade inteira**
+(14 mm/h, de 3 horas atrás até 6 horas à frente). A pergunta que ela responde é: *"se estivesse chovendo forte onde eu estou, que rota o sistema indicaria até o meu destino?"*
+
+O resultado aparece como em qualquer análise: tempo, distância, trechos em atenção e a rota de **menor exposição estimada**, com o custo em minutos e a escolha sua.
+Em cinco percursos testados em Porto Alegre sob essa chuva, todos cruzaram trechos em atenção ou alto, e o sistema sugeriu uma alternativa de menor exposição
+com 2 a 11 minutos a mais (um par curto teve só 0,05 km de exposição). Esses números são **da série sintética** e não valem como previsão.
+
+**Isolamento.** O estado de demonstração é separado do real: as ocorrências ficam só em memória e **nunca** entram no arquivo real, e a credencial do operador da
+demonstração (`demo-operador-com-mais-de-24-caracteres`) é pública e **não abre o serviço real**. Quem usa a demonstração compartilha o mesmo estado, que some quando o
+servidor reinicia. Há também duas ocorrências de demonstração em uma região do centro (uma pendente, uma confirmada), que servem para mostrar os selos e a interdição.
+
+**Celular.** Quem abre o endereço do painel num celular é levado direto ao aplicativo do cidadão; `?painel=1` abre o painel mesmo assim.
+
 1. Ter Python 3.12 e instalar as dependências do servidor: `python -m venv .venv && .venv/bin/pip install -r requirements-servidor.txt` (ou `requirements.lock.txt` para o ambiente completo).
 2. Ter a tabela de ruas `data/processed/rede_poa.parquet` (17 MB). Se faltar, `make rede` a gera (exige o ambiente completo e o recorte do OpenStreetMap; veja o README).
 3. Opcional, só para ver o assistente reformular com o provedor real: definir `GEMINI_API_KEY` e `GEMINI_MODEL` no arquivo `.env` (que o Git ignora) e iniciar com `DEMO_GEMINI=1 make demo`. **Nunca coloque a chave em arquivo versionado.**
@@ -31,7 +52,7 @@ Verificação rápida: `curl http://127.0.0.1:8766/api/saude` deve responder `"s
 
 ## 3. Acesso ao desktop
 
-Abra `http://127.0.0.1:8766/` no navegador do computador. A faixa amarela "DEMONSTRAÇÃO" deve estar visível.
+Abra `http://127.0.0.1:8766/` no navegador do computador. A faixa amarela "DEMONSTRAÇÃO" deve estar visível (no modo local, ou ao escolher Demonstração no seletor).
 
 ## 4. Acesso ao PWA
 

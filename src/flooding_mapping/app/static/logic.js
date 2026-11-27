@@ -157,8 +157,15 @@
   function norm(s) { return String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim(); }
   /* "#poa/mobilidade" -> {territorio, aba}; a bare tab ("#mapa") keeps the default territory; anything else falls back. */
   function parseHash(hash, tabs, territories, fallback) {
-    var parts = String(hash || "").replace(/^#/, "").split("/"), t = territories.indexOf(parts[0]) >= 0 ? parts.shift() : fallback;
-    return { territorio: t, aba: tabs.indexOf(parts[0]) >= 0 ? parts[0] : null };
+    var h = String(hash || "").replace(/^#/, ""), q = h.indexOf("?"), consulta = null;
+    if (q >= 0) {   // "#poa/mapa?escoamento=1&p=30": a landing page opens the map already set up
+      consulta = {}; h.slice(q + 1).split("&").forEach(function (kv) { var p = kv.split("="); if (p[0]) consulta[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || ""); });
+      h = h.slice(0, q);
+    }
+    var parts = h.split("/"), t = territories.indexOf(parts[0]) >= 0 ? parts.shift() : fallback;
+    var r = { territorio: t, aba: tabs.indexOf(parts[0]) >= 0 ? parts[0] : null };
+    if (consulta) r.consulta = consulta;
+    return r;
   }
 
   /* Fragments of one street along a route read as one line: total length, first to last passage, worst class.
@@ -206,7 +213,10 @@
     alternativa: { color: "#1f6fb2", dash: "8 6", label: "Alternativa" }
   };
 
-  var api = { KINDS: KINDS, kind: kind, kindBadge: kindBadge, hhmm: hhmm, weekdayHour: weekdayHour, minutes: minutes,
+  /* Data mode: "real" or "demo". A session cookie (no expiry, no personal data) that the server reads to pick the service; the page reloads on change. */
+  function modoAtual() { return typeof document !== "undefined" && /(?:^|;\s*)fm_modo=demo(?:;|$)/.test(document.cookie) ? "demo" : "real"; }
+  function definirModo(modo) { document.cookie = "fm_modo=" + (modo === "demo" ? "demo" : "real") + "; path=/; SameSite=Lax"; }
+  var api = { modoAtual: modoAtual, definirModo: definirModo, KINDS: KINDS, kind: kind, kindBadge: kindBadge, hhmm: hhmm, weekdayHour: weekdayHour, minutes: minutes,
               extraMinutes: extraMinutes, mm: mm, km: km, groupStreets: groupStreets, barHeights: barHeights,
               ROUTE_STYLE: ROUTE_STYLE, groupStretches: groupStretches, rankMunicipalities: rankMunicipalities, countByClass: countByClass, STATE_LABEL: STATE_LABEL, CLASS_LABEL_COV: CLASS_LABEL_COV, capStatus: capStatus, layersOf: layersOf, pct: pct,
               classBadge: classBadge, dimensions: dimensions, norm: norm, parseHash: parseHash, CLASS_ORDER: CLASS_ORDER, CLASS_LABEL: CLASS_LABEL, esc: esc, classColor: classColor,

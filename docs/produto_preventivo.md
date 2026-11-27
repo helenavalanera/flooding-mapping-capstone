@@ -1,5 +1,7 @@
 # Flooding Mapping: inteligência territorial e mobilidade preventiva
 
+> **Foco no cidadão (nov/2026):** a aba **Avisos** do aplicativo (`/pwa/`), as áreas em exposição com pontos de interesse e o laço em que a comunidade confirma estão descritos em [avisos_comunidade.md](avisos_comunidade.md).
+
 Uma plataforma, duas escalas de demonstração, duas interfaces sobre **o mesmo serviço** (`servico.py`, exposto por
 `servidor.py`). O dashboard e a PWA não conversam entre si: ambos consultam a API, então uma interdição confirmada no painel
 é a próxima coisa que uma análise de rota na PWA enxerga.

@@ -114,7 +114,11 @@ def test_static_files_are_served_with_security_headers_and_no_path_traversal(api
     base, _, _ = api()
     r = requests.get(base + "/")
     assert r.status_code == 200 and "text/html" in r.headers["Content-Type"]
-    assert "frame-ancestors 'none'" in r.headers["Content-Security-Policy"] and r.headers["X-Content-Type-Options"] == "nosniff"
+    # só a página do painel pode ser enquadrada, e só pela mesma origem (página "No celular"); todo o resto continua com 'none'
+    assert "frame-ancestors 'self'" in r.headers["Content-Security-Policy"] and r.headers["X-Content-Type-Options"] == "nosniff"
+    for caminho in ("/inicio/", "/resultados.js"):
+        o = requests.get(base + caminho)
+        assert o.status_code == 200 and "frame-ancestors 'none'" in o.headers["Content-Security-Policy"], caminho
     # só a origem vai a outros domínios: o OpenStreetMap exige um Referer nos tiles, e o caminho da página nunca vaza
     assert r.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
     host, port = base.removeprefix("http://").split(":")
@@ -170,7 +174,19 @@ def test_generated_files_come_from_the_build_folder_but_source_files_win(api, tm
     assert c.getresponse().status == 404
 
 
-def test_only_the_service_worker_may_connect_to_the_map_library_cdn(api):
+@pytest.fixture
+def com_pwa_arquivado(monkeypatch):
+    """O PWA arquivado (app/arquivo/) só é servido por opt-in (FM_ARQUIVO_PWA=1); os testes do app de rotas o ligam assim."""
+    monkeypatch.setattr(srv, "RAIZES", tuple(r for r in srv.RAIZES if r != srv.ARQUIVO) + (srv.ARQUIVO,))
+
+
+def test_the_archived_pwa_and_the_install_files_are_not_served_by_default(api):
+    base, _, _ = api()
+    for caminho in ("/pwa/", "/pwa/pwa.js", "/sw.js", "/sw-mapa.js", "/manifest.webmanifest", "/instalar.js", "/inicio/aplicativo.html"):
+        assert requests.get(base + caminho).status_code == 404, caminho
+
+
+def test_only_the_service_worker_may_connect_to_the_map_library_cdn(api, com_pwa_arquivado):
     base, _, _ = api()
     pagina = requests.get(base + "/pwa/").headers["Content-Security-Policy"]
     sw = requests.get(base + "/pwa/sw.js").headers["Content-Security-Policy"]
@@ -206,7 +222,7 @@ def test_read_requests_are_limited_per_client(api, monkeypatch):
     assert codigos == [200] * 5 + [429] * 2
 
 
-def test_a_directory_without_the_trailing_slash_redirects_so_relative_paths_keep_working(api):
+def test_a_directory_without_the_trailing_slash_redirects_so_relative_paths_keep_working(api, com_pwa_arquivado):
     base, _, _ = api()
     r = requests.get(base + "/pwa", allow_redirects=False)
     assert r.status_code == 301 and r.headers["Location"] == "/pwa/"
@@ -411,3 +427,174 @@ def test_the_download_has_a_size_limit(tmp_path, monkeypatch):
     with pytest.raises(SystemExit, match="limite"):
         srv.baixar_rede("https://exemplo.test/x", "0" * 64, tmp_path / "r.parquet")
     assert not (tmp_path / "r.parquet").exists()
+
+
+# ---- celular: o painel abre normalmente (o redirecionamento ao app do cidadão foi arquivado com o PWA)
+IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+ANDROID = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36"
+DESKTOP = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+
+
+@pytest.mark.parametrize("ua", [IPHONE, ANDROID])
+def test_a_phone_is_no_longer_redirected_to_the_archived_citizen_app(api, ua):
+    base, _, _ = api()
+    r = requests.get(base + "/", headers={"User-Agent": ua}, allow_redirects=False)
+    assert r.status_code == 200 and "Location" not in r.headers and "Vary" not in r.headers
+    assert requests.get(base + "/index.html", headers={"User-Agent": ua}, allow_redirects=False).status_code == 200
+
+
+def test_the_panel_stays_for_desktops_and_can_be_forced_on_a_phone(api):
+    base, _, _ = api()
+    assert requests.get(base + "/", headers={"User-Agent": DESKTOP}, allow_redirects=False).status_code == 200
+    assert requests.get(base + "/?painel=1", headers={"User-Agent": IPHONE}, allow_redirects=False).status_code == 200
+
+
+def test_the_api_opens_normally_on_a_phone_and_the_archived_app_does_only_with_the_opt_in(api, com_pwa_arquivado):
+    base, _, _ = api()
+    assert requests.get(base + "/pwa/", headers={"User-Agent": IPHONE}, allow_redirects=False).status_code == 200
+    assert requests.get(base + "/api/saude", headers={"User-Agent": IPHONE}, allow_redirects=False).status_code == 200
+
+
+# ---- modo de demonstração: um segundo serviço, isolado, escolhido por cookie
+TOKEN_REAL = "token-do-servico-real-com-mais-de-24-caracteres"
+TOKEN_DEMO = "demo-operador-com-mais-de-24-caracteres"
+
+
+@pytest.fixture
+def dois():
+    """A real service and an isolated demonstration one behind the same server."""
+    real, _ = montar(token=TOKEN_REAL)
+    demo, _ = montar(token=TOKEN_DEMO)
+    servidor = ThreadingHTTPServer(("127.0.0.1", 0), srv.criar_handler(real, "", srv.Limitador(), servico_demo=demo))
+    threading.Thread(target=servidor.serve_forever, daemon=True).start()
+    yield f"http://127.0.0.1:{servidor.server_address[1]}"
+    servidor.shutdown()
+
+
+DEMO = {"Cookie": "fm_modo=demo"}
+
+
+def test_the_switch_cookie_picks_the_service_and_health_says_which(dois):
+    real = requests.get(dois + "/api/saude").json()
+    demo = requests.get(dois + "/api/saude", headers=DEMO).json()
+    assert real["modo"] == "real" and demo["modo"] == "demonstracao" and real["demonstracao_disponivel"] is True
+    assert requests.get(dois + "/api/saude", headers={"Cookie": "fm_modo=real"}).json()["modo"] == "real"
+    assert requests.get(dois + "/api/saude", headers={"Cookie": "outro=1; fm_modo=demo"}).json()["modo"] == "demonstracao"
+
+
+def test_demonstration_records_never_reach_the_real_service_and_the_other_way_round(dois):
+    rid = requests.post(dois + "/api/relatos", json={"texto": "alagada (demonstração)", "lon": O[0], "lat": O[1]}, headers=DEMO).json()["id"]
+    assert rid in [o["id"] for o in requests.get(dois + "/api/ocorrencias", headers=DEMO).json()["ocorrencias"]]
+    assert requests.get(dois + "/api/ocorrencias").json()["total"] == 0
+    requests.post(dois + "/api/relatos", json={"texto": "alagada (real)", "lon": D[0], "lat": D[1]})
+    assert requests.get(dois + "/api/ocorrencias", headers=DEMO).json()["total"] == 1
+
+
+def test_the_public_demonstration_credential_does_not_open_the_real_service(dois):
+    rid = requests.post(dois + "/api/relatos", json={"texto": "alagada na rua", "lon": O[0], "lat": O[1]}).json()["id"]
+    corpo = {"situacao": "confirmada", "confiabilidade": "alta", "impacto_circulacao": "interdicao", "evidencia": "confirmado em teste isolado"}
+    assert requests.post(dois + "/api/ocorrencias/" + rid, json=corpo, headers={"Authorization": "Bearer " + TOKEN_DEMO}).status_code == 403
+    assert requests.post(dois + "/api/ocorrencias/" + rid, json=corpo, headers={"Authorization": "Bearer " + TOKEN_REAL}).status_code == 200
+
+
+def test_without_a_demonstration_service_the_cookie_changes_nothing(api):
+    base, _, _ = api()
+    saude = requests.get(base + "/api/saude", headers=DEMO).json()
+    assert saude["modo"] == "real" and saude["demonstracao_disponivel"] is False
+
+
+# ------------------------------------------------------------------ mapa-base (Protomaps, PMTiles lido por Range)
+@pytest.fixture
+def mapa(tmp_path, monkeypatch):
+    arquivo = tmp_path / "rs.pmtiles"
+    arquivo.write_bytes(bytes(range(256)) * 40)   # 10 240 bytes
+    monkeypatch.setattr(srv, "MAPA_ARQUIVO", arquivo)
+    return arquivo
+
+
+def test_the_basemap_answers_byte_ranges_so_a_phone_never_downloads_the_whole_file(api, mapa):
+    base, _, _ = api()
+    todo = mapa.read_bytes()
+    r = requests.get(base + "/mapa/rs.pmtiles", headers={"Range": "bytes=10-19"})
+    assert r.status_code == 206 and r.content == todo[10:20]
+    assert r.headers["Content-Range"] == f"bytes 10-19/{len(todo)}" and r.headers["Accept-Ranges"] == "bytes"
+    assert requests.get(base + "/mapa/rs.pmtiles", headers={"Range": "bytes=-5"}).content == todo[-5:]       # suffix
+    assert requests.get(base + "/mapa/rs.pmtiles", headers={"Range": f"bytes={len(todo) - 3}-"}).content == todo[-3:]   # open-ended
+    inteiro = requests.get(base + "/mapa/rs.pmtiles")
+    assert inteiro.status_code == 200 and inteiro.content == todo and "ETag" in inteiro.headers
+    assert requests.get(base + "/mapa/rs.pmtiles?v=20261115", headers={"Range": "bytes=0-3"}).content == todo[:4]   # the version in the URL is only a cache key
+
+
+def test_the_basemap_refuses_ranges_it_cannot_serve(api, mapa):
+    base, _, _ = api()
+    for pedido in ("bytes=99999-", "bytes=20-10", "bytes=-", "bytes=a-b", "items=0-9"):
+        r = requests.get(base + "/mapa/rs.pmtiles", headers={"Range": pedido})
+        assert r.status_code == 416, pedido
+    assert requests.get(base + "/mapa/rs.pmtiles", headers={"Range": "bytes=99999-"}).headers["Content-Range"] == f"bytes */{mapa.stat().st_size}"
+
+
+def test_one_basemap_answer_is_capped_however_open_the_range_is(api, mapa, monkeypatch):
+    monkeypatch.setattr(srv, "MAPA_RESPOSTA_MAX", 100)
+    base, _, _ = api()
+    r = requests.get(base + "/mapa/rs.pmtiles", headers={"Range": "bytes=0-"})
+    assert r.status_code == 206 and len(r.content) == 100 and r.headers["Content-Range"].startswith("bytes 0-99/")
+
+
+def test_a_missing_basemap_is_a_404_not_a_crash(api, tmp_path, monkeypatch):
+    monkeypatch.setattr(srv, "MAPA_ARQUIVO", tmp_path / "nao_existe.pmtiles")
+    base, _, _ = api()
+    assert requests.get(base + "/mapa/rs.pmtiles").status_code == 404
+
+
+def test_the_content_policy_no_longer_lets_pages_reach_third_party_tile_servers(api):
+    base, _, _ = api()
+    csp = requests.get(base + "/").headers["Content-Security-Policy"]
+    assert "openstreetmap.org" not in csp and "carto" not in csp.lower()
+    assert "connect-src 'self'" in csp
+
+
+def test_the_basemap_download_is_verified_and_named_in_its_errors(tmp_path, monkeypatch):
+    import hashlib
+    _com_resposta(monkeypatch, b"mapa")
+    alvo = tmp_path / "rs.pmtiles"
+    srv.baixar_rede("https://exemplo.test/rs.pmtiles", hashlib.sha256(b"mapa").hexdigest(), alvo, "FM_MAPA", "o mapa-base", srv.MAX_MAPA_BYTES)
+    assert alvo.read_bytes() == b"mapa"
+    with pytest.raises(SystemExit, match="FM_MAPA_SHA256"):
+        srv.baixar_rede("https://exemplo.test/rs.pmtiles", "0" * 64, tmp_path / "outro.pmtiles", "FM_MAPA", "o mapa-base", srv.MAX_MAPA_BYTES)
+
+
+def test_encoded_paths_reach_the_label_fonts_but_never_leave_the_static_folder(api):
+    base, _, _ = api()
+    r = requests.get(base + "/vendor/mapa/fontes/Noto%20Sans%20Regular/0-255.pbf")   # how the map library spells the font stack
+    assert r.status_code == 200 and len(r.content) > 1000
+    host, port = base.removeprefix("http://").split(":")
+    for caminho in ("/vendor/mapa/fontes/%2e%2e/%2e%2e/%2e%2e/servidor.py", "/vendor/%00/x", "/vendor/mapa/..%2f..%2f..%2fservidor.py", "/%252e%252e/%252e%252e/.env"):
+        c = http.client.HTTPConnection(host, int(port))
+        c.request("GET", caminho)
+        resposta = c.getresponse()
+        assert resposta.status == 404, caminho
+        assert b"OPERADOR_TOKEN" not in resposta.read()
+
+
+def test_the_citizen_routes_answer_strict_json_and_the_backing_flow_works_over_http(api):
+    base, servico, _ = api()
+    for caminho in ("/api/bolsoes?h=1", "/api/pois", "/api/areas-sugeridas", "/api/aprendizado", "/api/bairros?h=1", "/api/territorio"):
+        r = requests.get(base + caminho)
+        assert r.status_code == 200, caminho
+        json.loads(r.text, parse_constant=lambda c: pytest.fail(f"{c} em {caminho}"))
+    rel = requests.post(base + "/api/relatos", json={"lon": O[0], "lat": O[1], "tipo": "alagamento_via"}).json()
+    ok = requests.post(base + f"/api/ocorrencias/{rel['id']}/apoio", json={"chave": "aparelho-aleatorio-123", "tipo": "ainda"})
+    assert ok.status_code == 200 and ok.json()["contado"] and ok.json()["situacao"] == "reportada"
+    assert requests.post(base + f"/api/ocorrencias/{rel['id']}/apoio", json={"chave": "x", "tipo": "ainda"}).status_code == 422
+    assert requests.post(base + "/api/ocorrencias/inexistente/apoio", json={"chave": "aparelho-aleatorio-123", "tipo": "ainda"}).status_code == 404
+    av = requests.post(base + "/api/avisos", json={"lugares": [{"nome": "Casa", "lon": O[0], "lat": O[1]}], "horas": 3})
+    assert av.status_code == 200 and av.json()["lugares"][0]["nome"] == "Casa"
+    assert requests.post(base + "/api/avisos", json={"lugares": []}).status_code == 422
+
+
+def test_backing_does_not_need_the_operator_token_and_cannot_confirm(api):
+    base, servico, _ = api(token="x" * 30)
+    rel = requests.post(base + "/api/relatos", json={"lon": O[0], "lat": O[1]}).json()
+    r = requests.post(base + f"/api/ocorrencias/{rel['id']}/apoio", json={"chave": "aparelho-aleatorio-9", "tipo": "ainda"})
+    assert r.status_code == 200 and r.json()["situacao"] == "reportada"
+    assert requests.post(base + f"/api/ocorrencias/{rel['id']}", json={"situacao": "confirmada", "evidencia": "tentativa sem token"}).status_code == 403
