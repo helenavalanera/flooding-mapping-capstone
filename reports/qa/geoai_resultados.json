@@ -1,0 +1,1977 @@
+{
+ "P1_blocos": {
+  "media_do_treino": {
+   "fracao_construida": {
+    "mae": 0.26985853910446167,
+    "rmse": 0.34724336862564087,
+    "vies": 0.0004876942257396877,
+    "n": 407574
+   },
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.26985855207324744,
+     "ic95": [
+      0.2407570148672199,
+      0.3031875856954584
+     ]
+    },
+    "rmse": {
+     "valor": 0.3472433612907372,
+     "ic95": [
+      0.30424433822610886,
+      0.39034598938533704
+     ]
+    },
+    "vies": {
+     "valor": 0.0004876931627277322,
+     "ic95": [
+      -0.05872471000499173,
+      0.05182263126860973
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.219839591748076,
+     "ic95": [
+      0.20958902805151022,
+      0.2279679623790305
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "erros_por_grupo": {
+    "construido": {
+     "mae": 0.26985853910446167,
+     "rmse": 0.34724336862564087,
+     "vies": 0.0004876942257396877,
+     "n": 407574
+    },
+    "vegetacao": {
+     "mae": 0.30811917781829834,
+     "rmse": 0.3727947771549225,
+     "vies": -0.0005278565804474056,
+     "n": 407574
+    },
+    "solo_exposto": {
+     "mae": 0.06382512301206589,
+     "rmse": 0.14748041331768036,
+     "vies": 0.00012446950131561607,
+     "n": 407574
+    },
+    "agua": {
+     "mae": 0.018705306574702263,
+     "rmse": 0.08153876662254333,
+     "vies": -9.607854735804722e-05,
+     "n": 407574
+    }
+   }
+  },
+  "linear_ndvi_ndbi_mndwi": {
+   "fracao_construida": {
+    "mae": 0.11617123335599899,
+    "rmse": 0.19034333527088165,
+    "vies": 0.013446935452520847,
+    "n": 407574
+   },
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.11617123943374709,
+     "ic95": [
+      0.10129852390257428,
+      0.1316522320330904
+     ]
+    },
+    "rmse": {
+     "valor": 0.19034333808756435,
+     "ic95": [
+      0.1726162032049306,
+      0.20641488284252613
+     ]
+    },
+    "vies": {
+     "valor": 0.013446936280784366,
+     "ic95": [
+      -0.008354509472398528,
+      0.033024777389982565
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.44362462402814923,
+     "ic95": [
+      0.43279014352479084,
+      0.45164122244139304
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.6878390081589862,
+     "ic95": [
+      0.6307745127514027,
+      0.7325968548147156
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.815052863257673,
+     "ic95": [
+      0.7735888776108581,
+      0.8456633769777122
+     ]
+    }
+   },
+   "erros_por_grupo": {
+    "construido": {
+     "mae": 0.11617123335599899,
+     "rmse": 0.19034333527088165,
+     "vies": 0.013446935452520847,
+     "n": 407574
+    },
+    "vegetacao": {
+     "mae": 0.12596829235553741,
+     "rmse": 0.19385211169719696,
+     "vies": -0.018887512385845184,
+     "n": 407574
+    },
+    "solo_exposto": {
+     "mae": 0.06141868606209755,
+     "rmse": 0.14492496848106384,
+     "vies": -0.00019139680080115795,
+     "n": 407574
+    },
+    "agua": {
+     "mae": 0.022126035764813423,
+     "rmse": 0.0747787281870842,
+     "vies": 0.005631972104310989,
+     "n": 407574
+    }
+   }
+  },
+  "rf_S1_bandas": {
+   "fracao_construida": {
+    "mae": 0.055214110761880875,
+    "rmse": 0.12095026671886444,
+    "vies": 0.0033242523204535246,
+    "n": 407574
+   },
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.05521411263246496,
+     "ic95": [
+      0.04612080408026413,
+      0.0649409141921565
+     ]
+    },
+    "rmse": {
+     "valor": 0.12095026273675531,
+     "ic95": [
+      0.10610399327742709,
+      0.13579595481435236
+     ]
+    },
+    "vies": {
+     "valor": 0.003324252204635877,
+     "ic95": [
+      -0.005905482736188623,
+      0.011696392864173764
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.6430893800558803,
+     "ic95": [
+      0.6091130857889276,
+      0.6677285302882114
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.8026411968227669,
+     "ic95": [
+      0.7587528811406918,
+      0.8333474512481811
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.8905168685121108,
+     "ic95": [
+      0.8628305764438704,
+      0.909099309761729
+     ]
+    }
+   },
+   "erros_por_grupo": {
+    "construido": {
+     "mae": 0.055214110761880875,
+     "rmse": 0.12095026671886444,
+     "vies": 0.0033242523204535246,
+     "n": 407574
+    },
+    "vegetacao": {
+     "mae": 0.08510206639766693,
+     "rmse": 0.16630198061466217,
+     "vies": -0.006152591202408075,
+     "n": 407574
+    },
+    "solo_exposto": {
+     "mae": 0.05336867272853851,
+     "rmse": 0.13281698524951935,
+     "vies": 0.0020570012275129557,
+     "n": 407574
+    },
+    "agua": {
+     "mae": 0.01311666052788496,
+     "rmse": 0.060567501932382584,
+     "vies": 0.0007713381783105433,
+     "n": 407574
+    }
+   }
+  },
+  "rf_S2_indices": {
+   "fracao_construida": {
+    "mae": 0.05394531413912773,
+    "rmse": 0.12169266492128372,
+    "vies": 0.0035319305025041103,
+    "n": 407574
+   },
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.053945312928201414,
+     "ic95": [
+      0.045036757811029025,
+      0.06364350596103993
+     ]
+    },
+    "rmse": {
+     "valor": 0.12169266541324922,
+     "ic95": [
+      0.10674953996963363,
+      0.1367620446966989
+     ]
+    },
+    "vies": {
+     "valor": 0.0035319305572495937,
+     "ic95": [
+      -0.005131867267920605,
+      0.011788347248219816
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.6525726959293952,
+     "ic95": [
+      0.619042183172112,
+      0.6781217682655262
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.802263527066289,
+     "ic95": [
+      0.7580824136455581,
+      0.8333237660211317
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.8902843729764732,
+     "ic95": [
+      0.8623968985553003,
+      0.9090852161148483
+     ]
+    }
+   },
+   "erros_por_grupo": {
+    "construido": {
+     "mae": 0.05394531413912773,
+     "rmse": 0.12169266492128372,
+     "vies": 0.0035319305025041103,
+     "n": 407574
+    },
+    "vegetacao": {
+     "mae": 0.08356622606515884,
+     "rmse": 0.1670193374156952,
+     "vies": -0.0073575726710259914,
+     "n": 407574
+    },
+    "solo_exposto": {
+     "mae": 0.05351956561207771,
+     "rmse": 0.13333149254322052,
+     "vies": 0.0028457788284868,
+     "n": 407574
+    },
+    "agua": {
+     "mae": 0.012854952365159988,
+     "rmse": 0.060342926532030106,
+     "vies": 0.0009798624087125063,
+     "n": 407574
+    }
+   }
+  },
+  "rf_S3_temporais": {
+   "fracao_construida": {
+    "mae": 0.05060339719057083,
+    "rmse": 0.11313141882419586,
+    "vies": 0.00206869188696146,
+    "n": 407574
+   },
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.05060339886175414,
+     "ic95": [
+      0.04252038013957188,
+      0.05972858810490151
+     ]
+    },
+    "rmse": {
+     "valor": 0.11313141561485746,
+     "ic95": [
+      0.10090371085294443,
+      0.12549395193196144
+     ]
+    },
+    "vies": {
+     "valor": 0.002068691246836755,
+     "ic95": [
+      -0.004729479916297578,
+      0.008185984934779835
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.6519865453730013,
+     "ic95": [
+      0.615414847465445,
+      0.679083389567732
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.8150033111770622,
+     "ic95": [
+      0.7783068200737119,
+      0.8412190186878358
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.8980736356326733,
+     "ic95": [
+      0.8753346849101967,
+      0.9137631211029502
+     ]
+    }
+   },
+   "erros_por_grupo": {
+    "construido": {
+     "mae": 0.05060339719057083,
+     "rmse": 0.11313141882419586,
+     "vies": 0.00206869188696146,
+     "n": 407574
+    },
+    "vegetacao": {
+     "mae": 0.08290237188339233,
+     "rmse": 0.16424334049224854,
+     "vies": -0.009754136204719543,
+     "n": 407574
+    },
+    "solo_exposto": {
+     "mae": 0.05580148845911026,
+     "rmse": 0.13752904534339905,
+     "vies": 0.006080111023038626,
+     "n": 407574
+    },
+    "agua": {
+     "mae": 0.013433236628770828,
+     "rmse": 0.06043270230293274,
+     "vies": 0.001605333643965423,
+     "n": 407574
+    }
+   }
+  },
+  "rf_S4_intra_celula": {
+   "fracao_construida": {
+    "mae": 0.04877106100320816,
+    "rmse": 0.11149313300848007,
+    "vies": 0.0009683442185632885,
+    "n": 407574
+   },
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.04877105978959073,
+     "ic95": [
+      0.04091492550004995,
+      0.057910744585046664
+     ]
+    },
+    "rmse": {
+     "valor": 0.11149313383292764,
+     "ic95": [
+      0.09927142947132145,
+      0.12382289383697036
+     ]
+    },
+    "vies": {
+     "valor": 0.0009683441555702277,
+     "ic95": [
+      -0.0052563502315637126,
+      0.006386718455704915
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.6586293562853821,
+     "ic95": [
+      0.6236382326135911,
+      0.6838704038064618
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.8184641445511011,
+     "ic95": [
+      0.7825304171447248,
+      0.8439378293513052
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.9001707809346375,
+     "ic95": [
+      0.8779995108226045,
+      0.9153647326835158
+     ]
+    }
+   },
+   "erros_por_grupo": {
+    "construido": {
+     "mae": 0.04877106100320816,
+     "rmse": 0.11149313300848007,
+     "vies": 0.0009683442185632885,
+     "n": 407574
+    },
+    "vegetacao": {
+     "mae": 0.07728017121553421,
+     "rmse": 0.15688513219356537,
+     "vies": -0.006726133171468973,
+     "n": 407574
+    },
+    "solo_exposto": {
+     "mae": 0.05374012514948845,
+     "rmse": 0.1345936357975006,
+     "vies": 0.004706420470029116,
+     "n": 407574
+    },
+    "agua": {
+     "mae": 0.012950718402862549,
+     "rmse": 0.05951321870088577,
+     "vies": 0.0010513681918382645,
+     "n": 407574
+    }
+   }
+  },
+  "linear_AEF": {
+   "fracao_construida": {
+    "mae": 0.06239880993962288,
+    "rmse": 0.11813394725322723,
+    "vies": 0.0065298848785459995,
+    "n": 407574
+   },
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.06239881114587341,
+     "ic95": [
+      0.05293922035086907,
+      0.07274694639134514
+     ]
+    },
+    "rmse": {
+     "valor": 0.11813395404918758,
+     "ic95": [
+      0.10443807205879241,
+      0.13287960710330263
+     ]
+    },
+    "vies": {
+     "valor": 0.006529885139866554,
+     "ic95": [
+      0.0017913164487503152,
+      0.01046285445146716
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.5746999768065826,
+     "ic95": [
+      0.536169716174371,
+      0.6010054677015908
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.8198127734460929,
+     "ic95": [
+      0.778775966782619,
+      0.8483113438865802
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.9009858436081339,
+     "ic95": [
+      0.8756313117508797,
+      0.9179312191042276
+     ]
+    }
+   },
+   "erros_por_grupo": {
+    "construido": {
+     "mae": 0.06239880993962288,
+     "rmse": 0.11813394725322723,
+     "vies": 0.0065298848785459995,
+     "n": 407574
+    },
+    "vegetacao": {
+     "mae": 0.09876977652311325,
+     "rmse": 0.16493384540081024,
+     "vies": -0.02202286571264267,
+     "n": 407574
+    },
+    "solo_exposto": {
+     "mae": 0.06051547825336456,
+     "rmse": 0.1391468197107315,
+     "vies": 0.00731558445841074,
+     "n": 407574
+    },
+    "agua": {
+     "mae": 0.021176733076572418,
+     "rmse": 0.06871935725212097,
+     "vies": 0.008177395910024643,
+     "n": 407574
+    }
+   }
+  },
+  "rf_AEF": {
+   "fracao_construida": {
+    "mae": 0.04791143909096718,
+    "rmse": 0.10850150883197784,
+    "vies": -6.216872861841694e-05,
+    "n": 407574
+   },
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.04791143578489068,
+     "ic95": [
+      0.03935462120818908,
+      0.057752675683242244
+     ]
+    },
+    "rmse": {
+     "valor": 0.10850150553979425,
+     "ic95": [
+      0.09511953312081237,
+      0.12319258429157444
+     ]
+    },
+    "vies": {
+     "valor": -6.216877721929376e-05,
+     "ic95": [
+      -0.002585099585454004,
+      0.0022852577470691866
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.623889833609964,
+     "ic95": [
+      0.5849081203716379,
+      0.6577302476628761
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.8238913669331422,
+     "ic95": [
+      0.7829341378291123,
+      0.852218707123144
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.9034434636515755,
+     "ic95": [
+      0.8782535720302683,
+      0.9202139046672897
+     ]
+    }
+   },
+   "erros_por_grupo": {
+    "construido": {
+     "mae": 0.04791143909096718,
+     "rmse": 0.10850150883197784,
+     "vies": -6.216872861841694e-05,
+     "n": 407574
+    },
+    "vegetacao": {
+     "mae": 0.08252670615911484,
+     "rmse": 0.15897804498672485,
+     "vies": -0.006614517420530319,
+     "n": 407574
+    },
+    "solo_exposto": {
+     "mae": 0.055387046188116074,
+     "rmse": 0.13484404981136322,
+     "vies": 0.004739600699394941,
+     "n": 407574
+    },
+    "agua": {
+     "mae": 0.01437036506831646,
+     "rmse": 0.06333713233470917,
+     "vies": 0.0019370847148820758,
+     "n": 407574
+    }
+   }
+  }
+ },
+ "escolha_do_conjunto_de_atributos": {
+  "regra": "parte de S1 e só passa ao conjunto seguinte se o intervalo de 95% (blocos) da redução de MAE exclui zero",
+  "escolhido": "S4_intra_celula",
+  "passos": [
+   {
+    "de": "S1_bandas",
+    "para": "S2_indices",
+    "diferenca_mae": 0.0012687997042635443,
+    "ic95": [
+     0.0007720939424363537,
+     0.0017841674768334715
+    ],
+    "adotado": true
+   },
+   {
+    "de": "S2_indices",
+    "para": "S3_temporais",
+    "diferenca_mae": 0.0033419140664472727,
+    "ic95": [
+     0.0004845162531399018,
+     0.006673521774884715
+    ],
+    "adotado": true
+   },
+   {
+    "de": "S3_temporais",
+    "para": "S4_intra_celula",
+    "diferenca_mae": 0.0018323390721634095,
+    "ic95": [
+     0.0010651434555050796,
+     0.0028657173117493198
+    ],
+    "adotado": true
+   }
+  ]
+ },
+ "comparacao_pareada_com_o_primario": {
+  "media_do_treino": {
+   "diferenca_mae": 0.2210874922836567,
+   "ic95": [
+    0.19849544710290712,
+    0.2463452272309248
+   ]
+  },
+  "linear_ndvi_ndbi_mndwi": {
+   "diferenca_mae": 0.06740017964415636,
+   "ic95": [
+    0.05844594290929446,
+    0.07632135297682317
+   ]
+  },
+  "rf_S1_bandas": {
+   "diferenca_mae": 0.0064430528428742265,
+   "ic95": [
+    0.0029127570832469763,
+    0.010888882072172956
+   ]
+  },
+  "rf_S2_indices": {
+   "diferenca_mae": 0.005174253138610682,
+   "ic95": [
+    0.0017242805236002971,
+    0.00934864064279701
+   ]
+  },
+  "rf_S3_temporais": {
+   "diferenca_mae": 0.0018323390721634095,
+   "ic95": [
+    0.0010651434555050796,
+    0.0028657173117493198
+   ]
+  },
+  "linear_AEF": {
+   "diferenca_mae": 0.013627751356282677,
+   "ic95": [
+    0.010814147179225212,
+    0.016529389833258076
+   ]
+  },
+  "rf_AEF": {
+   "diferenca_mae": -0.0008596240047000492,
+   "ic95": [
+    -0.0029397127765840737,
+    0.0012584598864528109
+   ]
+  }
+ },
+ "primario": {
+  "modelo": "rf_S4_intra_celula",
+  "matriz_de_confusao_ref_x_prev": [
+   [
+    66677,
+    6003,
+    287,
+    53
+   ],
+   [
+    5655,
+    311969,
+    1974,
+    222
+   ],
+   [
+    2457,
+    7087,
+    1746,
+    24
+   ],
+   [
+    334,
+    1696,
+    9,
+    1381
+   ]
+  ],
+  "ordem_das_classes": [
+   "construido",
+   "vegetacao",
+   "solo_exposto",
+   "agua"
+  ],
+  "classes_duras": {
+   "precisao": [
+    0.8875710501444298,
+    0.9547489709415311,
+    0.4347609561752988,
+    0.8220238095238095
+   ],
+   "recall": [
+    0.9131333881128458,
+    0.9754518166468639,
+    0.15432207884037474,
+    0.40380116959064327
+   ],
+   "f1": [
+    0.9001707809346375,
+    0.9649893670494528,
+    0.22778864970645796,
+    0.5415686274509803
+   ],
+   "iou": [
+    0.8184641445511011,
+    0.9323472980161742,
+    0.12853356890459364,
+    0.3713363807475128
+   ],
+   "macro_f1": 0.6586293562853821,
+   "suporte": [
+    73020,
+    319820,
+    11314,
+    3420
+   ]
+  },
+  "estabilidade_entre_blocos": {
+   "blocos": 79,
+   "mae_mediano": 0.037649519111183236,
+   "mae_p10_p90": [
+    0.006447222117211448,
+    0.11868168860402281
+   ],
+   "mae_pior": 0.15632361833684236,
+   "fracao_de_blocos_dentro_do_limite": 0.8354430379746836
+  },
+  "por_estrato_de_jardins": [
+   {
+    "de": 0.0,
+    "ate": 0.1,
+    "mae": 0.028992248699069023,
+    "rmse": 0.08789091557264328,
+    "vies": 0.014067964628338814,
+    "n": 310512
+   },
+   {
+    "de": 0.1,
+    "ate": 0.3,
+    "mae": 0.10342280566692352,
+    "rmse": 0.15705469250679016,
+    "vies": -0.026455143466591835,
+    "n": 53347
+   },
+   {
+    "de": 0.3,
+    "ate": 1.0,
+    "mae": 0.12256841361522675,
+    "rmse": 0.1758575290441513,
+    "vies": -0.058613695204257965,
+    "n": 43715
+   }
+  ],
+  "erro_de_area_por_bairro": {
+   "bairros_avaliados": 94,
+   "fracao_dentro_do_limite": 0.574468085106383,
+   "erro_relativo_mediano_abs": 0.08244022049339325,
+   "erro_relativo_total": 0.02837315692412368,
+   "bairros": [
+    {
+     "bairro": "Boa Vista do Sul",
+     "celulas": 25525,
+     "area_construida_ref_km2": 0.185571,
+     "area_construida_prevista_km2": 0.6676334375,
+     "erro_relativo": 2.597725062105609
+    },
+    {
+     "bairro": "São Caetano",
+     "celulas": 8467,
+     "area_construida_ref_km2": 0.058356,
+     "area_construida_prevista_km2": 0.1303754453125,
+     "erro_relativo": 1.2341395111470972
+    },
+    {
+     "bairro": "Arquipélago",
+     "celulas": 46848,
+     "area_construida_ref_km2": 0.408582,
+     "area_construida_prevista_km2": 0.779463125,
+     "erro_relativo": 0.9077275185886798
+    },
+    {
+     "bairro": "Extrema",
+     "celulas": 25364,
+     "area_construida_ref_km2": 0.196848,
+     "area_construida_prevista_km2": 0.3692621875,
+     "erro_relativo": 0.8758747231366334
+    },
+    {
+     "bairro": "Pitinga",
+     "celulas": 8485,
+     "area_construida_ref_km2": 0.09081,
+     "area_construida_prevista_km2": 0.142637671875,
+     "erro_relativo": 0.5707264824909151
+    },
+    {
+     "bairro": "Lageado",
+     "celulas": 22335,
+     "area_construida_ref_km2": 0.233172,
+     "area_construida_prevista_km2": 0.350461875,
+     "erro_relativo": 0.5030186943543822
+    },
+    {
+     "bairro": "Lami",
+     "celulas": 17103,
+     "area_construida_ref_km2": 0.246897,
+     "area_construida_prevista_km2": 0.3538689375,
+     "erro_relativo": 0.4332654406493396
+    },
+    {
+     "bairro": "Cascata",
+     "celulas": 5347,
+     "area_construida_ref_km2": 0.265365,
+     "area_construida_prevista_km2": 0.369234375,
+     "erro_relativo": 0.3914207789271381
+    },
+    {
+     "bairro": "Vila Conceição",
+     "celulas": 301,
+     "area_construida_ref_km2": 0.088497,
+     "area_construida_prevista_km2": 0.05463507421875,
+     "erro_relativo": -0.3826336009271501
+    },
+    {
+     "bairro": "Praia de Belas",
+     "celulas": 2211,
+     "area_construida_ref_km2": 0.531927,
+     "area_construida_prevista_km2": 0.72314975,
+     "erro_relativo": 0.35949058799421724
+    },
+    {
+     "bairro": "Lomba do Pinheiro",
+     "celulas": 24932,
+     "area_construida_ref_km2": 0.855954,
+     "area_construida_prevista_km2": 1.14608275,
+     "erro_relativo": 0.3389536704075219
+    },
+    {
+     "bairro": "Jardim Isabel",
+     "celulas": 459,
+     "area_construida_ref_km2": 0.167103,
+     "area_construida_prevista_km2": 0.117246171875,
+     "erro_relativo": -0.2983598626296356
+    },
+    {
+     "bairro": "Sétimo Céu",
+     "celulas": 1574,
+     "area_construida_ref_km2": 0.059427,
+     "area_construida_prevista_km2": 0.04530834375,
+     "erro_relativo": -0.2375798248270988
+    },
+    {
+     "bairro": "Bela Vista",
+     "celulas": 664,
+     "area_construida_ref_km2": 0.332496,
+     "area_construida_prevista_km2": 0.25676125,
+     "erro_relativo": -0.22777642437803763
+    },
+    {
+     "bairro": "Vila Assunção",
+     "celulas": 874,
+     "area_construida_ref_km2": 0.308637,
+     "area_construida_prevista_km2": 0.2420163125,
+     "erro_relativo": -0.21585450707465403
+    },
+    {
+     "bairro": "Jardim Europa",
+     "celulas": 411,
+     "area_construida_ref_km2": 0.18531,
+     "area_construida_prevista_km2": 0.150070203125,
+     "erro_relativo": -0.19016673074847554
+    },
+    {
+     "bairro": "Espírito Santo",
+     "celulas": 1001,
+     "area_construida_ref_km2": 0.277794,
+     "area_construida_prevista_km2": 0.22509778125,
+     "erro_relativo": -0.18969530929393724
+    },
+    {
+     "bairro": "Três Figueiras",
+     "celulas": 786,
+     "area_construida_ref_km2": 0.349317,
+     "area_construida_prevista_km2": 0.28524903125,
+     "erro_relativo": -0.1834092493351311
+    },
+    {
+     "bairro": "Vila São José",
+     "celulas": 1992,
+     "area_construida_ref_km2": 0.494136,
+     "area_construida_prevista_km2": 0.5831344375,
+     "erro_relativo": 0.18010919564654265
+    },
+    {
+     "bairro": "Chácara das Pedras",
+     "celulas": 450,
+     "area_construida_ref_km2": 0.230265,
+     "area_construida_prevista_km2": 0.190540625,
+     "erro_relativo": -0.17251590558704102
+    },
+    {
+     "bairro": "Ponta Grossa",
+     "celulas": 10605,
+     "area_construida_ref_km2": 0.485469,
+     "area_construida_prevista_km2": 0.568925375,
+     "erro_relativo": 0.17190876245445127
+    },
+    {
+     "bairro": "Anchieta",
+     "celulas": 8491,
+     "area_construida_ref_km2": 1.988829,
+     "area_construida_prevista_km2": 2.32604275,
+     "erro_relativo": 0.16955391841128625
+    },
+    {
+     "bairro": "Montserrat",
+     "celulas": 561,
+     "area_construida_ref_km2": 0.29646,
+     "area_construida_prevista_km2": 0.25080553125,
+     "erro_relativo": -0.15399874772313296
+    },
+    {
+     "bairro": "Chapéu do Sol",
+     "celulas": 5843,
+     "area_construida_ref_km2": 0.195327,
+     "area_construida_prevista_km2": 0.225107359375,
+     "erro_relativo": 0.15246412106365223
+    },
+    {
+     "bairro": "Petrópolis",
+     "celulas": 2251,
+     "area_construida_ref_km2": 1.071513,
+     "area_construida_prevista_km2": 0.9099785625,
+     "erro_relativo": -0.1507535956166654
+    },
+    {
+     "bairro": "Ipanema",
+     "celulas": 2399,
+     "area_construida_ref_km2": 0.764487,
+     "area_construida_prevista_km2": 0.6496563125,
+     "erro_relativo": -0.15020620036704352
+    },
+    {
+     "bairro": "Humaitá",
+     "celulas": 2843,
+     "area_construida_ref_km2": 0.904968,
+     "area_construida_prevista_km2": 1.032918375,
+     "erro_relativo": 0.1413866291404779
+    },
+    {
+     "bairro": "Sarandi",
+     "celulas": 21938,
+     "area_construida_ref_km2": 3.194496,
+     "area_construida_prevista_km2": 3.6446275,
+     "erro_relativo": 0.1409084562948271
+    },
+    {
+     "bairro": "Rio Branco",
+     "celulas": 948,
+     "area_construida_ref_km2": 0.533556,
+     "area_construida_prevista_km2": 0.468045625,
+     "erro_relativo": -0.12278069218601234
+    },
+    {
+     "bairro": "Jardim Lindóia",
+     "celulas": 492,
+     "area_construida_ref_km2": 0.24651,
+     "area_construida_prevista_km2": 0.21671628125,
+     "erro_relativo": -0.12086211005638717
+    },
+    {
+     "bairro": "Vila Jardim",
+     "celulas": 506,
+     "area_construida_ref_km2": 0.262881,
+     "area_construida_prevista_km2": 0.231492625,
+     "erro_relativo": -0.11940145921538643
+    },
+    {
+     "bairro": "Tristeza",
+     "celulas": 1476,
+     "area_construida_ref_km2": 0.56286,
+     "area_construida_prevista_km2": 0.49783403125,
+     "erro_relativo": -0.11552778444018051
+    },
+    {
+     "bairro": "Higienópolis",
+     "celulas": 734,
+     "area_construida_ref_km2": 0.342369,
+     "area_construida_prevista_km2": 0.30290009375,
+     "erro_relativo": -0.1152817756572587
+    },
+    {
+     "bairro": "Boa Vista",
+     "celulas": 1218,
+     "area_construida_ref_km2": 0.320571,
+     "area_construida_prevista_km2": 0.28469275,
+     "erro_relativo": -0.11191982431349061
+    },
+    {
+     "bairro": "Vila Nova",
+     "celulas": 9894,
+     "area_construida_ref_km2": 0.948006,
+     "area_construida_prevista_km2": 1.053424125,
+     "erro_relativo": 0.11119985000094935
+    },
+    {
+     "bairro": "Jardim Itu",
+     "celulas": 1313,
+     "area_construida_ref_km2": 0.578367,
+     "area_construida_prevista_km2": 0.51539984375,
+     "erro_relativo": -0.10887058952187798
+    },
+    {
+     "bairro": "Independência",
+     "celulas": 349,
+     "area_construida_ref_km2": 0.215145,
+     "area_construida_prevista_km2": 0.192222640625,
+     "erro_relativo": -0.10654376989937019
+    },
+    {
+     "bairro": "Vila Ipiranga",
+     "celulas": 991,
+     "area_construida_ref_km2": 0.496161,
+     "area_construida_prevista_km2": 0.444399375,
+     "erro_relativo": -0.10432425160381409
+    },
+    {
+     "bairro": "Moinhos de Vento",
+     "celulas": 919,
+     "area_construida_ref_km2": 0.44883,
+     "area_construida_prevista_km2": 0.4024843125,
+     "erro_relativo": -0.10325888978009491
+    },
+    {
+     "bairro": "Auxiliadora",
+     "celulas": 657,
+     "area_construida_ref_km2": 0.35037,
+     "area_construida_prevista_km2": 0.31450771875,
+     "erro_relativo": -0.10235545637468961
+    },
+    {
+     "bairro": "Cel. Aparicio Borges",
+     "celulas": 1961,
+     "area_construida_ref_km2": 0.388098,
+     "area_construida_prevista_km2": 0.4240645625,
+     "erro_relativo": 0.09267391870094667
+    },
+    {
+     "bairro": "Pedra Redonda",
+     "celulas": 564,
+     "area_construida_ref_km2": 0.07704,
+     "area_construida_prevista_km2": 0.070001734375,
+     "erro_relativo": -0.09135858807113188
+    },
+    {
+     "bairro": "Bom Fim",
+     "celulas": 417,
+     "area_construida_ref_km2": 0.273294,
+     "area_construida_prevista_km2": 0.249091578125,
+     "erro_relativo": -0.08855818962362877
+    },
+    {
+     "bairro": "Cristo Redentor",
+     "celulas": 747,
+     "area_construida_ref_km2": 0.428985,
+     "area_construida_prevista_km2": 0.391021125,
+     "erro_relativo": -0.08849697541872094
+    },
+    {
+     "bairro": "Jardim Sabará",
+     "celulas": 1378,
+     "area_construida_ref_km2": 0.318951,
+     "area_construida_prevista_km2": 0.2915125,
+     "erro_relativo": -0.08602732081103368
+    },
+    {
+     "bairro": "Jardim do Salso",
+     "celulas": 476,
+     "area_construida_ref_km2": 0.168282,
+     "area_construida_prevista_km2": 0.15437496875,
+     "erro_relativo": -0.0826412287113298
+    },
+    {
+     "bairro": "Santa Cecília",
+     "celulas": 466,
+     "area_construida_ref_km2": 0.25398,
+     "area_construida_prevista_km2": 0.233022421875,
+     "erro_relativo": -0.08251664747224191
+    },
+    {
+     "bairro": "Jardim Leopoldina",
+     "celulas": 612,
+     "area_construida_ref_km2": 0.262125,
+     "area_construida_prevista_km2": 0.240535390625,
+     "erro_relativo": -0.08236379351454459
+    },
+    {
+     "bairro": "Passo da Areia",
+     "celulas": 1368,
+     "area_construida_ref_km2": 0.756207,
+     "area_construida_prevista_km2": 0.6953705,
+     "erro_relativo": -0.0804495329982399
+    },
+    {
+     "bairro": "Rubem Berta",
+     "celulas": 1639,
+     "area_construida_ref_km2": 0.568134,
+     "area_construida_prevista_km2": 0.61244,
+     "erro_relativo": 0.07798512322797087
+    },
+    {
+     "bairro": "Menino Deus",
+     "celulas": 1440,
+     "area_construida_ref_km2": 0.797112,
+     "area_construida_prevista_km2": 0.7354955,
+     "erro_relativo": -0.07729967683336846
+    },
+    {
+     "bairro": "Mário Quintana",
+     "celulas": 4739,
+     "area_construida_ref_km2": 0.803394,
+     "area_construida_prevista_km2": 0.8652155625,
+     "erro_relativo": 0.07695049066833957
+    },
+    {
+     "bairro": "Santo Antônio",
+     "celulas": 812,
+     "area_construida_ref_km2": 0.346545,
+     "area_construida_prevista_km2": 0.3208726875,
+     "erro_relativo": -0.07408074708912263
+    },
+    {
+     "bairro": "Azenha",
+     "celulas": 997,
+     "area_construida_ref_km2": 0.564291,
+     "area_construida_prevista_km2": 0.52295275,
+     "erro_relativo": -0.07325697202330003
+    },
+    {
+     "bairro": "Jardim Botânico",
+     "celulas": 1500,
+     "area_construida_ref_km2": 0.508401,
+     "area_construida_prevista_km2": 0.47134596875,
+     "erro_relativo": -0.07288544131502495
+    },
+    {
+     "bairro": "Belém Novo",
+     "celulas": 14194,
+     "area_construida_ref_km2": 0.721863,
+     "area_construida_prevista_km2": 0.7734205,
+     "erro_relativo": 0.07142283231028602
+    },
+    {
+     "bairro": "Santa Tereza",
+     "celulas": 2957,
+     "area_construida_ref_km2": 1.035567,
+     "area_construida_prevista_km2": 0.9616645,
+     "erro_relativo": -0.07136428642473157
+    },
+    {
+     "bairro": "Santa Maria Goretti",
+     "celulas": 516,
+     "area_construida_ref_km2": 0.314361,
+     "area_construida_prevista_km2": 0.2923081875,
+     "erro_relativo": -0.07015123536316528
+    },
+    {
+     "bairro": "Cristal",
+     "celulas": 2548,
+     "area_construida_ref_km2": 0.824031,
+     "area_construida_prevista_km2": 0.881471125,
+     "erro_relativo": 0.06970626711859142
+    },
+    {
+     "bairro": "Cidade Baixa",
+     "celulas": 666,
+     "area_construida_ref_km2": 0.431199,
+     "area_construida_prevista_km2": 0.40140965625,
+     "erro_relativo": -0.06908490917186728
+    },
+    {
+     "bairro": "Agronomia",
+     "celulas": 9105,
+     "area_construida_ref_km2": 0.335331,
+     "area_construida_prevista_km2": 0.358064125,
+     "erro_relativo": 0.06779309100560342
+    },
+    {
+     "bairro": "Jardim São Pedro",
+     "celulas": 800,
+     "area_construida_ref_km2": 0.38016,
+     "area_construida_prevista_km2": 0.3546004375,
+     "erro_relativo": -0.06723369765361953
+    },
+    {
+     "bairro": "Medianeira",
+     "celulas": 760,
+     "area_construida_ref_km2": 0.390906,
+     "area_construida_prevista_km2": 0.36505425,
+     "erro_relativo": -0.066132906632285
+    },
+    {
+     "bairro": "Santa Rosa de Lima",
+     "celulas": 3944,
+     "area_construida_ref_km2": 1.157283,
+     "area_construida_prevista_km2": 1.230812,
+     "erro_relativo": 0.06353588534524399
+    },
+    {
+     "bairro": "Bom Jesus",
+     "celulas": 1060,
+     "area_construida_ref_km2": 0.563724,
+     "area_construida_prevista_km2": 0.527981125,
+     "erro_relativo": -0.06340491978344012
+    },
+    {
+     "bairro": "Santana",
+     "celulas": 1058,
+     "area_construida_ref_km2": 0.617985,
+     "area_construida_prevista_km2": 0.58395075,
+     "erro_relativo": -0.05507293866355979
+    },
+    {
+     "bairro": "São Sebastião",
+     "celulas": 565,
+     "area_construida_ref_km2": 0.306144,
+     "area_construida_prevista_km2": 0.29009540625,
+     "erro_relativo": -0.05242171576121041
+    },
+    {
+     "bairro": "Vila João Pessoa",
+     "celulas": 738,
+     "area_construida_ref_km2": 0.403389,
+     "area_construida_prevista_km2": 0.3842298125,
+     "erro_relativo": -0.047495562595906184
+    },
+    {
+     "bairro": "Belém Velho",
+     "celulas": 8385,
+     "area_construida_ref_km2": 0.385101,
+     "area_construida_prevista_km2": 0.40320559375,
+     "erro_relativo": 0.04701258565934651
+    },
+    {
+     "bairro": "São João",
+     "celulas": 1172,
+     "area_construida_ref_km2": 0.711216,
+     "area_construida_prevista_km2": 0.677865,
+     "erro_relativo": -0.04689292704326112
+    },
+    {
+     "bairro": "Partenon",
+     "celulas": 3532,
+     "area_construida_ref_km2": 1.560006,
+     "area_construida_prevista_km2": 1.488810375,
+     "erro_relativo": -0.04563804562290145
+    },
+    {
+     "bairro": "Campo Novo",
+     "celulas": 2911,
+     "area_construida_ref_km2": 0.232299,
+     "area_construida_prevista_km2": 0.242879484375,
+     "erro_relativo": 0.04554683565146643
+    },
+    {
+     "bairro": "Aberta dos Morros",
+     "celulas": 3141,
+     "area_construida_ref_km2": 0.40788,
+     "area_construida_prevista_km2": 0.4256776875,
+     "erro_relativo": 0.04363461679905855
+    },
+    {
+     "bairro": "Nonoai",
+     "celulas": 3418,
+     "area_construida_ref_km2": 0.572427,
+     "area_construida_prevista_km2": 0.5495918125,
+     "erro_relativo": -0.0398918770428369
+    },
+    {
+     "bairro": "Farrapos",
+     "celulas": 1711,
+     "area_construida_ref_km2": 0.907488,
+     "area_construida_prevista_km2": 0.9430236875,
+     "erro_relativo": 0.03915830016485067
+    },
+    {
+     "bairro": "Jardim Carvalho",
+     "celulas": 2490,
+     "area_construida_ref_km2": 0.631305,
+     "area_construida_prevista_km2": 0.6068201875,
+     "erro_relativo": -0.038784442543619964
+    },
+    {
+     "bairro": "Guarujá",
+     "celulas": 1166,
+     "area_construida_ref_km2": 0.257544,
+     "area_construida_prevista_km2": 0.248267859375,
+     "erro_relativo": -0.03601769260786506
+    },
+    {
+     "bairro": "Glória",
+     "celulas": 2625,
+     "area_construida_ref_km2": 0.534294,
+     "area_construida_prevista_km2": 0.5155490625,
+     "erro_relativo": -0.03508356354366697
+    },
+    {
+     "bairro": "Cavalhada",
+     "celulas": 2177,
+     "area_construida_ref_km2": 0.762678,
+     "area_construida_prevista_km2": 0.7397435625,
+     "erro_relativo": -0.030070930982668963
+    },
+    {
+     "bairro": "Centro Histórico",
+     "celulas": 2112,
+     "area_construida_ref_km2": 1.351494,
+     "area_construida_prevista_km2": 1.313384125,
+     "erro_relativo": -0.028198330884191866
+    },
+    {
+     "bairro": "Camaquã",
+     "celulas": 1055,
+     "area_construida_ref_km2": 0.446427,
+     "area_construida_prevista_km2": 0.43397803125,
+     "erro_relativo": -0.027885788157974316
+    },
+    {
+     "bairro": "Jardim Floresta",
+     "celulas": 375,
+     "area_construida_ref_km2": 0.167202,
+     "area_construida_prevista_km2": 0.1627074375,
+     "erro_relativo": -0.026881033121613378
+    },
+    {
+     "bairro": "Serraria",
+     "celulas": 3076,
+     "area_construida_ref_km2": 0.186444,
+     "area_construida_prevista_km2": 0.19116959375,
+     "erro_relativo": 0.02534591485915342
+    },
+    {
+     "bairro": "São Geraldo",
+     "celulas": 1441,
+     "area_construida_ref_km2": 0.947556,
+     "area_construida_prevista_km2": 0.924975125,
+     "erro_relativo": -0.02383064958693734
+    },
+    {
+     "bairro": "Morro Santana",
+     "celulas": 4778,
+     "area_construida_ref_km2": 0.493587,
+     "area_construida_prevista_km2": 0.50527696875,
+     "erro_relativo": 0.023683704696436495
+    },
+    {
+     "bairro": "Farroupilha",
+     "celulas": 440,
+     "area_construida_ref_km2": 0.105291,
+     "area_construida_prevista_km2": 0.1029644765625,
+     "erro_relativo": -0.02209612823033308
+    },
+    {
+     "bairro": "Navegantes",
+     "celulas": 1599,
+     "area_construida_ref_km2": 1.037349,
+     "area_construida_prevista_km2": 1.0146735625,
+     "erro_relativo": -0.02185902478336606
+    },
+    {
+     "bairro": "Parque Santa Fé",
+     "celulas": 1083,
+     "area_construida_ref_km2": 0.295173,
+     "area_construida_prevista_km2": 0.2891045,
+     "erro_relativo": -0.0205591297307003
+    },
+    {
+     "bairro": "Hípica",
+     "celulas": 7449,
+     "area_construida_ref_km2": 0.724086,
+     "area_construida_prevista_km2": 0.7382275,
+     "erro_relativo": 0.019530138685183804
+    },
+    {
+     "bairro": "Teresópolis",
+     "celulas": 3198,
+     "area_construida_ref_km2": 0.436392,
+     "area_construida_prevista_km2": 0.44033309375,
+     "erro_relativo": 0.009031086156483162
+    },
+    {
+     "bairro": "Passo das Pedras",
+     "celulas": 1560,
+     "area_construida_ref_km2": 0.459864,
+     "area_construida_prevista_km2": 0.4558158125,
+     "erro_relativo": -0.008803010237809439
+    },
+    {
+     "bairro": "Costa e Silva",
+     "celulas": 1146,
+     "area_construida_ref_km2": 0.479295,
+     "area_construida_prevista_km2": 0.48309784375,
+     "erro_relativo": 0.007934244567541911
+    },
+    {
+     "bairro": "Floresta",
+     "celulas": 1449,
+     "area_construida_ref_km2": 0.90828,
+     "area_construida_prevista_km2": 0.914849125,
+     "erro_relativo": 0.007232488880081032
+    },
+    {
+     "bairro": "Restinga",
+     "celulas": 15858,
+     "area_construida_ref_km2": 1.578717,
+     "area_construida_prevista_km2": 1.569618625,
+     "erro_relativo": -0.005763145009523556
+    }
+   ]
+  },
+  "incerteza": {
+   "spearman_desvio_x_erro": 0.9584679289678898,
+   "erro_por_quintil_de_desvio": [
+    {
+     "desvio_de": 0.0,
+     "desvio_ate": 0.002114332979544997,
+     "erro_abs_medio": 0.00024230667622759938
+    },
+    {
+     "desvio_de": 0.002114332979544997,
+     "desvio_ate": 0.010811165161430838,
+     "erro_abs_medio": 0.002195275854319334
+    },
+    {
+     "desvio_de": 0.010811165161430838,
+     "desvio_ate": 0.03561800941824916,
+     "erro_abs_medio": 0.01217317022383213
+    },
+    {
+     "desvio_de": 0.03561800941824916,
+     "desvio_ate": 0.10929388403892522,
+     "erro_abs_medio": 0.053307127207517624
+    },
+    {
+     "desvio_de": 0.10929388403892522,
+     "desvio_ate": 0.4173327088356018,
+     "erro_abs_medio": 0.1759369671344757
+    }
+   ],
+   "cobertura_por_dobra": [
+    {
+     "dobra": 0,
+     "meio_intervalo": 0.15834800899028778,
+     "cobertura": 0.9117713596259709
+    },
+    {
+     "dobra": 1,
+     "meio_intervalo": 0.15148606896400452,
+     "cobertura": 0.8872008298335273
+    },
+    {
+     "dobra": 2,
+     "meio_intervalo": 0.1578688770532608,
+     "cobertura": 0.9107421502262038
+    },
+    {
+     "dobra": 3,
+     "meio_intervalo": 0.1569078266620636,
+     "cobertura": 0.909465642561728
+    },
+    {
+     "dobra": 4,
+     "meio_intervalo": 0.14927807450294495,
+     "cobertura": 0.8771483131763208
+    }
+   ],
+   "nota": "intervalo conforme de 90% com resíduos das outras dobras (modelos dessas dobras viram a dobra testada no treino: calibração aproximada)"
+  }
+ },
+ "P2_quadrantes": {
+  "media_do_treino": {
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.28922004007138336,
+     "ic95": [
+      0.25860799966362297,
+      0.32301924322497
+     ]
+    },
+    "rmse": {
+     "valor": 0.37189055678165756,
+     "ic95": [
+      0.3272759052627424,
+      0.4158479308911992
+     ]
+    },
+    "vies": {
+     "valor": 0.003395856077823424,
+     "ic95": [
+      -0.06851977853207977,
+      0.06311394065635231
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.219839591748076,
+     "ic95": [
+      0.20958902805151022,
+      0.2279679623790305
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "fracao_construida": {
+    "mae": 0.28922006487846375,
+    "rmse": 0.3718905448913574,
+    "vies": 0.0033958652056753635,
+    "n": 407574
+   },
+   "por_quadrante": {
+    "0": {
+     "mae": 0.3403143882751465,
+     "rmse": 0.4708268642425537,
+     "vies": -0.21208205819129944,
+     "n": 129037
+    },
+    "1": {
+     "mae": 0.30754828453063965,
+     "rmse": 0.4090283513069153,
+     "vies": -0.08995568752288818,
+     "n": 73801
+    },
+    "2": {
+     "mae": 0.23030373454093933,
+     "rmse": 0.2831544578075409,
+     "vies": 0.06028193607926369,
+     "n": 68080
+    },
+    "3": {
+     "mae": 0.26042747497558594,
+     "rmse": 0.2699461579322815,
+     "vies": 0.22893483936786652,
+     "n": 136656
+    }
+   }
+  },
+  "linear_ndvi_ndbi_mndwi": {
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.12513738456376203,
+     "ic95": [
+      0.10904758963735894,
+      0.14378313405170243
+     ]
+    },
+    "rmse": {
+     "valor": 0.2011542761646386,
+     "ic95": [
+      0.18337486679004777,
+      0.2190791877220186
+     ]
+    },
+    "vies": {
+     "valor": 0.006763924907296014,
+     "ic95": [
+      -0.02014261658110617,
+      0.02969477911116003
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.43974915801906206,
+     "ic95": [
+      0.4285588217066456,
+      0.448834548629854
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.6721231064062785,
+     "ic95": [
+      0.6149818118571965,
+      0.7184159607415919
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.803915816761606,
+     "ic95": [
+      0.7615959574033387,
+      0.8361374391707721
+     ]
+    }
+   },
+   "fracao_construida": {
+    "mae": 0.12513738870620728,
+    "rmse": 0.20115427672863007,
+    "vies": 0.00676392437890172,
+    "n": 407574
+   },
+   "por_quadrante": {
+    "0": {
+     "mae": 0.15853475034236908,
+     "rmse": 0.22997474670410156,
+     "vies": -0.0673322081565857,
+     "n": 129037
+    },
+    "1": {
+     "mae": 0.1585075706243515,
+     "rmse": 0.24021697044372559,
+     "vies": 0.007374306675046682,
+     "n": 73801
+    },
+    "2": {
+     "mae": 0.09647193551063538,
+     "rmse": 0.16673238575458527,
+     "vies": 0.010459893383085728,
+     "n": 68080
+    },
+    "3": {
+     "mae": 0.0898611843585968,
+     "rmse": 0.16039974987506866,
+     "vies": 0.07455804944038391,
+     "n": 136656
+    }
+   }
+  },
+  "rf_S4_intra_celula": {
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.05224999425990353,
+     "ic95": [
+      0.0437189713223621,
+      0.06223792163636011
+     ]
+    },
+    "rmse": {
+     "valor": 0.11645269698183817,
+     "ic95": [
+      0.10395314579511027,
+      0.1301312429671777
+     ]
+    },
+    "vies": {
+     "valor": -0.0024234316425069246,
+     "ic95": [
+      -0.011064981445589336,
+      0.004418960946656642
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.6510956408507083,
+     "ic95": [
+      0.6168913281665955,
+      0.67711135721042
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.8096150044479589,
+     "ic95": [
+      0.7760007104529747,
+      0.8350876251240947
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.8947925414609833,
+     "ic95": [
+      0.8738743062297993,
+      0.9101337869513819
+     ]
+    }
+   },
+   "fracao_construida": {
+    "mae": 0.05224999040365219,
+    "rmse": 0.11645270138978958,
+    "vies": -0.0024234317243099213,
+    "n": 407574
+   },
+   "por_quadrante": {
+    "0": {
+     "mae": 0.07536240667104721,
+     "rmse": 0.14572010934352875,
+     "vies": -0.022563675418496132,
+     "n": 129037
+    },
+    "1": {
+     "mae": 0.06250817328691483,
+     "rmse": 0.13136643171310425,
+     "vies": 0.009339614771306515,
+     "n": 73801
+    },
+    "2": {
+     "mae": 0.05250243470072746,
+     "rmse": 0.11391706764698029,
+     "vies": -0.006683498155325651,
+     "n": 68080
+    },
+    "3": {
+     "mae": 0.024760490283370018,
+     "rmse": 0.06790392845869064,
+     "vies": 0.012363605201244354,
+     "n": 136656
+    }
+   }
+  },
+  "linear_AEF": {
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.06380362158824951,
+     "ic95": [
+      0.05488759341824185,
+      0.07404411160837103
+     ]
+    },
+    "rmse": {
+     "valor": 0.11955811892332203,
+     "ic95": [
+      0.10614851884289092,
+      0.13402706753494087
+     ]
+    },
+    "vies": {
+     "valor": 0.008781398463377414,
+     "ic95": [
+      0.003585164385173835,
+      0.012958367427620347
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.5598532786501291,
+     "ic95": [
+      0.5287320330581552,
+      0.5845309992583491
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.8188577428334228,
+     "ic95": [
+      0.7755407623631648,
+      0.8479070742221794
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.9004087824458481,
+     "ic95": [
+      0.8735826050228338,
+      0.9176944930489002
+     ]
+    }
+   },
+   "fracao_construida": {
+    "mae": 0.06380361318588257,
+    "rmse": 0.11955811828374863,
+    "vies": 0.008781397715210915,
+    "n": 407574
+   },
+   "por_quadrante": {
+    "0": {
+     "mae": 0.07592645287513733,
+     "rmse": 0.14141885936260223,
+     "vies": -0.004341209772974253,
+     "n": 129037
+    },
+    "1": {
+     "mae": 0.08193657547235489,
+     "rmse": 0.14163970947265625,
+     "vies": 0.009514061734080315,
+     "n": 73801
+    },
+    "2": {
+     "mae": 0.06849843263626099,
+     "rmse": 0.12330746650695801,
+     "vies": 0.000706277962308377,
+     "n": 68080
+    },
+    "3": {
+     "mae": 0.04022510349750519,
+     "rmse": 0.07306577265262604,
+     "vies": 0.024799613282084465,
+     "n": 136656
+    }
+   }
+  },
+  "rf_AEF": {
+   "bootstrap_por_blocos": {
+    "mae": {
+     "valor": 0.05025514672688352,
+     "ic95": [
+      0.04196779601944656,
+      0.06001584934044958
+     ]
+    },
+    "rmse": {
+     "valor": 0.10960542896285005,
+     "ic95": [
+      0.09633518720600459,
+      0.12382763095974397
+     ]
+    },
+    "vies": {
+     "valor": -6.349493927698678e-06,
+     "ic95": [
+      -0.003270018300760298,
+      0.0028398568502896837
+     ]
+    },
+    "macro_f1": {
+     "valor": 0.6163769594977199,
+     "ic95": [
+      0.577704366041577,
+      0.6503273278984228
+     ]
+    },
+    "iou_construido": {
+     "valor": 0.8242416754185458,
+     "ic95": [
+      0.7857337226885204,
+      0.8512598284539558
+     ]
+    },
+    "f1_construido": {
+     "valor": 0.9036540350164244,
+     "ic95": [
+      0.8800121902502115,
+      0.9196546179002472
+     ]
+    }
+   },
+   "fracao_construida": {
+    "mae": 0.050255145877599716,
+    "rmse": 0.10960542410612106,
+    "vies": -6.349536306515802e-06,
+    "n": 407574
+   },
+   "por_quadrante": {
+    "0": {
+     "mae": 0.06854266673326492,
+     "rmse": 0.1338619440793991,
+     "vies": -0.005756217986345291,
+     "n": 129037
+    },
+    "1": {
+     "mae": 0.06543393433094025,
+     "rmse": 0.13015945255756378,
+     "vies": 0.0068174139596521854,
+     "n": 73801
+    },
+    "2": {
+     "mae": 0.053537242114543915,
+     "rmse": 0.11274760216474533,
+     "vies": -0.010180903598666191,
+     "n": 68080
+    },
+    "3": {
+     "mae": 0.02315482310950756,
+     "rmse": 0.05854429677128792,
+     "vies": 0.006806588266044855,
+     "n": 136656
+    }
+   }
+  }
+ },
+ "verificacao_osm": {
+  "nota": "OSM de edificações não é independente da Profill (origem das importações desconhecida); só indica coerência",
+  "celulas": 407574,
+  "soma_osm_km2": 33.042293548583984,
+  "soma_profill_edificacao_km2": 35.71757888793945,
+  "razao_osm_sobre_profill_edificacao": 0.9250988960266113,
+  "corr_osm_x_profill_edificacao": 0.9591939786960638,
+  "mae_osm_x_profill_edificacao": 0.012213880196213722,
+  "corr_osm_x_profill_construido": 0.8432447878335232,
+  "corr_osm_x_previsto_construido": 0.8170194390377095,
+  "corr_profill_construido_x_previsto": 0.9309483515700951
+ },
+ "meta": {
+  "experimento": "geoai-fase5-f082089c4c59",
+  "celulas_no_experimento": 407574,
+  "blocos": {
+   "blocos_com_celula_valida": 84,
+   "blocos_usados": 79,
+   "blocos_excluidos_por_poucas_celulas": [
+    0,
+    56,
+    84,
+    124,
+    139
+   ],
+   "celulas_por_dobra": {
+    "0": 92827,
+    "1": 79052,
+    "2": 89079,
+    "3": 72779,
+    "4": 73837
+   }
+  },
+  "limiares_operacionais": {
+   "mae_fracao_construida": 0.1,
+   "vies_absoluto": 0.03,
+   "erro_de_area_por_bairro": 0.1,
+   "fracao_de_bairros_dentro_do_limite": 0.8,
+   "ganho_minimo_de_macro_f1": 0.03
+  },
+  "segundos": 3178.6
+ }
+}

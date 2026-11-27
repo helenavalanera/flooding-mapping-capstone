@@ -1,0 +1,61 @@
+# Fase 5 (GeoAI): parâmetros do experimento. Nada aqui altera o motor de escoamento nem os resultados oficiais.
+experimento: geoai-fase5
+versao: "1"
+
+imagens:
+  stac_url: https://earth-search.aws.element84.com/v1/search   # catálogo público (Element 84) dos COG do Sentinel-2 L2A na AWS Open Data
+  colecao: sentinel-2-l2a
+  inicio: "2019-01-01"          # período da ortoimagem da Profill: 2018 a 2021
+  fim: "2021-12-31"
+  bandas_10m: [blue, green, red, nir]
+  bandas_20m: [swir16, swir22]
+  banda_scl: scl
+  nuvem_maxima_do_tile_pct: 60      # filtro barato nos metadados; a qualidade real é medida no município pela SCL
+  valido_minimo_no_municipio: 0.85  # fração do município com pixel válido para a cena entrar na composição
+  maximo_de_cenas: 30
+  scl_validas: [4, 5, 6]            # vegetação, não vegetado, água; fora: sombras, nuvens, cirros, não classificado, neve
+  scl_nuvem_e_sombra: [2, 3, 8, 9, 10]
+  dilatar_nuvem_px_20m: 2           # 40 m em volta de nuvem e sombra
+  margem_m: 60                      # margem da janela em volta do município
+
+alphaearth:      # Experimento B: embeddings anuais de 10 m (Google/DeepMind), CC-BY 4.0, bucket público gs://alphaearth_foundations
+  ano: 2020      # meio do período da ortoimagem da Profill (2018 a 2021)
+  zona: 22S
+  margem_m: 60
+
+diretorios:
+  cache: data/interim/geoai         # janelas das cenas (fora do Git)
+  saida: data/processed/geoai       # composição, atributos, previsões, COG (fora do Git)
+  relatorios: reports/qa            # métricas em JSON (fora do Git; os números citados vão para docs/)
+
+rotulos:
+  # Agrupamento das 15 classes da Profill 2022 em quatro grupos. "Jardins, Passeios..." é classe mista (jardim, calçada, área semiurbanizada):
+  # nenhuma fonte diz que fração dela é impermeável; ela fica FORA das frações e aparece como estrato nas métricas.
+  construido: ["Edificação", "Vias Pavimentadas"]
+  vegetacao: ["Campo", "Cultivo Irrigado", "Cultivo não Irrigado", "Pastagem", "Reflorestamento ou Vegetação Exótica", "Vegetação Mista", "Vegetação Nativa", "Área Úmida"]
+  solo_exposto: ["Solo Exposto", "Vias não Pavimentadas", "Área Degradada"]
+  agua: ["Corpo Hídrico"]
+  misto_excluido: ["Jardins, Passeios ou Áreas semi urbanizadas"]
+  celula_minima_nao_mista_m2: 540     # a célula só entra se a Profill classifica em grupo não misto ao menos 60% dos 900 m²
+
+validacao:
+  bloco_celulas: 100        # a mesma unidade de bloco da pintura do uso do solo (3 km)
+  dobras: 5
+  buffer_celulas: 5         # células de treino a menos de 150 m de um bloco de teste ficam de fora
+  semente: 20261126
+  bootstrap: 1000
+  estratos_jardins: [0.0, 0.10, 0.30, 1.01]    # fração da célula em "Jardins, Passeios..." (estrato das métricas)
+  limiares_operacionais:    # critérios propostos no relatório de viabilidade; NÃO são padrão científico (ver docs/geoai_fase5.md)
+    mae_fracao_construida: 0.10
+    vies_absoluto: 0.03
+    erro_de_area_por_bairro: 0.10
+    fracao_de_bairros_dentro_do_limite: 0.80
+    ganho_minimo_de_macro_f1: 0.03
+
+modelo:
+  rf:
+    n_estimators: 200
+    min_samples_leaf: 5
+    max_features: 0.33
+    amostras_de_treino: 150000   # subamostra por dobra (memória de 8 GB); a avaliação usa todas as células de teste
+    n_jobs: -1
