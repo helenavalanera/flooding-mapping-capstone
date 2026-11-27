@@ -13,7 +13,8 @@
   var CAMADAS = {
     relevo: { rotulo: "Relevo sombreado", kind: null, ids: ["sombra"], inicial: true, so3d: true },
     drenagem_cadastro: { rotulo: "Drenagem cadastrada (inventário, só contexto)", kind: "observado", ids: ["dren-rede-halo", "dren-rede-0", "dren-rede-1", "dren-rede-2", "dren-rede-dup", "dren-pocos", "dren-bocas", "dren-bombas", "dren-pt-dup", "dren-sel-rede", "dren-sel-pocos", "dren-sel-bocas", "dren-sel-bombas"], inicial: false, so3d: true },
-    escoamento_fase3: { rotulo: "Escoamento potencial por trecho (motor da Fase 3)", kind: "simulado", ids: ["f3-casing", "f3-sem-dados", "f3-sel"], inicial: false, so3d: true }
+    escoamento_fase3: { rotulo: "Escoamento potencial por trecho (motor da Fase 3)", kind: "simulado", ids: ["f3-casing", "f3-sem-dados", "f3-sel"], inicial: false, so3d: true },
+    geoai_fracao_construida: { rotulo: "E. Fração construída estimada (GeoAI, experimental)", kind: "experimental", ids: ["geoai-e"], inicial: false, so3d: true }
   };
   M.CAMADAS = CAMADAS;
 
@@ -77,7 +78,19 @@
     var dr = visivel("drenagem_cadastro");
     el("dren-opcoes").hidden = !dr;
     if (dr) ligarDrenagem();
+    var ge = visivel("geoai_fracao_construida");
+    el("geoai-opcoes").hidden = !ge;
+    if (ge) ligarGeoai();
     renderDimensoes();
+  }
+  /* Camada E (GeoAI, experimental): independente do cálculo; os dados só são baixados quando ela é ligada. */
+  function ligarGeoai() {
+    var G = window.Geoai;
+    if (!M._geoaiOuvindo) { M._geoaiOuvindo = true; G.aoMudar(function () { if (visivel("geoai_fracao_construida")) { if (G.meta && M.motor && M.pronto) M.motor.geoai_atualizar(G.meta, G.opacidade); else ligarGeoai(); legenda(); } }); }
+    G.montarPainel();
+    if (G.meta) { M.motor.geoai_atualizar(G.meta, G.opacidade); legenda(); return; }
+    G.carregar().then(function () { G.montarPainel(); if (visivel("geoai_fracao_construida")) M.motor.geoai_atualizar(G.meta, G.opacidade); legenda(); renderDimensoes(); })
+      .catch(function () { G.montarPainel(); legenda(); renderDimensoes(); });
   }
   /* Drenagem cadastrada: contexto do inventário da Fase 2, sem relação com o cálculo. Carregada só quando ligada. */
   function ligarDrenagem() {
@@ -132,7 +145,9 @@
     { id: "C", modo: "tp", camada: "escoamento_fase3", nome: "Topografia", pergunta: "Onde o relevo apresenta condições mais favoráveis à retenção de água (propensão topográfica à retenção).",
       nota: "Posto relativo entre trechos pelo preenchimento de depressões no Copernicus GLO-30 (30 m). Não é profundidade de alagamento, e o modelo não resolve depressões urbanas pequenas." },
     { id: "D", camada: "drenagem_cadastro", nome: "Drenagem", pergunta: "Onde estão localizados os dispositivos e as redes de drenagem cadastrados (infraestrutura de drenagem).",
-      nota: "Presença no cadastro não comprova conexão hidráulica, capacidade nem funcionamento. Fica fora do cálculo." }
+      nota: "Presença no cadastro não comprova conexão hidráulica, capacidade nem funcionamento. Fica fora do cálculo." },
+    { id: "E", camada: "geoai_fracao_construida", nome: "GeoAI (experimental)", pergunta: "Qual a fração construída por célula estimada por inteligência artificial geoespacial (camada experimental).",
+      nota: "Estimativa experimental, com a Profill como referência e fonte dos rótulos e sem validação independente. Não é impermeabilidade medida, coeficiente de escoamento nem alagamento, e não entra no cálculo das dimensões A a D." }
   ];
   M.DIMENSOES = DIMENSOES;
   function dimensaoAtiva(d) {
@@ -154,7 +169,7 @@
     var box = el("dimensoes"), F = window.Fase3;
     if (!box) return;
     var foco = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.dim;
-    var poa = M.pronto && (habilitada("escoamento_fase3") || habilitada("drenagem_cadastro"));
+    var poa = M.pronto && (habilitada("escoamento_fase3") || habilitada("drenagem_cadastro") || habilitada("geoai_fracao_construida"));
     box.hidden = !poa; el("camadas-sub").textContent = poa ? "(outras)" : "";
     if (!poa) { box.innerHTML = ""; return; }
     var ativas = DIMENSOES.filter(dimensaoAtiva);
@@ -167,7 +182,7 @@
       (p === 30 ? "É o percentil 75 dos totais por evento de 2017 a 2026 (reanálise ERA5), não a média. " : "") + "Cenário de cálculo, não previsão.</p>" : "";
     var erro = F.erro && visivel("escoamento_fase3") ? "<p class='small f3-sem' role='status'>Os dados de escoamento não estão disponíveis (" + Lg.esc(F.erro) + "); esta dimensão não pode ser mostrada. <button type='button' class='link' id='dim-tentar'>Tentar de novo</button></p>" : "";
     var versao = F.meta && visivel("escoamento_fase3") ? "<p class='small' id='dim-versao'>Dados de escoamento: camada v" + Lg.esc(F.meta.versao) + (window.FM_DADOS.versao ? ", conjunto " + Lg.esc(window.FM_DADOS.versao) : "") + ".</p>" : "";
-    box.innerHTML = "<h2 id='h-dim'>O que você quer ver?</h2><p class='small'>Cada item é independente, sem índice único. A, B e C pintam as linhas, um por vez. D pode ficar por cima.</p>" +
+    box.innerHTML = "<h2 id='h-dim'>O que você quer ver?</h2><p class='small'>Cada item é independente, sem índice único. A, B e C pintam as linhas, um por vez. D e a camada experimental E podem ficar por cima.</p>" +
       "<ul class='dim-lista'>" + botoes + "</ul>" +
       (ativas.length ? "<details class='dim-nota small'><summary>Como ler " + (ativas.length > 1 ? "estas dimensões" : "esta dimensão") + "</summary>" + ativas.map(function (d) { return "<p><b>" + d.id + ".</b> " + Lg.esc(d.nota) + "</p>"; }).join("") + "</details>" : "<p class='small muted'>Nenhuma dimensão ligada. Escolha uma acima para colorir os trechos.</p>") +
       chuva + erro + versao +
@@ -195,6 +210,7 @@
     var h = "";
     if (visivel("escoamento_fase3")) h += window.Fase3.legenda();
     if (visivel("drenagem_cadastro")) h += window.Drenagem.legenda();
+    if (visivel("geoai_fracao_construida")) h += window.Geoai.legenda();
     el("legenda-gl").innerHTML = h || "<li class='muted'>Nenhuma camada ativa.</li>";
   }
 
@@ -272,6 +288,18 @@
                paint: c[1] === "line" ? { "line-color": "#000", "line-width": 7, "line-opacity": 0.55 } : { "circle-radius": 9, "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": "#000", "circle-stroke-width": 3 } });
       });
       map.addLayer({ id: "f3-sel", type: "line", source: "f3", "source-layer": "trechos", filter: ["==", ["get", "n"], -1], layout: { "line-cap": "round" }, paint: { "line-color": "#000", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 5, 16, 11], "line-opacity": 0.55 } });
+    };
+    /* Camada E: imagem com transparência, alinhada ao Web Mercator (cantos em graus), por baixo das linhas de escoamento e de drenagem. Criada só na primeira vez que a camada é ligada. */
+    function acimaDoRelevo() {   // logo depois do relevo sombreado: sobre a água e o terreno, e por baixo das ruas, dos rótulos e das camadas de análise
+      var ls = map.getStyle().layers, i = ls.map(function (l) { return l.id; }).indexOf("sombra");
+      return i >= 0 && ls[i + 1] ? ls[i + 1].id : (map.getLayer("f3-casing") ? "f3-casing" : undefined);
+    }
+    m.geoai_atualizar = function (meta, opacidade) {
+      if (!map.getSource("geoai")) {
+        map.addSource("geoai", { type: "image", url: window.Geoai.urlImagem(), coordinates: meta.coordenadas });   // a fonte de imagem não aceita "attribution": a origem está no painel da camada e na legenda
+        map.addLayer({ id: "geoai-e", type: "raster", source: "geoai", layout: { visibility: "visible" }, paint: { "raster-opacity": opacidade, "raster-resampling": "nearest", "raster-fade-duration": 0 } }, acimaDoRelevo());
+      } else map.setPaintProperty("geoai-e", "raster-opacity", opacidade);
+      map.setLayoutProperty("geoai-e", "visibility", "visible");
     };
     m.visibilidade = function (nome, ligado) {
       CAMADAS[nome].ids.concat(nome === "escoamento_fase3" ? f3Camadas : []).forEach(function (id) { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", ligado ? "visible" : "none"); });

@@ -5,7 +5,7 @@ const { assert, abrir, BASE, semTransbordo } = require("./lib");
   const f3 = []; page.on("request", (r) => { if (/\/fase3\//.test(r.url())) f3.push(r.url()); });
   await page.goto(BASE + "#poa/mapa"); await page.waitForFunction(() => window.Mapa && window.Mapa.pronto, null, { timeout: 90000 });
   await page.waitForSelector("#dimensoes button[data-dim]");
-  assert.deepStrictEqual(await page.locator("#dimensoes button[data-dim]").evaluateAll((b) => b.map((x) => x.dataset.dim)), ["A", "B", "C", "D"]);
+  assert.deepStrictEqual(await page.locator("#dimensoes button[data-dim]").evaluateAll((b) => b.map((x) => x.dataset.dim)), ["A", "B", "C", "D", "E"]);   // E: camada experimental de GeoAI, independente
   assert.strictEqual(f3.length, 0, "nenhum dado da Fase 3 antes de escolher uma dimensão");
   assert.strictEqual(await page.locator("#dimensoes button[aria-pressed=true]").count(), 0, "começa sem dimensão ligada");
   // A: geração local

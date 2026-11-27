@@ -18,7 +18,7 @@ const ESTADUAL = /rodovia|bloqueio|S2iD|DAER|CPRv|munic[ií]pio|Rio Grande do Su
   const centro = await page.evaluate(() => window.Mapa.map.getCenter().toArray()); assert.ok(Math.abs(centro[0] + 51.22) < 0.1 && Math.abs(centro[1] + 30.03) < 0.1, "o mapa abre em Porto Alegre");
   const camadas = (await page.locator("#camadas label").allInnerTexts()).join(" | ");
   assert.match(camadas, /Relevo sombreado/); assert.match(camadas, /Drenagem cadastrada/); assert.match(camadas, /Escoamento potencial/); assert.doesNotMatch(camadas, ESTADUAL);
-  assert.strictEqual(await page.locator("#camadas input[data-camada]").count(), 3, "só as camadas do estudo");
+  assert.strictEqual(await page.locator("#camadas input[data-camada]").count(), 4, "só as camadas do estudo: relevo, drenagem, escoamento e a camada experimental E");
   assert.match(await page.innerText("#contexto"), /Ligue uma dimensão e clique em um trecho de rua/); assert.doesNotMatch(await page.innerText("#contexto"), ESTADUAL);
   assert.strictEqual(await page.locator("#poa-opcoes, #cores, #poa-hora").count(), 0, "sem controle de hora à frente nem de cores estaduais");
   // 2D sem relevo, 3D com exagero declarado

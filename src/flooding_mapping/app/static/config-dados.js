@@ -4,7 +4,7 @@
    - versao: identificador do conjunto (tools/gerar_manifesto_publicacao.py). meta_sha256: hash esperado do meta.json de cada camada; quando preenchido, a página
      recusa um meta.json diferente (dados que não são os da versão) em vez de mostrá-lo. Nulo = sem conferência (desenvolvimento local). */
 window.FM_DADOS = {
-  fase3: "fase3/", drenagem: "drenagem/", versao: null, meta_sha256: { fase3: null, drenagem: null },
+  fase3: "fase3/", drenagem: "drenagem/", geoai: "geoai/", versao: null, meta_sha256: { fase3: null, drenagem: null, geoai: null },
   /* Arquivo do mapa-base (Protomaps, lido por faixas de bytes). Padrão: o servidor local, na raiz ("/mapa/rs.pmtiles"). Com os dados no R2: a URL pública do objeto
      ("https://dados.exemplo.org/d-<hash>/mapa/rs.pmtiles"), que precisa de CORS com o cabeçalho Range e da origem em connect-src. */
   mapa: "/mapa/rs.pmtiles",

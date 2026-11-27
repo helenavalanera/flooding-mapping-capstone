@@ -67,7 +67,8 @@
     observado: { label: "Observado", cls: "k-observado", hint: "medido ou registrado" },
     previsto: { label: "Previsto", cls: "k-previsto", hint: "estimado a partir da previsão de chuva" },
     simulado: { label: "Simulado", cls: "k-simulado", hint: "efeito calculado em um cenário" },
-    confirmado: { label: "Confirmado", cls: "k-confirmado", hint: "validado por operador com evidência" }
+    confirmado: { label: "Confirmado", cls: "k-confirmado", hint: "validado por operador com evidência" },
+    experimental: { label: "Experimental", cls: "k-experimental", hint: "estimativa de GeoAI, sem validação independente" }
   };
   function kind(name) { return KINDS[name] || { label: "Sem classificação", cls: "k-nenhum", hint: "" }; }
   function kindBadge(name) {

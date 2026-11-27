@@ -4,7 +4,7 @@
   var TELAS = {
     territorio: { url: "../?painel=1#poa/mapa", nota: "Visão territorial: o mapa 3D de Porto Alegre. Os controles ficam em uma folha que se recolhe para liberar o mapa." },
     camadas: { url: "../?painel=1#poa/mapa?escoamento=1&modo=l&p=30&pacote=m1", nota: "Camadas: dimensão A (geração potencial de escoamento) para uma chuva hipotética de 30 mm. A legenda traz unidade, pacote de coeficientes e o que significa dado ausente." },
-    consulta: { url: "../?painel=1#poa/mapa?escoamento=1&modo=c&p=30&pacote=m1&lon=-51.2104&lat=-30.0144&zoom=15.5&trecho=31404", nota: "Consulta: um trecho de rua com contribuição potencial acumulada, área contribuinte, cobertura do pacote e indicador topográfico, cada um com a sua leitura e limitação. O trecho é um exemplo de demonstração, não um ponto de alagamento." },
+    consulta: { url: "../?painel=1#poa/mapa?escoamento=1&modo=c&p=30&pacote=m1&lon=-51.2104&lat=-30.0144&zoom=15.5&trecho=26114", nota: "Consulta: um trecho de rua com contribuição potencial acumulada, área contribuinte, cobertura do pacote e indicador topográfico, cada um com a sua leitura e limitação. O trecho é um exemplo de demonstração, não um ponto de alagamento." },
     resultados: { url: "../?painel=1#poa/resultados", nota: "Resultados: o que foi observado, o que o modelo estimou, o contexto, a relevância e a limitação de cada achado." },
     simulador: { url: "../?painel=1#poa/simulador", nota: "Simulador: compara as três execuções do motor (10, 20 e 30 mm). Não é um simulador hidráulico." }
   };

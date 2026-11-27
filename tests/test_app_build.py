@@ -66,9 +66,19 @@ def test_the_site_ships_the_single_territory_with_only_the_layers_of_the_study(t
     territorios = json.loads((out / "data/territorio_poa.json").read_text())["territorios"]
     assert set(territorios) == {"poa"} and territorios["poa"]["nome"] == "Porto Alegre" and territorios["poa"]["escala"] == "municipal"
     camadas = {c for cap in territorios["poa"]["capacidades"].values() for c in cap["camadas"]}
-    assert camadas == {"relevo", "escoamento_fase3", "drenagem_cadastro"}
+    assert camadas == {"relevo", "escoamento_fase3", "drenagem_cadastro", "geoai_fracao_construida"}      # a última é a camada experimental E, independente do cálculo
     desenhadas = set(re.findall(r"^    (\w+): \{ rotulo:", (out / "mapa.js").read_text(), re.M))
     assert camadas == desenhadas        # toda camada prometida é desenhada, e nenhuma desenhada fica sem promessa
+
+
+def test_the_geoai_layer_is_labelled_experimental_independent_and_loaded_only_when_turned_on(tmp_path):
+    out, _ = make_site(tmp_path)
+    mapa, geoai, logic = (out / "mapa.js").read_text(), (out / "geoai.js").read_text(), (out / "logic.js").read_text()
+    assert 'kind: "experimental"' in mapa and "experimental: { label: \"Experimental\"" in logic
+    assert "ligarGeoai" in mapa and 'visivel("geoai_fracao_construida")' in mapa and "Geoai.carregar" in mapa.replace("G.carregar", "Geoai.carregar")      # os dados só são baixados ao ligar
+    assert "não entra no cálculo das dimensões A, B, C e D" in geoai and "não há validação independente" in geoai and "transferência para outras áreas não foi testada" in geoai
+    assert "Fase3" not in geoai and "Drenagem" not in geoai                                                   # independente das dimensões A a D
+    assert not (out / "geoai").exists() and 'geoai: "geoai/"' in (out / "config-dados.js").read_text()      # a imagem é dado derivado: publicada à parte
 
 
 def test_derived_layers_are_published_only_when_asked(tmp_path):

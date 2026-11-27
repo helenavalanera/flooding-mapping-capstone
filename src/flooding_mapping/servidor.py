@@ -52,7 +52,9 @@ MAPA_ARQUIVO = ROOT / "data" / "raw" / "basemap" / "rs.pmtiles"
 CACHE_DERIVADOS = "public, max-age=3600, must-revalidate"   # tiles e fragmentos dos derivados; a publicação usa caminhos com hash e "immutable" (docs/r2_cache.md)
 FASE3_ROTA = "/fase3/"   # tiles e fragmentos da Fase 3 (derivados, fora do Git): tools/preparar_camada_fase3.py escreve em data/processed/fase3_web
 FASE3_RAIZ = ROOT / "data" / "processed" / "fase3_web"
-FASE3_TIPOS = (".pbf", ".json")
+FASE3_TIPOS = (".pbf", ".json", ".webp")
+GEOAI_ROTA = "/geoai/"   # camada E (GeoAI, experimental): tools/preparar_camada_geoai.py escreve em data/processed/geoai_web
+GEOAI_RAIZ = ROOT / "data" / "processed" / "geoai_web"
 DRENAGEM_ROTA = "/drenagem/"   # inventário de drenagem (Fase 2) para o mapa: tools/preparar_camada_drenagem.py escreve em data/processed/drenagem_web
 DRENAGEM_RAIZ = ROOT / "data" / "processed" / "drenagem_web"
 MAPA_RESPOSTA_MAX = 8 * 1024 * 1024   # one answer never carries more than this, however open the requested range is
@@ -452,6 +454,8 @@ def criar_handler(servico_real: Servico, cors_origem: str = "", limitador: Limit
                 return self._fase3(unquote(caminho))
             if caminho.startswith(DRENAGEM_ROTA):
                 return self._fase3(unquote(caminho), DRENAGEM_ROTA, DRENAGEM_RAIZ)
+            if caminho.startswith(GEOAI_ROTA):
+                return self._fase3(unquote(caminho), GEOAI_ROTA, GEOAI_RAIZ)
             caminho = unquote(caminho)   # the map library asks for "Noto%20Sans%20Regular"; the containment check below still applies to the decoded path
             if "\x00" in caminho:
                 return self._erro(HTTPStatus.NOT_FOUND, "não encontrado")
@@ -585,10 +589,11 @@ def montar(raiz: Path = ROOT, env=os.environ) -> tuple[Servico, str]:
         RAIZES = (STATIC, Path(env["FM_SITE"]))
     if (env.get("FM_ARQUIVO_PWA") or "").strip().lower() in ("1", "true", "sim"):   # opt-in: o PWA arquivado volta a ser servido (testes e retomada da frente de monitoramento)
         RAIZES = tuple(r for r in RAIZES if r != ARQUIVO) + (ARQUIVO,)
-    global MAPA_ARQUIVO, FASE3_RAIZ, DRENAGEM_RAIZ
+    global MAPA_ARQUIVO, FASE3_RAIZ, DRENAGEM_RAIZ, GEOAI_RAIZ
     MAPA_ARQUIVO = Path(env.get("FM_MAPA") or MAPA_ARQUIVO)
     FASE3_RAIZ = Path(env.get("FM_FASE3") or FASE3_RAIZ)
     DRENAGEM_RAIZ = Path(env.get("FM_DRENAGEM") or DRENAGEM_RAIZ)
+    GEOAI_RAIZ = Path(env.get("FM_GEOAI") or GEOAI_RAIZ)
     if not MAPA_ARQUIVO.exists() and env.get("FM_MAPA_URL"):   # a host built from Git has no data/: fetch the basemap once, verified
         baixar_rede(env["FM_MAPA_URL"], env.get("FM_MAPA_SHA256", ""), MAPA_ARQUIVO, "FM_MAPA", "o mapa-base", MAX_MAPA_BYTES)
     config = load_config()

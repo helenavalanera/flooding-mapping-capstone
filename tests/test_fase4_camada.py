@@ -320,3 +320,34 @@ def test_the_municipal_cut_keeps_only_streets_whose_midpoint_is_inside_the_polyg
     gpd.GeoDataFrame(geometry=[box(-51.2, -30.1, -51.1, -30.0)], crs="EPSG:4326").to_parquet(tmp_path / "m.parquet")
     pd.DataFrame({"segmento_id": ["dentro", "borda_para_fora", "fora"], "lon0": [-51.15, -51.12, -51.5], "lat0": [-30.05, -30.05, -30.05], "lon1": [-51.14, -51.0, -51.4], "lat1": [-30.05, -30.05, -30.05]}).to_parquet(tmp_path / "r.parquet")
     assert c.ids_no_municipio(tmp_path / "r.parquet", tmp_path / "m.parquet") == {"dentro"}      # o ponto médio de "borda_para_fora" (-51,06) já está fora
+
+
+def test_the_server_serves_the_experimental_geoai_layer_files_and_only_those(tmp_path, monkeypatch):
+    import http.client
+    import threading
+    from http.server import ThreadingHTTPServer
+
+    from test_servico import montar
+
+    pasta = tmp_path / "geoai"
+    pasta.mkdir()
+    (pasta / "meta.json").write_text('{"natureza":"EXPERIMENTAL"}')
+    (pasta / "fracao_construida.webp").write_bytes(b"RIFF" + b"x" * 2000)
+    (tmp_path / "fora.json").write_text("{}")
+    monkeypatch.setattr(srv, "GEOAI_RAIZ", pasta)
+    servico, _ = montar()
+    servidor = ThreadingHTTPServer(("127.0.0.1", 0), srv.criar_handler(servico, "", srv.Limitador()))
+    threading.Thread(target=servidor.serve_forever, daemon=True).start()
+    try:
+        def pega(caminho):
+            con = http.client.HTTPConnection("127.0.0.1", servidor.server_address[1])
+            con.request("GET", caminho)
+            r = con.getresponse()
+            return r.status, r.read(), r.getheader("Content-Type")
+        assert pega("/geoai/meta.json") == (200, b'{"natureza":"EXPERIMENTAL"}', "application/json")
+        st, corpo, tipo = pega("/geoai/fracao_construida.webp")
+        assert st == 200 and tipo == "image/webp" and corpo[:4] == b"RIFF"
+        for caminho in ("/geoai/x.txt", "/geoai/../fora.json", "/geoai/%2e%2e/fora.json", "/geoai/nao-existe.webp"):
+            assert pega(caminho)[0] == 404, caminho
+    finally:
+        servidor.shutdown()
