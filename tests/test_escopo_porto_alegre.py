@@ -24,7 +24,7 @@ def test_the_landing_never_offers_a_state_front():
 
 
 def test_the_published_static_folder_has_only_porto_alegre_data_and_no_state_layers():
-    assert sorted(p.name for p in (STATIC / "data").iterdir()) == ["mapa_manchas_poa.json", "rankings_poa.json", "resultados_poa.json", "territorio_poa.json"]
+    assert sorted(p.name for p in (STATIC / "data").iterdir()) == ["mapa_dimensoes_poa.json", "mapa_manchas_poa.json", "rankings_poa.json", "resultados_poa.json", "territorio_poa.json"]
     for nome in ("rodovias.geojson", "municipios.geojson", "cobertura_rs.json", "impacto_rs.json", "ocorrencias.json", "territorios.json"):
         assert not (STATIC / "data" / nome).exists(), nome
     assert not list(STATIC.rglob("*.geojson")) and not list(STATIC.rglob("*.parquet"))
@@ -42,16 +42,17 @@ def test_the_archived_fronts_are_kept_and_the_active_interface_does_not_load_the
     assert (arq / "painel-estadual/painel.js").read_text(encoding="utf-8") != texto(STATIC / "painel.js")
 
 
-def test_images_and_data_of_unconfirmed_licence_are_not_in_the_versionable_tree():
-    assert sorted(p.suffix for p in (STATIC / "inicio/img/estudo").iterdir()) == [".svg"] * 5 + [".webp"]                 # só gráficos de números agregados
+def test_raw_third_party_data_and_unconfirmed_coordinates_are_not_in_the_versionable_tree():
+    assert sorted(p.suffix for p in (STATIC / "inicio/img/estudo").iterdir()) == [".svg"] * 5 + [".webp"] * 4          # gráficos de números agregados e os quatro mapas de manchas (derivados, com atribuição)
     assert not list((RAIZ / "docs/figuras").glob("geoai_*.png"))                                              # derivam da Profill
     assert not (APP / "arquivo/inicio/img/painel-rs.png").exists()                                            # mostrava a malha do DAER
     assert not (RAIZ / "tests/dados/alagamentos_pmpa_coordenadas.csv").exists()                               # coordenadas da Prefeitura
     assert sorted(p.name for p in (RAIZ / "tests/dados").iterdir()) == ["LEIAME.md", "alagamentos_sinteticos.csv"]
 
 
-def test_the_landing_and_the_docs_say_why_the_maps_are_not_published():
-    assert "dependem da publicação dos arquivos derivados e da confirmação das permissões de redistribuição" in texto(STATIC / "inicio/index.html")
+def test_the_landing_gives_the_legal_basis_and_says_why_the_trecho_layers_are_pending():
+    h = texto(STATIC / "inicio/index.html")
+    assert "Decreto Municipal nº 20.315/2019" in h and "base_legal_dados.md" in h and "dependem da publicação dos arquivos derivados" in h
     assert "Figura não publicada" in texto(RAIZ / "docs/geoai_resultados.md")
     assert "mapas de trechos" in texto(RAIZ / "tools/gerar_landing.py") and "--mapas-locais" in texto(RAIZ / "tools/gerar_landing.py")
 

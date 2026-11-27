@@ -1,4 +1,4 @@
-/* Landing científica: navegação por âncoras com seção atual, abas das camadas do mapa, comparador de cenários e entrada suave.
+/* Landing científica: navegação por âncoras com seção atual, seletor das quatro dimensões do mapa, ampliação do mapa, comparador de cenários e entrada suave.
    Sem script, tudo continua legível: as abas mostram só a primeira camada, mas as quatro imagens estão no HTML; o comparador mostra os valores de 30 mm.
    O comparador usa os números reais das três execuções do motor (embutidos na página): nenhuma conta nova, só a escolha da chuva. */
 (function () {
@@ -31,17 +31,57 @@
     secoes.forEach(function (s) { if (s) io.observe(s); });
   }
 
-  /* abas das camadas do mapa */
+  /* seletor das quatro dimensões: sem script as quatro vêm empilhadas e legíveis; com script, uma de cada vez (as imagens das outras só carregam ao serem escolhidas) */
   var abas = $$("[data-mapas] [role=tab]");
+  $$("[data-mapas]").forEach(function (c) {
+    var lista = $("[role=tablist]", c); if (lista) lista.hidden = false;
+    $$("[role=tabpanel]", c).forEach(function (p) { p.hidden = p.getAttribute("aria-labelledby") !== (abas.filter(function (b) { return b.getAttribute("aria-selected") === "true"; })[0] || {}).id; });
+    $$(".ampliar", c).forEach(function (b) { b.hidden = false; });
+  });
+  function escolher(aba) {
+    abas.forEach(function (b) { var ativa = b === aba; b.setAttribute("aria-selected", String(ativa)); b.tabIndex = ativa ? 0 : -1; var p = document.getElementById(b.getAttribute("aria-controls")); if (p) p.hidden = !ativa; });
+  }
   abas.forEach(function (aba) {
-    aba.addEventListener("click", function () {
-      abas.forEach(function (b) { var ativa = b === aba; b.setAttribute("aria-selected", String(ativa)); var p = document.getElementById(b.getAttribute("aria-controls")); if (p) p.hidden = !ativa; });
-    });
+    aba.addEventListener("click", function () { escolher(aba); });
     aba.addEventListener("keydown", function (e) {
-      var i = abas.indexOf(aba), j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : -1;
-      if (j >= 0) { var alvo = abas[(j + abas.length) % abas.length]; alvo.focus(); alvo.click(); e.preventDefault(); }
+      var i = abas.indexOf(aba), j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? abas.length - 1 : -1;
+      if (j >= 0) { var alvo = abas[(j + abas.length) % abas.length]; alvo.focus(); escolher(alvo); e.preventDefault(); }
     });
   });
+
+  /* ampliar o mapa de manchas: a imagem em tamanho natural dentro de uma janela rolável, com mais e menos zoom; o pinça do celular também funciona */
+  var zoom = null;
+  function janelaZoom() {
+    if (zoom) return zoom;
+    var d = document.createElement("dialog"); d.className = "zoom"; d.setAttribute("aria-label", "Mapa ampliado");
+    d.innerHTML = "<div class='zoom-barra'><strong class='zoom-nome'></strong><span><button type='button' data-z='-' aria-label='Reduzir o mapa'>−</button><button type='button' data-z='+' aria-label='Aumentar o mapa'>+</button><button type='button' data-z='x' class='zoom-fechar'>Fechar</button></span></div><div class='zoom-area' tabindex='0' role='region' aria-label='Mapa ampliado, role para mover'><img alt=''></div>";
+    document.body.appendChild(d);
+    var img = $("img", d), nivel = 1, base = 0;
+    var aplicar = function () { img.style.width = Math.round(base * nivel) + "px"; $("[data-z='-']", d).disabled = nivel <= 1; $("[data-z='+']", d).disabled = nivel >= 4; };
+    d.addEventListener("click", function (e) {
+      var z = e.target.getAttribute && e.target.getAttribute("data-z"); if (!z) return;
+      if (z === "x") { d.close(); return; }
+      nivel = Math.max(1, Math.min(4, nivel + (z === "+" ? .5 : -.5))); aplicar();
+    });
+    d.addEventListener("close", function () { if (d._de) d._de.focus(); });
+    d._abrir = function (de, src, alt, nome, larg) { d._de = de; img.src = src; img.alt = alt; $(".zoom-nome", d).textContent = nome; base = Math.min(window.innerWidth - 24, larg); nivel = 1; aplicar(); d.showModal(); $(".zoom-area", d).scrollTop = 0; };
+    return (zoom = d);
+  }
+  $$(".ampliar").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = b.closest("figure"), im = $("img", f); if (typeof HTMLDialogElement === "undefined") { window.open(b.getAttribute("data-ampliar"), "_blank", "noopener"); return; }
+      janelaZoom()._abrir(b, im.currentSrc || im.src, im.alt, b.getAttribute("data-nome"), +b.getAttribute("data-largura"));
+    });
+  });
+
+  /* navegação em telas estreitas: indica que há mais abas além da borda e traz a seção atual para a vista */
+  var faixa = $(".ancoras");
+  function bordas() { if (!faixa) return; var max = faixa.scrollWidth - faixa.clientWidth; faixa.classList.toggle("rola-esq", faixa.scrollLeft > 4); faixa.classList.toggle("rola-dir", max > 4 && faixa.scrollLeft < max - 4); }
+  if (faixa) {
+    faixa.addEventListener("scroll", bordas, { passive: true }); window.addEventListener("resize", bordas); bordas();
+    var atual = function () { var a = $("a[aria-current=true]", faixa); if (a && faixa.scrollWidth > faixa.clientWidth + 4) faixa.scrollTo({ left: a.offsetLeft - (faixa.clientWidth - a.offsetWidth) / 2, behavior: reduz ? "auto" : "smooth" }); };
+    new MutationObserver(atual).observe(faixa, { attributes: true, subtree: true, attributeFilter: ["aria-current"] });
+  }
 
   /* comparador de cenários */
   var bruto = $("#dados-cenarios"), campo = $("[data-cenarios]");

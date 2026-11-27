@@ -83,7 +83,7 @@ def test_derived_layers_are_published_only_when_asked(tmp_path):
 def test_nothing_secret_reaches_the_published_site(tmp_path):
     out, _ = make_site(tmp_path)
     pattern = re.compile(r"R2_[A-Z_]+|SECRET|access[_-]?key|api[_-]?key|token|cb1_[A-Za-z0-9_]{10,}", re.I)
-    leaks = [p.name for p in out.rglob("*") if p.is_file() and pattern.search(p.read_text(errors="ignore"))]
+    leaks = [p.name for p in out.rglob("*") if p.is_file() and p.suffix not in {".webp", ".png", ".woff2", ".pbf"} and pattern.search(p.read_text(errors="ignore"))]   # imagens são binárias: bytes ao acaso podem imitar um padrão
     assert leaks == []
 
 

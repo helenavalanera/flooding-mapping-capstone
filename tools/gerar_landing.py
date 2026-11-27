@@ -420,17 +420,102 @@ def grafico_chuva_mensal(caminho_svg: Path):
     plt.close(fig)
 
 
-def mapa_manchas() -> dict:
-    """Números, legenda e dimensões da imagem do mapa de manchas, lidos de mapa_manchas_poa.json (tools/gerar_mapa_manchas.py)."""
-    j = jcarrega("src/flooding_mapping/app/static/data/mapa_manchas_poa.json")
-    nomes = [f"{br(f['de'], 1)} a {br(f['ate'], 1)} m" if f["ate"] is not None else f"mais de {br(f['de'], 0)} m" for f in j["faixas_m"]]
-    leg = "".join(f'<li><span style="background:{f["cor"]}"></span>{n}</li>' for f, n in zip(j["faixas_m"], nomes))
-    leg += '<li><span style="background:#f4f6f7"></span>sem depressão no modelo (ruas em cinza)</li>'
-    leg += f'<li><span class="lin" style="border-color:#8c99a1;border-top-style:dashed"></span>sem dado de relevo ({br(j["trechos_sem_dado_de_relevo"])} trechos)</li>'
-    return {"MAPA_IMG_DIM": f'width="{j["imagem"]["largura_px"]}" height="{j["imagem"]["altura_px"]}"', "MAPA_LEGENDA": leg, "MAPA_TOTAL": br(j["trechos_total"]), "MAPA_COM_DEPRESSAO": br(j["trechos_com_depressao"]),
-            "MAPA_PCT_DEPRESSAO": br(j["trechos_com_depressao_pct"], 1), "MAPA_COBERTURA": br(j["cobertura_de_dado_pct"], 1), "MAPA_COM_DADO": br(j["trechos_com_dado_de_relevo"]),
-            "MAPA_SEM_DADO": br(j["trechos_sem_dado_de_relevo"]), "MAPA_PCT_SEM_DADO": br(round(100 - j["cobertura_de_dado_pct"], 1), 1), "MAPA_MEDIANA": br(j["altura_mediana_m"], 2),
-            "MAPA_P99": br(j["altura_p99_m"], 2), "MAPA_ACIMA_8": br(j["trechos_acima_de_8_m"])}
+DIMS_JSON = "src/flooding_mapping/app/static/data/mapa_dimensoes_poa.json"
+# Texto de cada dimensão: o que a cor mostra, o que NÃO mostra e a unidade. Os números vêm sempre dos JSON gerados (testes conferem).
+TEXTOS_DIM = {
+    "A": ("Geração de escoamento", "Quanta água a superfície de cada trecho tende a gerar para escoar?",
+          "Quanto mais escuro, mais escoamento potencial o uso do solo (áreas construídas e pavimentadas) tende a gerar, em um evento de 30 mm.",
+          "Não é a água que chega à rua nem o que alaga: ignora o relevo e a drenagem, e vale só para as classes com coeficiente fundamentado (edificação e via pavimentada)."),
+    "B": ("Concentração do escoamento", "Para onde a água gerada na vizinhança tende a convergir?",
+          "Quanto mais escuro, mais escoamento potencial o relevo encaminha a esse trecho, somando a água gerada a montante, em um evento de 30 mm.",
+          "Não é vazão (volume por tempo), nem capacidade da rua, nem alagamento. Trechos ao longo do mesmo caminho repetem a mesma água; por isso os valores não se somam."),
+    "C": ("Propensão topográfica à retenção", "Onde o relevo favorece o acúmulo de água?",
+          "Quanto mais escuro, mais profunda é a depressão estimada do relevo (altura que o preenchimento de depressões soma ao terreno). Isso não indica maior ocorrência de alagamentos.",
+          "Não representa ocorrência nem risco de alagamento. O modelo de superfície de 30 metros não resolve o microrrelevo urbano."),
+    "D": ("Drenagem cadastrada", "Onde a Prefeitura registra rede pluvial?",
+          "Quanto mais escuro, mais metros de rede pluvial cadastrada há na célula de 100 metros.",
+          "É um registro do cadastro, e não o funcionamento nem a capacidade da rede. Onde não há mancha, o cadastro não registra rede; isso não prova que não exista drenagem."),
+}
+
+ABAS_CURTAS = {"A": "Geração", "B": "Concentração", "C": "Retenção", "D": "Drenagem"}      # rótulos do seletor; o nome completo está no título de cada painel
+
+
+def _leg(faixas: list[dict], extras: list[str]) -> str:
+    return "".join(f'<li><span style="background:{f["cor"]}"></span>{html.escape(f["rotulo"])}</li>' for f in faixas) + "".join(extras)
+
+
+def _num(titulo: str, texto: str) -> str:
+    return f"<div><dt>{titulo}</dt><dd>{texto}</dd></div>"
+
+
+def _bairros(letra: str, metrica: str, universo: str, itens: list[tuple[str, str, str]], rotulo_col: str, nota: str) -> str:
+    linhas = "".join(f"<tr><th scope='row'>{html.escape(b)}</th><td>{v}</td><td>{o}</td></tr>" for b, v, o in itens)
+    return (f"<div class='tabela-rolagem'><table class='tab-fontes mapa-bairros'><caption>Cinco bairros com os maiores valores nesta dimensão ({html.escape(metrica)})</caption>"
+            f"<thead><tr><th scope='col'>Bairro</th><th scope='col'>{rotulo_col}</th><th scope='col'>Trechos com dados</th></tr></thead><tbody>{linhas}</tbody></table></div>"
+            f"<p class='small'>{html.escape(universo)}. {nota}</p>")
+
+
+def paineis_dimensoes() -> str:
+    d, c = jcarrega(DIMS_JSON), jcarrega("src/flooding_mapping/app/static/data/mapa_manchas_poa.json")
+    topo = jcarrega(RANKINGS)["top5_bairros"]
+    sem_comparar = "Cada dimensão tem a sua unidade: os valores de uma dimensão não se comparam com os de outra, e a lista não é ranking de risco."
+    cfg = {}
+    a, b, dd = d["A"], d["B"], d["D"]
+    cfg["A"] = dict(img=a["imagem"], alt="Mapa de manchas de Porto Alegre em tons de rosa, do claro ao vinho escuro, com as ruas em cinza e a água em azul. As manchas mais escuras, de maior geração potencial de escoamento, cobrem a zona norte e o centro; a zona sul e o extremo sul têm manchas esparsas",
+                    leg=_leg(a["faixas"], ['<li><span class="vazio"></span>zero: sem classe com coeficiente fundamentado (ruas em cinza)</li>', f'<li><span class="trac"></span>sem dado de uso do solo ({br(a["trechos_sem_dado"])} trechos)</li>']),
+                    nums=[_num(f"{br(a['total_cidade_m3']['min'] / 1e6, 1)} a {br(a['total_cidade_m3']['max'] / 1e6, 1)} milhões de m³", "escoamento potencial gerado na cidade em 30 mm (Método 1, intervalo entre o limite inferior e o superior)"),
+                          _num(f"{br(a['trechos_com_valor_positivo'])} de {br(a['trechos_total'])}", "trechos com geração potencial acima de zero"),
+                          _num(f"Mediana de {br(a['mediana_m3'], 0)} m³", f"por trecho com valor acima de zero; percentil 99: {br(a['p99_m3'], 0)} m³"),
+                          _num(f"{br(a['trechos_com_valor_zero'])} trechos em zero", f"não significam ausência de escoamento: só edificação e via pavimentada têm coeficiente fundamentado, {br(a['area_com_coeficiente_fundamentado_pct'], 1)}% da área classificada")],
+                    bairros=_bairros("A", a["bairros"]["metrica"], a["bairros"]["universo"], [(i["bairro"], f"{br(i['valor'], 0)} m³/ha", br(i["trechos_com_dados"])) for i in a["bairros"]["itens"]], "Geração potencial (m³ por hectare, 30 mm)", sem_comparar),
+                    lacunas=[f"{br(a['trechos_sem_dado'])} trechos sem dado de uso do solo ficam fora das manchas.", f"O Método 1 só cobre edificação e via pavimentada ({br(a['area_com_coeficiente_fundamentado_pct'], 1)}% da área classificada); as demais classes ficam em zero, e os métodos 2 e 3 cobrem outras classes, com mais incerteza.", f"{a['bairros']['bairros_sem_estimativa']} bairros têm poucos trechos com dados e ficam sem estimativa."],
+                    fonte="Uso e ocupação do solo, Profill 2022 (Prefeitura de Porto Alegre, GeoPOA) e coeficientes de escoamento de referência")
+    cfg["B"] = dict(img=b["imagem"], alt="Mapa de manchas de Porto Alegre em tons de violeta, do claro ao azul-marinho escuro, com as ruas em cinza. As manchas mais escuras formam eixos que descem das áreas altas para a margem do Guaíba, onde o escoamento potencial converge",
+                    leg=_leg(b["faixas"], ['<li><span class="vazio"></span>zero: sem escoamento estimado pelo Método 1 (ruas em cinza)</li>', f'<li><span class="trac"></span>sem dado de uso do solo ({br(b["trechos_sem_dado"])} trechos)</li>']),
+                    nums=[_num(f"{br(b['trechos_com_valor_positivo'])} de {br(b['trechos_total'])}", "trechos com escoamento potencial convergindo acima de zero"),
+                          _num(f"Mediana de {br(b['mediana_m3'], 0)} m³", f"por trecho com valor acima de zero; percentil 90: {br(b['p90_m3'], 0)} m³"),
+                          _num(f"{br(b['trechos_acima_de_1000_m3'])} trechos acima de 1.000 m³", f"dos quais {br(b['trechos_acima_de_10000_m3'])} acima de 10.000 m³: os eixos onde a convergência simulada é maior"),
+                          _num(f"{br(b['trechos_com_valor_zero'])} trechos em zero", "sem escoamento estimado pelo Método 1, que só cobre edificação e via pavimentada")],
+                    bairros=_bairros("B", b["bairros"]["metrica"], b["bairros"]["universo"], [(i["bairro"], f"{br(i['valor'], 0)} m³", br(i["trechos_com_dados"])) for i in b["bairros"]["itens"]], "Mediana por trecho (m³, 30 mm)", sem_comparar),
+                    lacunas=[f"{br(b['trechos_sem_dado'])} trechos sem dado ficam fora das manchas.", "A concentração herda os limites da geração: só a água de áreas com coeficiente fundamentado é somada, e o relevo é o de 30 metros, que não resolve valas, meios-fios nem bueiros.", "Os valores acumulam a montante: o máximo por célula realça os eixos, mas não é a água que de fato passou."],
+                    fonte="Escoamento potencial acumulado: Profill 2022 (Prefeitura de Porto Alegre, GeoPOA), Copernicus DEM GLO-30 e OpenStreetMap")
+    cfg["C"] = dict(img=c["imagem"], alt="Mapa de manchas de Porto Alegre em tons de terra, do bege ao marrom escuro, com as ruas em cinza e a água em azul. As depressões mais profundas concentram-se na zona norte e ao longo da margem do Guaíba; na zona sul há poucas, dispersas",
+                    leg=_leg([{"cor": f["cor"], "rotulo": r} for f, r in zip(c["faixas_m"], ["0,0 a 0,5 m", "0,5 a 1,0 m", "1,0 a 2,0 m", "mais de 2 m"])], ['<li><span class="vazio"></span>sem depressão no modelo (ruas em cinza)</li>', f'<li><span class="trac"></span>sem dado de relevo ({br(c["trechos_sem_dado_de_relevo"])} trechos)</li>']),
+                    nums=[_num(f"{br(c['trechos_com_depressao'])} de {br(c['trechos_total'])}", f"trechos de rua com depressão ({br(c['trechos_com_depressao_pct'], 1)}%)"),
+                          _num(f"{br(c['cobertura_de_dado_pct'], 1)}% de cobertura", f"{br(c['trechos_com_dado_de_relevo'])} trechos com dado de relevo; <b>{br(c['trechos_sem_dado_de_relevo'])} trechos sem dado</b> ({br(round(100 - c['cobertura_de_dado_pct'], 1), 1)}%)"),
+                          _num(f"Mediana de {br(c['altura_mediana_m'], 2)} m", "entre os trechos com depressão: metade tem até esse valor"),
+                          _num(f"Percentil 99: {br(c['altura_p99_m'], 2)} m", f"só 1% dos trechos com depressão passa desse valor; poucos valores muito altos ({br(c['trechos_acima_de_8_m'])} acima de 8 m) podem refletir limites do modelo")],
+                    bairros="<div class='tabela-rolagem'><table class='tab-fontes mapa-bairros'><caption>Cinco bairros com os maiores valores nesta dimensão (parcela das ruas com propensão topográfica à retenção)</caption><thead><tr><th scope='col'>Bairro</th><th scope='col'>Parcela das ruas do bairro</th><th scope='col'>Trechos com dados</th></tr></thead><tbody>"
+                            + "".join(f"<tr><th scope='row'>{html.escape(i['bairro'])}</th><td>{br(100 * i['parcela_com_propensao_topografica'], 1)}%</td><td>{br(i['trechos_com_dados'])}</td></tr>" for i in topo["itens"])
+                            + f"</tbody></table></div><p class='small'>{html.escape(topo['universo'])}. {sem_comparar}</p>",
+                    lacunas=[f"{br(c['trechos_sem_dado_de_relevo'])} trechos sem dado de relevo ficam fora das manchas.", "O relevo é o do modelo de superfície de 30 metros: não resolve o microrrelevo urbano, e poucos valores extremos podem ser artefatos do modelo.", "Mostra onde o relevo favorece o acúmulo, e não se a água acumulou."],
+                    fonte="Relevo: Copernicus DEM GLO-30 (ESA e Airbus); ruas e água: © colaboradores do OpenStreetMap")
+    cfg["D"] = dict(img=dd["imagem"], alt="Mapa de manchas de Porto Alegre em tons de verde, do claro ao verde-escuro, com as ruas em cinza. A rede pluvial cadastrada cobre densamente a zona norte, o centro e parte da zona sul; o extremo sul e as áreas rurais quase não têm registro",
+                    leg=_leg(dd["faixas"], ['<li><span class="vazio"></span>sem rede cadastrada na célula (não prova ausência de drenagem)</li>']),
+                    nums=[_num(f"{br(dd['rede_km'])} km de rede", f"{br(dd['rede_trechos'])} trechos de rede pluvial cadastrados; {br(dd['rede_sem_acesso_km'])} km são registro sem acesso"),
+                          _num(f"{br(dd['pocos_de_visita'])} poços e {br(dd['bocas_de_lobo'])} bocas de lobo", f"cadastrados, além de {dd['casas_de_bomba']} casas de bomba"),
+                          _num(f"Mediana de {br(dd['mediana_m_por_celula'])} m por célula", f"entre as {br(dd['celulas_com_rede'])} células de 100 m com rede; percentil 90: {br(dd['p90_m_por_celula'])} m"),
+                          _num(f"{br(dd['trechos_de_rua_em_celula_com_rede_pct'], 1)}% dos trechos de rua", f"estão em células com rede cadastrada; perto de uma boca de lobo (até 50 m) estão {br(dd['perto_de_boca_de_lobo_por_quintil_de_concentracao_pct']['menor'])}% dos trechos de menor concentração e {br(dd['perto_de_boca_de_lobo_por_quintil_de_concentracao_pct']['maior'])}% dos de maior")],
+                    bairros=_bairros("D", dd["bairros"]["metrica"], dd["bairros"]["universo"], [(i["bairro"], f"{br(i['valor'], 1)} km/km²", br(i["bocas_por_km2"]) + " bocas/km²") for i in dd["bairros"]["itens"]], "Rede cadastrada (km por km²)", sem_comparar).replace("Trechos com dados", "Bocas de lobo"),
+                    lacunas=[f"{br(100 - dd['trechos_de_rua_em_celula_com_rede_pct'], 1)}% dos trechos de rua (inclui vias rurais e vias de cidades vizinhas que aparecem na malha) estão em células sem rede cadastrada.", f"Campos sem preenchimento no cadastro: material {dd['campos_sem_preenchimento_pct']['material']}%, declividade {dd['campos_sem_preenchimento_pct']['declividade']}%, classe do tubo {dd['campos_sem_preenchimento_pct']['classe_do_tubo']}%. Das casas de bomba só o nome está preenchido.", "Perto de uma boca de lobo não significa que a água seja captada: o cadastro não traz capacidade nem estado de conservação."],
+                    fonte="Cadastro de drenagem pluvial (Prefeitura de Porto Alegre, GeoPOA)")
+    abas, paineis = [], []
+    for k, (nome, pergunta, le, nao) in TEXTOS_DIM.items():
+        x = cfg[k]
+        im = x["img"]
+        sel = k == "A"
+        abas.append(f'<button type="button" role="tab" id="aba-{k.lower()}" class="dim-aba dim-{k.lower()}" aria-controls="painel-{k.lower()}" aria-selected="{str(sel).lower()}" tabindex="{0 if sel else -1}"><span class="dim-letra">{k}</span><span class="aba-nome">{ABAS_CURTAS[k]}</span></button>')
+        paineis.append(
+            f'<div role="tabpanel" id="painel-{k.lower()}" aria-labelledby="aba-{k.lower()}" class="dim-painel dim-{k.lower()}" data-dim="{k}">'
+            f'<h3 class="dim-titulo"><span class="dim-letra">{k}</span> {nome}<span class="dim-pergunta">{pergunta}</span></h3>'
+            f'<div class="mapa-manchas"><figure class="mapa-fig"><img src="{im["arquivo"]}" width="{im["largura_px"]}" height="{im["altura_px"]}" alt="{x["alt"]}" loading="{"eager" if sel else "lazy"}" decoding="async">'
+            f'<figcaption><b>{nome} em Porto Alegre.</b> Cada mancha é {"a soma" if k == "D" else "o maior valor"} {"da rede" if k == "D" else "entre os trechos"} de uma célula de 100 metros. {html.escape(x["fonte"])}. Limites dos bairros: Prefeitura de Porto Alegre.</figcaption>'
+            f'<button type="button" class="ampliar" hidden data-ampliar="{im["arquivo"]}" data-largura="{im["largura_px"]}" data-nome="{nome}">Ampliar o mapa</button></figure>'
+            f'<div class="mapa-lado"><p class="dim-le"><b>Como ler.</b> {le}</p><h4>Legenda ({html.escape(d.get(k, {}).get("unidade", "metros de profundidade da depressão do relevo"))})</h4>'
+            f'<ul class="leg" aria-label="Legenda da dimensão {k}">{x["leg"]}</ul><dl class="mapa-numeros">{"".join(x["nums"])}</dl>'
+            f'<p class="mapa-aviso" role="note"><b>O que este mapa não mostra.</b> {nao}</p></div></div>'
+            f'<div class="dim-baixo"><div class="dim-bairros">{x["bairros"]}</div><div class="mapa-lacunas"><h4>O que falta nesta dimensão</h4><ul>{"".join(f"<li>{t}</li>" for t in x["lacunas"])}</ul></div></div></div>')
+    return ('<div class="dim-seletor" data-mapas><div role="tablist" aria-label="Dimensões do estudo" class="dim-abas" hidden>' + "".join(abas) + "</div>" + "".join(paineis) + "</div>")
 
 
 def tabela_chuva_mensal() -> str:
@@ -517,7 +602,7 @@ def montar(figuras: bool = True) -> dict:
     subs = {
         "NUMEROS": bloco_numeros(lista),
         "CENARIOS_JSON": json.dumps(cen, ensure_ascii=False, separators=(",", ":")),
-        **mapa_manchas(),
+        "PAINEIS_DIMENSOES": paineis_dimensoes(),
         "TABELA_CHUVA_MENSAL": tabela_chuva_mensal(),
         "PERIODO_CHUVA": "de " + jcarrega(RANKINGS)["media_mensal_de_chuva"]["periodo_da_serie"][0][:4] + " a " + jcarrega(RANKINGS)["media_mensal_de_chuva"]["periodo_da_serie"][1][:4],
         "TOP5_BAIRROS": tabela_top5(),

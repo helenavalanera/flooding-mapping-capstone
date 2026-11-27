@@ -94,26 +94,10 @@
   <div class="grade">
     <p class="sec-num"><span>02</span> Mapa</p>
     <h2 id="h-terr" class="titulo">O mapa de Porto Alegre e as quatro dimensões</h2>
-    <p class="intro">Em <b>{{MAPA_PCT_DEPRESSAO}}% das ruas</b> de Porto Alegre ({{MAPA_COM_DEPRESSAO}} de {{MAPA_TOTAL}} trechos), o relevo de 30 metros tem uma depressão (parte mais baixa do terreno, onde a água tende a parar). O mapa abaixo mostra onde elas estão. <b>Quanto mais escuro, mais profunda é a depressão estimada. Isso não indica maior ocorrência de alagamentos.</b></p>
-    <div class="mapa-manchas">
-      <figure class="mapa-fig">
-        <img src="img/estudo/mapa-propensao.webp" {{MAPA_IMG_DIM}} alt="Mapa de manchas de toda Porto Alegre, com as ruas em cinza e a água em azul claro. Manchas em tons de terra, do bege ao marrom escuro, marcam os trechos de rua em depressão; as mais escuras concentram-se na zona norte e ao longo da margem do Guaíba, e na zona sul há poucas, dispersas" loading="lazy">
-        <figcaption><b>Propensão topográfica à retenção em Porto Alegre.</b> Cada mancha é o maior valor entre os trechos de uma célula de 100 metros. Relevo: Copernicus DEM GLO-30 (ESA e Airbus). Ruas e água: © colaboradores do OpenStreetMap. Cálculo do estudo Flooding Mapping, por trecho de rua.</figcaption>
-      </figure>
-      <div class="mapa-lado">
-        <h3>Profundidade estimada da depressão do relevo (propensão topográfica à retenção: áreas onde o relevo favorece o acúmulo de água)</h3>
-        <ul class="leg" aria-label="Legenda, em metros">{{MAPA_LEGENDA}}</ul>
-        <dl class="mapa-numeros">
-          <div><dt>{{MAPA_COM_DEPRESSAO}} de {{MAPA_TOTAL}}</dt><dd>trechos de rua com depressão ({{MAPA_PCT_DEPRESSAO}}%)</dd></div>
-          <div><dt>{{MAPA_COBERTURA}}% de cobertura</dt><dd>{{MAPA_COM_DADO}} trechos com dado de relevo; <b>{{MAPA_SEM_DADO}} trechos sem dado</b> ({{MAPA_PCT_SEM_DADO}}%), que não entram nas manchas</dd></div>
-          <div><dt>Mediana de {{MAPA_MEDIANA}} m</dt><dd>entre os trechos com depressão: metade tem até esse valor</dd></div>
-          <div><dt>Percentil 99: {{MAPA_P99}} m</dt><dd>só 1% dos trechos com depressão passa desse valor</dd></div>
-        </dl>
-        <p class="mapa-aviso" role="note"><b>Este mapa é uma estimativa. Não representa ocorrência nem risco de alagamento.</b> Mostra onde o relevo favorece a retenção de água, e não se a água acumulou. O modelo de superfície de 30 metros não resolve o microrrelevo urbano, e poucos trechos com valores muito altos ({{MAPA_ACIMA_8}} acima de 8 m) podem refletir limitações desse modelo.</p>
-        <p class="acoes"><a class="btn" href="#resultados">Visualizar resultados</a> <a class="btn btn-sec" href="../?painel=1#poa/mapa">Explorar dados</a></p>
-      </div>
-    </div>
-    <p class="intro mapa-dims">As dimensões abaixo podem ser exploradas <b>individualmente no mapa completo</b>: um clique em um trecho mostra os valores, o que cada um significa e o que falta de dado. Cada uma responde a uma pergunta diferente, e <b>acúmulo favorecido pelo relevo não é o mesmo que alagamento</b>.</p>
+    <p class="intro">Quatro mapas respondem a <b>quatro perguntas diferentes</b> sobre Porto Alegre: quanta água a superfície gera (A), para onde ela converge (B), onde o relevo favorece o acúmulo (C) e onde há rede de drenagem cadastrada (D). Cada um tem a sua cor, a sua unidade e a sua legenda. <b>Eles não se somam, não formam um índice e nenhum mostra ocorrência de alagamento.</b></p>
+    {{PAINEIS_DIMENSOES}}
+    <p class="acoes mapa-acoes"><a class="btn" href="#resultados">Visualizar resultados</a> <a class="btn btn-sec" href="../?painel=1#poa/mapa">Explorar dados</a></p>
+    <p class="intro mapa-dims">As quatro dimensões podem ser exploradas <b>individualmente no mapa completo</b>: um clique em um trecho mostra os valores, o que cada um significa e o que falta de dado. Como cada uma responde a uma pergunta diferente, <b>acúmulo favorecido pelo relevo não é o mesmo que alagamento</b>.</p>
     <div class="dimensoes-texto" id="dimensoes-texto">
       <article id="p-local">
         <h3><span class="dim-letra">A</span> Geração de escoamento</h3>
@@ -132,7 +116,7 @@
         <p><b>Rede de estruturas registradas para captar e conduzir a água da chuva.</b> Mostra o que está no cadastro da Prefeitura, como contexto. Estar no cadastro não prova capacidade, funcionamento nem conexão entre as estruturas.</p>
       </article>
     </div>
-    <p class="small mapa-nota">As camadas de geração e de concentração do escoamento (A e B) e de drenagem cadastrada (D) dependem da publicação dos arquivos derivados e da confirmação das permissões de redistribuição. Por isso, nenhuma delas aparece nesta página; o mapa completo mostra hoje o relevo e o mapa-base.</p>
+    <p class="small mapa-nota">Dados da Prefeitura de Porto Alegre (uso do solo Profill 2022, cadastro de drenagem e limites de bairros) usados com base na Política de Dados Abertos do município (Decreto Municipal nº 20.315/2019). Origem, atribuição e condições em <a href="{{REPO}}/blob/develop/docs/base_legal_dados.md">base legal e origem dos dados</a>. No site publicado, as camadas trecho a trecho de escoamento e de drenagem do mapa completo dependem da publicação dos arquivos derivados, em preparação; os quatro mapas acima já trazem as dimensões A a D.</p>
   </div>
 </section>
 
