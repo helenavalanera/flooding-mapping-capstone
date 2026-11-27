@@ -12,10 +12,15 @@ Rules that the rest of the system relies on
     * Only a ``confirmada`` record with ``impacto_circulacao == "interdicao"`` closes a segment
       for routing. A report, however alarming, only raises the estimated risk.
     * The store keeps no user identifier, address or device information.
+    * The community can back a report (``apoiar``): "still flooded" and "it dried" are counted from anonymous keys that are
+      stored only as salted hashes of (key, occurrence), so one person counts once per occurrence and the hashes cannot be
+      linked across occurrences. Enough backing raises the reliability of a report (``media``) and enough "dried" closes its
+      validity (``fim``); neither confirms it nor closes a street: only an operator's confirmation does that.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import os
@@ -177,6 +182,46 @@ class Ocorrencias:
             self._registros[id_] = registro
             self._gravar(registro)
         return registro
+
+    def apoiar(self, id_: str, chave: str, tipo: str, sal: str, minimo: int = 2) -> tuple[dict, bool]:
+        """A community vote on a record: ``ainda`` (still there) or ``secou`` (it dried). Returns (record, counted).
+
+        ``chave`` is a random key the device generated; it is hashed with the server's ``sal`` and the record id and never kept
+        in the clear. Backing never changes the status, and never makes a record an interdiction."""
+        if tipo not in ("ainda", "secou"):
+            raise ValueError("tipo: use ainda ou secou")
+        chave = str(chave or "")
+        if not (8 <= len(chave) <= 64):
+            raise ValueError("chave anônima inválida")
+        with self._lock:
+            registro = self._registros.get(id_)
+            if registro is None:
+                raise KeyError(id_)
+            if registro["situacao"] == "descartada":
+                raise ValueError("ocorrência descartada")
+            marca = hashlib.sha256(f"{sal}|{id_}|{chave}".encode()).hexdigest()[:16]
+            ainda, secou = list(registro.get("apoios", [])), list(registro.get("secou", []))
+            if marca in ainda or marca in secou:
+                return registro, False
+            (ainda if tipo == "ainda" else secou).append(marca)
+            agora_iso = agora().strftime("%Y-%m-%dT%H:%M:%SZ")
+            campos = {"apoios": ainda, "secou": secou}
+            if tipo == "ainda" and len(ainda) >= minimo and registro["confiabilidade"] == "baixa":
+                campos["confiabilidade"] = "media"
+            if tipo == "secou" and len(secou) >= minimo and not registro.get("fim"):
+                campos["fim"] = agora_iso
+            registro = {**registro, **campos, "atualizado_em": agora_iso,
+                        "historico": registro["historico"] + [{"em": agora_iso, "de": registro["situacao"], "para": registro["situacao"],
+                                                               "por": "comunidade", "evidencia": f"apoio: {tipo}"}]}
+            self._registros[id_] = registro
+            self._gravar(registro)
+        return registro, True
+
+    def rotuladas(self, minimo_apoios: int = 2) -> list[dict]:
+        """Records that count as *observed* for learning: confirmed by an operator, or backed by enough people.
+        Discarded and merely reported ones do not: an unverified report is not a label."""
+        return [r for r in self.listar() if r["situacao"] == "confirmada"
+                or (r["situacao"] == "reportada" and len(r.get("apoios", [])) >= minimo_apoios and len(r.get("secou", [])) < minimo_apoios)]
 
     def obter(self, id_: str) -> dict | None:
         return self._registros.get(id_)

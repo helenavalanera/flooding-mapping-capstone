@@ -12,11 +12,13 @@ operar o produto em escala pública. O escopo aqui é a demonstração controlad
 | Consentimento de localização | só no aparelho | idem | idem |
 | Posição do aparelho | lida **uma vez**, em primeiro plano, após consentimento | usada para marcar um ponto; não é gravada no servidor | ninguém |
 | Origem, destino, modal e hora de uma análise | memória do servidor | até 30 min, ou até iniciar outra análise ou fechar o app; apagada por `DELETE /api/analises/{id}` | o servidor, para calcular |
+| Coordenadas dos lugares salvos, ao pedir os **avisos** | memória do servidor, só durante o cálculo | descartadas ao responder; **o nome do lugar não é enviado** (testado no navegador) | o servidor, para calcular |
+| Apoio a uma ocorrência ("ainda alagado" ou "já secou") | arquivo local do servidor, **só como código irreversível** | 90 dias, junto com a ocorrência | ninguém: o servidor guarda `sha256(sal do processo, id da ocorrência, chave do aparelho)` truncado, nunca a chave |
 | Relato de ocorrência (texto livre e ponto) | arquivo local do servidor | 90 dias, depois removido | texto livre: só o operador autenticado |
 | Decisões do operador (situação, evidência, impacto) | histórico do registro | 90 dias | operador |
 | Logs | **não há log de acesso** nem de corpos de requisição | — | — |
 
-Não há contas de usuário, cookies de rastreamento, analytics nem identificador persistente do usuário.
+Não há contas de usuário, cookies de rastreamento, analytics nem identificador persistente do usuário. O único cookie é o **`fm_modo`** (`real` ou `demo`), de sessão, sem dado pessoal, que só diz ao servidor qual serviço usar quando o seletor de demonstração está ligado.
 
 ## Controles implementados
 
@@ -31,6 +33,17 @@ Não há contas de usuário, cookies de rastreamento, analytics nem identificado
 - **Saída escapada:** todo texto vindo de dados ou da API é escapado antes de entrar na página; teste automatizado confere.
 - **Service worker:** nunca guarda respostas da API.
 - **Erros:** respostas 500 sem detalhes internos.
+
+## Avisos e apoio da comunidade (como a privacidade se mantém)
+
+- **Chave anônima:** o aparelho gera uma chave aleatória (12 bytes) e a guarda só no `localStorage`. Ela vai ao servidor apenas dentro de um apoio. O servidor a mistura com um sal que muda a cada reinício e com o id da ocorrência e guarda só o código: dois apoios do mesmo aparelho a ocorrências diferentes não podem ser ligados entre si, e um aparelho conta uma vez por ocorrência.
+- **O apoio não age sobre a rua:** ele sobe a confiabilidade de um relato (dois apoios) ou encerra sua validade (dois "já secou"), e é usado como rótulo para o aprendizado; nunca confirma uma ocorrência nem interdita uma via.
+- **Limites desta proteção:** a chave aparece no corpo da requisição, então quem controla o servidor ou um proxy em claro a vê naquele momento; não há defesa contra uma pessoa que gere várias chaves (limite por cliente: 20 apoios por minuto, mas um atacante com vários endereços pode inflar apoios). Por isso o apoio só prioriza verificação e nunca decide algo sozinho.
+- **Pontos de interesse** vêm do OpenStreetMap e não trazem dado pessoal; podem estar desatualizados.
+
+## Modo de demonstração (quando `FM_DEMONSTRACAO=1`)
+
+O serviço de demonstração é separado do real: tem chuva fictícia, ocorrências **só em memória** (nunca no arquivo real) e uma credencial de operador **pública**. Essa credencial só vale sobre dados de demonstração; um teste automatizado confirma que ela **não** abre o serviço real e que registros de um lado nunca aparecem no outro. Como qualquer visitante pode escrever nesse estado compartilhado, ele deve ser tratado como descartável (some ao reiniciar). Nada ali é dado do mundo real.
 
 ## Riscos e pendências (nada disto está resolvido)
 

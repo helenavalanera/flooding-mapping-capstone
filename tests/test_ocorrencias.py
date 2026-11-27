@@ -117,3 +117,52 @@ def test_the_operator_declares_the_impact_when_reviewing_and_only_then_can_a_rep
     assert c["historico"][-1]["campos"] == {"impacto_circulacao": "interdicao", "severidade": "alta"}      # the decision is on the record
     with pytest.raises(ValueError, match="impacto_circulacao"):
         store.mudar_situacao(store.relato(PONTO)["id"], "confirmada", por="operador", evidencia="Guarda municipal no local, via fechada", impacto="bloqueado")
+
+
+def _relato(store):
+    return store.relato({"lon": -51.2, "lat": -30.0, "tipo": "alagamento_via"})
+
+
+def test_community_backing_counts_each_anonymous_key_once_and_stores_only_hashes():
+    store = oc.Ocorrencias()
+    r = _relato(store)
+    reg, novo = store.apoiar(r["id"], "chave-do-aparelho-1", "ainda", "sal", 2)
+    assert novo and reg["confiabilidade"] == "baixa" and len(reg["apoios"]) == 1
+    assert "chave-do-aparelho-1" not in str(reg)
+    assert store.apoiar(r["id"], "chave-do-aparelho-1", "ainda", "sal", 2)[1] is False           # the same key does not count twice
+    reg, _ = store.apoiar(r["id"], "chave-do-aparelho-2", "ainda", "sal", 2)
+    assert reg["confiabilidade"] == "media" and reg["situacao"] == "reportada"                  # backing raises reliability, never the status
+    assert oc.Ocorrencias.interdicoes(store, 72) == []                                         # and never closes a street
+
+
+def test_the_same_key_on_two_records_leaves_two_unlinkable_hashes_and_dried_votes_close_the_validity():
+    store = oc.Ocorrencias()
+    a, b = _relato(store), _relato(store)
+    ha = store.apoiar(a["id"], "mesma-chave-aleatoria", "ainda", "sal")[0]["apoios"][0]
+    hb = store.apoiar(b["id"], "mesma-chave-aleatoria", "ainda", "sal")[0]["apoios"][0]
+    assert ha != hb
+    store.apoiar(a["id"], "outra-chave-aleatoria-1", "secou", "sal", 2)
+    reg, _ = store.apoiar(a["id"], "outra-chave-aleatoria-2", "secou", "sal", 2)
+    assert reg["fim"] and reg["situacao"] == "reportada"
+
+
+def test_backing_rejects_bad_input_and_discarded_records_and_labels_need_enough_people():
+    store = oc.Ocorrencias()
+    r = _relato(store)
+    for args in (("curta", "ainda"), ("chave-valida-123", "talvez")):
+        try:
+            store.apoiar(r["id"], args[0], args[1], "sal")
+            raise AssertionError("deveria recusar")
+        except ValueError:
+            pass
+    assert store.rotuladas(2) == []                                                            # an unbacked report is not a label
+    store.apoiar(r["id"], "chave-valida-0001", "ainda", "sal")
+    store.apoiar(r["id"], "chave-valida-0002", "ainda", "sal")
+    assert [x["id"] for x in store.rotuladas(2)] == [r["id"]]
+    store.mudar_situacao(r["id"], "descartada", por="op", evidencia="verificado: não há alagamento")
+    assert store.rotuladas(2) == []
+    try:
+        store.apoiar(r["id"], "chave-valida-0003", "ainda", "sal")
+        raise AssertionError("deveria recusar")
+    except ValueError:
+        pass

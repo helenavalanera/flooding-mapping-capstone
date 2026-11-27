@@ -152,3 +152,17 @@ roteamento:
   # Rotas distintas compartilham no máximo esta fração do comprimento com as já escolhidas.
   compartilhamento_maximo: 0.7
   snap_maximo_m: 500
+
+# Aprendizado a partir do que a comunidade confirma: sugere áreas para verificar. É um ranking, não uma probabilidade, e só substitui
+# a regra de terreno quando a validação por blocos espaciais mostra ganho; senão a regra segue valendo.
+aprendizado:
+  apoios_minimos: 2            # PROVISÓRIO: apoios de pessoas distintas para uma ocorrência virar rótulo e subir a confiabilidade
+  min_ocorrencias: 8           # PROVISÓRIO: abaixo disso não se treina
+  min_positivos: 30            # PROVISÓRIO: trechos positivos mínimos
+  raio_rotulo_m: 100
+  bloco_m: 1500                # lado do bloco espacial usado para separar treino e teste
+  dobras: 5
+  margem_ap: 0.10              # PROVISÓRIO: ganho relativo mínimo de PR-AUC sobre a regra para adotar o modelo
+  fracao_sugerida: 0.01        # PROVISÓRIO: parcela da malha sugerida para verificação
+  raio_bolsao_m: 120
+  raio_aviso_m: 150            # distância de um lugar salvo a um trecho em exposição para entrar no aviso
