@@ -10,16 +10,16 @@ const fs = require("fs"), path = require("path");
   assert.match(await page.innerText(".hero-quadro"), /Geração de escoamento[\s\S]*Concentração do escoamento[\s\S]*Propensão topográfica à retenção[\s\S]*Drenagem cadastrada/); assert.strictEqual(await page.locator(".hero img").count(), 0, "sem mapa derivado de dado restrito no início");
   // âncoras: cada link leva à sua seção e a atual é marcada
   const hrefs = await page.locator(".ancoras a").evaluateAll((a) => a.map((x) => x.getAttribute("href")));
-  assert.deepStrictEqual(hrefs, ["#pergunta", "#territorio", "#resultados-executivos", "#cenarios", "#metodo", "#documentacao", "#referencias"]);
-  await page.click(".ancoras a[href='#resultados-executivos']");
-  await page.waitForFunction(() => { const a = document.querySelector(".ancoras a[aria-current=true]"); return a && a.getAttribute("href") === "#resultados-executivos"; }, null, { timeout: 15000 });
-  assert.ok(await page.evaluate(() => document.getElementById("resultados-executivos").getBoundingClientRect().top < 200), "a âncora rolou até a seção");
+  assert.deepStrictEqual(hrefs, ["#apresentacao", "#mapa", "#cenarios", "#resultados", "#contato"]);
+  await page.click(".ancoras a[href='#resultados']");
+  await page.waitForFunction(() => { const a = document.querySelector(".ancoras a[aria-current=true]"); return a && a.getAttribute("href") === "#resultados"; }, null, { timeout: 15000 });
+  assert.ok(await page.evaluate(() => document.getElementById("resultados").getBoundingClientRect().top < 200), "a âncora rolou até a seção");
   // as quatro dimensões, em texto: os mapas de trechos e de drenagem não são publicados (redistribuição dos dados da Prefeitura não esclarecida)
-  await page.click(".ancoras a[href='#territorio']"); await page.waitForTimeout(2500);
+  await page.click(".ancoras a[href='#mapa']"); await page.waitForTimeout(2500);
   for (const id of ["p-contribuicao", "p-local", "p-topografico", "p-drenagem"]) assert.ok(await page.locator("#" + id).isVisible(), id + " visível");
-  assert.strictEqual(await page.locator("#territorio img, .hero img, [role=tab]").count(), 0, "sem mapas nem abas de mapas");
-  assert.match(await page.innerText("#p-drenagem"), /não indica capacidade de vazão/); assert.match(await page.innerText("#p-topografico"), /não é profundidade, volume nem duração/);
-  assert.match(await page.innerText("#territorio"), /redistribuição desses dados ainda não foi esclarecida/);
+  assert.strictEqual(await page.locator("#mapa img, .hero img, [role=tab]").count(), 0, "sem mapas nem abas de mapas");
+  assert.match(await page.innerText("#p-drenagem"), /não prova capacidade, funcionamento nem conexão/); assert.match(await page.innerText("#p-topografico"), /Não é profundidade, volume nem duração/);
+  assert.match(await page.innerText("#mapa"), /redistribuição desses dados ainda não foi esclarecida/);
   // nenhuma imagem quebrada na página inteira
   await page.evaluate(() => document.querySelectorAll('img[loading=lazy]').forEach((i) => { i.loading = 'eager'; }));   // imagens preguiçosas só carregam ao rolar
   await page.waitForFunction(() => Array.from(document.images).every((i) => i.complete), null, { timeout: 20000 }).catch(() => {});
@@ -35,7 +35,7 @@ const fs = require("fs"), path = require("path");
     for (const k of ["metodo1", "referencia_analoga", "limites_fisicos"]) assert.ok(txt.includes(mi(t[k].min_m3) + " a " + mi(t[k].max_m3) + " milhões de m³"), `${p} mm ${k}: ${mi(t[k].min_m3)} a ${mi(t[k].max_m3)}`);
     assert.strictEqual(await page.getAttribute("#cen-link", "href"), `../?painel=1#poa/mapa?escoamento=1&p=${p}`);
   }
-  assert.match(await page.innerText("#cen-trecho"), /Contribuição potencial acumulada[\s\S]*mediana[\s\S]*percentil 99/); assert.match(await page.innerText("#cenarios"), /não previsões hidráulicas/);
+  assert.match(await page.innerText("#cen-trecho"), /Contribuição potencial acumulada[\s\S]*mediana[\s\S]*percentil 99/); assert.match(await page.innerText("#cenarios"), /e não previsões/);
   // o link do simulador abre o mapa já configurado (camada ligada, chuva e pacote pedidos)
   await page.click(".seletor button[data-p='20']");
   await page.goto(BASE + "?painel=1#poa/mapa?escoamento=1&p=20&pacote=an&modo=l");

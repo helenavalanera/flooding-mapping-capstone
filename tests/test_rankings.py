@@ -32,5 +32,5 @@ def test_the_top5_districts_are_the_five_highest_among_districts_with_enough_str
 def test_unpublished_rankings_state_why_and_the_page_does_not_claim_them():
     assert set(R["nao_publicados"]) == {"top10_trechos", "ranking_de_zonas"}
     assert "Profill" in R["nao_publicados"]["top10_trechos"] and "zonas" in R["nao_publicados"]["ranking_de_zonas"]
-    assert "Top 10 ruas e trechos viários: não publicado" in HTML and "Ranking das zonas de Porto Alegre: não publicado" in HTML
+    assert "Ranking de ruas e trechos: não publicado" in HTML and "Ranking de zonas de Porto Alegre: não publicado" in HTML
     assert not re.search(r"<th scope='row'>(?:6|7|8|9|10)\. ", HTML)                    # nenhuma tabela de 10 itens

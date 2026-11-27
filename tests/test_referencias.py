@@ -68,10 +68,12 @@ def test_tools_not_executed_are_marked_and_kept_apart(refs):
             assert r["titulo"] in avaliadas and r["titulo"] not in corpo, r["id"]
 
 
-def test_every_citation_marker_in_the_template_resolves_to_a_reference(refs):
-    ids = {r["id"] for r in refs}
-    usados = {i.strip() for m in re.findall(r"\{\{cite:([a-z0-9_,\s]+)\}\}", TEMPLATE.read_text(encoding="utf-8")) for i in m.split(",")}
-    assert usados and usados <= ids, usados - ids
+def test_the_landing_has_no_bibliography_and_no_citation_markers_it_links_to_the_documentation(refs):
+    modelo = TEMPLATE.read_text(encoding="utf-8")
+    assert "{{cite:" not in modelo and "{{REFERENCIAS}}" not in modelo                      # as referências ficam só na documentação técnica
+    t = LANDING.read_text(encoding="utf-8")
+    assert 'id="referencias"' not in t and "Referências bibliográficas" not in re.sub(r"<[^>]+>", "", t.split("<footer")[0])
+    assert "docs/referencias_bibliograficas.md" in t and "docs/metodologia.md" in t and "docs/inventario_fontes.md" in t
 
 
 def test_a_citation_marker_that_matches_nothing_fails_loudly(refs):
@@ -79,22 +81,16 @@ def test_a_citation_marker_that_matches_nothing_fails_loudly(refs):
         g.substituir_citacoes("texto {{cite:nao_existe}}", refs)
 
 
-def test_the_landing_has_the_references_section_and_navigation_link():
+def test_the_landing_navigation_has_exactly_the_five_tabs():
     t = LANDING.read_text(encoding="utf-8")
-    assert '<h2 id="h-ref" class="titulo">Referências bibliográficas</h2>' in t
-    assert re.search(r'<ol class="ancoras">.*?href="#referencias">Referências</a>.*?</ol>', t, re.S)
-    for nome in CATEGORIAS:
-        assert nome in t, nome
-    assert "Tecnologias avaliadas, não utilizadas, e planejadas" in t
+    nav = re.findall(r'<ol class="ancoras">(.*?)</ol>', t, re.S)[0]
+    assert re.findall(r'href="#([a-z]+)">([^<]+)<', nav) == [("apresentacao", "Apresentação"), ("mapa", "Mapa"), ("cenarios", "Simulador"), ("resultados", "Resultados"), ("contato", "Contato")]
 
 
-def test_every_reference_cited_in_the_landing_exists_and_every_used_reference_is_listed():
+def test_the_contact_is_the_address_registered_in_the_project_and_there_is_no_form():
     t = LANDING.read_text(encoding="utf-8")
-    alvos = set(re.findall(r'class="cit"[^>]*href="#([^"]+)"', t)) | set(re.findall(r'href="#([^"]+)"[^>]*class="cit"', t))
-    ids = set(re.findall(r'<li id="([^"]+)"', t))
-    assert alvos and alvos <= ids, alvos - ids
-    for chave in ("profill2022", "copernicus_dem", "osm_geofabrik", "hersbach2020", "openmeteo_software", "breiman2001", "alphaearth_dataset", "roberts2017", "drusch2012"):
-        assert any(chave in i for i in ids), chave
+    registrado = re.search(r'email = "([^"]+)"', (RAIZ / "pyproject.toml").read_text(encoding="utf-8")).group(1)
+    assert f'href="mailto:{registrado}"' in t and "<form" not in t and set(re.findall(r"mailto:([^\"]+)", t)) == {registrado}
 
 
 def test_the_open_data_statement_is_verbatim_with_its_caveat_on_landing_readme_and_docs():
@@ -102,16 +98,12 @@ def test_the_open_data_statement_is_verbatim_with_its_caveat_on_landing_readme_a
         t = re.sub(r"\s+", " ", caminho.read_text(encoding="utf-8"))
         assert FRASE in t, caminho.name
     landing = re.sub(r"<[^>]+>", "", LANDING.read_text(encoding="utf-8"))
-    assert "não afirma que todas as bases" in landing and "licença MIT vale para o código" in landing
+    assert "Isso não significa que todas as bases tenham licença aberta irrestrita" in landing
 
 
-def test_geoai_is_presented_as_experimental_without_overclaims():
-    t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", LANDING.read_text(encoding="utf-8")))
-    ini = t.index("GeoAI: estimar a parte construída")
-    sec = t[ini:t.index("De onde vêm os dados", ini)]
-    for frase in ("não prevê alagamentos", "Concordância com a Profill não é validação independente em campo", "empatou com o Random Forest", "não é publicado", "solo exposto"):
-        assert frase in sec, frase
-    assert not re.search(r"supera o Random Forest|valida(do|ção) em campo\b(?! )", sec.replace("não é validação independente em campo", ""))
+def test_geoai_is_only_a_documentation_link_marked_as_experimental_on_the_landing():
+    t = LANDING.read_text(encoding="utf-8")
+    assert "GeoAI (frente experimental)" in t and "docs/geoai_fase5.md" in t and "estimador" not in t.lower()
 
 
 def test_the_published_text_avoids_the_terms_the_glossary_forbids():

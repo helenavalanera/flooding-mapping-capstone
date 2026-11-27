@@ -98,10 +98,9 @@ def test_the_active_panel_has_no_demo_mode_and_the_synthetic_notice_stays_with_t
 
 def test_the_landing_states_the_narrative_the_scenarios_and_what_is_not_predicted():
     h = ler("inicio/index.html")
-    assert "Como a chuva transforma o território?" in h
-    assert "Da chuva à estimativa de áreas com maior propensão ao acúmulo de água." in h
-    assert "cenários de 10, 20 e 30 mm" in h
-    assert re.search(r"Não são previsão de alagamentos, de profundidade nem de duração da água", h)
+    assert "Dada uma chuva, onde a água tende a se acumular?" in h
+    assert "compare chuvas de 10, 20 e 30 mm" in h.lower() or "chuvas de 10, 20 e 30 mm" in h
+    assert "não constituem previsão de alagamentos nem estimativa de profundidade ou duração da inundação" in h
     assert "planejamento preventivo" in h
 
 

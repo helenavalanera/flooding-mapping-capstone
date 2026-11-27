@@ -53,20 +53,21 @@ def test_the_page_is_structurally_sound_and_loads_nothing_from_outside(pagina):
     assert not re.search(r"\{\{[A-Z_]+\}\}", texto)
 
 
-def test_the_nine_narrative_sections_exist_in_order_and_every_anchor_resolves(pagina):
+def test_the_five_sections_exist_in_order_and_every_anchor_resolves(pagina):
     texto, c = pagina
-    ordem = ["hero", "pergunta", "territorio", "resultados-executivos", "descobertas", "cenarios", "metodo", "sintese", "documentacao", "resultados", "geoai", "dados", "referencias"]
+    ordem = ["hero", "apresentacao", "mapa", "cenarios", "resultados", "contato"]
     pos = [texto.index(f'id="{i}"') for i in ordem]
     assert pos == sorted(pos)
     internos = [h[1:] for h in c.hrefs if h.startswith("#") and len(h) > 1]
     assert internos and all(i in c.ids for i in internos), [i for i in internos if i not in c.ids]
-    assert set(re.findall(r'<p class="sec-num"><span>(\d\d)</span>', texto)) == {"02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}
+    assert re.findall(r'<p class="sec-num"><span>(\d\d)</span> ([^<]*)', texto) == [("01", "Apresentação"), ("02", "Mapa"), ("03", "Simulador"), ("04", "Resultados"), ("05", "Contato")]
+    assert re.findall(r'<ol class="ancoras">(.*?)</ol>', texto, re.S)[0].count("<a ") == 5          # só Apresentação, Mapa, Simulador, Resultados e Contato
 
 
 def test_relative_links_and_images_point_to_files_that_exist(pagina):
     _, c = pagina
     for h in c.hrefs:
-        if h.startswith(("http", "#")):
+        if h.startswith(("http", "#", "mailto:")):
             continue
         alvo = (INICIO / h.split("?")[0].split("#")[0]).resolve()
         if h.startswith("../"):
@@ -80,8 +81,8 @@ def test_relative_links_and_images_point_to_files_that_exist(pagina):
 
 def test_the_hero_asks_the_question_and_never_claims_real_time_prediction(pagina):
     texto, _ = pagina
-    assert "Como a chuva transforma o território?" in texto and "Space Tech Bootcamp 2026" in texto and "Porto Alegre" in texto
-    assert "Abrir o mapa" in texto and "Ver as descobertas" in texto
+    assert "Dada uma chuva, onde a água tende a se acumular?" in texto and "Space Tech Bootcamp 2026" in texto and "Porto Alegre" in texto
+    assert "Abrir o mapa" in texto and "Ver os resultados" in texto
     proibidos = json.loads(re.search(r"TERMOS_PROIBIDOS = (\[.*?\]);", (RAIZ / "src/flooding_mapping/app/static/fase3-dados.js").read_text(encoding="utf-8"), re.S).group(1).replace("\n", " "))
     visivel = re.sub(r"<script.*?</script>", "", texto, flags=re.S).lower()
     for t in proibidos:
@@ -91,17 +92,20 @@ def test_the_hero_asks_the_question_and_never_claims_real_time_prediction(pagina
             assert "não" in visivel[max(0, m.start() - 60):m.start()], t                      # só aparece negado
 
 
-def test_the_negative_result_and_the_exploratory_nature_are_stated_prominently(pagina):
+def test_the_negative_result_the_caveat_and_the_exploratory_nature_are_stated(pagina):
     texto, _ = pagina
-    for t in ("nenhuma formulação física, nenhum coeficiente testado e nenhum modelo de aprendizado de máquina atingiu o critério de adoção", "exploratória", "não têm horário nem precipitação associada",
-              "A regra de terreno atual permanece", "Esse resultado negativo faz parte das descobertas", "cenários de cálculo", "não previsões hidráulicas", "Estimativa, não previsão"):
+    ressalva = ("Este estudo apresenta estimativas geoespaciais do escoamento superficial e das condições topográficas associadas à concentração e à retenção de água. Os resultados apoiam a análise territorial e o planejamento preventivo, "
+                "mas não constituem previsão de alagamentos nem estimativa de profundidade ou duração da inundação.")
+    assert texto.count(ressalva) == 2                                                          # no início e nos resultados
+    for t in ("não mostrou ganho robusto", "Nem a física nem o aprendizado de máquina superaram a regra de terreno já em uso", "comparação exploratória", "cenários de cálculo", "Estimativa, não previsão"):
         assert t in texto, t
-    assert texto.count("Métodos avaliados e por que não foram adotados") == 1 and "Regressão logística (só terreno)" in texto and "Rede MLP (só terreno)" in texto
 
 
-def test_the_three_quantities_and_the_hypotheses_are_explained(pagina):
+def test_the_four_dimensions_are_named_and_explained_in_plain_language(pagina):
     texto, _ = pagina
-    for t in ("Geração de escoamento", "Contribuição acumulada", "Propensão topográfica à retenção", "As hipóteses de modelagem, sem esconder nenhuma", "Chuva uniforme e hipotética", "Valores por trecho não são somáveis", "V = P × A × C ÷ 1000"):
+    for t in ("Geração de escoamento", "água da chuva que não é absorvida pelo solo e escoa pela superfície", "Concentração do escoamento", "locais para onde a água da chuva tende a convergir",
+              "Propensão topográfica à retenção", "áreas onde o relevo favorece o acúmulo de água", "Drenagem cadastrada", "rede de estruturas registradas para captar e conduzir a água da chuva",
+              "acúmulo favorecido pelo relevo não é o mesmo que alagamento", "Não é vazão (volume por tempo)"):
         assert t in texto, t
 
 

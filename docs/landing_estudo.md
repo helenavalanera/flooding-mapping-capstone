@@ -1,5 +1,7 @@
 # Landing científica (estudo)
 
+> **Atualização (versão final).** A landing tem hoje cinco áreas: Apresentação, Mapa, Simulador, Resultados e Contato. Método, fontes, hipóteses, validações, limitações e referências saíram da página e ficam na documentação técnica (`docs/metodologia.md`, `docs/inventario_fontes.md`, `docs/referencias_bibliograficas.md`), com links no rodapé. O texto abaixo descreve a estrutura anterior, de nove seções.
+
 `/inicio/` é a porta de entrada do produto: uma apresentação editorial do estudo, que comunica a pergunta, os dados, as descobertas, os testes, as limitações e o caminho até o mapa. O painel é a ferramenta de exploração; a landing não o duplica.
 
 ## Estrutura (as nove seções pedidas)

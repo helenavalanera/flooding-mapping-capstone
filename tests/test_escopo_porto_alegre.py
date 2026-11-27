@@ -15,9 +15,9 @@ def texto(p: Path) -> str:
     return p.read_text(encoding="utf-8")
 
 
-def test_the_landing_outside_its_bibliography_never_offers_a_state_front():
+def test_the_landing_never_offers_a_state_front():
     h = texto(STATIC / "inicio/index.html")
-    fora = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h[: h.index('id="referencias"')]))
+    fora = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", re.sub(r"<script.*?</script>", "", h, flags=re.S)))
     achados = {m.group(0).lower() for m in ESTADUAL.finditer(fora)}
     assert achados == {"rio grande do sul"}, achados            # só o nome do estado ao situar Porto Alegre
     assert "Porto Alegre, Rio Grande do Sul" in fora
