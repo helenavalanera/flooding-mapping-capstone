@@ -1,0 +1,404 @@
+{
+  "versao_do_processamento": "fase2-1",
+  "crs": "EPSG:31982",
+  "grade": {
+    "origem_x": 469729.9215689416,
+    "origem_y": 6689715.874797529,
+    "linhas": 1314,
+    "colunas": 1004,
+    "celula_m": 30.0,
+    "origem": "a mesma grade que susceptibility.build_dem calcula para o município (DEM Copernicus GLO-30 reprojetado a 30 m), sem reamostrar para resolução mais fina",
+    "pintura_m": 3.0,
+    "bloco_celulas": 100
+  },
+  "partes_lidas": 31,
+  "poligonos_lidos": 605245,
+  "poligonos_processados": 605245,
+  "rejeitados_sem_geometria_util": 0,
+  "geometrias_invalidas": 277,
+  "motivos_de_invalidez": {
+    "Ring Self-intersection": 277
+  },
+  "duplicatas_exatas": 852,
+  "poligonos_grandes_em_particao_propria": 216,
+  "centroides_fora_da_grade": 0,
+  "classes": {
+    "Campo": {
+      "codigo": 1,
+      "poligonos": 2994,
+      "area_m2_geometria": 48034110.174678735,
+      "area_m2_fonte": 48072079.74123376,
+      "invalidos": 10,
+      "duplicatas_excluidas": 26,
+      "area_m2_duplicatas_excluidas": 5430.071966924643,
+      "area_km2": 48.034,
+      "fracao_da_area_classificada": 0.10179,
+      "area_m2_pintura_3m": 48035961.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior",
+        "referencia_analoga"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Corpo Hídrico": {
+      "codigo": 2,
+      "poligonos": 1540,
+      "area_m2_geometria": 3578222.0302340463,
+      "area_m2_fonte": 3581050.518169367,
+      "invalidos": 0,
+      "duplicatas_excluidas": 5,
+      "area_m2_duplicatas_excluidas": 4958.223911164461,
+      "area_km2": 3.578,
+      "fracao_da_area_classificada": 0.00758,
+      "area_m2_pintura_3m": 3578814.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0002,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [],
+      "fora_do_calculo_de_escoamento": true
+    },
+    "Cultivo Irrigado": {
+      "codigo": 3,
+      "poligonos": 149,
+      "area_m2_geometria": 14114399.083240112,
+      "area_m2_fonte": 14125556.152823724,
+      "invalidos": 1,
+      "duplicatas_excluidas": 1,
+      "area_m2_duplicatas_excluidas": 0.0012696685357935105,
+      "area_km2": 14.114,
+      "fracao_da_area_classificada": 0.02991,
+      "area_m2_pintura_3m": 14114511.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Cultivo não Irrigado": {
+      "codigo": 4,
+      "poligonos": 1563,
+      "area_m2_geometria": 17144758.562651534,
+      "area_m2_fonte": 17158310.956526216,
+      "invalidos": 6,
+      "duplicatas_excluidas": 6,
+      "area_m2_duplicatas_excluidas": 1934.225875785361,
+      "area_km2": 17.145,
+      "fracao_da_area_classificada": 0.03633,
+      "area_m2_pintura_3m": 17145405.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Edificação": {
+      "codigo": 5,
+      "poligonos": 526005,
+      "area_m2_geometria": 58325306.31608567,
+      "area_m2_fonte": 58371410.87138525,
+      "invalidos": 8,
+      "duplicatas_excluidas": 328,
+      "area_m2_duplicatas_excluidas": 7692.522863900387,
+      "area_km2": 58.325,
+      "fracao_da_area_classificada": 0.1236,
+      "area_m2_pintura_3m": 58329207.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0001,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": true,
+      "cenarios_do_metodo2": [],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Jardins, Passeios ou Áreas semi urbanizadas": {
+      "codigo": 6,
+      "poligonos": 21243,
+      "area_m2_geometria": 87696169.18297023,
+      "area_m2_fonte": 87765490.7634617,
+      "invalidos": 91,
+      "duplicatas_excluidas": 152,
+      "area_m2_duplicatas_excluidas": 121396.37979984428,
+      "area_km2": 87.696,
+      "fracao_da_area_classificada": 0.18584,
+      "area_m2_pintura_3m": 87690708.0,
+      "diferenca_relativa_pintura_x_poligonos": -0.0001,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior",
+        "referencia_analoga_jardins_f25",
+        "referencia_analoga_jardins_f50",
+        "referencia_analoga_jardins_f75"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Pastagem": {
+      "codigo": 7,
+      "poligonos": 344,
+      "area_m2_geometria": 8282363.14425209,
+      "area_m2_fonte": 8288910.101059589,
+      "invalidos": 0,
+      "duplicatas_excluidas": 4,
+      "area_m2_duplicatas_excluidas": 36053.53225526221,
+      "area_km2": 8.282,
+      "fracao_da_area_classificada": 0.01755,
+      "area_m2_pintura_3m": 8281161.0,
+      "diferenca_relativa_pintura_x_poligonos": -0.0001,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior",
+        "referencia_analoga"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Reflorestamento ou Vegetação Exótica": {
+      "codigo": 8,
+      "poligonos": 1115,
+      "area_m2_geometria": 11534097.08226924,
+      "area_m2_fonte": 11543214.454241417,
+      "invalidos": 1,
+      "duplicatas_excluidas": 2,
+      "area_m2_duplicatas_excluidas": 9592.81704096357,
+      "area_km2": 11.534,
+      "fracao_da_area_classificada": 0.02444,
+      "area_m2_pintura_3m": 11531610.0,
+      "diferenca_relativa_pintura_x_poligonos": -0.0002,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Solo Exposto": {
+      "codigo": 9,
+      "poligonos": 15615,
+      "area_m2_geometria": 7930923.35729106,
+      "area_m2_fonte": 7937192.356383606,
+      "invalidos": 103,
+      "duplicatas_excluidas": 79,
+      "area_m2_duplicatas_excluidas": 13376.51840878183,
+      "area_km2": 7.931,
+      "fracao_da_area_classificada": 0.01681,
+      "area_m2_pintura_3m": 7931592.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0001,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Vegetação Mista": {
+      "codigo": 10,
+      "poligonos": 18899,
+      "area_m2_geometria": 14983753.428713076,
+      "area_m2_fonte": 14995597.777028589,
+      "invalidos": 21,
+      "duplicatas_excluidas": 33,
+      "area_m2_duplicatas_excluidas": 51873.55409396786,
+      "area_km2": 14.984,
+      "fracao_da_area_classificada": 0.03175,
+      "area_m2_pintura_3m": 14977566.0,
+      "diferenca_relativa_pintura_x_poligonos": -0.0004,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Vegetação Nativa": {
+      "codigo": 11,
+      "poligonos": 6910,
+      "area_m2_geometria": 137844366.2039743,
+      "area_m2_fonte": 137919536.40789613,
+      "invalidos": 6,
+      "duplicatas_excluidas": 40,
+      "area_m2_duplicatas_excluidas": 84.05469696767643,
+      "area_km2": 137.844,
+      "fracao_da_area_classificada": 0.29211,
+      "area_m2_pintura_3m": 137844855.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0,
+      "diferenca_relativa_fonte_x_geometria": 0.00055,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Vias Pavimentadas": {
+      "codigo": 12,
+      "poligonos": 4071,
+      "area_m2_geometria": 23291172.305489186,
+      "area_m2_fonte": 23309583.33621063,
+      "invalidos": 1,
+      "duplicatas_excluidas": 67,
+      "area_m2_duplicatas_excluidas": 3611.2281873517213,
+      "area_km2": 23.291,
+      "fracao_da_area_classificada": 0.04936,
+      "area_m2_pintura_3m": 23295924.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0002,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": true,
+      "cenarios_do_metodo2": [],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Vias não Pavimentadas": {
+      "codigo": 13,
+      "poligonos": 1841,
+      "area_m2_geometria": 3302629.724526375,
+      "area_m2_fonte": 3305240.4751598225,
+      "invalidos": 20,
+      "duplicatas_excluidas": 103,
+      "area_m2_duplicatas_excluidas": 1280.3315761635954,
+      "area_km2": 3.303,
+      "fracao_da_area_classificada": 0.007,
+      "area_m2_pintura_3m": 3302640.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Área Degradada": {
+      "codigo": 14,
+      "poligonos": 525,
+      "area_m2_geometria": 3329256.404978194,
+      "area_m2_fonte": 3331888.190125849,
+      "invalidos": 5,
+      "duplicatas_excluidas": 4,
+      "area_m2_duplicatas_excluidas": 2821.7118220490906,
+      "area_km2": 3.329,
+      "fracao_da_area_classificada": 0.00706,
+      "area_m2_pintura_3m": 3328110.0,
+      "diferenca_relativa_pintura_x_poligonos": -0.0003,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [
+        "fisico_inferior",
+        "fisico_superior"
+      ],
+      "fora_do_calculo_de_escoamento": false
+    },
+    "Área Úmida": {
+      "codigo": 15,
+      "poligonos": 1579,
+      "area_m2_geometria": 32492376.30047833,
+      "area_m2_fonte": 32518060.593362104,
+      "invalidos": 1,
+      "duplicatas_excluidas": 2,
+      "area_m2_duplicatas_excluidas": 0.43366026340392716,
+      "area_km2": 32.492,
+      "fracao_da_area_classificada": 0.06886,
+      "area_m2_pintura_3m": 32492457.0,
+      "diferenca_relativa_pintura_x_poligonos": 0.0,
+      "diferenca_relativa_fonte_x_geometria": 0.00079,
+      "metodo1_fundamentado": false,
+      "cenarios_do_metodo2": [],
+      "fora_do_calculo_de_escoamento": true
+    }
+  },
+  "classes_sem_nenhum_tratamento": [],
+  "classes_inesperadas": [],
+  "area_de_referencia_municipio_m2": 494997340.6353265,
+  "area_classificada_pelos_poligonos_m2": 471883903.3018322,
+  "fracao_da_referencia_classificada": 0.9533,
+  "pela_pintura": {
+    "area_do_municipio_m2": 494996949.0,
+    "classificada_dentro_do_municipio_m2": 470624319.0,
+    "classificada_fora_do_municipio_m2": 1256202.0,
+    "lacuna_dentro_do_municipio_m2": 24372630.0,
+    "sobreposicao_m2": 0.0,
+    "fracao_do_municipio_coberta": 0.9508,
+    "blocos_com_mais_lacuna_linha_coluna_m2": [
+      [
+        "3,2",
+        5466627.0
+      ],
+      [
+        "2,2",
+        3889683.0
+      ],
+      [
+        "1,2",
+        2674242.0
+      ],
+      [
+        "2,3",
+        2252754.0
+      ],
+      [
+        "1,0",
+        1143234.0
+      ],
+      [
+        "0,1",
+        1122381.0
+      ]
+    ]
+  },
+  "cobertura_dos_metodos": {
+    "metodo1_area_m2": 81616478.62157485,
+    "metodo1_fracao_da_area_classificada": 0.173,
+    "fora_do_calculo_area_m2": 36070598.33071238,
+    "fora_do_calculo_fracao": 0.0764,
+    "sem_coeficiente_fundamentado_area_m2": 354196826.34954494,
+    "sem_coeficiente_fundamentado_fracao": 0.7506
+  },
+  "grade_de_saida": {
+    "arquivo": "data/processed/uso_solo/uso_solo_grade30m.parquet",
+    "celulas": 554807,
+    "colunas_de_area_por_classe": {
+      "area_m2__01": "Campo",
+      "area_m2__02": "Corpo Hídrico",
+      "area_m2__03": "Cultivo Irrigado",
+      "area_m2__04": "Cultivo não Irrigado",
+      "area_m2__05": "Edificação",
+      "area_m2__06": "Jardins, Passeios ou Áreas semi urbanizadas",
+      "area_m2__07": "Pastagem",
+      "area_m2__08": "Reflorestamento ou Vegetação Exótica",
+      "area_m2__09": "Solo Exposto",
+      "area_m2__10": "Vegetação Mista",
+      "area_m2__11": "Vegetação Nativa",
+      "area_m2__12": "Vias Pavimentadas",
+      "area_m2__13": "Vias não Pavimentadas",
+      "area_m2__14": "Área Degradada",
+      "area_m2__15": "Área Úmida"
+    }
+  },
+  "limitacoes": [
+    "A escala 1:2.500 é a de produção do mapa (interpretação visual de ortoimagem de 2018 a 2021, 30 cm), não uma resolução nem uma garantia de precisão dos limites.",
+    "As áreas por célula vêm de uma pintura de 3 m: sem viés, mas com ruído nas feições pequenas; a diferença por classe contra a soma dos polígonos está em 'classes'.",
+    "Sobreposição e lacuna são medidas na pintura de 3 m, não por interseção exata de polígonos.",
+    "Nenhum coeficiente de escoamento é aplicado aqui, e a classe 'Jardins, Passeios ou Áreas semi urbanizadas' segue sem coeficiente único."
+  ],
+  "lacunas_contra_agua_osm": {
+    "lacuna_m2": 24372630.0,
+    "celulas_com_lacuna": 34729,
+    "lacuna_sobre_agua_osm_m2": 22634406.0,
+    "fracao_da_lacuna_sobre_agua_osm": 0.9287,
+    "lacuna_fora_da_agua_m2": 1738224.0,
+    "fracao_da_lacuna_fora_da_agua_a_ate_100m_da_agua": 0.7582,
+    "fonte_da_agua": "data/interim/water.parquet (polígonos de água do OpenStreetMap)",
+    "leitura": "A maior parte da lacuna é água (o limite do município inclui parte do Guaíba, que o mapa de uso do solo não classifica). O restante não foi explicado: pendência de conferência visual."
+  }
+}

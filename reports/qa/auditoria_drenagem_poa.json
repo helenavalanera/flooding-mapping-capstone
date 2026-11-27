@@ -1,0 +1,1507 @@
+{
+  "coleta": "ver data/raw/manifest.json (entradas de data/raw/drenagem_poa/)",
+  "srid_dos_arquivos": 31982,
+  "rede_pluvial": {
+    "camada": "rede_pluvial",
+    "feicoes": 133060,
+    "extensao_pela_geometria_km": 2877.7,
+    "extensao_pelo_campo_EXTENSAO_km": 2877.8,
+    "identificador_de_origem": "OBJECTID",
+    "campos_de_no_ou_trecho_a_montante_jusante": [],
+    "geometria": {
+      "sem_geometria": 0,
+      "invalidas": 0,
+      "comprimento_zero": 0,
+      "duplicadas_exatas": 73
+    },
+    "atributos": {
+      "n": 133060,
+      "preenchimento": {
+        "DIAMETRO": 1.0,
+        "MATERIAL": 0.0772,
+        "CLASSE": 0.1251,
+        "EXTENSAO": 1.0,
+        "JUNTA": 0.0002,
+        "ENCAIXE": 0.0003,
+        "ENVELOPADO": 0.0267,
+        "INSERCAOMONTANTE": 0.8985,
+        "INSERCAOJUSANTE": 0.898,
+        "DECLIVIDADE": 0.0424,
+        "ALTITUDE_MONTANTE": 0.8801,
+        "ALTITUDE_JUSANTE": 0.883,
+        "ATIVO": 0.9759,
+        "COLETORFUNDOS": 0.0741,
+        "LOCALIZACAO": 0.9536,
+        "DATAIMPLANTACAO": 0.0482,
+        "ACESSO": 0.9792,
+        "AJUSTE": 0.9905,
+        "DATACRIACAO": 0.9999,
+        "DATAATUALIZACAO": 0.2067,
+        "ENABLED": 1.0,
+        "SHAPE_Length": 1.0,
+        "EXT_DIGITAL": 0.0
+      },
+      "numericos": {
+        "DIAMETRO": {
+          "preenchido": 1.0,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            0.0,
+            5000.0
+          ],
+          "minimo": 75.0,
+          "mediana": 300.0,
+          "maximo": 2000.0
+        },
+        "EXTENSAO": {
+          "preenchido": 1.0,
+          "zeros": 53,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": 0.0,
+          "mediana": 13.453000000000001,
+          "maximo": 650.345
+        },
+        "INSERCAOMONTANTE": {
+          "preenchido": 0.8985,
+          "zeros": 43820,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 9,
+          "faixa_plausivel": [
+            0.0,
+            60.0
+          ],
+          "minimo": 0.0,
+          "mediana": 0.9,
+          "maximo": 120.0
+        },
+        "INSERCAOJUSANTE": {
+          "preenchido": 0.898,
+          "zeros": 17305,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 7,
+          "faixa_plausivel": [
+            0.0,
+            60.0
+          ],
+          "minimo": 0.0,
+          "mediana": 1.2,
+          "maximo": 177.93
+        },
+        "DECLIVIDADE": {
+          "preenchido": 0.0424,
+          "zeros": 137,
+          "negativos": 1045,
+          "fora_da_faixa_plausivel": 132,
+          "faixa_plausivel": [
+            -1.0,
+            1.0
+          ],
+          "minimo": -93539.066,
+          "mediana": 0.019,
+          "maximo": 519.509
+        },
+        "ALTITUDE_MONTANTE": {
+          "preenchido": 0.8801,
+          "zeros": 374,
+          "negativos": 479,
+          "fora_da_faixa_plausivel": 3,
+          "faixa_plausivel": [
+            -5.0,
+            320.0
+          ],
+          "minimo": -4.577,
+          "mediana": 25.27,
+          "maximo": 283465.64
+        },
+        "ALTITUDE_JUSANTE": {
+          "preenchido": 0.883,
+          "zeros": 1099,
+          "negativos": 1027,
+          "fora_da_faixa_plausivel": 5,
+          "faixa_plausivel": [
+            -5.0,
+            320.0
+          ],
+          "minimo": -6.058000000000001,
+          "mediana": 24.087,
+          "maximo": 73741.0
+        },
+        "EXT_DIGITAL": {
+          "preenchido": 0.0,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": null,
+          "mediana": null,
+          "maximo": null
+        }
+      },
+      "categoricos": {
+        "MATERIAL": {
+          "(vazio)": 122785,
+          "CR": 7138,
+          "Concreto": 2631,
+          "PEAD": 412,
+          "PVC": 58,
+          "CM": 13,
+          "FoFo": 10,
+          "FD": 9,
+          "PVCC": 2,
+          "VINIL": 1,
+          "PVC-OCRE": 1
+        },
+        "CLASSE": {
+          "(vazio)": 116420,
+          "PS2": 14577,
+          "PA2": 2061,
+          "JUNTA ELASTICA": 1,
+          "CONCRETO": 1
+        },
+        "ATIVO": {
+          "1": 129858,
+          "(vazio)": 3202
+        },
+        "ACESSO": {
+          "1": 130286,
+          "(vazio)": 2773,
+          "Com Acesso": 1
+        },
+        "ENABLED": {
+          "1": 133060
+        },
+        "COLETORFUNDOS": {
+          "(vazio)": 123194,
+          "0": 8261,
+          "1": 1605
+        },
+        "JUNTA": {
+          "(vazio)": 133031,
+          "RIGIDA": 27,
+          "ELASTICA": 2
+        },
+        "ENCAIXE": {
+          "(vazio)": 133017,
+          "Ponta e Bolsa": 43
+        },
+        "ENVELOPADO": {
+          "(vazio)": 129505,
+          "Não": 3013,
+          "Envelope-Concreto": 535,
+          "Envelope-Aço": 5,
+          "Envelope-PEAD": 2
+        }
+      }
+    },
+    "datas": {
+      "DATAIMPLANTACAO": {
+        "preenchido": 0.0482,
+        "minimo": "0202-08-01",
+        "maximo": "2025-04-15"
+      },
+      "DATACRIACAO": {
+        "preenchido": 0.9999,
+        "minimo": "2021-12-29",
+        "maximo": "2025-06-13"
+      },
+      "DATAATUALIZACAO": {
+        "preenchido": 0.2067,
+        "minimo": "2022-01-06",
+        "maximo": "2025-06-13"
+      }
+    },
+    "consistencia_das_altitudes": {
+      "com_as_duas_altitudes_validas": 114933,
+      "montante_maior_ou_igual_a_jusante": 0.8506,
+      "altitudes_iguais": 0.0029,
+      "correlacao_declividade_informada_x_calculada": 0.998,
+      "razao_mediana_informada_sobre_calculada": 1.0,
+      "altitude_montante_min_max": [
+        -4.577,
+        283465.64
+      ]
+    },
+    "conectividade": {
+      "segmentos": 133060,
+      "evidencia_geometrica_de_conexao_por_tolerancia": {
+        "tolerancia_0.1m": {
+          "ambos_extremos_ligados": 0.5941,
+          "um_extremo_ligado": 0.394,
+          "nenhum_extremo_ligado": 0.0119,
+          "extremos_ligados_a_poco_de_visita_em_1m": null
+        },
+        "tolerancia_0.5m": {
+          "ambos_extremos_ligados": 0.6947,
+          "um_extremo_ligado": 0.2989,
+          "nenhum_extremo_ligado": 0.0064,
+          "extremos_ligados_a_poco_de_visita_em_1m": 0.8065
+        },
+        "tolerancia_2.0m": {
+          "ambos_extremos_ligados": 0.7987,
+          "um_extremo_ligado": 0.1967,
+          "nenhum_extremo_ligado": 0.0046,
+          "extremos_ligados_a_poco_de_visita_em_1m": 0.8065
+        }
+      },
+      "leitura": "Coincidência de extremos é evidência geométrica, não conectividade hidráulica confirmada: a camada não traz identificador de nó nem de trecho a montante/jusante."
+    },
+    "diametro_valores_mais_comuns": {
+      "300.0": 92202,
+      "400.0": 12895,
+      "600.0": 8769,
+      "500.0": 6332,
+      "800.0": 4452,
+      "1000.0": 2502,
+      "450.0": 1986,
+      "1200.0": 1571,
+      "1500.0": 770,
+      "200.0": 705
+    }
+  },
+  "rede_pluvial_sem_acesso": {
+    "camada": "rede_pluvial_sem_acesso",
+    "feicoes": 2775,
+    "extensao_pela_geometria_km": 84.1,
+    "extensao_pelo_campo_EXTENSAO_km": 84.1,
+    "identificador_de_origem": "OBJECTID",
+    "campos_de_no_ou_trecho_a_montante_jusante": [],
+    "geometria": {
+      "sem_geometria": 0,
+      "invalidas": 0,
+      "comprimento_zero": 0,
+      "duplicadas_exatas": 3
+    },
+    "atributos": {
+      "n": 2775,
+      "preenchimento": {
+        "DIAMETRO": 0.4519,
+        "MATERIAL": 0.0486,
+        "CLASSE": 0.4541,
+        "EXTENSAO": 1.0,
+        "JUNTA": 0.0,
+        "ENCAIXE": 0.0,
+        "ENVELOPADO": 0.0065,
+        "INSERCAOMONTANTE": 0.0105,
+        "INSERCAOJUSANTE": 0.0076,
+        "DECLIVIDADE": 0.0047,
+        "ALTITUDE_MONTANTE": 0.0061,
+        "ALTITUDE_JUSANTE": 0.0058,
+        "ATIVO": 0.9827,
+        "COLETORFUNDOS": 0.1726,
+        "LOCALIZACAO": 0.0912,
+        "DATAIMPLANTACAO": 0.0011,
+        "ACESSO": 1.0,
+        "AJUSTE": 0.9813,
+        "DATACRIACAO": 1.0,
+        "DATAATUALIZACAO": 0.5777,
+        "ENABLED": 1.0,
+        "SHAPE_Length": 1.0,
+        "EXT_DIGITAL": 0.0
+      },
+      "numericos": {
+        "DIAMETRO": {
+          "preenchido": 0.4519,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            0.0,
+            5000.0
+          ],
+          "minimo": 100.0,
+          "mediana": 300.0,
+          "maximo": 1500.0
+        },
+        "EXTENSAO": {
+          "preenchido": 1.0,
+          "zeros": 4,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": 0.0,
+          "mediana": 23.255000000000003,
+          "maximo": 240.876
+        },
+        "INSERCAOMONTANTE": {
+          "preenchido": 0.0105,
+          "zeros": 4,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            0.0,
+            60.0
+          ],
+          "minimo": 0.0,
+          "mediana": 0.85,
+          "maximo": 4.3500000000000005
+        },
+        "INSERCAOJUSANTE": {
+          "preenchido": 0.0076,
+          "zeros": 2,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            0.0,
+            60.0
+          ],
+          "minimo": 0.0,
+          "mediana": 1.22,
+          "maximo": 3.149
+        },
+        "DECLIVIDADE": {
+          "preenchido": 0.0047,
+          "zeros": 0,
+          "negativos": 2,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            -1.0,
+            1.0
+          ],
+          "minimo": -0.019,
+          "mediana": 0.019,
+          "maximo": 0.091
+        },
+        "ALTITUDE_MONTANTE": {
+          "preenchido": 0.0061,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            -5.0,
+            320.0
+          ],
+          "minimo": 1.175,
+          "mediana": 15.225000000000001,
+          "maximo": 79.4
+        },
+        "ALTITUDE_JUSANTE": {
+          "preenchido": 0.0058,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            -5.0,
+            320.0
+          ],
+          "minimo": 0.7250000000000001,
+          "mediana": 15.171000000000001,
+          "maximo": 74.813
+        },
+        "EXT_DIGITAL": {
+          "preenchido": 0.0,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": null,
+          "mediana": null,
+          "maximo": null
+        }
+      },
+      "categoricos": {
+        "MATERIAL": {
+          "(vazio)": 2640,
+          "CR": 131,
+          "PVC": 3,
+          "CM": 1
+        },
+        "CLASSE": {
+          "(vazio)": 1515,
+          "PS2": 1088,
+          "PA2": 172
+        },
+        "ATIVO": {
+          "1": 2725,
+          "(vazio)": 48,
+          "0": 2
+        },
+        "ACESSO": {
+          "0": 2775
+        },
+        "ENABLED": {
+          "1": 2773,
+          "0": 2
+        },
+        "COLETORFUNDOS": {
+          "(vazio)": 2296,
+          "0": 339,
+          "1": 140
+        },
+        "JUNTA": {
+          "(vazio)": 2775
+        },
+        "ENCAIXE": {
+          "(vazio)": 2775
+        },
+        "ENVELOPADO": {
+          "(vazio)": 2757,
+          "Envelope-Concreto": 9,
+          "Não": 9
+        }
+      }
+    },
+    "datas": {
+      "DATAIMPLANTACAO": {
+        "preenchido": 0.0011,
+        "minimo": "2006-08-01",
+        "maximo": "2023-06-01"
+      },
+      "DATACRIACAO": {
+        "preenchido": 1.0,
+        "minimo": "2021-12-29",
+        "maximo": "2025-06-09"
+      },
+      "DATAATUALIZACAO": {
+        "preenchido": 0.5777,
+        "minimo": "2022-01-20",
+        "maximo": "2025-06-09"
+      }
+    },
+    "consistencia_das_altitudes": {
+      "com_as_duas_altitudes_validas": 15,
+      "montante_maior_ou_igual_a_jusante": 0.8667,
+      "altitudes_iguais": 0.0,
+      "correlacao_declividade_informada_x_calculada": 0.874,
+      "razao_mediana_informada_sobre_calculada": 1.0,
+      "altitude_montante_min_max": [
+        1.7140000000000002,
+        76.283
+      ]
+    }
+  },
+  "rede_pluvial_nao_interligada": {
+    "camada": "rede_pluvial_nao_interligada",
+    "feicoes": 21,
+    "extensao_pela_geometria_km": 0.5,
+    "extensao_pelo_campo_EXTENSAO_km": 0.5,
+    "identificador_de_origem": "OBJECTID",
+    "campos_de_no_ou_trecho_a_montante_jusante": [],
+    "geometria": {
+      "sem_geometria": 0,
+      "invalidas": 0,
+      "comprimento_zero": 0,
+      "duplicadas_exatas": 0
+    },
+    "atributos": {
+      "n": 21,
+      "preenchimento": {
+        "DIAMETRO": 1.0,
+        "MATERIAL": 0.381,
+        "CLASSE": 1.0,
+        "EXTENSAO": 1.0,
+        "JUNTA": 0.0,
+        "ENCAIXE": 0.0,
+        "ENVELOPADO": 0.2857,
+        "INSERCAOMONTANTE": 0.619,
+        "INSERCAOJUSANTE": 0.619,
+        "DECLIVIDADE": 0.5714,
+        "ALTITUDE_MONTANTE": 0.5714,
+        "ALTITUDE_JUSANTE": 0.619,
+        "ATIVO": 1.0,
+        "COLETORFUNDOS": 0.5714,
+        "LOCALIZACAO": 0.7619,
+        "DATAIMPLANTACAO": 0.2381,
+        "ACESSO": 1.0,
+        "AJUSTE": 1.0,
+        "DATACRIACAO": 1.0,
+        "DATAATUALIZACAO": 1.0,
+        "ENABLED": 1.0,
+        "SHAPE_Length": 1.0,
+        "EXT_DIGITAL": 0.0
+      },
+      "numericos": {
+        "DIAMETRO": {
+          "preenchido": 1.0,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            0.0,
+            5000.0
+          ],
+          "minimo": 300.0,
+          "mediana": 600.0,
+          "maximo": 1500.0
+        },
+        "EXTENSAO": {
+          "preenchido": 1.0,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": 0.995,
+          "mediana": 17.55,
+          "maximo": 84.489
+        },
+        "INSERCAOMONTANTE": {
+          "preenchido": 0.619,
+          "zeros": 1,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            0.0,
+            60.0
+          ],
+          "minimo": 0.0,
+          "mediana": 1.7,
+          "maximo": 4.3500000000000005
+        },
+        "INSERCAOJUSANTE": {
+          "preenchido": 0.619,
+          "zeros": 2,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            0.0,
+            60.0
+          ],
+          "minimo": 0.0,
+          "mediana": 2.1,
+          "maximo": 2.95
+        },
+        "DECLIVIDADE": {
+          "preenchido": 0.5714,
+          "zeros": 0,
+          "negativos": 3,
+          "fora_da_faixa_plausivel": 1,
+          "faixa_plausivel": [
+            -1.0,
+            1.0
+          ],
+          "minimo": -0.063,
+          "mediana": 0.004,
+          "maximo": 1.1760000000000002
+        },
+        "ALTITUDE_MONTANTE": {
+          "preenchido": 0.5714,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            -5.0,
+            320.0
+          ],
+          "minimo": 8.565000000000001,
+          "mediana": 14.27,
+          "maximo": 76.283
+        },
+        "ALTITUDE_JUSANTE": {
+          "preenchido": 0.619,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            -5.0,
+            320.0
+          ],
+          "minimo": 7.894,
+          "mediana": 14.24,
+          "maximo": 74.813
+        },
+        "EXT_DIGITAL": {
+          "preenchido": 0.0,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": null,
+          "mediana": null,
+          "maximo": null
+        }
+      },
+      "categoricos": {
+        "MATERIAL": {
+          "(vazio)": 13,
+          "CR": 8
+        },
+        "CLASSE": {
+          "PS2": 14,
+          "PA2": 7
+        },
+        "ATIVO": {
+          "0": 21
+        },
+        "ACESSO": {
+          "1": 19,
+          "0": 2
+        },
+        "ENABLED": {
+          "1": 21
+        },
+        "COLETORFUNDOS": {
+          "(vazio)": 9,
+          "1": 8,
+          "0": 4
+        },
+        "JUNTA": {
+          "(vazio)": 21
+        },
+        "ENCAIXE": {
+          "(vazio)": 21
+        },
+        "ENVELOPADO": {
+          "(vazio)": 15,
+          "Envelope-Concreto": 5,
+          "Não": 1
+        }
+      }
+    },
+    "datas": {
+      "DATAIMPLANTACAO": {
+        "preenchido": 0.2381,
+        "minimo": "2022-08-01",
+        "maximo": "2022-08-01"
+      },
+      "DATACRIACAO": {
+        "preenchido": 1.0,
+        "minimo": "2021-12-29",
+        "maximo": "2024-11-29"
+      },
+      "DATAATUALIZACAO": {
+        "preenchido": 1.0,
+        "minimo": "2022-08-19",
+        "maximo": "2025-03-13"
+      }
+    },
+    "consistencia_das_altitudes": {
+      "com_as_duas_altitudes_validas": 12,
+      "montante_maior_ou_igual_a_jusante": 0.75,
+      "altitudes_iguais": 0.0,
+      "correlacao_declividade_informada_x_calculada": 0.804,
+      "razao_mediana_informada_sobre_calculada": 1.03,
+      "altitude_montante_min_max": [
+        8.565000000000001,
+        76.283
+      ]
+    }
+  },
+  "rede_publica_x_consulta": {
+    "consulta_trechos": 133060,
+    "publica_trechos": 133428,
+    "campos_so_na_consulta": [
+      "AJUSTE",
+      "ALTITUDE_JUSANTE",
+      "ALTITUDE_MONTANTE",
+      "DATAATUALIZACAO",
+      "DATACRIACAO",
+      "DECLIVIDADE",
+      "ENABLED",
+      "EXT_DIGITAL",
+      "INSERCAOJUSANTE",
+      "INSERCAOMONTANTE",
+      "LOCALIZACAO",
+      "SHAPE_LENGTH"
+    ],
+    "campos_so_na_publica": [
+      "Shape__Length",
+      "coletorfun",
+      "dataatuali",
+      "datacriaca",
+      "dataimplan",
+      "localizaca"
+    ],
+    "trechos_com_mesma_geometria_em_1m": 127416,
+    "so_na_consulta": 5485,
+    "so_na_publica": 5860,
+    "entre_os_comuns_mesmo_diametro": 0.9993,
+    "entre_os_comuns_mesmo_material": 0.0645,
+    "leitura": "A camada pública não traz altitudes, inserção nem declividade; a de consulta traz. As duas têm contagens diferentes: são cópias de datas distintas."
+  },
+  "poco_de_visita": {
+    "feicoes": 88899,
+    "atributos": {
+      "n": 88899,
+      "preenchimento": {
+        "TIPO": 0.004,
+        "MATERIAL": 0.855,
+        "PROFUNDIDADE": 0.8353,
+        "TIPOTAMPA": 0.9892,
+        "ESPELHO": 0.0443,
+        "ALTITUDETAMPA": 0.9003,
+        "DATAIMPLANTACAO": 0.048,
+        "DATACRIACAO": 0.9999,
+        "DATAATUALIZACAO": 0.9571,
+        "ENABLED": 1.0
+      },
+      "numericos": {
+        "PROFUNDIDADE": {
+          "preenchido": 0.8353,
+          "zeros": 15,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 1,
+          "faixa_plausivel": [
+            0.0,
+            60.0
+          ],
+          "minimo": 0.0,
+          "mediana": 1.3,
+          "maximo": 110.0
+        },
+        "ALTITUDETAMPA": {
+          "preenchido": 0.9003,
+          "zeros": 7,
+          "negativos": 12,
+          "fora_da_faixa_plausivel": 2,
+          "faixa_plausivel": [
+            -5.0,
+            320.0
+          ],
+          "minimo": -0.48800000000000004,
+          "mediana": 26.315,
+          "maximo": 2146.0
+        }
+      },
+      "categoricos": {
+        "TIPO": {
+          "(vazio)": 88541,
+          "PV": 194,
+          "PVBL": 83,
+          "<Null>": 69,
+          "A": 6,
+          "PV BL": 1,
+          "INSPECAO": 1,
+          "FERRO FUNDIDO": 1,
+          "CAIXA _INSPECAO": 1,
+          "SIFAO": 1,
+          "ESPECIAL": 1
+        },
+        "MATERIAL": {
+          "Concreto": 70311,
+          "(vazio)": 12888,
+          "FERRO": 5224,
+          "PEDRA": 165,
+          "CR": 136,
+          "ALV": 90,
+          "FERRO FUNDIDO": 77,
+          "TIJOLO MACIÇO": 3,
+          "PEAD": 3,
+          "FERRRO FUNDIDO": 1,
+          "<Null>": 1
+        },
+        "ENABLED": {
+          "1": 88899
+        }
+      }
+    }
+  },
+  "grelha": {
+    "n": 955,
+    "preenchimento": {
+      "TIPO": 0.1298,
+      "MATERIAL": 0.7602,
+      "PROFUNDIDADE": 0.8901,
+      "ALTITUDETAMPA": 0.8251,
+      "DATAIMPLANTACAO": 0.1822,
+      "DATACRIACAO": 0.9958,
+      "DATAATUALIZACAO": 0.1686,
+      "ENABLED": 1.0
+    },
+    "numericos": {
+      "PROFUNDIDADE": {
+        "preenchido": 0.8901,
+        "zeros": 617,
+        "negativos": 0,
+        "fora_da_faixa_plausivel": 0,
+        "faixa_plausivel": [
+          0.0,
+          60.0
+        ],
+        "minimo": 0.0,
+        "mediana": 0.0,
+        "maximo": 2.7
+      },
+      "ALTITUDETAMPA": {
+        "preenchido": 0.8251,
+        "zeros": 0,
+        "negativos": 6,
+        "fora_da_faixa_plausivel": 0,
+        "faixa_plausivel": [
+          -5.0,
+          320.0
+        ],
+        "minimo": -2.43,
+        "mediana": 17.064999999999998,
+        "maximo": 221.02
+      }
+    },
+    "categoricos": {
+      "TIPO": {
+        "(vazio)": 831,
+        "CAIXA": 72,
+        "LINEAR": 52
+      },
+      "MATERIAL": {
+        "FERRO": 671,
+        "(vazio)": 229,
+        "CONCRETO": 55
+      }
+    }
+  },
+  "coletor_de_fundo": {
+    "feicoes": 1868
+  },
+  "canal_pluvial": {
+    "n": 1752,
+    "preenchimento": {
+      "TIPO": 0.9983,
+      "TIPOSECAO": 0.9201,
+      "MATERIALPAREDE": 0.1421,
+      "MATERIALFUNDO": 0.1404,
+      "MATERIALTAMPA": 0.0434,
+      "EXTENSAO": 1.0,
+      "LARGURA": 0.9155,
+      "ALTURA": 0.8647,
+      "ALTITUDEMONTANTE": 0.2083,
+      "ALTITUDEJUSANTE": 0.1946,
+      "INSERCAOMONTANTE": 0.1039,
+      "INSERCAOJUSANTE": 0.1039,
+      "DECLIVIDADE": 0.0976,
+      "ACESSO": 0.9652,
+      "DATAIMPLANTACAO": 0.1941,
+      "AJUSTE": 0.9309,
+      "DATACRIACAO": 0.9977,
+      "DATAATUALIZACAO": 0.9892,
+      "ENABLED": 1.0,
+      "SHAPE_Length": 1.0
+    },
+    "numericos": {
+      "LARGURA": {
+        "preenchido": 0.9155,
+        "zeros": 0,
+        "negativos": 0,
+        "fora_da_faixa_plausivel": null,
+        "faixa_plausivel": null,
+        "minimo": 0.2,
+        "mediana": 1.5,
+        "maximo": 5.5
+      },
+      "ALTURA": {
+        "preenchido": 0.8647,
+        "zeros": 1,
+        "negativos": 0,
+        "fora_da_faixa_plausivel": null,
+        "faixa_plausivel": null,
+        "minimo": 0.0,
+        "mediana": 1.2,
+        "maximo": 76.0
+      },
+      "ALTITUDEMONTANTE": {
+        "preenchido": 0.2083,
+        "zeros": 11,
+        "negativos": 15,
+        "fora_da_faixa_plausivel": 0,
+        "faixa_plausivel": [
+          -5.0,
+          320.0
+        ],
+        "minimo": -2.75,
+        "mediana": 2.81,
+        "maximo": 181.94
+      },
+      "ALTITUDEJUSANTE": {
+        "preenchido": 0.1946,
+        "zeros": 0,
+        "negativos": 17,
+        "fora_da_faixa_plausivel": 0,
+        "faixa_plausivel": [
+          -5.0,
+          320.0
+        ],
+        "minimo": -3.2,
+        "mediana": 2.66,
+        "maximo": 181.26
+      },
+      "DECLIVIDADE": {
+        "preenchido": 0.0976,
+        "zeros": 15,
+        "negativos": 93,
+        "fora_da_faixa_plausivel": 1,
+        "faixa_plausivel": [
+          -1.0,
+          1.0
+        ],
+        "minimo": -0.506,
+        "mediana": -0.001,
+        "maximo": 1.16
+      },
+      "EXTENSAO": {
+        "preenchido": 1.0,
+        "zeros": 4,
+        "negativos": 0,
+        "fora_da_faixa_plausivel": null,
+        "faixa_plausivel": null,
+        "minimo": 0.0,
+        "mediana": 29.587500000000002,
+        "maximo": 641.522
+      }
+    },
+    "categoricos": {
+      "TIPOSECAO": {
+        "Retangular": 1570,
+        "(vazio)": 140,
+        "Circular": 21,
+        "SemiCircular": 11,
+        "Trapezoidal": 10
+      },
+      "MATERIALPAREDE": {
+        "(vazio)": 1503,
+        "CR": 214,
+        "ALV": 21,
+        "PEDRA": 13,
+        "TERRA": 1
+      },
+      "ACESSO": {
+        "1": 860,
+        "Com Acesso": 831,
+        "(vazio)": 61
+      }
+    }
+  },
+  "conduto_forcado": {
+    "n": 108,
+    "preenchimento": {
+      "NOME": 0.9815,
+      "TIPOSECAO": 0.6019,
+      "DIAMETRO": 0.1574,
+      "ALTURA": 0.6759,
+      "LARGURA": 0.6759,
+      "MATERIAL": 0.0278,
+      "EXTENSAO": 1.0,
+      "ALTITUDE_MONTANTE": 0.0,
+      "ALTITUDE_JUSANTE": 0.0,
+      "ACESSO": 0.4444,
+      "DATAIMPLANTACAO": 0.0,
+      "DATACRIACAO": 1.0,
+      "DATAATUALIZACAO": 1.0,
+      "ENABLED": 1.0,
+      "SHAPE_Length": 1.0
+    },
+    "numericos": {
+      "DIAMETRO": {
+        "preenchido": 0.1574,
+        "zeros": 0,
+        "negativos": 0,
+        "fora_da_faixa_plausivel": 0,
+        "faixa_plausivel": [
+          0.0,
+          5000.0
+        ],
+        "minimo": 1200.0,
+        "mediana": 1500.0,
+        "maximo": 2200.0
+      },
+      "ALTURA": {
+        "preenchido": 0.6759,
+        "zeros": 0,
+        "negativos": 0,
+        "fora_da_faixa_plausivel": null,
+        "faixa_plausivel": null,
+        "minimo": 0.55,
+        "mediana": 2.25,
+        "maximo": 3.0
+      },
+      "LARGURA": {
+        "preenchido": 0.6759,
+        "zeros": 0,
+        "negativos": 0,
+        "fora_da_faixa_plausivel": null,
+        "faixa_plausivel": null,
+        "minimo": 0.6,
+        "mediana": 2.08,
+        "maximo": 7.5
+      }
+    },
+    "categoricos": {
+      "TIPOSECAO": {
+        "Retangular": 55,
+        "(vazio)": 43,
+        "Circular": 10
+      },
+      "MATERIAL": {
+        "(vazio)": 105,
+        "Concreto": 2,
+        "CR": 1
+      }
+    }
+  },
+  "bocas_de_lobo": {
+    "bocas_de_lobo": 44868,
+    "publica_bocas_de_lobo": 44336,
+    "atributos": {
+      "n": 44868,
+      "preenchimento": {
+        "TIPO": 0.8587,
+        "ESPELHO": 0.0648,
+        "PROFUNDIDADE": 0.916,
+        "ALTITUDETAMPA": 0.8926,
+        "DATAIMPLANTACAO": 0.0556,
+        "DATACRIACAO": 0.9999,
+        "DATAATUALIZACAO": 0.8546,
+        "ENABLED": 1.0
+      },
+      "numericos": {
+        "PROFUNDIDADE": {
+          "preenchido": 0.916,
+          "zeros": 36785,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            0.0,
+            60.0
+          ],
+          "minimo": 0.0,
+          "mediana": 0.0,
+          "maximo": 18.0
+        },
+        "ALTITUDETAMPA": {
+          "preenchido": 0.8926,
+          "zeros": 0,
+          "negativos": 19,
+          "fora_da_faixa_plausivel": 0,
+          "faixa_plausivel": [
+            -5.0,
+            320.0
+          ],
+          "minimo": -0.47200000000000003,
+          "mediana": 25.07,
+          "maximo": 267.05
+        }
+      },
+      "categoricos": {
+        "TIPO": {
+          "1": 37957,
+          "(vazio)": 6338,
+          "2": 519,
+          "3": 41,
+          "4": 11,
+          "5": 2
+        },
+        "ESPELHO": {
+          "(vazio)": 41960,
+          "MaxEficiencia": 2230,
+          "MAXIMA_EFICIENCIA": 345,
+          "CONCRETO": 279,
+          "SemEspelho": 49,
+          "FoFo": 5
+        },
+        "ENABLED": {
+          "1": 44868
+        }
+      }
+    },
+    "datas": {
+      "DATAIMPLANTACAO": {
+        "preenchido": 0.0556,
+        "minimo": "1999-03-01",
+        "maximo": "2025-03-21"
+      },
+      "DATACRIACAO": {
+        "preenchido": 0.9999,
+        "minimo": "2021-12-29",
+        "maximo": "2025-06-13"
+      },
+      "DATAATUALIZACAO": {
+        "preenchido": 0.8546,
+        "minimo": "2022-01-12",
+        "maximo": "2025-06-13"
+      }
+    },
+    "capacidade_declarada": false,
+    "campos_de_relacao_com_a_rede": [],
+    "distancia_a_rede_pluvial_mais_proxima": {
+      "mediana_m": 0.0,
+      "p90_m": 0.0,
+      "p99_m": 2.1,
+      "ate_2m": 0.9895,
+      "ate_5m": 0.9926,
+      "ate_10m": 0.9942,
+      "ate_25m": 0.9962,
+      "ate_50m": 0.9977,
+      "sem_rede_em_50m": 0.0023
+    },
+    "bocas_dentro_de_algum_bairro": 44709,
+    "densidade_por_bairro_bocas_por_km2": {
+      "mediana": 205.2,
+      "minimo": 0.0,
+      "maximo": 440.5,
+      "bairros_com_menos_de_5_por_km2": [
+        "Arquipélago",
+        "Extrema",
+        "São Caetano",
+        "Lageado",
+        "Lami",
+        "Boa Vista do Sul"
+      ]
+    },
+    "leitura": "Distância geométrica à rede NÃO é conexão hidráulica; a camada não diz a que trecho cada boca descarrega, nem se está funcional."
+  },
+  "casas_de_bomba": {
+    "unidades": 24,
+    "preenchimento_dos_campos": {
+      "name": 1.0,
+      "local": 0.0,
+      "f__rea_prot": 0.0,
+      "se____o_re": 0.0,
+      "descri____": 0.0,
+      "f__rea_cont": 0.0,
+      "capacidade": 0.0,
+      "configura_": 0.0,
+      "endere__o": 0.0
+    },
+    "capacidade_valores_distintos": [
+      ""
+    ],
+    "unidade_da_capacidade": "não identificável: o campo está vazio em todos os registros",
+    "no_projeto": 20,
+    "mesmo_nome_no_servico_e_no_projeto": 19,
+    "distancia_maxima_entre_os_registros_de_mesmo_nome_m": 443.5,
+    "somente_no_servico": [
+      {
+        "nome": "CB-11B",
+        "distancia_ao_registro_do_projeto_m": null,
+        "mais_proximo_no_projeto": {
+          "nome": "CB-11",
+          "distancia_m": 80.1
+        }
+      },
+      {
+        "nome": "CB ASA BRANCA",
+        "distancia_ao_registro_do_projeto_m": null,
+        "mais_proximo_no_projeto": {
+          "nome": "CB-10",
+          "distancia_m": 1481.9
+        }
+      },
+      {
+        "nome": "CB TRINCHEIRA CEARÁ",
+        "distancia_ao_registro_do_projeto_m": null,
+        "mais_proximo_no_projeto": {
+          "nome": "CB-Trensurb",
+          "distancia_m": 1612.4
+        }
+      },
+      {
+        "nome": "CB SANTA TEREZINHA",
+        "distancia_ao_registro_do_projeto_m": null,
+        "mais_proximo_no_projeto": {
+          "nome": "CB-14",
+          "distancia_m": 725.3
+        }
+      },
+      {
+        "nome": "CB-11A",
+        "distancia_ao_registro_do_projeto_m": null,
+        "mais_proximo_no_projeto": {
+          "nome": "CB-11",
+          "distancia_m": 177.2
+        }
+      }
+    ],
+    "somente_no_projeto": [
+      "CB-11"
+    ],
+    "casadas": [
+      {
+        "nome": "CB-2",
+        "distancia_ao_registro_do_projeto_m": 0.0,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-3",
+        "distancia_ao_registro_do_projeto_m": 16.7,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-4",
+        "distancia_ao_registro_do_projeto_m": 17.0,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-5",
+        "distancia_ao_registro_do_projeto_m": 39.0,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-6",
+        "distancia_ao_registro_do_projeto_m": 33.5,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-9",
+        "distancia_ao_registro_do_projeto_m": 30.2,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-12",
+        "distancia_ao_registro_do_projeto_m": 16.8,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-13",
+        "distancia_ao_registro_do_projeto_m": 19.9,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-14",
+        "distancia_ao_registro_do_projeto_m": 17.2,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-17",
+        "distancia_ao_registro_do_projeto_m": 19.7,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-18",
+        "distancia_ao_registro_do_projeto_m": 31.8,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-Trensurb",
+        "distancia_ao_registro_do_projeto_m": 0.1,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-Vila Farrapos",
+        "distancia_ao_registro_do_projeto_m": 18.6,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-Minuano",
+        "distancia_ao_registro_do_projeto_m": 443.5,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-15",
+        "distancia_ao_registro_do_projeto_m": 19.0,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-10",
+        "distancia_ao_registro_do_projeto_m": 30.2,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-Silvio Brum",
+        "distancia_ao_registro_do_projeto_m": 27.2,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-16",
+        "distancia_ao_registro_do_projeto_m": 22.5,
+        "mais_proximo_no_projeto": null
+      },
+      {
+        "nome": "CB-1",
+        "distancia_ao_registro_do_projeto_m": 105.4,
+        "mais_proximo_no_projeto": null
+      }
+    ]
+  },
+  "risco_cprm": {
+    "poligonos": 2216,
+    "classes": {
+      "Alto": {
+        "poligonos": 1526,
+        "area_km2": 234.806
+      },
+      "Baixa": {
+        "poligonos": 149,
+        "area_km2": 3.15
+      },
+      "Médio": {
+        "poligonos": 541,
+        "area_km2": 12.803
+      }
+    },
+    "classe_muito_alto_presente": false,
+    "area_total_km2": 250.76,
+    "area_da_uniao_km2": 250.76,
+    "sobreposicao_entre_poligonos_km2": -0.0,
+    "fracao_da_area_dos_bairros": 0.5317,
+    "geometria": {
+      "sem_geometria": 0,
+      "invalidas": 26,
+      "comprimento_zero": 0,
+      "duplicadas_exatas": 0
+    },
+    "fonte_declarada": [
+      "Produto obtido através da modelagem (ver Nota técnica explicativa do projeto) validado por trabalho de campo pela CPRM entre os anos 2012 e 2014."
+    ],
+    "processo": [
+      "Inundação"
+    ],
+    "camada_editavel_no_servidor": true,
+    "leitura": "Risco mapeado por modelagem validada em campo (2012–2014): não é ocorrência histórica, nem simulação hidráulica, nem profundidade; só contexto e comparação qualitativa."
+  },
+  "uso_do_solo_profill_2022": {
+    "fonte": "estatísticas do servidor (agrupamento por classe) em 25/11/2026; polígonos não baixados nesta etapa",
+    "poligonos": 605245,
+    "area_classificada_km2": 472.5,
+    "classes": {
+      "Vegetação Nativa": 137.92,
+      "Jardins, Passeios ou Áreas semi urbanizadas": 87.89,
+      "Edificação": 58.38,
+      "Campo": 48.08,
+      "Área Úmida": 32.52,
+      "Vias Pavimentadas": 23.31,
+      "Cultivo não Irrigado": 17.16,
+      "Vegetação Mista": 15.05,
+      "Cultivo Irrigado": 14.13,
+      "Reflorestamento ou Vegetação Exótica": 11.55,
+      "Pastagem": 8.32,
+      "Solo Exposto": 7.95,
+      "Corpo Hídrico": 3.59,
+      "Área Degradada": 3.33,
+      "Vias não Pavimentadas": 3.31
+    },
+    "piloto_de_geometria_1km2": {
+      "centro": {
+        "lon": -51.21772,
+        "lat": -30.05771
+      },
+      "poligonos_que_tocam_a_caixa": 2208,
+      "area_da_caixa_m2": 864711,
+      "geometrias_invalidas": 0,
+      "cobertura_da_caixa_pelos_poligonos": 1.0,
+      "lacunas_m2": 4.4,
+      "sobreposicao_m2": -0.0,
+      "sobreposicao_fracao_da_area_somada": -0.0,
+      "campo_area_m2_x_area_pela_geometria": {
+        "mediana_da_diferenca_relativa": 0.00079,
+        "p95_da_diferenca_relativa": 0.0008
+      },
+      "area_por_classe_na_caixa_fracao": {
+        "Jardins, Passeios ou Áreas semi urbanizadas": 0.3997,
+        "Edificação": 0.3679,
+        "Vias Pavimentadas": 0.1251,
+        "Vegetação Mista": 0.0974,
+        "Vegetação Nativa": 0.0076,
+        "Solo Exposto": 0.0023
+      },
+      "leitura": "Escala cartográfica 1:2.500 é a escala de produção do mapa, não uma resolução de 2.500 m nem uma garantia de precisão dos limites dos polígonos."
+    }
+  },
+  "hidrografia": {
+    "recurso_hidrico_feicoes": 5989,
+    "extensao_km": 766.1,
+    "geometria": {
+      "sem_geometria": 0,
+      "invalidas": 0,
+      "comprimento_zero": 0,
+      "duplicadas_exatas": 13
+    },
+    "atributos": {
+      "n": 5989,
+      "preenchimento": {
+        "TIPO": 0.5518,
+        "NOME": 0.247,
+        "EXTENSAO": 1.0,
+        "LEITO": 0.9995,
+        "DATACAMPO": 0.0053,
+        "LARGURACANAL": 0.073,
+        "ALTURACANAL": 0.0706,
+        "ACESSO": 0.9573,
+        "AJUSTE": 0.9307,
+        "DATACRIACAO": 0.9952,
+        "DATAATUALIZACAO": 0.9962,
+        "ENABLED": 1.0,
+        "SHAPE_Length": 1.0
+      },
+      "numericos": {
+        "EXTENSAO": {
+          "preenchido": 1.0,
+          "zeros": 3,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": 0.0,
+          "mediana": 58.052,
+          "maximo": 9845.301000000001
+        },
+        "LARGURACANAL": {
+          "preenchido": 0.073,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": 0.4,
+          "mediana": 2.2,
+          "maximo": 14.0
+        },
+        "ALTURACANAL": {
+          "preenchido": 0.0706,
+          "zeros": 0,
+          "negativos": 0,
+          "fora_da_faixa_plausivel": null,
+          "faixa_plausivel": null,
+          "minimo": 0.3,
+          "mediana": 1.7,
+          "maximo": 33.75
+        }
+      },
+      "categoricos": {
+        "TIPO": {
+          "(vazio)": 2684,
+          "ARROIO": 2020,
+          "Arroio": 660,
+          "VALA": 534,
+          "CÓRREGO": 42,
+          "Vala": 29,
+          "RIO": 20
+        },
+        "LEITO": {
+          "NATURAL": 3913,
+          "CANALIZADO": 875,
+          "EM GALERIA": 790,
+          "Natural": 281,
+          "RETIFICADO": 127,
+          "(vazio)": 3
+        },
+        "ACESSO": {
+          "1": 5224,
+          "0": 509,
+          "(vazio)": 256
+        },
+        "ENABLED": {
+          "1": 5989
+        }
+      }
+    },
+    "datas": {
+      "DATACAMPO": {
+        "preenchido": 0.0053,
+        "minimo": "1899-12-30",
+        "maximo": "2019-08-31"
+      },
+      "DATACRIACAO": {
+        "preenchido": 0.9952,
+        "minimo": "2021-12-29",
+        "maximo": "2025-06-13"
+      },
+      "DATAATUALIZACAO": {
+        "preenchido": 0.9962,
+        "minimo": "2022-05-02",
+        "maximo": "2025-06-13"
+      }
+    },
+    "arroios_do_projeto": 679,
+    "extensao_arroios_do_projeto_km": 471.6,
+    "arroios_do_projeto_a_ate_25m_do_recurso_hidrico": 0.183,
+    "arroios_do_projeto_a_ate_50m": 0.342,
+    "recurso_hidrico_a_ate_25m_de_um_arroio_do_projeto": 0.116,
+    "extremos_livres_da_rede_pluvial": 41477,
+    "extremos_livres_a_ate_25m_de_recurso_hidrico": 0.093,
+    "app_hidrografia_2014": {
+      "poligonos": 139,
+      "area_km2": 81.82,
+      "nome_preenchido": 1.0,
+      "fonte_declarada": "Projeto DMWeb, com base no aerolevantamento de 1982 (Áreas de Preservação Permanente), não curso d'água"
+    },
+    "leitura": "Recurso hídrico (cadastro da drenagem), arroios do projeto (mapa da Prefeitura) e APP são três coisas diferentes; proximidade não prova que o arroio recebe a rede."
+  }
+}

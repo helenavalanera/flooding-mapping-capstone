@@ -1,0 +1,329 @@
+{
+  "versao_do_processamento": "fase2-1",
+  "crs": "EPSG:31982",
+  "tolerancias_m": {
+    "extremos": 0.5,
+    "poco_de_visita": 1.0
+  },
+  "rede_pluvial": {
+    "rede_pluvial": {
+      "camada": "rede_pluvial",
+      "registros_na_fonte": 133060,
+      "rejeitados_na_coleta_sem_geometria": 0,
+      "rejeitados_na_coleta_coordenada_nao_finita": null,
+      "registros_processados": 133060,
+      "geometrias_validas": 133060,
+      "geometrias_invalidas": 0,
+      "fora_da_caixa_do_municipio": 0,
+      "duplicatas_exatas": 74,
+      "usados_no_inventario": 132986,
+      "colunas_sem_nenhum_preenchimento": [
+        "extensao_digital"
+      ],
+      "fracao_de_nulos_por_coluna": {
+        "diametro": 0.0,
+        "material": 0.9228,
+        "classe_do_tubo": 0.8749,
+        "junta": 0.9998,
+        "encaixe": 0.9997,
+        "envelopado": 0.9733,
+        "insercao_montante": 0.1015,
+        "insercao_jusante": 0.102,
+        "declividade": 0.9576,
+        "altitude_montante": 0.1199,
+        "altitude_jusante": 0.117,
+        "ativo_no_cadastro": 0.0241,
+        "coletor_de_fundos": 0.9259,
+        "localizacao": 0.0464,
+        "data_implantacao": 0.9518,
+        "acesso": 0.0208,
+        "ajuste": 0.0095,
+        "data_criacao_no_cadastro": 0.0001,
+        "data_atualizacao_no_cadastro": 0.7933,
+        "extensao_digital": 1.0,
+        "duplicata_exata_de": 0.9994
+      },
+      "sinalizacoes": {
+        "altitude_montante_fora_da_faixa_plausivel": 3,
+        "altitude_jusante_fora_da_faixa_plausivel": 5,
+        "declividade_fora_da_faixa_plausivel": 132,
+        "insercao_montante_fora_da_faixa_plausivel": 9,
+        "insercao_jusante_fora_da_faixa_plausivel": 7,
+        "diametro_fora_da_faixa_plausivel": 0,
+        "insercao_montante_zero_possivel_ausencia": 43820,
+        "insercao_jusante_zero_possivel_ausencia": 17305,
+        "data_implantacao_suspeita": 13
+      }
+    },
+    "rede_pluvial_sem_acesso": {
+      "camada": "rede_pluvial_sem_acesso",
+      "registros_na_fonte": 2775,
+      "rejeitados_na_coleta_sem_geometria": 0,
+      "rejeitados_na_coleta_coordenada_nao_finita": null,
+      "registros_processados": 2775,
+      "geometrias_validas": 2775,
+      "geometrias_invalidas": 0,
+      "fora_da_caixa_do_municipio": 0,
+      "duplicatas_exatas": 3,
+      "usados_no_inventario": 2772,
+      "colunas_sem_nenhum_preenchimento": [
+        "junta",
+        "encaixe",
+        "extensao_digital"
+      ],
+      "fracao_de_nulos_por_coluna": {
+        "diametro": 0.5481,
+        "material": 0.9514,
+        "classe_do_tubo": 0.5459,
+        "junta": 1.0,
+        "encaixe": 1.0,
+        "envelopado": 0.9935,
+        "insercao_montante": 0.9895,
+        "insercao_jusante": 0.9924,
+        "declividade": 0.9953,
+        "altitude_montante": 0.9939,
+        "altitude_jusante": 0.9942,
+        "ativo_no_cadastro": 0.0173,
+        "coletor_de_fundos": 0.8274,
+        "localizacao": 0.9088,
+        "data_implantacao": 0.9989,
+        "ajuste": 0.0187,
+        "data_atualizacao_no_cadastro": 0.4223,
+        "extensao_digital": 1.0,
+        "duplicata_exata_de": 0.9989
+      },
+      "sinalizacoes": {
+        "altitude_montante_fora_da_faixa_plausivel": 0,
+        "altitude_jusante_fora_da_faixa_plausivel": 0,
+        "declividade_fora_da_faixa_plausivel": 0,
+        "insercao_montante_fora_da_faixa_plausivel": 0,
+        "insercao_jusante_fora_da_faixa_plausivel": 0,
+        "diametro_fora_da_faixa_plausivel": 0,
+        "insercao_montante_zero_possivel_ausencia": 4,
+        "insercao_jusante_zero_possivel_ausencia": 2,
+        "data_implantacao_suspeita": 0
+      }
+    },
+    "rede_pluvial_nao_interligada": {
+      "camada": "rede_pluvial_nao_interligada",
+      "registros_na_fonte": 21,
+      "rejeitados_na_coleta_sem_geometria": 0,
+      "rejeitados_na_coleta_coordenada_nao_finita": null,
+      "registros_processados": 21,
+      "geometrias_validas": 21,
+      "geometrias_invalidas": 0,
+      "fora_da_caixa_do_municipio": 0,
+      "duplicatas_exatas": 0,
+      "usados_no_inventario": 21,
+      "colunas_sem_nenhum_preenchimento": [
+        "junta",
+        "encaixe",
+        "extensao_digital",
+        "duplicata_exata_de"
+      ],
+      "fracao_de_nulos_por_coluna": {
+        "material": 0.619,
+        "junta": 1.0,
+        "encaixe": 1.0,
+        "envelopado": 0.7143,
+        "insercao_montante": 0.381,
+        "insercao_jusante": 0.381,
+        "declividade": 0.4286,
+        "altitude_montante": 0.4286,
+        "altitude_jusante": 0.381,
+        "coletor_de_fundos": 0.4286,
+        "localizacao": 0.2381,
+        "data_implantacao": 0.7619,
+        "extensao_digital": 1.0,
+        "duplicata_exata_de": 1.0
+      },
+      "sinalizacoes": {
+        "altitude_montante_fora_da_faixa_plausivel": 0,
+        "altitude_jusante_fora_da_faixa_plausivel": 0,
+        "declividade_fora_da_faixa_plausivel": 1,
+        "insercao_montante_fora_da_faixa_plausivel": 0,
+        "insercao_jusante_fora_da_faixa_plausivel": 0,
+        "diametro_fora_da_faixa_plausivel": 0,
+        "insercao_montante_zero_possivel_ausencia": 1,
+        "insercao_jusante_zero_possivel_ausencia": 2,
+        "data_implantacao_suspeita": 0
+      }
+    }
+  },
+  "pocos_de_visita": {
+    "camada": "poco_de_visita",
+    "registros_na_fonte": 88906,
+    "rejeitados_na_coleta_sem_geometria": 0,
+    "rejeitados_na_coleta_coordenada_nao_finita": 7,
+    "registros_processados": 88899,
+    "geometrias_validas": 88899,
+    "geometrias_invalidas": 0,
+    "fora_da_caixa_do_municipio": 0,
+    "duplicatas_exatas": 39,
+    "usados_no_inventario": 88860,
+    "colunas_sem_nenhum_preenchimento": [],
+    "fracao_de_nulos_por_coluna": {
+      "tipo_codigo": 0.9967,
+      "espelho": 0.9557,
+      "material": 0.145,
+      "profundidade": 0.1647,
+      "altitude_da_tampa": 0.0997,
+      "tipo_de_tampa": 0.0108,
+      "data_implantacao": 0.952,
+      "data_criacao_no_cadastro": 0.0001,
+      "data_atualizacao_no_cadastro": 0.0429,
+      "duplicata_exata_de": 0.9996
+    },
+    "sinalizacoes": {
+      "altitude_da_tampa_fora_da_faixa_plausivel": 2,
+      "profundidade_fora_da_faixa_plausivel": 1,
+      "profundidade_zero_possivel_ausencia": 15,
+      "data_implantacao_suspeita": 8
+    }
+  },
+  "bocas_de_lobo": {
+    "camada": "boca_de_lobo",
+    "registros_na_fonte": 44872,
+    "rejeitados_na_coleta_sem_geometria": 0,
+    "rejeitados_na_coleta_coordenada_nao_finita": 4,
+    "registros_processados": 44868,
+    "geometrias_validas": 44868,
+    "geometrias_invalidas": 0,
+    "fora_da_caixa_do_municipio": 1,
+    "duplicatas_exatas": 106,
+    "usados_no_inventario": 44761,
+    "colunas_sem_nenhum_preenchimento": [],
+    "fracao_de_nulos_por_coluna": {
+      "tipo_codigo": 0.1413,
+      "espelho": 0.9352,
+      "profundidade": 0.084,
+      "altitude_da_tampa": 0.1074,
+      "data_implantacao": 0.9444,
+      "data_criacao_no_cadastro": 0.0001,
+      "data_atualizacao_no_cadastro": 0.1454,
+      "duplicata_exata_de": 0.9976
+    },
+    "sinalizacoes": {
+      "altitude_da_tampa_fora_da_faixa_plausivel": 0,
+      "profundidade_fora_da_faixa_plausivel": 0,
+      "profundidade_zero_possivel_ausencia": 36785,
+      "data_implantacao_suspeita": 0
+    }
+  },
+  "casas_de_bomba": {
+    "camada": "casas_de_bomba_ebap",
+    "registros_na_fonte": 24,
+    "rejeitados_na_coleta_sem_geometria": 0,
+    "rejeitados_na_coleta_coordenada_nao_finita": null,
+    "registros_processados": 24,
+    "geometrias_validas": 24,
+    "geometrias_invalidas": 0,
+    "fora_da_caixa_do_municipio": 0,
+    "duplicatas_exatas": 0,
+    "usados_no_inventario": 24,
+    "colunas_sem_nenhum_preenchimento": [
+      "local",
+      "area_protegida",
+      "area_de_contribuicao",
+      "secao",
+      "configuracao",
+      "endereco",
+      "descricao",
+      "capacidade_texto_original",
+      "duplicata_exata_de"
+    ],
+    "fracao_de_nulos_por_coluna": {
+      "local": 1.0,
+      "area_protegida": 1.0,
+      "area_de_contribuicao": 1.0,
+      "secao": 1.0,
+      "configuracao": 1.0,
+      "endereco": 1.0,
+      "descricao": 1.0,
+      "capacidade_texto_original": 1.0,
+      "distancia_ao_registro_do_projeto": 0.2083,
+      "duplicata_exata_de": 1.0
+    },
+    "sinalizacoes": {}
+  },
+  "evidencia_geometrica_rede_pluvial_operacional": {
+    "evidencia_geometrica_inicio_coincide_com_outro_extremo": 0.6203,
+    "evidencia_geometrica_fim_coincide_com_outro_extremo": 0.9703,
+    "evidencia_geometrica_inicio_perto_de_poco_de_visita": 0.6741,
+    "evidencia_geometrica_fim_perto_de_poco_de_visita": 0.939,
+    "evidencia_geometrica_ambos_extremos_ligados": 0.6949
+  },
+  "bocas_de_lobo_distancia_geometrica": {
+    "mediana_m": 0.0,
+    "ate_2m": 0.9895,
+    "acima_de_50m": 105,
+    "aviso": "distância geométrica; não é conexão hidráulica nem funcionamento"
+  },
+  "casas_de_bomba_detalhe": {
+    "capacidade_informada": 0,
+    "registros": 24,
+    "mesmo_nome_no_projeto": 19,
+    "distancia_maxima_ao_projeto_m": 443.5,
+    "somente_no_servico": [
+      "CB-11B",
+      "CB ASA BRANCA",
+      "CB TRINCHEIRA CEARÁ",
+      "CB SANTA TEREZINHA",
+      "CB-11A"
+    ],
+    "somente_no_projeto": [
+      "CB-11"
+    ]
+  },
+  "classificacao_operacional_original_preservada": {
+    "rede_pluvial": {
+      "ativo_no_cadastro": {
+        "1": 129858,
+        "(vazio)": 3202
+      }
+    },
+    "rede_pluvial_sem_acesso": {
+      "acesso": {
+        "0": 2775
+      }
+    },
+    "rede_pluvial_nao_interligada": {
+      "ativo_no_cadastro": {
+        "0": 21
+      }
+    }
+  },
+  "arquivos": {
+    "rede_pluvial": {
+      "path": "data/processed/drenagem/rede_pluvial.parquet",
+      "sha256": "958e8b20e4091e4c2632ae8aab62c7edac702befb1235e14c75b6159cae006e6",
+      "bytes": 9037611,
+      "registros": 135856
+    },
+    "pocos_de_visita": {
+      "path": "data/processed/drenagem/pocos_de_visita.parquet",
+      "sha256": "3f2fd89233e34d2660ca59682528bb3fac27d087950665d4a8af472922cf43d2",
+      "bytes": 3006563,
+      "registros": 88899
+    },
+    "bocas_de_lobo": {
+      "path": "data/processed/drenagem/bocas_de_lobo.parquet",
+      "sha256": "5e67b6587d3101757072627cd1e6c0eb49b4fa7358bea9d70d91707f826e98c8",
+      "bytes": 1488502,
+      "registros": 44868
+    },
+    "casas_de_bomba": {
+      "path": "data/processed/drenagem/casas_de_bomba.parquet",
+      "sha256": "cec3ed5b5db2779b019c89a59a31b5c2acd885d1a4f8e62a2c315012af39487a",
+      "bytes": 18781,
+      "registros": 24
+    }
+  },
+  "limitacoes": [
+    "Inventário cadastral: nenhuma capacidade, vazão, operação ou conectividade hidráulica é atribuída.",
+    "A rede sem acesso e a não interligada não são tratadas como operacionais ou ativas.",
+    "Bocas de lobo não recebem identificador de trecho, e a distância geométrica não prova conexão nem funcionamento.",
+    "Casas de bomba: só nome e posição; o campo de capacidade está vazio.",
+    "Unidades inferidas pelos valores; os serviços não as declaram nem documentam a referência vertical das altitudes."
+  ]
+}
