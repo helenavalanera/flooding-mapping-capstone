@@ -36,12 +36,20 @@
     RENDER[aba]();
   }
   function marcarTerritorio() { var t = T.territorio(); el("sub-territorio").textContent = t.nome + " · escala " + t.escala + " · análise do escoamento superficial"; }
+  /* Nem o mapa 3D nem o 2D puderam iniciar (sem WebGL e sem as bibliotecas, por exemplo): o que a pessoa pode fazer em vez disso, sem script de mapa. */
+  function mapaIndisponivel(motivo) {
+    aviso("Não foi possível iniciar o mapa: " + motivo);
+    var c = el("mapa-gl"); if (!c) return;
+    c.innerHTML = "<div class='mapa-indisponivel' role='status'><h2>O mapa interativo não pôde ser exibido</h2><p>Motivo: " + Lg.esc(motivo) + ".</p>" +
+      "<p>Isso costuma acontecer quando o navegador não tem aceleração gráfica (WebGL) ou não consegue baixar as bibliotecas do mapa. Tente atualizar o navegador, ativar a aceleração gráfica ou abrir a página com conexão à internet.</p>" +
+      "<p>Enquanto isso, os resultados continuam disponíveis: os mapas de manchas das dimensões A a E são imagens, sem WebGL, na <a href='inicio/#dimensoes'>página inicial</a>, e os resultados por bairro estão na aba <a href='#poa/resultados'>Resultados</a>.</p></div>";
+  }
   function abrirMapa() {
     window.Mapa.iniciar().then(function () {
       window.Mapa.redimensionar();
     }).catch(function (e) {
-      if (window.Mapa.motorNome === "gl") { window.Mapa.trocarMotor(true).then(function () { window.Mapa.redimensionar(); }).catch(function (x) { aviso("Não foi possível iniciar o mapa: " + x.message); }); aviso("O mapa 3D não pôde iniciar (" + e.message + "): usando o mapa 2D simples."); }
-      else aviso("Não foi possível iniciar o mapa: " + e.message);
+      if (window.Mapa.motorNome === "gl") { window.Mapa.trocarMotor(true).then(function () { window.Mapa.redimensionar(); }).catch(function (x) { mapaIndisponivel(x.message); }); aviso("O mapa 3D não pôde iniciar (" + e.message + "): usando o mapa 2D simples."); }
+      else mapaIndisponivel(e.message);
     });
   }
 

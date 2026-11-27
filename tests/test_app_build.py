@@ -207,3 +207,12 @@ def test_the_headers_file_caches_what_is_heavy_and_rarely_changes_but_not_the_pa
     for rota in ("/", "/index.html", "/painel.html"):
         assert not any(x.startswith("Cache-Control") for x in blocos[rota])                 # as páginas seguem a revalidação padrão do Pages
     assert not any(x.startswith("Cache-Control") for x in blocos["/*"])
+
+
+def test_the_basemap_ranges_are_cached_without_a_service_worker_and_the_map_has_an_informative_fallback(tmp_path):
+    out, _ = make_site(tmp_path)
+    base, painel, estilo = (out / "mapa-base.js").read_text(encoding="utf-8"), (out / "painel.js").read_text(encoding="utf-8"), (out / "style.css").read_text(encoding="utf-8")
+    assert "FonteComCache" in base and "caches.open(CACHE_NOME)" in base and "hashCurto(ARQUIVO)" in base and "serviceWorker" not in base      # Cache API, sem Service Worker
+    assert "typeof caches !== \"undefined\"" in base and "return base.getBytes(offset, length, signal, etag)" in base                           # sem Cache API (ou se falhar), volta ao pedido normal
+    assert "x-etag" in base and "protocolo.add(" in base                                                                                      # a faixa só vale com a mesma versão (ETag) do arquivo
+    assert "function mapaIndisponivel" in painel and "inicio/#dimensoes" in painel and "sem WebGL" in painel and ".mapa-indisponivel" in estilo

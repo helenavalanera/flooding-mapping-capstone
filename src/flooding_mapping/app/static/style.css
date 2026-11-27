@@ -247,3 +247,5 @@ footer { border-top:1px solid var(--line); padding:16px 20px; }
 .k-experimental { background:#eef1f4; color:#1f2d3d; border:2px dashed #46586b; }
 .geoai-aviso { border-left:4px dashed #46586b; padding-left:10px; }
 #geoai-opac { width:100%; max-width:220px; vertical-align:middle; }
+
+.mapa-indisponivel { max-width: 40rem; margin: 40px auto; padding: 22px 26px; background: #fff; border: 2px solid #46586b; border-radius: 12px; color: #14232e; } .mapa-indisponivel h2 { font-size: 1.2rem; margin: 0 0 10px; } .mapa-indisponivel p { margin: 8px 0; }
