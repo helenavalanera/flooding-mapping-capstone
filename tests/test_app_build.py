@@ -187,3 +187,13 @@ def test_the_map_libraries_are_loaded_on_demand_with_integrity_hashes_and_not_wi
     mapa = (out / "mapa.js").read_text(encoding="utf-8")
     assert "window.CarregarMapa.gl()" in mapa and "gl = window.maplibregl" not in mapa
     assert "maxzoom: 12" in (out / "mapa-base.js").read_text(encoding="utf-8")            # o relevo (30 m) não precisa de tiles além do zoom 12: menos pedidos e bytes
+
+
+def test_the_headers_file_caches_what_is_heavy_and_rarely_changes_but_not_the_pages(tmp_path):
+    h = build.cabecalhos()
+    blocos = {l.strip(): [x.strip() for x in b.splitlines()[1:]] for b in re.split(r"\n(?=/)", h) for l in b.splitlines()[:1]}
+    assert any("max-age=3600" in x for x in blocos["/inicio/img/*"]) and any("stale-while-revalidate" in x for x in blocos["/inicio/img/*"])
+    assert any("max-age=86400" in x for x in blocos["/vendor/*"]) and "/data/*" in blocos
+    for rota in ("/", "/index.html", "/painel.html"):
+        assert not any(x.startswith("Cache-Control") for x in blocos[rota])                 # as páginas seguem a revalidação padrão do Pages
+    assert not any(x.startswith("Cache-Control") for x in blocos["/*"])

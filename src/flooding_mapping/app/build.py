@@ -47,7 +47,11 @@ def cabecalhos(r2_origem: str | None = None) -> str:
     linhas = ["/*", f"  Content-Security-Policy: {geral}", *(f"  {h}" for h in seguranca)]
     for rota in ("/", "/index.html", "/painel.html"):
         linhas += [rota, "  ! Content-Security-Policy", f"  Content-Security-Policy: {enquadravel}"]
-    linhas += ["/vendor/*", "  Cache-Control: public, max-age=86400"]      # bibliotecas e glifos do mapa: mudam raramente
+    # Cache do navegador e do CDN. HTML, JS e CSS ficam com a revalidação padrão do Pages (ETag): uma publicação nova vale na hora. O que muda pouco e pesa fica em cache.
+    linhas += ["/vendor/*", "  Cache-Control: public, max-age=86400",                                        # bibliotecas e glifos do mapa
+               "/inicio/img/*", "  Cache-Control: public, max-age=3600, stale-while-revalidate=86400",      # os quatro mapas WebP e os gráficos da landing (não têm hash no nome)
+               "/data/*", "  Cache-Control: public, max-age=3600, stale-while-revalidate=86400",            # resultados, rankings e números dos mapas
+               "/icone-*", "  Cache-Control: public, max-age=86400"]
     return "\n".join(linhas) + "\n"
 
 
