@@ -13,6 +13,8 @@ Essa declaração descreve a **abordagem** do estudo. Ela **não** afirma que to
 - **nenhuma licença (MIT, CC BY ou outra) é atribuída a dados de terceiros sem fundamento documental**; a licença MIT do repositório vale para o **código** do projeto;
 - distinguem-se quatro naturezas: **dado original** (de terceiros), **dado derivado** (processado pelo projeto), **resultado agregado** (números e figuras) e **código**.
 
+> **Base legal e origem (27/11/2026).** A autora autorizou o uso e a redistribuição de derivados dos dados da Prefeitura com atribuição, com base no Decreto Municipal nº 20.315/2019; a regularização documental de cada conjunto segue separada. Ver [`base_legal_dados.md`](base_legal_dados.md). As colunas de condição de uso abaixo registram o estado documental de cada fonte, e não bloqueiam a publicação de derivados.
+
 > **Fora do Git não significa descartado.** Todo o acervo está catalogado, com tamanho, processamento, local previsto no R2 e condição de acesso, em [`catalogo_dados.md`](catalogo_dados.md). Armazenar no R2 não torna o dado público: Profill, drenagem e demais conjuntos com licença não confirmada só ganham acesso público depois de a licença estar registrada.
 
 ## 1. Dados de terceiros (originais)
