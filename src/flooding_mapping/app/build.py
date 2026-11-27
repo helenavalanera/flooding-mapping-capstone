@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -18,6 +19,36 @@ STATIC = Path(__file__).parent / "static"
 ASSETS = ("index.html", "painel.js", "territorio.js", "fase3-dados.js", "fase3.js", "drenagem.js", "resultados.js", "simulador.js", "mapa.js", "mapa2d.js", "mapa-base.js", "logic.js", "style.css", "config-dados.js", "icone-192.png", "icone-512.png")
 ENTRADA = Path(__file__).parent / "entrada"   # raiz da versão estática: leva à landing (ou ao painel, quando o endereço pede)
 # O PWA de rotas, o painel estadual e a aplicação instalável estão arquivados em app/arquivo/ e não entram no site.
+
+# ---------------------------------------------------------------------------------------------------------------------------------------- cabeçalhos
+# O Cloudflare Pages não tem o servidor Python que aplica a política de conteúdo em desenvolvimento: ela vai no arquivo ``_headers`` da raiz do site.
+# A política é a mesma de ``flooding_mapping.servidor.CSP`` (um teste confere), acrescida da origem pública do R2 quando há uma. Este módulo não importa o servidor.
+CSP = ("default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+       "img-src 'self' data: blob: https://cdnjs.cloudflare.com https://s3.amazonaws.com; "
+       "connect-src 'self' https://s3.amazonaws.com; worker-src 'self' blob:; child-src 'self' blob:; frame-ancestors 'none'; base-uri 'none'")
+# A página "No celular" mostra a interface real num quadro da MESMA origem: a raiz (que leva ao painel) e o painel podem ser enquadrados por 'self'; o resto, por ninguém.
+CSP_ENQUADRAVEL = CSP.replace("frame-ancestors 'none'", "frame-ancestors 'self'")
+ORIGEM_R2 = re.compile(r"^https://[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?(:\d{1,5})?$")
+
+
+def com_origem_do_r2(csp: str, origem: str | None) -> str:
+    """Acrescenta a origem pública do R2 (tiles, fragmentos e PMTiles lidos por faixas de bytes) a ``connect-src`` e a ``img-src``. Só origem https, sem caminho."""
+    if not origem:
+        return csp
+    if not ORIGEM_R2.match(origem):
+        raise SystemExit(f"--r2-origem deve ser uma origem https sem caminho (por exemplo https://dados.exemplo.org), e não {origem!r}")
+    return csp.replace("img-src 'self' data: blob:", f"img-src 'self' data: blob: {origem}").replace("connect-src 'self'", f"connect-src 'self' {origem}")
+
+
+def cabecalhos(r2_origem: str | None = None) -> str:
+    """Conteúdo do ``_headers`` do Pages. Regras que casam com a mesma página SOMAM cabeçalhos, por isso as páginas enquadráveis soltam a política geral (``!``) antes de pôr a sua."""
+    geral, enquadravel = com_origem_do_r2(CSP, r2_origem), com_origem_do_r2(CSP_ENQUADRAVEL, r2_origem)
+    seguranca = ["X-Content-Type-Options: nosniff", "Referrer-Policy: strict-origin-when-cross-origin", "Permissions-Policy: geolocation=(), camera=(), microphone=()"]
+    linhas = ["/*", f"  Content-Security-Policy: {geral}", *(f"  {h}" for h in seguranca)]
+    for rota in ("/", "/index.html", "/painel.html"):
+        linhas += [rota, "  ! Content-Security-Policy", f"  Content-Security-Policy: {enquadravel}"]
+    linhas += ["/vendor/*", "  Cache-Control: public, max-age=86400"]      # bibliotecas e glifos do mapa: mudam raramente
+    return "\n".join(linhas) + "\n"
 
 
 def copiar_interface(out: Path) -> None:
@@ -38,7 +69,7 @@ def copiar_interface(out: Path) -> None:
         shutil.copy(path, out / "data" / path.name)
 
 
-def build_site(out: Path, fase3: Path | None = None, drenagem: Path | None = None) -> dict:
+def build_site(out: Path, fase3: Path | None = None, drenagem: Path | None = None, r2_origem: str | None = None) -> dict:
     """Escreve o site em ``out`` e devolve o que foi publicado."""
     shutil.rmtree(out, ignore_errors=True)
     copiar_interface(out)
@@ -50,6 +81,8 @@ def build_site(out: Path, fase3: Path | None = None, drenagem: Path | None = Non
         shutil.copytree(drenagem, out / "drenagem")
         published["drenagem"] = True
     (out / ".nojekyll").write_text("")
+    (out / "_headers").write_text(cabecalhos(r2_origem), encoding="utf-8")
+    published["cabecalhos"] = True
     return published
 
 
@@ -58,8 +91,9 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path("site"))
     parser.add_argument("--drenagem", type=Path, default=None, help="data/processed/drenagem_web (tools/preparar_camada_drenagem.py): publica a camada de drenagem cadastrada com o site")
     parser.add_argument("--fase3", type=Path, default=None, help="data/processed/fase3_web (tools/preparar_camada_fase3.py): publica a camada da Fase 3 com o site")
+    parser.add_argument("--r2-origem", default=None, help="origem pública do R2 (https://dados.exemplo.org), acrescentada a connect-src e img-src do _headers")
     args = parser.parse_args()
-    print(json.dumps(build_site(args.out, args.fase3, args.drenagem), ensure_ascii=False))
+    print(json.dumps(build_site(args.out, args.fase3, args.drenagem, args.r2_origem), ensure_ascii=False))
 
 
 if __name__ == "__main__":

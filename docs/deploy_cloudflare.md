@@ -7,13 +7,13 @@ Estado em 26/11/2026: **nada foi publicado**. O build está pronto e foi verific
 ## Aplicação (Pages)
 
 ```bash
-PYTHONPATH=src .venv/bin/python -m flooding_mapping.app.build --out dist        # 53 arquivos, 1,6 MB: landing, painel, simulador, vendor do mapa
+PYTHONPATH=src .venv/bin/python -m flooding_mapping.app.build --out dist        # 54 arquivos, com o _headers, 1,6 MB: landing, painel, simulador, vendor do mapa
 CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... npx wrangler pages deploy dist --project-name <projeto> --branch main
 ```
 
 Token com permissão de edição de Pages. A raiz leva à landing (`inicio/`); o painel é `painel.html`.
 
-Em `dist/_headers`, a política de conteúdo que o servidor local aplica (`servidor.CSP`), com a origem pública do R2 acrescentada a `connect-src` e `img-src`. Sem isso o navegador bloqueia os dados do bucket.
+O build gera `dist/_headers` com a política de conteúdo do servidor local (`servidor.CSP`, conferida por teste), os cabeçalhos de segurança e o cache de `/vendor/*`. Com a origem pública do R2, rode o build com `--r2-origem https://dados.exemplo.org`: ela entra em `connect-src` e `img-src`; sem isso o navegador bloqueia os dados do bucket. A raiz e o painel podem ser enquadrados pela mesma origem (página "No celular"); o resto, por ninguém. O Pages soma cabeçalhos de regras que casam com a mesma página, por isso essas rotas soltam a política geral (`! Content-Security-Policy`) antes de pôr a sua.
 
 ## Dados (R2)
 

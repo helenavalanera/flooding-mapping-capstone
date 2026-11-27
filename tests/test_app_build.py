@@ -25,7 +25,7 @@ def test_site_has_the_page_the_data_and_no_jekyll_marker(tmp_path):
     out, published = make_site(tmp_path)
     for name in ("index.html", "painel.html", "inicio/index.html", "mapa2d.js", "logic.js", "style.css", ".nojekyll", "data/resultados_poa.json", "data/territorio_poa.json"):
         assert (out / name).exists(), name
-    assert published == {"territorio": "poa"}
+    assert published == {"territorio": "poa", "cabecalhos": True}
 
 
 def test_the_site_ships_nothing_from_the_state_front(tmp_path):
@@ -77,7 +77,7 @@ def test_derived_layers_are_published_only_when_asked(tmp_path):
         p.mkdir()
         (p / "meta.json").write_text("{}")
     out, published = make_site(tmp_path, fase3=fase3, drenagem=dren)
-    assert published == {"territorio": "poa", "fase3": True, "drenagem": True} and (out / "fase3/meta.json").exists() and (out / "drenagem/meta.json").exists()
+    assert published == {"territorio": "poa", "fase3": True, "drenagem": True, "cabecalhos": True} and (out / "fase3/meta.json").exists() and (out / "drenagem/meta.json").exists()
 
 
 def test_nothing_secret_reaches_the_published_site(tmp_path):
@@ -130,3 +130,43 @@ def test_the_site_build_imports_nothing_from_the_archived_state_front():
     import ast
     modulos = {n.module or "" for n in ast.walk(ast.parse((build.STATIC.parent / "build.py").read_text())) if isinstance(n, ast.ImportFrom)}
     assert not {m for m in modulos if re.search(r"collector|ingestion|inference|geospatial|layers|arquivo", m)}, modulos
+
+
+def test_the_pages_headers_file_repeats_the_server_policy_and_the_security_headers(tmp_path):
+    from flooding_mapping import servidor
+    out, _ = make_site(tmp_path)
+    h = (out / "_headers").read_text(encoding="utf-8")
+    assert build.CSP == servidor.CSP and build.CSP_ENQUADRAVEL == servidor.CSP_PAINEL            # a mesma política do servidor local
+    assert h.startswith("/*\n") and f"Content-Security-Policy: {build.CSP}" in h
+    for linha in ("X-Content-Type-Options: nosniff", "Referrer-Policy: strict-origin-when-cross-origin", "Permissions-Policy: geolocation=(), camera=(), microphone=()"):
+        assert f"  {linha}" in h
+    assert "'unsafe-eval'" not in h and "frame-ancestors 'none'" in h and "https://s3.amazonaws.com" in h        # relevo 3D; nenhum motor de avaliação dinâmica
+    assert max(len(x) for x in h.splitlines()) < 2000 and h.count("\n/") < 100                            # limites do Pages: 2.000 caracteres por linha e 100 regras
+
+
+def test_the_pages_headers_let_only_the_entry_and_the_panel_be_framed_by_the_same_origin_and_drop_the_general_policy_there(tmp_path):
+    out, _ = make_site(tmp_path)
+    blocos = {}
+    for bloco in re.split(r"\n(?=/)", (out / "_headers").read_text(encoding="utf-8").strip()):
+        rota, *regras = bloco.splitlines()
+        blocos[rota] = [r.strip() for r in regras]
+    for rota in ("/", "/index.html", "/painel.html"):
+        assert blocos[rota][0] == "! Content-Security-Policy"                                            # sem isso o Pages somaria as duas políticas e o quadro seguiria bloqueado
+        assert f"Content-Security-Policy: {build.CSP_ENQUADRAVEL}" in blocos[rota] and "frame-ancestors 'self'" in blocos[rota][1]
+    assert "frame-ancestors 'none'" in " ".join(blocos["/*"]) and "/inicio/*" not in blocos
+    assert blocos["/vendor/*"] == ["Cache-Control: public, max-age=86400"]
+
+
+def test_the_r2_origin_is_added_only_to_connect_and_img_sources_and_only_when_it_is_a_plain_https_origin(tmp_path):
+    r2 = "https://dados.exemplo.org"
+    h = build.cabecalhos(r2)
+    for linha in (l for l in h.splitlines() if "Content-Security-Policy:" in l):
+        d = dict(p.strip().split(" ", 1) for p in linha.split("Content-Security-Policy:", 1)[1].split(";") if p.strip())
+        assert r2 in d["connect-src"].split() and r2 in d["img-src"].split() and r2 not in d["script-src"] and r2 not in d["default-src"]
+    assert r2 not in build.cabecalhos() and build.com_origem_do_r2(build.CSP, None) == build.CSP
+    for ruim in ("http://dados.exemplo.org", "https://dados.exemplo.org/mapa", "dados.exemplo.org", "https://x.org; script-src *", "https://*.exemplo.org"):
+        with pytest.raises(SystemExit, match="origem https sem caminho"):
+            build.cabecalhos(ruim)
+    out = tmp_path / "s"
+    build.build_site(out, r2_origem=r2)
+    assert r2 in (out / "_headers").read_text(encoding="utf-8")
