@@ -52,7 +52,7 @@ def top_bairros(n: int = 5) -> dict:
 def main() -> None:
     r = {"media_mensal_de_chuva": media_mensal(), "top5_bairros": top_bairros(),
          "nao_publicados": {
-             "top10_trechos": "Os valores por trecho derivam do uso do solo da Profill, cuja redistribuição não foi confirmada, e a contribuição acumulada não se soma nem se ordena entre trechos de uma mesma rede sem leitura do contexto. Fica para quando a Prefeitura esclarecer a licença.",
+             "top10_trechos": "A contribuição acumulada se repete ao longo de um mesmo caminho da água: trechos vizinhos da mesma rede carregam a mesma água, então os valores não se somam e ordená-los em uma lista de ruas induziria a leitura errada. Sem um critério metodológico validado para ordenar trechos, o estudo mostra os mapas e os bairros, e não um ranking de ruas.",
              "ranking_de_zonas": "Não há, nos dados do projeto, divisão de Porto Alegre em zonas (só os 94 bairros). Criar uma agrupando bairros seria inventar uma classificação."}}
     SAIDA.write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding="utf-8")
     print("gravado:", SAIDA)
