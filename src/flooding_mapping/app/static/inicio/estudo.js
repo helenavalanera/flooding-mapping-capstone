@@ -40,6 +40,7 @@
   });
   function escolher(aba) {
     abas.forEach(function (b) { var ativa = b === aba; b.setAttribute("aria-selected", String(ativa)); b.tabIndex = ativa ? 0 : -1; var p = document.getElementById(b.getAttribute("aria-controls")); if (p) p.hidden = !ativa; });
+    regioesRolaveis();   // a tabela do painel que acabou de aparecer pode rolar na horizontal: precisa ser alcançável pelo teclado
   }
   abas.forEach(function (aba) {
     aba.addEventListener("click", function () { escolher(aba); });
