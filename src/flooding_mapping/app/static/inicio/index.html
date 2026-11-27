@@ -18,14 +18,12 @@
   <nav class="nav" aria-label="Seções do estudo">
     <a class="marca" href="#hero" aria-label="Flooding Mapping, início"><b>FM</b><span>Flooding Mapping</span></a>
     <ol class="ancoras">
-      <li><a href="#pergunta">Pergunta</a></li>
-      <li><a href="#descobertas">Descobertas</a></li>
-      <li><a href="#territorio">Território</a></li>
+      <li><a href="#pergunta">Contexto</a></li>
+      <li><a href="#territorio">Mapa</a></li>
+      <li><a href="#resultados-executivos">Resultados</a></li>
+      <li><a href="#cenarios">Simulador</a></li>
       <li><a href="#metodo">Método</a></li>
-      <li><a href="#resultados">Resultados</a></li>
-      <li><a href="#cenarios">Cenários</a></li>
-      <li><a href="#geoai">GeoAI</a></li>
-      <li><a href="#dados">Dados</a></li>
+      <li><a href="#documentacao">Documentação</a></li>
       <li><a href="#referencias">Referências</a></li>
     </ol>
     <a class="btn btn-sm" href="../?painel=1#poa/mapa?escoamento=1&amp;p=30">Abrir o mapa</a>
@@ -36,7 +34,7 @@
 <section class="hero" id="hero" aria-labelledby="titulo">
   <div class="hero-texto">
     <p class="selo"><span>Space Tech Bootcamp 2026</span><span>Projeto final</span><span>Porto Alegre, RS</span></p>
-    <h1 id="titulo">Como a chuva transforma o território?</h1>
+    <h1 id="titulo">Dada uma chuva, onde a água tende a se acumular?</h1>
     <p class="lead"><b>Da chuva à estimativa de áreas com maior propensão ao acúmulo de água.</b> O estudo analisa como a precipitação interage com o relevo, a urbanização e a drenagem de Porto Alegre para estimar a <b>geração</b> e a <b>concentração</b> de escoamento superficial. Explore cenários de 10, 20 e 30 mm.</p>
     <p class="hero-acoes">
       <a class="btn" href="#descobertas">Ver as descobertas</a>
@@ -64,7 +62,7 @@
 
 <section class="campo c-seco" id="pergunta" aria-labelledby="h-pergunta">
   <div class="grade">
-    <p class="sec-num"><span>02</span> O problema e o território</p>
+    <p class="sec-num"><span>02</span> Contexto e chuva</p>
     <h2 id="h-pergunta" class="titulo">A água segue o relevo, o solo e o que a cidade construiu</h2>
     <div class="duas">
       <div class="prosa">
@@ -84,40 +82,19 @@
       <li><h3>Uso do solo</h3><p>Mapa de 2022 em escala 1:2.500 com 15 classes: define quanto da chuva escorre em cada superfície.</p></li>
       <li><h3>Drenagem</h3><p>Cadastro da Prefeitura de rede pluvial, poços de visita, bocas de lobo e casas de bomba. Mostrado como contexto: ainda sem capacidade nem conexões confirmadas.</p></li>
     </ul>
-  </div>
-</section>
-
-<section class="campo c-leve" id="descobertas" aria-labelledby="h-desc">
-  <div class="grade">
-    <p class="sec-num"><span>03</span> O que descobrimos</p>
-    <h2 id="h-desc" class="titulo">Quatro achados, com os números que os sustentam</h2>
-    <ol class="achados">
-      <li><b>A água se concentra em poucos eixos.</b> A contribuição potencial mediana de um trecho é pequena; no percentil 99 ela é mais de mil vezes maior. Um mapa de médias esconderia isso.</li>
-      <li><b>Só uma parte da cidade tem coeficiente fundamentado.</b> Por isso os resultados vêm em intervalos e cada trecho informa quanto da sua área a montante é coberta.</li>
-      <li><b>O indicador topográfico distingue só uma minoria de trechos.</b> A maioria não tem depressão a preencher no modelo de 30 m.</li>
-      <li><b>Nem a física nem o aprendizado de máquina superaram a regra atual.</b> Esse resultado negativo é uma descoberta do estudo, e está na seção de resultados.</li>
-    </ol>
-    <p class="legenda-grupos">Os números abaixo são de três tipos, e não se misturam: <b>processamento</b> (o tamanho da base), <b>resultado metodológico</b> (o que o motor produz) e <b>validação</b> (o que a comparação com registros mostrou). Cada cartão traz unidade, definição, origem, contexto e limitação.</p>
-    <div class="grupo-num" id="num-processamento"><div class="grupo-cab"><h3>Processamento</h3><p>O que entrou e o que foi processado. Não são resultados, são o tamanho e a cobertura da base.</p></div><div class="nums"><article class="num" data-chave="trechos_com_dados" data-valor="173917" data-fonte="reports/qa/fase3_execucao.json · pegadas_dos_trechos.com_celulas_com_dados"><h4>Trechos viários com dados</h4><p class="fig">173.917</p><p class="unid">trechos</p><dl class="vis"><dt>Contexto</dt><dd>De 176.836 trechos da rede do OpenStreetMap em Porto Alegre (98,3%).</dd><dt>Limitação</dt><dd>2.728 ficam fora da grade e 191 só tocam células sem dado ou de água: ficam sem valor, nunca zero.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Trechos da rede de ruas com ao menos uma célula de 30 m com dado de uso do solo e relevo sob a sua pegada.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · pegadas_dos_trechos.com_celulas_com_dados</code></dd></dl></details></article><article class="num" data-chave="uso_do_solo" data-valor="0.9508" data-fonte="reports/qa/qualidade_uso_solo_fase2.json · pela_pintura.fracao_do_municipio_coberta"><h4>Município coberto pelo mapa de uso do solo</h4><p class="fig">95,1%</p><p class="unid">% da área do município</p><dl class="vis"><dt>Contexto</dt><dd>605.245 polígonos, 15 classes, escala 1:2.500 (Profill 2022).</dd><dt>Limitação</dt><dd>Os 24,4 km² sem classe são em 93% água do Guaíba; o restante não foi explicado.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Parte da área municipal classificada pelos 605 mil polígonos de uso do solo, medida na grade de 3 m.</dd><dt>De onde vem</dt><dd><code>reports/qa/qualidade_uso_solo_fase2.json · pela_pintura.fracao_do_municipio_coberta</code></dd></dl></details></article><article class="num" data-chave="celulas" data-valor="1290058" data-fonte="reports/qa/fase3_execucao.json · motor.celulas_com_dados"><h4>Células de 30 m processadas</h4><p class="fig">1.290.058</p><p class="unid">células</p><dl class="vis"><dt>Contexto</dt><dd>O acúmulo é idêntico ao do índice de suscetibilidade do projeto e a massa se conserva (erro relativo máximo de 1,4 × 10⁻¹⁴).</dd><dt>Limitação</dt><dd>O modelo de elevação é um modelo de superfície de 30 m (Copernicus GLO-30), com erro médio de 2,18 m contra marcos da Prefeitura.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Células da grade do modelo de elevação com dado, unidade de cálculo do fluxo e da geração de escoamento.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · motor.celulas_com_dados</code></dd></dl></details></article><article class="num" data-chave="drenagem" data-valor="135856" data-fonte="reports/qa/qualidade_drenagem_fase2.json · rede_pluvial.*.registros_processados (3 camadas de origem)"><h4>Trechos de rede pluvial cadastrados</h4><p class="fig">135.856</p><p class="unid">trechos (cadastro)</p><dl class="vis"><dt>Contexto</dt><dd>Mais 88.899 poços de visita, 44.868 bocas de lobo e 24 casas de bomba. Camada contextual, fora do cálculo.</dd><dt>Limitação</dt><dd>O cadastro diz o que está registrado, não capacidade de vazão, funcionamento nem conexão hidráulica; só o nome das casas de bomba está preenchido.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Linhas do cadastro municipal de drenagem: rede, rede sem acesso e rede cadastrada como não interligada.</dd><dt>De onde vem</dt><dd><code>reports/qa/qualidade_drenagem_fase2.json · rede_pluvial.*.registros_processados (3 camadas de origem)</code></dd></dl></details></article></div></div>
-<div class="grupo-num" id="num-metodologico"><div class="grupo-cab"><h3>Resultados metodológicos</h3><p>O que o motor produz e o quanto cada valor é fundamentado.</p></div><div class="nums"><article class="num" data-chave="cobertura_m1" data-valor="0.173" data-fonte="reports/qa/qualidade_uso_solo_fase2.json · cobertura_dos_metodos.metodo1_fracao_da_area_classificada"><h4>Área com coeficiente de escoamento fundamentado</h4><p class="fig">17,3%</p><p class="unid">% da área classificada</p><dl class="vis"><dt>Contexto</dt><dd>75,1% da área não tem coeficiente fundamentado e 7,6% é água ou fica fora do cálculo.</dd><dt>Limitação</dt><dd>Para o resto só há limites físicos (C = 0 a 1) e cenários por analogia, que são hipóteses declaradas.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Parte da área cujas classes (edificação e via pavimentada) têm coeficiente C em referência publicada (Método 1).</dd><dt>De onde vem</dt><dd><code>reports/qa/qualidade_uso_solo_fase2.json · cobertura_dos_metodos.metodo1_fracao_da_area_classificada</code></dd></dl></details></article><article class="num" data-chave="cobertura_trecho" data-valor="0.3017" data-fonte="reports/qa/fase3_execucao.json · descricao.fracoes_a_montante_medianas.fracao_montante_coberta_m1"><h4>Área a montante com coeficiente fundamentado, por trecho</h4><p class="fig">30,2%</p><p class="unid">% da área a montante (mediana)</p><dl class="vis"><dt>Contexto</dt><dd>É o grau de confiança do valor de cada trecho; fica em cada trecho do mapa.</dd><dt>Limitação</dt><dd>Com cobertura baixa o intervalo do Método 1 considera só uma parte da área: deve ser lido como parcial.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Para cada trecho, a fração da área que drena para ele cujo uso do solo tem coeficiente fundamentado; mediana entre os trechos.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · descricao.fracoes_a_montante_medianas.fracao_montante_coberta_m1</code></dd></dl></details></article><article class="num" data-chave="contribuicao_mediana" data-valor="32.0625" data-fonte="reports/qa/fase3_execucao.json · descricao.nivel2_p30.metodo1.contrib_potencial_max_m3.q50"><h4>Contribuição potencial mediana por trecho</h4><p class="fig">32,1</p><p class="unid">m³ (30 mm, Método 1, limite superior)</p><dl class="vis"><dt>Contexto</dt><dd>A cauda é longa: percentil 90 de 942 m³ e percentil 99 de 42.420 m³.</dd><dt>Limitação</dt><dd>É potencial, não volume transportado; não pode ser somado entre trechos, porque as áreas a montante se sobrepõem.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Água que a superfície das áreas a montante pode escoar até o trecho para uma chuva hipotética de 30 mm, sem infiltração nem perdas.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · descricao.nivel2_p30.metodo1.contrib_potencial_max_m3.q50</code></dd></dl></details></article><article class="num" data-chave="sem_preenchimento" data-valor="0.7758930984320107" data-fonte="reports/qa/fase3_execucao.json · descricao.nivel1.trechos_com_preenchimento_zero / trechos_com_valor"><h4>Trechos sem preenchimento de depressão</h4><p class="fig">77,6%</p><p class="unid">% dos trechos com dados</p><dl class="vis"><dt>Contexto</dt><dd>134.941 de 173.917 trechos; só os 38.976 restantes têm posto no indicador.</dd><dt>Limitação</dt><dd>A altura não é interpretável em metros com um modelo de 30 m: serve só para comparar trechos entre si, não como profundidade.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Trechos em que o preenchimento de depressões não soma altura ao relevo do modelo: o indicador topográfico de retenção vale zero.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · descricao.nivel1.trechos_com_preenchimento_zero / trechos_com_valor</code></dd></dl></details></article></div></div>
-<div class="grupo-num" id="num-validacao"><div class="grupo-cab"><h3>Validação exploratória</h3><p>O que a comparação com os alagamentos registrados mostrou. Não valida o motor.</p></div><div class="nums"><article class="num" data-chave="regra_atual" data-valor="0.00205" data-fonte="reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.regra_atual_percentil.precisao_media"><h4>Regra de terreno atual (referência)</h4><p class="fig">0,00205</p><p class="unid">precisão média</p><dl class="vis"><dt>Contexto</dt><dd>124 trechos positivos em 107.869; taxa base de 0,115%; AUC 0,666.</dd><dt>Limitação</dt><dd>Os 124 registros são de 2013 e 2014, sem horário nem chuva associada: a comparação é exploratória.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Precisão média da regra atual (percentil de índice de terreno) para achar os trechos com alagamento registrado, em validação por blocos espaciais.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.regra_atual_percentil.precisao_media</code></dd></dl></details></article><article class="num" data-chave="melhor_ganho" data-valor="0.1259" data-fonte="reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.nivel1_altura_de_preenchimento_max.ganho_sobre_a_regra"><h4>Maior ganho observado sobre a regra atual</h4><p class="fig">+12,6%</p><p class="unid">de precisão média (indicador topográfico)</p><dl class="vis"><dt>Contexto</dt><dd>Intervalo de 95% (blocos completos): -23% a +68%. Critério de adoção: ganho de 10% com limite inferior acima de zero.</dd><dt>Limitação</dt><dd>Intervalo que inclui zero não é evidência de superioridade: nenhum candidato atende o critério e a regra atual permanece.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Variação da precisão média do indicador topográfico em relação à regra atual na mesma amostra.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.nivel1_altura_de_preenchimento_max.ganho_sobre_a_regra</code></dd></dl></details></article><article class="num" data-chave="blocos_atendem" data-valor="0" data-fonte="reports/qa/robustez_espacial.json · resumo_das_configuracoes.por_modelo.*.configuracoes_que_atendem_o_criterio"><h4>Configurações de blocos que atendem o critério</h4><p class="fig">0 de 16</p><p class="unid">configurações espaciais</p><dl class="vis"><dt>Contexto</dt><dd>12 das 16 configurações têm positivos bem distribuídos; retirar o maior bloco não muda a conclusão.</dd><dt>Limitação</dt><dd>Mas o ganho troca de sinal ao retirar até 2 blocos e a ordem dos modelos assume 6 formas: nenhum ganho pode ser lido como evidência.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Divisões do espaço em blocos (lados e origens diferentes) em que algum modelo físico atinge o critério de adoção.</dd><dt>De onde vem</dt><dd><code>reports/qa/robustez_espacial.json · resumo_das_configuracoes.por_modelo.*.configuracoes_que_atendem_o_criterio</code></dd></dl></details></article><article class="num" data-chave="ml_melhor" data-valor="-0.059" data-fonte="reports/qa/modelos_exploratorio_alagamentos.json · modelos.*.ganho_sobre_a_regra"><h4>Melhor ganho entre os modelos de aprendizado de máquina</h4><p class="fig">-5,9%</p><p class="unid">de precisão média sobre a regra</p><dl class="vis"><dt>Contexto</dt><dd>Os três ficaram abaixo da regra (−7,3%, −11,2%, −5,9%), com intervalos que se sobrepõem. Nenhum seria adotado.</dd><dt>Limitação</dt><dd>Cerca de 100 positivos e só terreno como entrada: o resultado diz que não há ganho demonstrável com estes dados, não que o aprendizado de máquina não sirva.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Regressão logística, gradient boosting e rede MLP em validação por blocos espaciais, contra a regra de terreno atual.</dd><dt>De onde vem</dt><dd><code>reports/qa/modelos_exploratorio_alagamentos.json · modelos.*.ganho_sobre_a_regra</code></dd></dl></details></article></div></div>
-    <div class="graficos duas-graf">
+    <div class="graficos">
       <figure>
-        <img class="grafico" src="img/estudo/grafico-distribuicao.svg" width="619" height="302" alt="Histograma da contribuição potencial por trecho em escala logarítmica, com marcas nos percentis 50, 90 e 99: a distribuição tem cauda longa" loading="lazy">
-        <figcaption><b>Distribuição da contribuição potencial.</b> Histograma dos trechos com valor positivo, em escala logarítmica. A cauda longa mostra que poucos trechos recebem a maior parte do potencial. Dados: <code>trechos_contribuicao_base.parquet</code>; chuva hipotética de 30 mm.</figcaption>
-      </figure>
-      <figure>
-        <img class="grafico" src="img/estudo/grafico-cobertura.svg" width="506" height="120" alt="Barra horizontal dividida: 17,3% da área classificada com coeficiente de escoamento fundamentado, 7,6% água ou fora do cálculo e 75,1% sem coeficiente fundamentado" loading="lazy">
-        <figcaption><b>Cobertura dos coeficientes de escoamento.</b> Parte da área classificada que tem coeficiente em referência publicada. O restante só admite limites físicos e cenários por analogia. Dados: <code>qualidade_uso_solo_fase2.json</code>.</figcaption>
+        <img class="grafico" src="img/estudo/grafico-chuva-mensal.svg" width="536" height="223" alt="Gráfico de barras com a média da chuva de cada mês do calendário em Porto Alegre, em milímetros por mês, no período de 2017 a 2026; os valores estão na tabela logo abaixo" loading="lazy">
+        <figcaption><b>Média mensal de chuva em Porto Alegre.</b> Média, entre os anos, do total de cada mês do calendário (mm por mês), no período de 2017 a 2026. Fonte: Open-Meteo, arquivo de reanálise (base ERA5), ponto da grade de Porto Alegre: dado modelado, não é pluviômetro, e a grade suaviza e subestima extremos locais. <b>Média mensal não é chuva por evento:</b> os cenários de 10, 20 e 30 mm do simulador são totais por evento (sequência de dias com chuva).</figcaption>
+        <details class="tabela-chuva"><summary>Ver os valores</summary><table class='tab-fontes'><caption>Média mensal de chuva, Porto Alegre</caption><thead><tr><th scope='col'>Mês</th><th scope='col'>Média (mm por mês)</th><th scope='col'>Anos na média</th></tr></thead><tbody><tr><th scope='row'>Janeiro</th><td>95,9</td><td>10</td></tr><tr><th scope='row'>Fevereiro</th><td>71,1</td><td>10</td></tr><tr><th scope='row'>Março</th><td>103,4</td><td>10</td></tr><tr><th scope='row'>Abril</th><td>97,2</td><td>10</td></tr><tr><th scope='row'>Maio</th><td>173,4</td><td>10</td></tr><tr><th scope='row'>Junho</th><td>147,3</td><td>10</td></tr><tr><th scope='row'>Julho</th><td>136,0</td><td>10</td></tr><tr><th scope='row'>Agosto</th><td>119,7</td><td>10</td></tr><tr><th scope='row'>Setembro</th><td>182,4</td><td>10</td></tr><tr><th scope='row'>Outubro</th><td>130,4</td><td>10</td></tr><tr><th scope='row'>Novembro</th><td>111,5</td><td>9</td></tr><tr><th scope='row'>Dezembro</th><td>88,2</td><td>9</td></tr></tbody></table></details>
       </figure>
     </div>
   </div>
 </section>
-
 <section class="campo c-fundo" id="territorio" aria-labelledby="h-terr">
   <div class="grade">
-    <p class="sec-num"><span>04</span> Explore o território</p>
-    <h2 id="h-terr" class="titulo">Quatro modos de olhar os mesmos 176.836 trechos</h2>
+    <p class="sec-num"><span>03</span> Mapa</p>
+    <h2 id="h-terr" class="titulo">O mapa de Porto Alegre e as quatro dimensões, sobre os mesmos 176.836 trechos</h2>
     <p class="intro">Cada dimensão responde a uma pergunta diferente e tem a sua escala; a mesma cor nunca vale duas grandezas, e nenhuma delas se combina com as outras em um índice. Os mapas dos trechos não são publicados aqui: derivam do uso do solo (Profill) e da drenagem cadastrada da Prefeitura, e a redistribuição desses dados ainda não foi esclarecida.</p>
     <div class="dimensoes-texto" id="dimensoes-texto">
       <article id="p-contribuicao">
@@ -147,11 +124,78 @@
     </div>
   </div>
 </section>
+<section class="campo c-seco" id="resultados-executivos" aria-labelledby="h-exe">
+  <div class="grade">
+    <p class="sec-num"><span>04</span> Resultados executivos</p>
+    <h2 id="h-exe" class="titulo">Onde as condições favorecem a retenção de água</h2>
+    <p class="intro">Os rankings usam só resultados que o estudo já calculou, agregados por bairro; nada foi recalculado. Ordenar não é prever: a posição indica condições favoráveis à retenção no relevo de 30 m, não onde a água vai de fato se acumular, nem a profundidade ou a duração.</p>
+    <h3>Os 5 bairros com maior propensão topográfica à retenção</h3>
+    <p class='small'>Critério: parcela dos trechos do bairro com propensão topográfica à retenção, isto é, em que o preenchimento de depressões do modelo de 30 m soma altura (indicador relativo; não é profundidade, volume nem duração). Universo: 92 dos 94 bairros: só os com trechos suficientes (os demais ficam de fora, sem estimativa).</p><div class='tabela-rolagem'><table class='tab-fontes'><caption>Top 5 bairros por propensão topográfica à retenção</caption><thead><tr><th scope='col'>Bairro</th><th scope='col'>Trechos com propensão topográfica</th><th scope='col'>Trechos no decil superior de contribuição da cidade</th><th scope='col'>Trechos com dados</th><th scope='col'>Cobertura do coeficiente a montante (mediana)</th></tr></thead><tbody><tr><th scope='row'>1. Anchieta</th><td>67,9%</td><td>16,0%</td><td>4.000</td><td>39%</td></tr><tr><th scope='row'>2. Santana</th><td>59,5%</td><td>24,5%</td><td>805</td><td>56%</td></tr><tr><th scope='row'>3. Floresta</th><td>59,1%</td><td>30,2%</td><td>702</td><td>63%</td></tr><tr><th scope='row'>4. Farrapos</th><td>58,5%</td><td>16,7%</td><td>2.173</td><td>56%</td></tr><tr><th scope='row'>5. Bom Fim</th><td>54,3%</td><td>40,5%</td><td>232</td><td>60%</td></tr></tbody></table></div><p class='small'>As colunas não se combinam em índice. A cobertura baixa significa que parte da área a montante só tem coeficiente por cenário declarado.</p>
+    <div class="duas">
+      <div class="prosa"><h3>Top 10 ruas e trechos viários: não publicado</h3><p>Os valores por trecho derivam do uso do solo da Profill, cuja redistribuição não foi confirmada, e a contribuição acumulada não se soma nem se ordena entre trechos de uma mesma rede sem leitura do contexto. Fica para quando a Prefeitura esclarecer a licença.</p></div>
+      <div class="prosa"><h3>Ranking das zonas de Porto Alegre: não publicado</h3><p>Não há, nos dados do projeto, divisão de Porto Alegre em zonas (só os 94 bairros). Criar uma agrupando bairros seria inventar uma classificação.</p></div>
+    </div>
+  </div>
+</section>
 
+<section class="campo c-leve" id="descobertas" aria-labelledby="h-desc">
+  <div class="grade">
+    <p class="sec-num"><span>05</span> O que descobrimos</p>
+    <h2 id="h-desc" class="titulo">Quatro achados, com os números que os sustentam</h2>
+    <ol class="achados">
+      <li><b>A água se concentra em poucos eixos.</b> A contribuição potencial mediana de um trecho é pequena; no percentil 99 ela é mais de mil vezes maior. Um mapa de médias esconderia isso.</li>
+      <li><b>Só uma parte da cidade tem coeficiente fundamentado.</b> Por isso os resultados vêm em intervalos e cada trecho informa quanto da sua área a montante é coberta.</li>
+      <li><b>O indicador topográfico distingue só uma minoria de trechos.</b> A maioria não tem depressão a preencher no modelo de 30 m.</li>
+      <li><b>Nem a física nem o aprendizado de máquina superaram a regra atual.</b> Esse resultado negativo é uma descoberta do estudo, e está na seção de resultados.</li>
+    </ol>
+    <p class="legenda-grupos">Os números abaixo são de três tipos, e não se misturam: <b>processamento</b> (o tamanho da base), <b>resultado metodológico</b> (o que o motor produz) e <b>validação</b> (o que a comparação com registros mostrou). Cada cartão traz unidade, definição, origem, contexto e limitação.</p>
+    <div class="grupo-num" id="num-processamento"><div class="grupo-cab"><h3>Processamento</h3><p>O que entrou e o que foi processado. Não são resultados, são o tamanho e a cobertura da base.</p></div><div class="nums"><article class="num" data-chave="trechos_com_dados" data-valor="173917" data-fonte="reports/qa/fase3_execucao.json · pegadas_dos_trechos.com_celulas_com_dados"><h4>Trechos viários com dados</h4><p class="fig">173.917</p><p class="unid">trechos</p><dl class="vis"><dt>Contexto</dt><dd>De 176.836 trechos da rede do OpenStreetMap em Porto Alegre (98,3%).</dd><dt>Limitação</dt><dd>2.728 ficam fora da grade e 191 só tocam células sem dado ou de água: ficam sem valor, nunca zero.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Trechos da rede de ruas com ao menos uma célula de 30 m com dado de uso do solo e relevo sob a sua pegada.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · pegadas_dos_trechos.com_celulas_com_dados</code></dd></dl></details></article><article class="num" data-chave="uso_do_solo" data-valor="0.9508" data-fonte="reports/qa/qualidade_uso_solo_fase2.json · pela_pintura.fracao_do_municipio_coberta"><h4>Município coberto pelo mapa de uso do solo</h4><p class="fig">95,1%</p><p class="unid">% da área do município</p><dl class="vis"><dt>Contexto</dt><dd>605.245 polígonos, 15 classes, escala 1:2.500 (Profill 2022).</dd><dt>Limitação</dt><dd>Os 24,4 km² sem classe são em 93% água do Guaíba; o restante não foi explicado.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Parte da área municipal classificada pelos 605 mil polígonos de uso do solo, medida na grade de 3 m.</dd><dt>De onde vem</dt><dd><code>reports/qa/qualidade_uso_solo_fase2.json · pela_pintura.fracao_do_municipio_coberta</code></dd></dl></details></article><article class="num" data-chave="celulas" data-valor="1290058" data-fonte="reports/qa/fase3_execucao.json · motor.celulas_com_dados"><h4>Células de 30 m processadas</h4><p class="fig">1.290.058</p><p class="unid">células</p><dl class="vis"><dt>Contexto</dt><dd>O acúmulo é idêntico ao do índice de suscetibilidade do projeto e a massa se conserva (erro relativo máximo de 1,4 × 10⁻¹⁴).</dd><dt>Limitação</dt><dd>O modelo de elevação é um modelo de superfície de 30 m (Copernicus GLO-30), com erro médio de 2,18 m contra marcos da Prefeitura.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Células da grade do modelo de elevação com dado, unidade de cálculo do fluxo e da geração de escoamento.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · motor.celulas_com_dados</code></dd></dl></details></article><article class="num" data-chave="drenagem" data-valor="135856" data-fonte="reports/qa/qualidade_drenagem_fase2.json · rede_pluvial.*.registros_processados (3 camadas de origem)"><h4>Trechos de rede pluvial cadastrados</h4><p class="fig">135.856</p><p class="unid">trechos (cadastro)</p><dl class="vis"><dt>Contexto</dt><dd>Mais 88.899 poços de visita, 44.868 bocas de lobo e 24 casas de bomba. Camada contextual, fora do cálculo.</dd><dt>Limitação</dt><dd>O cadastro diz o que está registrado, não capacidade de vazão, funcionamento nem conexão hidráulica; só o nome das casas de bomba está preenchido.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Linhas do cadastro municipal de drenagem: rede, rede sem acesso e rede cadastrada como não interligada.</dd><dt>De onde vem</dt><dd><code>reports/qa/qualidade_drenagem_fase2.json · rede_pluvial.*.registros_processados (3 camadas de origem)</code></dd></dl></details></article></div></div>
+<div class="grupo-num" id="num-metodologico"><div class="grupo-cab"><h3>Resultados metodológicos</h3><p>O que o motor produz e o quanto cada valor é fundamentado.</p></div><div class="nums"><article class="num" data-chave="cobertura_m1" data-valor="0.173" data-fonte="reports/qa/qualidade_uso_solo_fase2.json · cobertura_dos_metodos.metodo1_fracao_da_area_classificada"><h4>Área com coeficiente de escoamento fundamentado</h4><p class="fig">17,3%</p><p class="unid">% da área classificada</p><dl class="vis"><dt>Contexto</dt><dd>75,1% da área não tem coeficiente fundamentado e 7,6% é água ou fica fora do cálculo.</dd><dt>Limitação</dt><dd>Para o resto só há limites físicos (C = 0 a 1) e cenários por analogia, que são hipóteses declaradas.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Parte da área cujas classes (edificação e via pavimentada) têm coeficiente C em referência publicada (Método 1).</dd><dt>De onde vem</dt><dd><code>reports/qa/qualidade_uso_solo_fase2.json · cobertura_dos_metodos.metodo1_fracao_da_area_classificada</code></dd></dl></details></article><article class="num" data-chave="cobertura_trecho" data-valor="0.3017" data-fonte="reports/qa/fase3_execucao.json · descricao.fracoes_a_montante_medianas.fracao_montante_coberta_m1"><h4>Área a montante com coeficiente fundamentado, por trecho</h4><p class="fig">30,2%</p><p class="unid">% da área a montante (mediana)</p><dl class="vis"><dt>Contexto</dt><dd>É o grau de confiança do valor de cada trecho; fica em cada trecho do mapa.</dd><dt>Limitação</dt><dd>Com cobertura baixa o intervalo do Método 1 considera só uma parte da área: deve ser lido como parcial.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Para cada trecho, a fração da área que drena para ele cujo uso do solo tem coeficiente fundamentado; mediana entre os trechos.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · descricao.fracoes_a_montante_medianas.fracao_montante_coberta_m1</code></dd></dl></details></article><article class="num" data-chave="contribuicao_mediana" data-valor="32.0625" data-fonte="reports/qa/fase3_execucao.json · descricao.nivel2_p30.metodo1.contrib_potencial_max_m3.q50"><h4>Contribuição potencial mediana por trecho</h4><p class="fig">32,1</p><p class="unid">m³ (30 mm, Método 1, limite superior)</p><dl class="vis"><dt>Contexto</dt><dd>A cauda é longa: percentil 90 de 942 m³ e percentil 99 de 42.420 m³.</dd><dt>Limitação</dt><dd>É potencial, não volume transportado; não pode ser somado entre trechos, porque as áreas a montante se sobrepõem.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Água que a superfície das áreas a montante pode escoar até o trecho para uma chuva hipotética de 30 mm, sem infiltração nem perdas.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · descricao.nivel2_p30.metodo1.contrib_potencial_max_m3.q50</code></dd></dl></details></article><article class="num" data-chave="sem_preenchimento" data-valor="0.7758930984320107" data-fonte="reports/qa/fase3_execucao.json · descricao.nivel1.trechos_com_preenchimento_zero / trechos_com_valor"><h4>Trechos sem preenchimento de depressão</h4><p class="fig">77,6%</p><p class="unid">% dos trechos com dados</p><dl class="vis"><dt>Contexto</dt><dd>134.941 de 173.917 trechos; só os 38.976 restantes têm posto no indicador.</dd><dt>Limitação</dt><dd>A altura não é interpretável em metros com um modelo de 30 m: serve só para comparar trechos entre si, não como profundidade.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Trechos em que o preenchimento de depressões não soma altura ao relevo do modelo: o indicador topográfico de retenção vale zero.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · descricao.nivel1.trechos_com_preenchimento_zero / trechos_com_valor</code></dd></dl></details></article></div></div>
+<div class="grupo-num" id="num-validacao"><div class="grupo-cab"><h3>Validação exploratória</h3><p>O que a comparação com os alagamentos registrados mostrou. Não valida o motor.</p></div><div class="nums"><article class="num" data-chave="regra_atual" data-valor="0.00205" data-fonte="reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.regra_atual_percentil.precisao_media"><h4>Regra de terreno atual (referência)</h4><p class="fig">0,00205</p><p class="unid">precisão média</p><dl class="vis"><dt>Contexto</dt><dd>124 trechos positivos em 107.869; taxa base de 0,115%; AUC 0,666.</dd><dt>Limitação</dt><dd>Os 124 registros são de 2013 e 2014, sem horário nem chuva associada: a comparação é exploratória.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Precisão média da regra atual (percentil de índice de terreno) para achar os trechos com alagamento registrado, em validação por blocos espaciais.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.regra_atual_percentil.precisao_media</code></dd></dl></details></article><article class="num" data-chave="melhor_ganho" data-valor="0.1259" data-fonte="reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.nivel1_altura_de_preenchimento_max.ganho_sobre_a_regra"><h4>Maior ganho observado sobre a regra atual</h4><p class="fig">+12,6%</p><p class="unid">de precisão média (indicador topográfico)</p><dl class="vis"><dt>Contexto</dt><dd>Intervalo de 95% (blocos completos): -23% a +68%. Critério de adoção: ganho de 10% com limite inferior acima de zero.</dd><dt>Limitação</dt><dd>Intervalo que inclui zero não é evidência de superioridade: nenhum candidato atende o critério e a regra atual permanece.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Variação da precisão média do indicador topográfico em relação à regra atual na mesma amostra.</dd><dt>De onde vem</dt><dd><code>reports/qa/fase3_execucao.json · comparacao_exploratoria_com_os_registros.metricas.nivel1_altura_de_preenchimento_max.ganho_sobre_a_regra</code></dd></dl></details></article><article class="num" data-chave="blocos_atendem" data-valor="0" data-fonte="reports/qa/robustez_espacial.json · resumo_das_configuracoes.por_modelo.*.configuracoes_que_atendem_o_criterio"><h4>Configurações de blocos que atendem o critério</h4><p class="fig">0 de 16</p><p class="unid">configurações espaciais</p><dl class="vis"><dt>Contexto</dt><dd>12 das 16 configurações têm positivos bem distribuídos; retirar o maior bloco não muda a conclusão.</dd><dt>Limitação</dt><dd>Mas o ganho troca de sinal ao retirar até 2 blocos e a ordem dos modelos assume 6 formas: nenhum ganho pode ser lido como evidência.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Divisões do espaço em blocos (lados e origens diferentes) em que algum modelo físico atinge o critério de adoção.</dd><dt>De onde vem</dt><dd><code>reports/qa/robustez_espacial.json · resumo_das_configuracoes.por_modelo.*.configuracoes_que_atendem_o_criterio</code></dd></dl></details></article><article class="num" data-chave="ml_melhor" data-valor="-0.059" data-fonte="reports/qa/modelos_exploratorio_alagamentos.json · modelos.*.ganho_sobre_a_regra"><h4>Melhor ganho entre os modelos de aprendizado de máquina</h4><p class="fig">-5,9%</p><p class="unid">de precisão média sobre a regra</p><dl class="vis"><dt>Contexto</dt><dd>Os três ficaram abaixo da regra (−7,3%, −11,2%, −5,9%), com intervalos que se sobrepõem. Nenhum seria adotado.</dd><dt>Limitação</dt><dd>Cerca de 100 positivos e só terreno como entrada: o resultado diz que não há ganho demonstrável com estes dados, não que o aprendizado de máquina não sirva.</dd></dl><details><summary>Definição e origem</summary><dl><dt>O que é</dt><dd>Regressão logística, gradient boosting e rede MLP em validação por blocos espaciais, contra a regra de terreno atual.</dd><dt>De onde vem</dt><dd><code>reports/qa/modelos_exploratorio_alagamentos.json · modelos.*.ganho_sobre_a_regra</code></dd></dl></details></article></div></div>
+    <div class="graficos duas-graf">
+      <figure>
+        <img class="grafico" src="img/estudo/grafico-distribuicao.svg" width="619" height="302" alt="Histograma da contribuição potencial por trecho em escala logarítmica, com marcas nos percentis 50, 90 e 99: a distribuição tem cauda longa" loading="lazy">
+        <figcaption><b>Distribuição da contribuição potencial.</b> Histograma dos trechos com valor positivo, em escala logarítmica. A cauda longa mostra que poucos trechos recebem a maior parte do potencial. Dados: <code>trechos_contribuicao_base.parquet</code>; chuva hipotética de 30 mm.</figcaption>
+      </figure>
+      <figure>
+        <img class="grafico" src="img/estudo/grafico-cobertura.svg" width="506" height="120" alt="Barra horizontal dividida: 17,3% da área classificada com coeficiente de escoamento fundamentado, 7,6% água ou fora do cálculo e 75,1% sem coeficiente fundamentado" loading="lazy">
+        <figcaption><b>Cobertura dos coeficientes de escoamento.</b> Parte da área classificada que tem coeficiente em referência publicada. O restante só admite limites físicos e cenários por analogia. Dados: <code>qualidade_uso_solo_fase2.json</code>.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+<section class="campo c-forte" id="cenarios" aria-labelledby="h-cen" data-cenarios>
+  <div class="grade">
+    <p class="sec-num"><span>06</span> Simule cenários</p>
+    <h2 id="h-cen" class="titulo">Compare chuvas de 10, 20 e 30 mm</h2>
+    <p class="intro">São <b>cenários de cálculo</b> com hipóteses definidas, não previsões hidráulicas. A chuva é a mesma em toda a cidade; ela só multiplica os volumes. Os números vêm das três execuções reais do motor.</p>
+    <p class="small">Referência de chuva: 30 mm corresponde a cerca do percentil 75 dos totais por evento de 2017 a 2026 (29,9 mm), na série diária de Porto Alegre do Open-Meteo, uma reanálise baseada em ERA5, e não em pluviômetro (<a class="cit" href="#ref-hersbach2020">HERSBACH et al., 2020</a>; <a class="cit" href="#ref-openmeteo_software">ZIPPENFENIG, 2023</a>). Evento: dias seguidos com pelo menos 1 mm.</p>
+    <div class="seletor" role="group" aria-label="Chuva de referência hipotética">
+      <button type="button" aria-pressed="false" data-p="10">10 mm</button>
+      <button type="button" aria-pressed="false" data-p="20">20 mm</button>
+      <button type="button" aria-pressed="true" data-p="30">30 mm</button>
+    </div>
+    <div class="cen-corpo">
+      <div class="cen-total">
+        <h3>Água potencialmente escoada pelas classes de cada pacote, <span id="cen-p">30 mm</span></h3>
+        <p class="small">Soma das células de 30 m, cada uma contada uma vez, em milhões de m³ (sem infiltração). Cada pacote cobre classes diferentes (Método 1: edificação e via pavimentada; Método 2: vegetação e similares; limites físicos: as demais) e eles nunca se somam. As barras usam a mesma escala para as três chuvas.</p>
+        <div class="barras" id="cen-barras" aria-live="polite"></div>
+      </div>
+      <div class="cen-trecho">
+        <h3>Um trecho típico (Método 1, limite superior)</h3>
+        <dl id="cen-trecho"></dl>
+        <p class="small">Valores por trecho não são somáveis: as áreas a montante se sobrepõem.</p>
+      </div>
+    </div>
+    <p class="acoes"><a class="btn" id="cen-link" href="../?painel=1#poa/mapa?escoamento=1&amp;p=30">Abrir o simulador no mapa (30 mm)</a></p>
+    <p class="small cen-nota">No mapa você troca o pacote (Método 1, Método 2 ou limites físicos) e o limite do intervalo, e clica num trecho para ver os valores com unidade, descrição e interpretação.</p>
+  </div>
+</section>
 <section class="campo c-seco" id="metodo" aria-labelledby="h-metodo">
   <div class="grade">
-    <p class="sec-num"><span>05</span> Como o estudo foi construído</p>
+    <p class="sec-num"><span>07</span> Como o estudo foi construído</p>
     <h2 id="h-metodo" class="titulo">Da fonte ao trecho, em seis passos</h2>
+    <p class="intro">Método próprio: o estudo integra a <b>precipitação</b> de referência, o <b>relevo</b> (Copernicus DEM, 30 m), o <b>uso e a cobertura do solo</b> (Profill, 1:2.500) e a <b>drenagem cadastrada</b> da Prefeitura, e calcula, por trecho de rua, a geração, a concentração e a propensão topográfica à retenção. Os seis passos abaixo mostram como.</p>
     <ol class="fluxo" aria-label="Fluxo metodológico">
       <li><h3>Dados de entrada</h3><p>Relevo (Copernicus GLO-30, 30 m) (<a class="cit" href="#ref-copernicus_dem">EUROPEAN SPACE AGENCY; AIRBUS, 2022</a>), uso do solo (Profill 2022, 1:2.500) (<a class="cit" href="#ref-profill2022">PROFILL, 2023</a>), ruas e água (OpenStreetMap) (<a class="cit" href="#ref-osm_geofabrik">OPENSTREETMAP CONTRIBUTORS, 2026</a>) e coeficientes de escoamento de manuais públicos (<a class="cit" href="#ref-sandiego_c">COUNTY OF SAN DIEGO, [s. d.]</a>; <a class="cit" href="#ref-txdot_c">TEXAS DEPARTMENT OF TRANSPORTATION, [s. d.]</a>).</p></li>
       <li><h3>Processamento geoespacial</h3><p>Tudo vai para uma grade de 30 m, a do modelo de elevação. O uso do solo vira área por classe em cada célula; depressões são preenchidas (<a class="cit" href="#ref-barnes2014">BARNES; LEHMAN; MULLA, 2014</a>) para a água não parar no meio do caminho.</p></li>
@@ -182,10 +226,38 @@
     </div>
   </div>
 </section>
+<section class="campo c-fundo encerramento" id="sintese" aria-labelledby="h-fim">
+  <div class="grade">
+    <p class="sec-num"><span>08</span> Síntese</p>
+    <h2 id="h-fim" class="titulo">O que este estudo entrega</h2>
+    <ul class="contribuicoes">
+      <li><b>Um cálculo verificável</b> do escoamento potencial e da contribuição por trecho viário, de dados abertos até cada rua, com massa conservada e cobertura declarada.</li>
+      <li><b>Três grandezas separadas</b> (geração, contribuição, propensão à retenção) e três pacotes de coeficientes que nunca se misturam.</li>
+      <li><b>Uma conclusão negativa honesta:</b> com os dados disponíveis, nada superou a regra atual. O estudo diz quais dados trariam a resposta.</li>
+      <li><b>Código e método abertos</b>, com cada número rastreável à sua fonte.</li>
+    </ul>
+    <p class="acoes">
+      <a class="btn" href="../?painel=1#poa/mapa?escoamento=1&amp;p=30">Explorar o mapa</a>
+      <a class="btn btn-sec-claro" href="../?painel=1#poa/resultados">Ler os resultados por contexto territorial</a>
+    </p>
+  </div>
+</section>
+<section class="campo c-fundo" id="documentacao" aria-labelledby="h-doc">
+  <div class="grade">
+    <p class="sec-num"><span>09</span> Documentação técnica</p>
+    <h2 id="h-doc" class="titulo">Fontes, metodologia completa, hipóteses, validações e limitações</h2>
+    <p class="intro">Tudo o que sustenta os resultados acima, sem esconder o que não funcionou nem o que falta confirmar.</p>
+    <ul class="pilares">
+      <li><h3>Validações e hipóteses</h3><p>Testes exploratórios, critérios de adoção e o resultado negativo. <a href="#resultados">Ver os testes</a>.</p></li>
+      <li><h3>Fontes, limitações e licenças</h3><p>De onde vêm os dados, o que não dá para afirmar e as licenças ainda por confirmar. <a href="#dados">Ver os dados</a>; GeoAI, a frente experimental, <a href="#geoai">aqui</a>.</p></li>
+      <li><h3>Metodologia completa e referências</h3><p><a href="https://github.com/helenavalanera/flooding-mapping-capstone/blob/develop/docs/metodologia.md">Metodologia</a>, <a href="https://github.com/helenavalanera/flooding-mapping-capstone/blob/develop/docs/inventario_fontes.md">inventário de fontes</a>, <a href="https://github.com/helenavalanera/flooding-mapping-capstone/blob/develop/docs/glossario.md">glossário</a> e as <a href="#referencias">referências bibliográficas</a>, em ABNT.</p></li>
+    </ul>
+  </div>
+</section>
 
 <section class="campo c-leve" id="resultados" aria-labelledby="h-res">
   <div class="grade">
-    <p class="sec-num"><span>06</span> Resultados, testes e validação</p>
+    <p class="sec-num"><span>10</span> Resultados, testes e validação</p>
     <h2 id="h-res" class="titulo">O que os testes mostraram, inclusive o que não funcionou</h2>
     <div class="destaque-neg" role="note">
       <p><b>Conclusão central da validação:</b> nenhuma formulação física, nenhum coeficiente testado e nenhum modelo de aprendizado de máquina atingiu o critério de adoção. A regra de terreno atual permanece. Esse resultado negativo faz parte das descobertas.</p>
@@ -234,38 +306,9 @@
     </div>
   </div>
 </section>
-
-<section class="campo c-forte" id="cenarios" aria-labelledby="h-cen" data-cenarios>
-  <div class="grade">
-    <p class="sec-num"><span>07</span> Simule cenários</p>
-    <h2 id="h-cen" class="titulo">Compare chuvas de 10, 20 e 30 mm</h2>
-    <p class="intro">São <b>cenários de cálculo</b> com hipóteses definidas, não previsões hidráulicas. A chuva é a mesma em toda a cidade; ela só multiplica os volumes. Os números vêm das três execuções reais do motor.</p>
-    <p class="small">Referência de chuva: 30 mm corresponde a cerca do percentil 75 dos totais por evento de 2017 a 2026 (29,9 mm), na série diária de Porto Alegre do Open-Meteo, uma reanálise baseada em ERA5, e não em pluviômetro (<a class="cit" href="#ref-hersbach2020">HERSBACH et al., 2020</a>; <a class="cit" href="#ref-openmeteo_software">ZIPPENFENIG, 2023</a>). Evento: dias seguidos com pelo menos 1 mm.</p>
-    <div class="seletor" role="group" aria-label="Chuva de referência hipotética">
-      <button type="button" aria-pressed="false" data-p="10">10 mm</button>
-      <button type="button" aria-pressed="false" data-p="20">20 mm</button>
-      <button type="button" aria-pressed="true" data-p="30">30 mm</button>
-    </div>
-    <div class="cen-corpo">
-      <div class="cen-total">
-        <h3>Água potencialmente escoada pelas classes de cada pacote, <span id="cen-p">30 mm</span></h3>
-        <p class="small">Soma das células de 30 m, cada uma contada uma vez, em milhões de m³ (sem infiltração). Cada pacote cobre classes diferentes (Método 1: edificação e via pavimentada; Método 2: vegetação e similares; limites físicos: as demais) e eles nunca se somam. As barras usam a mesma escala para as três chuvas.</p>
-        <div class="barras" id="cen-barras" aria-live="polite"></div>
-      </div>
-      <div class="cen-trecho">
-        <h3>Um trecho típico (Método 1, limite superior)</h3>
-        <dl id="cen-trecho"></dl>
-        <p class="small">Valores por trecho não são somáveis: as áreas a montante se sobrepõem.</p>
-      </div>
-    </div>
-    <p class="acoes"><a class="btn" id="cen-link" href="../?painel=1#poa/mapa?escoamento=1&amp;p=30">Abrir o simulador no mapa (30 mm)</a></p>
-    <p class="small cen-nota">No mapa você troca o pacote (Método 1, Método 2 ou limites físicos) e o limite do intervalo, e clica num trecho para ver os valores com unidade, descrição e interpretação.</p>
-  </div>
-</section>
-
 <section class="campo c-leve" id="geoai" aria-labelledby="h-geoai">
   <div class="grade">
-    <p class="sec-num"><span>08</span> Frente experimental</p>
+    <p class="sec-num"><span>11</span> Frente experimental</p>
     <h2 id="h-geoai" class="titulo">GeoAI: estimar a parte construída de cada célula, com os limites à vista</h2>
     <p class="intro">Testamos se imagens de satélite e aprendizado de máquina (GeoAI) conseguem estimar, para cada célula de 30 m, a fração construída (edificação e via pavimentada). É um experimento de classificação da cobertura do solo: <b>não prevê alagamentos</b>, não mede impermeabilidade e não entra no cálculo de escoamento.</p>
     <div class="tabela-rolagem">
@@ -303,10 +346,9 @@
     <p class="mais">Hipótese, protocolo, tabelas e limitações: <a href="https://github.com/helenavalanera/flooding-mapping-capstone/blob/develop/docs/geoai_fase5.md">geoai_fase5</a> e <a href="https://github.com/helenavalanera/flooding-mapping-capstone/blob/develop/docs/geoai_resultados.md">geoai_resultados</a>.</p>
   </div>
 </section>
-
 <section class="campo c-seco" id="dados" aria-labelledby="h-dados">
   <div class="grade">
-    <p class="sec-num"><span>09</span> Dados, limitações e reprodutibilidade</p>
+    <p class="sec-num"><span>12</span> Dados, limitações e reprodutibilidade</p>
     <h2 id="h-dados" class="titulo">De onde vêm os dados e o que ainda não dá para afirmar</h2>
     <p class="declaracao" id="reuso-de-dados"><b>Reuso de dados abertos.</b> O estudo utiliza dados geoespaciais públicos, provenientes de bases governamentais e iniciativas de dados abertos, reutilizados para fins de pesquisa, análise e desenvolvimento de produtos geoespaciais. As fontes originais são referenciadas na documentação técnica.</p>
     <p class="small declaracao-nota">Essa declaração descreve a abordagem do estudo. Ela não afirma que todas as bases, os dados derivados ou os produtos processados tenham licença aberta irrestrita nem que possam ser redistribuídos: a condição de cada fonte está na tabela de condições de uso abaixo e no <a href="https://github.com/helenavalanera/flooding-mapping-capstone/blob/develop/docs/inventario_fontes.md">inventário de fontes</a>; quando a licença não foi identificada ou a redistribuição não foi esclarecida, isso é dito. A licença MIT vale para o código do projeto, não para os dados de terceiros.</p>
@@ -365,27 +407,9 @@
     <p class="mais">As referências completas, em ABNT, estão na seção <a href="#referencias">Referências bibliográficas</a>.</p>
   </div>
 </section>
-
-<section class="campo c-fundo encerramento" id="sintese" aria-labelledby="h-fim">
-  <div class="grade">
-    <p class="sec-num"><span>10</span> Síntese</p>
-    <h2 id="h-fim" class="titulo">O que este estudo entrega</h2>
-    <ul class="contribuicoes">
-      <li><b>Um cálculo verificável</b> do escoamento potencial e da contribuição por trecho viário, de dados abertos até cada rua, com massa conservada e cobertura declarada.</li>
-      <li><b>Três grandezas separadas</b> (geração, contribuição, propensão à retenção) e três pacotes de coeficientes que nunca se misturam.</li>
-      <li><b>Uma conclusão negativa honesta:</b> com os dados disponíveis, nada superou a regra atual. O estudo diz quais dados trariam a resposta.</li>
-      <li><b>Código e método abertos</b>, com cada número rastreável à sua fonte.</li>
-    </ul>
-    <p class="acoes">
-      <a class="btn" href="../?painel=1#poa/mapa?escoamento=1&amp;p=30">Explorar o mapa</a>
-      <a class="btn btn-sec-claro" href="../?painel=1#poa/resultados">Ler os resultados por contexto territorial</a>
-    </p>
-  </div>
-</section>
-
 <section class="campo c-leve" id="referencias" aria-labelledby="h-ref">
   <div class="grade">
-    <p class="sec-num"><span>11</span> Fontes e métodos</p>
+    <p class="sec-num"><span>13</span> Fontes e métodos</p>
     <h2 id="h-ref" class="titulo">Referências bibliográficas</h2>
     <p class="intro">Todas as fontes de dados, os métodos e as ferramentas efetivamente usados no estudo, em ABNT, com a licença ou a condição de uso quando ela pôde ser verificada. As citações do texto levam até aqui.</p>
     <p class="small">Normalização: estrutura da NBR 6023 e citação autor-data da NBR 10520. A edição vigente das normas não pôde ser confirmada nesta revisão e precisa ser conferida pela autora. Datas de acesso: 26 nov. 2026. A tabela completa de uso e de licenças está no <a href="https://github.com/helenavalanera/flooding-mapping-capstone/blob/develop/docs/inventario_fontes.md">inventário de fontes</a>.</p>

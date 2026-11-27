@@ -55,12 +55,12 @@ def test_the_page_is_structurally_sound_and_loads_nothing_from_outside(pagina):
 
 def test_the_nine_narrative_sections_exist_in_order_and_every_anchor_resolves(pagina):
     texto, c = pagina
-    ordem = ["hero", "pergunta", "descobertas", "territorio", "metodo", "resultados", "cenarios", "geoai", "dados", "sintese", "referencias"]
+    ordem = ["hero", "pergunta", "territorio", "resultados-executivos", "descobertas", "cenarios", "metodo", "sintese", "documentacao", "resultados", "geoai", "dados", "referencias"]
     pos = [texto.index(f'id="{i}"') for i in ordem]
     assert pos == sorted(pos)
     internos = [h[1:] for h in c.hrefs if h.startswith("#") and len(h) > 1]
     assert internos and all(i in c.ids for i in internos), [i for i in internos if i not in c.ids]
-    assert set(re.findall(r'<p class="sec-num"><span>(\d\d)</span>', texto)) == {"02", "03", "04", "05", "06", "07", "08", "09", "10", "11"}
+    assert set(re.findall(r'<p class="sec-num"><span>(\d\d)</span>', texto)) == {"02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}
 
 
 def test_relative_links_and_images_point_to_files_that_exist(pagina):

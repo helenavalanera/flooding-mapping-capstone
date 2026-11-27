@@ -107,7 +107,8 @@ def test_the_open_data_statement_is_verbatim_with_its_caveat_on_landing_readme_a
 
 def test_geoai_is_presented_as_experimental_without_overclaims():
     t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", LANDING.read_text(encoding="utf-8")))
-    sec = t[t.index("GeoAI: estimar a parte construída"):t.index("De onde vêm os dados")]
+    ini = t.index("GeoAI: estimar a parte construída")
+    sec = t[ini:t.index("De onde vêm os dados", ini)]
     for frase in ("não prevê alagamentos", "Concordância com a Profill não é validação independente em campo", "empatou com o Random Forest", "não é publicado", "solo exposto"):
         assert frase in sec, frase
     assert not re.search(r"supera o Random Forest|valida(do|ção) em campo\b(?! )", sec.replace("não é validação independente em campo", ""))

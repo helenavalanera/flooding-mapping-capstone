@@ -24,7 +24,7 @@ def test_the_landing_outside_its_bibliography_never_offers_a_state_front():
 
 
 def test_the_published_static_folder_has_only_porto_alegre_data_and_no_state_layers():
-    assert sorted(p.name for p in (STATIC / "data").iterdir()) == ["resultados_poa.json", "territorio_poa.json"]
+    assert sorted(p.name for p in (STATIC / "data").iterdir()) == ["rankings_poa.json", "resultados_poa.json", "territorio_poa.json"]
     for nome in ("rodovias.geojson", "municipios.geojson", "cobertura_rs.json", "impacto_rs.json", "ocorrencias.json", "territorios.json"):
         assert not (STATIC / "data" / nome).exists(), nome
     assert not list(STATIC.rglob("*.geojson")) and not list(STATIC.rglob("*.parquet"))
@@ -43,7 +43,7 @@ def test_the_archived_fronts_are_kept_and_the_active_interface_does_not_load_the
 
 
 def test_images_and_data_of_unconfirmed_licence_are_not_in_the_versionable_tree():
-    assert sorted(p.suffix for p in (STATIC / "inicio/img/estudo").iterdir()) == [".svg"] * 4                 # só gráficos de números agregados
+    assert sorted(p.suffix for p in (STATIC / "inicio/img/estudo").iterdir()) == [".svg"] * 5                 # só gráficos de números agregados
     assert not list((RAIZ / "docs/figuras").glob("geoai_*.png"))                                              # derivam da Profill
     assert not (APP / "arquivo/inicio/img/painel-rs.png").exists()                                            # mostrava a malha do DAER
     assert not (RAIZ / "tests/dados/alagamentos_pmpa_coordenadas.csv").exists()                               # coordenadas da Prefeitura

@@ -5,15 +5,15 @@ const fs = require("fs"), path = require("path");
   const dados = JSON.parse(fs.readFileSync(path.join(__dirname, "../../src/flooding_mapping/app/static/inicio/dados.json"), "utf8"));
   const { browser, page, erros } = await abrir({ viewport: { width: 1400, height: 900 } });
   await page.goto(BASE + "inicio/");
-  assert.match(await page.innerText("h1"), /Como a chuva transforma o território\?/);
+  assert.match(await page.innerText("h1"), /Dada uma chuva, onde a água tende a se acumular\?/);
   assert.strictEqual(await page.locator("h1").count(), 1);
   assert.match(await page.innerText(".hero-quadro"), /Geração de escoamento[\s\S]*Concentração do escoamento[\s\S]*Propensão topográfica à retenção[\s\S]*Drenagem cadastrada/); assert.strictEqual(await page.locator(".hero img").count(), 0, "sem mapa derivado de dado restrito no início");
   // âncoras: cada link leva à sua seção e a atual é marcada
   const hrefs = await page.locator(".ancoras a").evaluateAll((a) => a.map((x) => x.getAttribute("href")));
-  assert.deepStrictEqual(hrefs, ["#pergunta", "#descobertas", "#territorio", "#metodo", "#resultados", "#cenarios", "#geoai", "#dados", "#referencias"]);
-  await page.click(".ancoras a[href='#resultados']");
-  await page.waitForFunction(() => { const a = document.querySelector(".ancoras a[aria-current=true]"); return a && a.getAttribute("href") === "#resultados"; }, null, { timeout: 15000 });
-  assert.ok(await page.evaluate(() => document.getElementById("resultados").getBoundingClientRect().top < 200), "a âncora rolou até a seção");
+  assert.deepStrictEqual(hrefs, ["#pergunta", "#territorio", "#resultados-executivos", "#cenarios", "#metodo", "#documentacao", "#referencias"]);
+  await page.click(".ancoras a[href='#resultados-executivos']");
+  await page.waitForFunction(() => { const a = document.querySelector(".ancoras a[aria-current=true]"); return a && a.getAttribute("href") === "#resultados-executivos"; }, null, { timeout: 15000 });
+  assert.ok(await page.evaluate(() => document.getElementById("resultados-executivos").getBoundingClientRect().top < 200), "a âncora rolou até a seção");
   // as quatro dimensões, em texto: os mapas de trechos e de drenagem não são publicados (redistribuição dos dados da Prefeitura não esclarecida)
   await page.click(".ancoras a[href='#territorio']"); await page.waitForTimeout(2500);
   for (const id of ["p-contribuicao", "p-local", "p-topografico", "p-drenagem"]) assert.ok(await page.locator("#" + id).isVisible(), id + " visível");

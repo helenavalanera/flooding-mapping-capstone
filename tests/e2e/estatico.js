@@ -8,7 +8,7 @@ const PAGES = process.env.PAGES, DADOS = process.env.DADOS;
   page.on("response", (r) => { const u = new URL(r.url()); const lado = u.origin === dadosOrigem ? "dados" : u.origin === paginasOrigem ? "paginas" : null; if (!lado) return;
     const k = /fase3\//.test(u.pathname) ? "fase3" : /drenagem\//.test(u.pathname) ? "drenagem" : /rs\.pmtiles/.test(u.pathname) ? "pmtiles" : "outros"; (contagem[lado][k] = contagem[lado][k] || {})[r.status()] = ((contagem[lado][k] || {})[r.status()] || 0) + 1; });
   // 1. a raiz é a landing
-  await page.goto(PAGES); await page.waitForURL(/\/inicio\/$/, { timeout: 15000 }); assert.match(await page.innerText("h1"), /Como a chuva transforma o território/);
+  await page.goto(PAGES); await page.waitForURL(/\/inicio\/$/, { timeout: 15000 }); assert.match(await page.innerText("h1"), /Dada uma chuva, onde a água tende a se acumular/);
   // 2. um link antigo (?painel=1#...) segue para o painel, com o hash preservado
   await page.goto(PAGES + "?painel=1#poa/resultados"); await page.waitForURL(/painel\.html\?painel=1#poa\/resultados$/, { timeout: 15000 });
   await page.waitForSelector("#vista-resultados .rs-achado", { timeout: 60000 });
