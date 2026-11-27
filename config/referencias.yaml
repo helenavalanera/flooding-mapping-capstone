@@ -1,0 +1,987 @@
+# Registro único das referências do projeto. Tudo que aparece em docs/referencias_bibliograficas.md e na seção "Referências bibliográficas" da landing sai daqui
+# (tools/gerar_referencias.py). Cada campo foi conferido em 26/11/2026 na fonte indicada em "conferido"; nada foi preenchido de memória.
+#
+# Campos: id, cat (1 a 11; ver CATEGORIAS em tools/gerar_referencias.py), uso (efetiva | experimento | historica | avaliada), tipo (artigo | preprint | software | dataset |
+# documento | web), autor (já em formato ABNT, separados por "; "), titulo, subtitulo, periodico, local, editora, ano, versao, vol, num, pag, doi, url, acesso (AAAA-MM-DD, data
+# em que o endereço respondeu), verificado (false = o endereço não pôde ser conferido por acesso automatizado), licenca, nota (o que o projeto usa e como), conferido (de onde vieram os
+# metadados), cit (chave da citação no texto, opcional: gerada do primeiro autor e do ano).
+#
+# Regra de autoria (ABNT): até três autores, todos; mais de três, o primeiro seguido de "et al.". Autor ausente ou coletivo: a instituição.
+# Licença: só quando há texto verificável; caso contrário "não identificada nesta revisão" ou "a confirmar".
+
+referencias:
+# ------------------------------------------------------------------------------------------------ 1. Dados geoespaciais e bases territoriais
+- id: ibge_setores2022
+  cat: 1
+  uso: historica
+  tipo: dataset
+  autor: "INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE)"
+  titulo: "Censo Demográfico 2022"
+  subtitulo: "agregados por setores censitários: malha com atributos, Rio Grande do Sul (RS_setores_CD2022.gpkg) e dicionário de dados"
+  local: "[S. l.]"
+  editora: "IBGE"
+  ano: "[s. d.]"
+  url: "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/RS/"
+  acesso: "2026-11-26"
+  licenca: "não identificada nesta revisão (a pasta não traz arquivo de licença)"
+  nota: "População por setor, usada na frente de mobilidade (grade de origens). Não entra no cálculo de escoamento."
+  conferido: "config/analysis.yaml e data/raw/manifest.json (URL e SHA-256); endereço respondeu em 26/11/2026"
+  cit: "IBGE, [s. d.]"
+- id: osm_geofabrik
+  cat: 1
+  uso: efetiva
+  tipo: dataset
+  autor: "OPENSTREETMAP CONTRIBUTORS"
+  titulo: "OpenStreetMap"
+  subtitulo: "extrato do Sul do Brasil (sul-latest.osm.pbf), distribuído pela Geofabrik"
+  local: "[S. l.]"
+  editora: "Geofabrik"
+  ano: "2026"
+  url: "https://download.geofabrik.de/south-america/brazil/sul.html"
+  acesso: "2026-11-26"
+  licenca: "Open Data Commons Open Database License (ODbL), da OpenStreetMap Foundation, com atribuição (página de direitos autorais do OpenStreetMap, conferida em 26/11/2026)"
+  nota: "Rede viária de Porto Alegre (176.836 trechos, unidade espacial do estudo), hidrografia auxiliar e edificações (verificação cruzada da GeoAI). Baixado em 25/10/2026 (manifesto, UTC)."
+  conferido: "config/analysis.yaml; data/raw/manifest.json; https://www.openstreetmap.org/copyright (texto da licença); data do arquivo local"
+  cit: "OPENSTREETMAP CONTRIBUTORS, 2026"
+- id: gtfs_eptc
+  cat: 1
+  uso: historica
+  tipo: dataset
+  autor: "EMPRESA PÚBLICA DE TRANSPORTE E CIRCULAÇÃO (EPTC)"
+  titulo: "GTFS de Porto Alegre"
+  subtitulo: "feed estático de ônibus (arquivo-gtfs.zip)"
+  local: "Porto Alegre"
+  editora: "Portal de Dados Abertos de Porto Alegre"
+  ano: "[s. d.]"
+  url: "https://dadosabertos.poa.br/dataset/gtfs"
+  acesso: "2026-11-26"
+  licenca: "Creative Commons Atribuição, conforme o portal (informação registrada no README do projeto; não relida nesta revisão)"
+  nota: "Frente de mobilidade (arquivada): vigência setembro a dezembro de 2025, hoje vencido. Não entra no cálculo de escoamento."
+  conferido: "config/analysis.yaml; data/raw/manifest.json; README (licença); página do conjunto respondeu em 26/11/2026"
+  cit: "EMPRESA PÚBLICA DE TRANSPORTE E CIRCULAÇÃO, [s. d.]"
+- id: daer_rodovias
+  cat: 1
+  uso: historica
+  tipo: dataset
+  autor: "DEPARTAMENTO AUTÔNOMO DE ESTRADAS DE RODAGEM (DAER-RS)"
+  titulo: "Rodovias do RS por administração"
+  subtitulo: "camada do serviço ArcGIS da IEDE-RS e Relatório do Sistema Rodoviário Estadual (planilha)"
+  local: "[S. l.]"
+  editora: "Infraestrutura Estadual de Dados Espaciais (IEDE-RS)"
+  ano: "[s. d.]"
+  url: "https://iede.rs.gov.br/server/rest/services/DAER/Rodovias_RS_por_Administracao/MapServer/0"
+  acesso: "2026-11-26"
+  licenca: "A CONFIRMAR (pendência registrada em docs/qa_relatorio_final.md)"
+  nota: "Frente estadual (arquivada): 1.683 trechos baixados em 08/11/2026. Não entra no cálculo de escoamento."
+  conferido: "config/analysis.yaml; data/raw/manifest.json (downloaded_at_utc); docs/qa_relatorio_final.md"
+  cit: "DEPARTAMENTO AUTÔNOMO DE ESTRADAS DE RODAGEM, [s. d.]"
+- id: pmpa_mymaps_drenagem
+  cat: 1
+  uso: efetiva
+  tipo: dataset
+  autor: "PORTO ALEGRE (RS). Prefeitura Municipal"
+  titulo: "Mapa \"Drenagem Pluvial\""
+  subtitulo: "bairros, arroios, casas de bombas e aglomerados (KML do Google My Maps)"
+  local: "Porto Alegre"
+  editora: "Prefeitura Municipal de Porto Alegre"
+  ano: "[s. d.]"
+  url: "https://www.google.com/maps/d/kml?mid=1hKUlnRnx2aRiH3NBYnlLt4qXBUo&forcekml=1"
+  acesso: "2026-11-26"
+  licenca: "não identificada (o serviço não declara licença; a reutilização precisa ser confirmada com a Prefeitura)"
+  nota: "Limites dos bairros (resultados por bairro) e contexto de arroios e casas de bomba, via tools/preparar_territorio_poa.py. Aglomerados subnormais (IBGE, 2010) entram só como contagem por bairro."
+  conferido: "tools/preparar_territorio_poa.py (cabeçalho); docs/inventario_fontes_poa.md"
+  cit: "PORTO ALEGRE, [s. d.]a"
+# ------------------------------------------------------------------------------------------------ 2. Uso e cobertura do solo
+- id: profill2022
+  cat: 2
+  uso: efetiva
+  tipo: dataset
+  autor: "PROFILL"
+  titulo: "Uso e ocupação do solo 2022"
+  subtitulo: "Porto Alegre, escala de produção 1:2.500, interpretação visual de ortoimagem de 30 cm (2018 a 2021); camada uso_solo_profill_2022 do GeoPOA"
+  local: "Porto Alegre"
+  editora: "Prefeitura Municipal de Porto Alegre (serviço gis-smamus)"
+  ano: "2023"
+  url: "https://gis-smamus.portoalegre.rs.gov.br/server/rest/services/01_PUBLICACOES/uso_solo_profill_2022/MapServer/0"
+  acesso: "2026-11-26"
+  licenca: "NÃO CONFIRMADA. O serviço declara apenas os direitos \"PROFILL, 2023\"; a redistribuição de derivados exige confirmação com a Prefeitura"
+  nota: "Classes de uso (15) na grade de 30 m: geração potencial de escoamento (motor) e, na frente experimental de GeoAI, rótulo de treino e referência de avaliação (referência cartográfica, não verdade de campo). Baixada em 25/11/2026 (data dos arquivos). Ano de publicação conforme o aviso de direitos do serviço."
+  conferido: "data/raw/manifest.json (URL e SHA-256); docs/auditoria_fontes_drenagem_poa.md; docs/inventario_fontes_poa.md (direitos declarados)"
+  cit: "PROFILL, 2023"
+- id: sentinel2_aws
+  cat: 2
+  uso: experimento
+  tipo: dataset
+  autor: "EUROPEAN SPACE AGENCY"
+  titulo: "Sentinel-2 L2A"
+  subtitulo: "produtos de reflectância de superfície em Cloud-Optimized GeoTIFF (\"Sentinel-2 Cloud-Optimized GeoTIFFs\"), distribuídos pelo Registry of Open Data on AWS e pelo catálogo Earth Search"
+  local: "[S. l.]"
+  editora: "Registry of Open Data on AWS; Element 84"
+  ano: "[s. d.]"
+  url: "https://registry.opendata.aws/sentinel-2-l2a-cogs/"
+  acesso: "2026-11-26"
+  licenca: "\"Access to Sentinel data is free, full and open\" (texto do registro AWS, que remete aos termos e condições do Copernicus)"
+  nota: "30 cenas do tile MGRS 22JDM, 2019 a 2021 (mediana por pixel após máscara SCL), usadas só na GeoAI experimental. Contém dados Copernicus Sentinel (2019–2021), modificados."
+  conferido: "registry.opendata.aws/sentinel-2-l2a-cogs/ (licença, gestor Element 84); data/interim/geoai/cenas.json"
+  cit: "EUROPEAN SPACE AGENCY, [s. d.]"
+- id: drusch2012
+  cat: 2
+  uso: experimento
+  tipo: artigo
+  autor: "DRUSCH, M. et al."
+  titulo: "Sentinel-2: ESA's optical high-resolution mission for GMES operational services"
+  periodico: "Remote Sensing of Environment"
+  vol: "120"
+  pag: "25-36"
+  ano: "2012"
+  doi: "10.1016/j.rse.2011.11.026"
+  acesso: "2026-11-26"
+  licenca: "artigo de periódico (direitos do editor)"
+  nota: "Descrição da missão Sentinel-2 (resolução espacial, bandas e revisita)."
+  conferido: "doi.org (CSL JSON): 15 autores, Remote Sensing of Environment 120, p. 25-36, 2012"
+  cit: "DRUSCH et al., 2012"
+# ------------------------------------------------------------------------------------------------ 3. Relevo e modelos digitais de elevação
+- id: copernicus_dem
+  cat: 3
+  uso: efetiva
+  tipo: dataset
+  autor: "EUROPEAN SPACE AGENCY; AIRBUS"
+  titulo: "Copernicus DEM"
+  subtitulo: "produto GLO-30 Public (30 m), em Cloud-Optimized GeoTIFF, distribuído pelo Registry of Open Data on AWS"
+  local: "[S. l.]"
+  editora: "European Space Agency"
+  ano: "2022"
+  doi: "10.5270/ESA-c5d3d65"
+  url: "https://registry.opendata.aws/copernicus-dem/"
+  acesso: "2026-11-26"
+  licenca: "\"GLO-30 Public e GLO-90 estão disponíveis gratuitamente ao público geral, nos termos da Licença\" do Copernicus DEM (texto do registro AWS; os termos da licença não foram relidos nesta revisão). Atribuição: © DLR e.V. 2010–2014 e © Airbus Defence and Space GmbH 2014–2018, fornecido no âmbito do Copernicus pela União Europeia e pela ESA"
+  nota: "Modelo digital de superfície (DSM) de 30 m: relevo, direção de fluxo, depressões e contribuição. Erro médio de 2,18 m contra 334 marcos altimétricos; não resolve microrrelevo urbano. Duas telas (S30 e S31, W052) cobrem Porto Alegre; o diretório local guarda 39 telas do estado, baixadas de 27/10 a 08/11/2026 (manifesto)."
+  conferido: "doi.org (DataCite): autores ESA e Airbus, título Copernicus DEM, 2022; registry.opendata.aws/copernicus-dem/ (licença, gestor Sinergise); README do projeto (atribuição)"
+  cit: "EUROPEAN SPACE AGENCY; AIRBUS, 2022"
+# ------------------------------------------------------------------------------------------------ 4. Drenagem e infraestrutura urbana
+- id: geopoa_drenagem
+  cat: 4
+  uso: efetiva
+  tipo: dataset
+  autor: "PORTO ALEGRE (RS). Prefeitura Municipal"
+  titulo: "Cadastro de drenagem pluvial"
+  subtitulo: "rede pluvial, poços de visita, bocas de lobo, grelhas, canais, condutos forçados e casas de bomba (camadas do GeoPOA)"
+  local: "Porto Alegre"
+  editora: "Prefeitura Municipal de Porto Alegre (serviço gis-smamus)"
+  ano: "[s. d.]"
+  url: "https://gis-smamus.portoalegre.rs.gov.br/server/rest/services/01_PUBLICACOES/rede_pluvial/FeatureServer/0"
+  acesso: "2026-11-26"
+  licenca: "NÃO CONFIRMADA (o serviço não declara licença; a redistribuição de derivados exige confirmação com a Prefeitura)"
+  nota: "Camada de contexto (a presença de um elemento não comprova capacidade, conexão nem funcionamento); fora do cálculo de escoamento. Camadas 49 a 59 do serviço POA___Consultas_MIL1, rede_pluvial, bocas_de_lobo, ram_hidrografia_2014 e Casas_de_Bomba___EBAP_210126. Coletadas em 25/11/2026."
+  conferido: "data/raw/manifest.json (URLs e SHA-256 de 49 arquivos); tools/baixar_drenagem_poa.py; docs/inventario_fontes_poa.md"
+  cit: "PORTO ALEGRE, [s. d.]b"
+# ------------------------------------------------------------------------------------------------ 5. Dados meteorológicos e precipitação
+- id: openmeteo_software
+  cat: 5
+  uso: efetiva
+  tipo: software
+  autor: "ZIPPENFENIG, Patrick"
+  titulo: "Open-Meteo.com Weather API"
+  local: "[S. l.]"
+  editora: "Zenodo"
+  ano: "2023"
+  doi: "10.5281/zenodo.7970649"
+  acesso: "2026-11-26"
+  licenca: "registro do software no Zenodo: CC BY 4.0. A licença e as condições de uso da API de dados (uso não comercial, segundo a documentação do projeto) não puderam ser relidas na página do provedor, que não carrega sem navegador"
+  nota: "Série diária de Porto Alegre de 2017-01-01 a 2026-11-02 (3.593 dias; ponto da grade -30,123 / -51,203) pela Historical Weather API, que reúne ERA5, ERA5-Land e ECMWF IFS conforme o provedor. O projeto não fixou o parâmetro models: o modelo efetivo por período não está registrado. Reanálise modelada, não pluviômetro. DOI do conceito (todas as versões); citação conforme o formato recomendado pelo próprio Open-Meteo (2023)."
+  conferido: "doi.org e API do Zenodo (conceptdoi 10.5281/zenodo.7970649, autor Zippenfenig); src/flooding_mapping/ingestion/weather.py (endpoint archive-api); página open-meteo.com/en/docs/historical-weather-api (descrição das fontes)"
+  cit: "ZIPPENFENIG, 2023"
+- id: openmeteo_docs
+  cat: 5
+  uso: efetiva
+  tipo: web
+  autor: "OPEN-METEO"
+  titulo: "Historical Weather API"
+  local: "[S. l.]"
+  editora: "Open-Meteo.com"
+  ano: "[s. d.]"
+  url: "https://open-meteo.com/en/docs/historical-weather-api"
+  acesso: "2026-11-26"
+  licenca: "ver a nota da referência do software"
+  nota: "Documentação do endpoint de reanálise usado (archive-api.open-meteo.com)."
+  conferido: "página lida em 26/11/2026"
+  cit: "OPEN-METEO, [s. d.]"
+- id: hersbach2020
+  cat: 5
+  uso: efetiva
+  tipo: artigo
+  autor: "HERSBACH, Hans et al."
+  titulo: "The ERA5 global reanalysis"
+  periodico: "Quarterly Journal of the Royal Meteorological Society"
+  vol: "146"
+  num: "730"
+  pag: "1999-2049"
+  ano: "2020"
+  doi: "10.1002/qj.3803"
+  acesso: "2026-11-26"
+  licenca: "artigo de periódico (direitos do editor). Dados ERA5: Copernicus Climate Change Service (C3S), DOI 10.24381/cds.adbb2d47"
+  nota: "Reanálise que fundamenta a série de chuva do Open-Meteo."
+  conferido: "doi.org (CSL JSON): 43 autores, Q. J. R. Meteorol. Soc. 146(730), p. 1999-2049, 2020"
+  cit: "HERSBACH et al., 2020"
+# ------------------------------------------------------------------------------------------------ 6. Bases históricas e registros de eventos
+- id: pmpa_alagamentos
+  cat: 6
+  uso: efetiva
+  tipo: dataset
+  autor: "PORTO ALEGRE (RS). Prefeitura Municipal"
+  titulo: "Alagamentos registrados em 2013 e 2014 e marcos altimétricos RRCM"
+  subtitulo: "mapa público do Google My Maps (KML)"
+  local: "Porto Alegre"
+  editora: "Prefeitura Municipal de Porto Alegre"
+  ano: "[s. d.]"
+  url: "https://www.google.com/maps/d/kml?mid=1pJ6wqw8YJLxbG7q4IZGCRqP07Os&forcekml=1"
+  acesso: "2026-11-26"
+  licenca: "não identificada (o serviço não declara licença)"
+  nota: "124 trechos alagados, sem horário nem chuva associada: validação exploratória, nunca treino, e não validação preditiva. Os marcos RRCM servem à conferência de altitude do relevo."
+  conferido: "tools/validar_terreno_alagamentos_pmpa.py (cabeçalho); docs/inventario_fontes_poa.md"
+  cit: "PORTO ALEGRE, [s. d.]c"
+- id: events2025
+  cat: 6
+  uso: historica
+  tipo: dataset
+  autor: "FLOODING MAPPING"
+  titulo: "Registro de eventos de bloqueio por acúmulo de água em Porto Alegre"
+  subtitulo: "compilação própria a partir de notícias da EPTC divulgadas pelo Jornal do Comércio e pelo Sul21 (data/events/events.csv)"
+  local: "[S. l.]"
+  editora: "Flooding Mapping"
+  ano: "2025"
+  acesso: null
+  licenca: "compilação do projeto; o conteúdo das notícias de origem pertence aos veículos (endereços em source_url)"
+  nota: "Frente de mobilidade (arquivada). Não é validação de escoamento. Arquivo do repositório (data/events/events.csv); ainda sem endereço público, porque o código não foi enviado."
+  conferido: "data/events/events.csv (colunas source_name e source_url)"
+  cit: "FLOODING MAPPING, 2025"
+- id: cprvbm_bloqueios
+  cat: 6
+  uso: historica
+  tipo: web
+  autor: "CPRv BM"
+  titulo: "Bloqueios ativos"
+  subtitulo: "API pública"
+  local: "[S. l.]"
+  editora: "CPRv BM"
+  ano: "[s. d.]"
+  url: "https://bloqueios.cprvbm.rs.gov.br/"
+  acesso: "2026-11-26"
+  licenca: "não identificada nesta revisão"
+  nota: "Frente do painel estadual (arquivada): bloqueios de rodovias consultados pelo coletor. Não faz parte do estudo de escoamento."
+  conferido: "src/flooding_mapping/collector.py (ENDPOINT)"
+  cit: "CPRv BM, [s. d.]"
+- id: s2id_midr
+  cat: 6
+  uso: historica
+  tipo: web
+  autor: "BRASIL. Ministério da Integração e do Desenvolvimento Regional"
+  titulo: "Sistema Integrado de Informações sobre Desastres (S2iD)"
+  subtitulo: "Relatório Gerencial: danos informados, exportação manual, UF = RS, de 2017-01-01 a 2026-11-07"
+  local: "[S. l.]"
+  editora: "MIDR"
+  ano: "[s. d.]"
+  url: "https://s2id.mi.gov.br/"
+  acesso: "2026-11-26"
+  licenca: "não identificada nesta revisão"
+  nota: "Frente do gatilho municipal (arquivada). Onze exportações em data/raw/s2id."
+  conferido: "data/raw/manifest.json (origin das 11 exportações)"
+  cit: "BRASIL, [s. d.]"
+# ------------------------------------------------------------------------------------------------ 7. Dados de referência e validação
+- id: cprm_inundacao
+  cat: 7
+  uso: efetiva
+  tipo: dataset
+  autor: "SERVIÇO GEOLÓGICO DO BRASIL (CPRM)"
+  titulo: "Risco de inundação, Porto Alegre"
+  subtitulo: "classes Alto, Médio e Baixo, modelagem de 2012 a 2014; camada inundacoes_cprm do GeoPOA"
+  local: "Porto Alegre"
+  editora: "Prefeitura Municipal de Porto Alegre (serviço gis-smamus)"
+  ano: "[s. d.]"
+  url: "https://gis-smamus.portoalegre.rs.gov.br/server/rest/services/01_PUBLICACOES/inundacoes_cprm/FeatureServer/0"
+  acesso: "2026-11-26"
+  licenca: "NÃO CONFIRMADA (o serviço não declara licença)"
+  nota: "Só contexto qualitativo (sobreposição com o ranking de contribuição), nunca rótulo nem validação. A classe Alto cobre cerca da metade da área mapeada e discrimina pouco."
+  conferido: "tools/executar_fase3.py (sobrepor_cprm); tools/baixar_drenagem_poa.py; docs/inventario_fontes_poa.md"
+  cit: "SERVIÇO GEOLÓGICO DO BRASIL, [s. d.]"
+- id: olofsson2014
+  cat: 7
+  uso: experimento
+  tipo: artigo
+  autor: "OLOFSSON, Pontus et al."
+  titulo: "Good practices for estimating area and assessing accuracy of land change"
+  periodico: "Remote Sensing of Environment"
+  vol: "148"
+  pag: "42-57"
+  ano: "2014"
+  doi: "10.1016/j.rse.2014.02.015"
+  acesso: "2026-11-26"
+  licenca: "artigo de periódico (direitos do editor)"
+  nota: "Referencial para a amostra independente de validação da GeoAI (ainda não executada). Não foi aplicado nos resultados atuais."
+  conferido: "doi.org (CSL JSON): 6 autores, Remote Sensing of Environment 148, p. 42-57, 2014"
+  cit: "OLOFSSON et al., 2014"
+- id: roberts2017
+  cat: 7
+  uso: experimento
+  tipo: artigo
+  autor: "ROBERTS, David R. et al."
+  titulo: "Cross-validation strategies for data with temporal, spatial, hierarchical, or phylogenetic structure"
+  periodico: "Ecography"
+  vol: "40"
+  num: "8"
+  pag: "913-929"
+  ano: "2017"
+  doi: "10.1111/ecog.02881"
+  acesso: "2026-11-26"
+  licenca: "artigo de periódico (direitos do editor)"
+  nota: "Fundamenta a validação por blocos espaciais da GeoAI (blocos de 3 km com faixa de exclusão)."
+  conferido: "doi.org (CSL JSON): 14 autores, Ecography 40(8), p. 913-929, 2017"
+  cit: "ROBERTS et al., 2017"
+# ------------------------------------------------------------------------------------------------ 8. Métodos e referenciais científicos
+- id: ocallaghan1984
+  cat: 8
+  uso: efetiva
+  tipo: artigo
+  autor: "O'CALLAGHAN, John F.; MARK, David M."
+  titulo: "The extraction of drainage networks from digital elevation data"
+  periodico: "Computer Vision, Graphics, and Image Processing"
+  vol: "28"
+  num: "3"
+  pag: "323-344"
+  ano: "1984"
+  doi: "10.1016/S0734-189X(84)80011-0"
+  acesso: "2026-11-26"
+  licenca: "artigo de periódico (direitos do editor)"
+  nota: "Direção de fluxo D8, implementada no projeto (src/flooding_mapping/fluxo.py)."
+  conferido: "doi.org (CSL JSON): 2 autores, CVGIP 28(3), p. 323-344, 1984; fluxo.py (docstring cita D8)"
+  cit: "O'CALLAGHAN; MARK, 1984"
+- id: barnes2014
+  cat: 8
+  uso: efetiva
+  tipo: artigo
+  autor: "BARNES, Richard; LEHMAN, Clarence; MULLA, David"
+  titulo: "Priority-flood: an optimal depression-filling and watershed-labeling algorithm for digital elevation models"
+  periodico: "Computers & Geosciences"
+  vol: "62"
+  pag: "117-127"
+  ano: "2014"
+  doi: "10.1016/j.cageo.2013.04.024"
+  acesso: "2026-11-26"
+  licenca: "artigo de periódico (direitos do editor)"
+  nota: "Referencial do preenchimento de depressões por priority-flood, implementado no projeto (susceptibility.fill_depressions)."
+  conferido: "doi.org (CSL JSON): Barnes, Lehman, Mulla; Computers & Geosciences 62, p. 117-127, 2014; susceptibility.py (docstring: priority-flood)"
+  cit: "BARNES; LEHMAN; MULLA, 2014"
+- id: beven1979
+  cat: 8
+  uso: experimento
+  tipo: artigo
+  autor: "BEVEN, K. J.; KIRKBY, M. J."
+  titulo: "A physically based, variable contributing area model of basin hydrology"
+  periodico: "Hydrological Sciences Bulletin"
+  vol: "24"
+  num: "1"
+  pag: "43-69"
+  ano: "1979"
+  doi: "10.1080/02626667909491834"
+  acesso: "2026-11-26"
+  verificado: false
+  licenca: "artigo de periódico (direitos do editor)"
+  nota: "Índice topográfico de umidade (TWI), usado só em experimentos anteriores de suscetibilidade (susceptibility.py); não entra no motor de escoamento. O DOI resolve nos metadados, mas o site do editor bloqueia o acesso automatizado."
+  conferido: "doi.org (CSL JSON): Beven e Kirkby, Hydrological Sciences Bulletin 24(1), p. 43-69, 1979"
+  cit: "BEVEN; KIRKBY, 1979"
+- id: txdot_c
+  cat: 8
+  uso: efetiva
+  tipo: documento
+  autor: "TEXAS DEPARTMENT OF TRANSPORTATION"
+  titulo: "Hydraulic Design Manual"
+  subtitulo: "cap. 4, seção 12, Rational Method: Runoff Coefficients (Tabela 4-10)"
+  local: "[S. l.]"
+  editora: "TxDOT"
+  ano: "[s. d.]"
+  url: "https://www.txdot.gov/manuals/des/hyd/chapter-4--hydrology/section-12--rational-method/runoff-coefficients.html"
+  acesso: "2026-11-26"
+  licenca: "documento público de agência; condições de reuso não verificadas nesta revisão"
+  nota: "Faixas do coeficiente de escoamento C do Método 1 (Edificação 0,75 a 0,95; Vias Pavimentadas 0,70 a 0,95) e referências por analogia (Campo, Pastagem, Jardins). Valores de outro país, usados como faixa declarada, não como calibração local. Consultada em 25/11/2026 (config/uso_solo_*.csv)."
+  conferido: "config/uso_solo_coeficientes_metodo1_fundamentados.csv (campo referencia); endereço respondeu em 26/11/2026"
+  cit: "TEXAS DEPARTMENT OF TRANSPORTATION, [s. d.]"
+- id: sandiego_c
+  cat: 8
+  uso: efetiva
+  tipo: documento
+  autor: "COUNTY OF SAN DIEGO"
+  titulo: "Hydrology Manual"
+  subtitulo: "valores do coeficiente de escoamento C (arquivo hydro-evalcvalues.pdf)"
+  local: "[S. l.]"
+  editora: "County of San Diego, Department of Public Works, Flood Control"
+  ano: "[s. d.]"
+  url: "https://www.sandiegocounty.gov/content/dam/sdc/dpw/FLOOD_CONTROL/floodcontroldocuments/hydro-evalcvalues.pdf"
+  acesso: "2026-11-26"
+  licenca: "documento público de agência; condições de reuso não verificadas nesta revisão"
+  nota: "Conferência das faixas de C do método racional (docs/sensibilidade_hidrologica.md); não fornece os valores adotados."
+  conferido: "docs/sensibilidade_hidrologica.md; endereço respondeu em 26/11/2026"
+  cit: "COUNTY OF SAN DIEGO, [s. d.]"
+# ------------------------------------------------------------------------------------------------ 9. Modelos de inteligência artificial e GeoAI
+- id: breiman2001
+  cat: 9
+  uso: experimento
+  tipo: artigo
+  autor: "BREIMAN, Leo"
+  titulo: "Random Forests"
+  periodico: "Machine Learning"
+  vol: "45"
+  num: "1"
+  pag: "5-32"
+  ano: "2001"
+  doi: "10.1023/A:1010933404324"
+  acesso: "2026-11-26"
+  licenca: "artigo de periódico (direitos do editor)"
+  nota: "Algoritmo do modelo treinado na GeoAI (RandomForestRegressor do scikit-learn, 200 árvores)."
+  conferido: "doi.org (CSL JSON): Breiman, Machine Learning 45(1), p. 5-32, 2001"
+  cit: "BREIMAN, 2001"
+- id: alphaearth_dataset
+  cat: 9
+  uso: experimento
+  tipo: dataset
+  autor: "GOOGLE; GOOGLE DEEPMIND"
+  titulo: "Satellite Embedding V1"
+  subtitulo: "embeddings anuais de 64 dimensões a 10 m (GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL), Earth Engine Data Catalog e bucket gs://alphaearth_foundations"
+  local: "[S. l.]"
+  editora: "Google"
+  ano: "[s. d.]"
+  url: "https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL"
+  acesso: "2026-11-26"
+  licenca: "CC BY 4.0, com atribuição obrigatória: \"The AlphaEarth Foundations Satellite Embedding dataset is produced by Google and Google DeepMind.\""
+  nota: "Ano 2020, zona UTM 22S, agregado às células de 30 m. Experimento B da GeoAI: empatou com o Random Forest, sem ganho demonstrado."
+  conferido: "página do catálogo e guia aef_on_gcs_readme (licença e atribuição); leitura anônima do bucket testada em 26/11/2026"
+  cit: "GOOGLE; GOOGLE DEEPMIND, [s. d.]"
+- id: brown2025
+  cat: 9
+  uso: experimento
+  tipo: preprint
+  autor: "BROWN, Christopher F. et al."
+  titulo: "AlphaEarth Foundations: an embedding field model for accurate and efficient global mapping from sparse label data"
+  ano: "2025"
+  doi: "10.48550/arXiv.2507.22291"
+  url: "https://arxiv.org/abs/2507.22291"
+  acesso: "2026-11-26"
+  licenca: "pré-publicação no arXiv (licença da versão consultada não verificada)"
+  nota: "Artigo do modelo cujos embeddings foram avaliados (arXiv, versão 2; 19 autores)."
+  conferido: "doi.org (DataCite): Brown, Kazmierski, Pasquarella, Rucklidge et al., arXiv, 2025, versão 2"
+  cit: "BROWN et al., 2025"
+# ------------------------------------------------------------------------------------------------ 10. Bibliotecas, ferramentas e tecnologias
+- id: numpy
+  cat: 10
+  uso: efetiva
+  tipo: artigo
+  autor: "HARRIS, Charles R. et al."
+  titulo: "Array programming with NumPy"
+  periodico: "Nature"
+  vol: "585"
+  num: "7825"
+  pag: "357-362"
+  ano: "2020"
+  doi: "10.1038/s41586-020-2649-2"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause, com licenças de componentes incluídos (PyPI: BSD-3-Clause AND 0BSD AND MIT AND Zlib e outras)"
+  nota: "NumPy 2.5.4 (versão instalada)."
+  conferido: "doi.org (CSL JSON): 26 autores, Nature 585(7825), p. 357-362, 2020; versão instalada no ambiente do projeto"
+  cit: "HARRIS et al., 2020"
+- id: scipy
+  cat: 10
+  uso: efetiva
+  tipo: artigo
+  autor: "VIRTANEN, Pauli et al."
+  titulo: "SciPy 1.0: fundamental algorithms for scientific computing in Python"
+  periodico: "Nature Methods"
+  vol: "17"
+  num: "3"
+  pag: "261-272"
+  ano: "2020"
+  doi: "10.1038/s41592-019-0686-2"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause (repositório no GitHub)"
+  nota: "SciPy 1.18.1 (versão instalada): morfologia, estatística e interpolação."
+  conferido: "doi.org (CSL JSON): 112 autores, Nature Methods 17(3), p. 261-272, 2020"
+  cit: "VIRTANEN et al., 2020"
+- id: pedregosa2011
+  cat: 10
+  uso: efetiva
+  tipo: artigo
+  autor: "PEDREGOSA, Fabian et al."
+  titulo: "Scikit-learn: machine learning in Python"
+  periodico: "Journal of Machine Learning Research"
+  vol: "12"
+  pag: "2825-2830"
+  ano: "2011"
+  url: "https://jmlr.org/papers/v12/pedregosa11a.html"
+  acesso: "2026-11-26"
+  licenca: "scikit-learn: BSD-3-Clause (PyPI)"
+  nota: "scikit-learn 1.9.1 (versão instalada): Random Forest, gradient boosting e regressão linear."
+  conferido: "página do JMLR (autores e título); volume e páginas conforme a citação oficial do pacote (v. 12, p. 2825-2830, 2011)"
+  cit: "PEDREGOSA et al., 2011"
+- id: pandas
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "THE PANDAS DEVELOPMENT TEAM"
+  titulo: "pandas-dev/pandas: Pandas"
+  versao: "3.1.0"
+  local: "[S. l.]"
+  editora: "Zenodo"
+  ano: "2026"
+  doi: "10.5281/zenodo.3509134"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause (registro Zenodo e PyPI)"
+  nota: "Versão 3.1.0 (publicada no PyPI em 22/10/2026); DOI do conceito (todas as versões)."
+  conferido: "API do Zenodo (conceptdoi 3509134, autor The pandas development team); PyPI (data da versão)"
+  cit: "THE PANDAS DEVELOPMENT TEAM, 2026"
+- id: geopandas
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "GEOPANDAS"
+  titulo: "GeoPandas"
+  subtitulo: "Geographic pandas extensions"
+  versao: "1.1.4"
+  local: "[S. l.]"
+  editora: "GeoPandas"
+  ano: "2026"
+  doi: "10.5281/zenodo.2585848"
+  url: "https://geopandas.org"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause (PyPI)"
+  nota: "Versão 1.1.4 (PyPI, 26/06/2026); DOI do conceito (todas as versões)."
+  conferido: "API do Zenodo (conceptdoi 2585848); PyPI (resumo e data)"
+  cit: "GEOPANDAS, 2026"
+- id: shapely
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "GILLIES, Sean et al."
+  titulo: "Shapely"
+  subtitulo: "Manipulation and analysis of geometric objects"
+  versao: "2.2.0"
+  local: "[S. l.]"
+  editora: "Zenodo"
+  ano: "2026"
+  doi: "10.5281/zenodo.5597138"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause (registro Zenodo e PyPI)"
+  nota: "Versão 2.2.0 (PyPI, 07/10/2026); DOI do conceito (todas as versões)."
+  conferido: "API do Zenodo (conceptdoi 5597138; 7 autores, 1º Gillies); PyPI"
+  cit: "GILLIES et al., 2026a"
+- id: rasterio
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "GILLIES, Sean et al."
+  titulo: "Rasterio"
+  subtitulo: "Fast and direct raster I/O for use with NumPy"
+  versao: "1.5.2"
+  local: "[S. l.]"
+  editora: "Rasterio"
+  ano: "2026"
+  url: "https://rasterio.readthedocs.io/"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause (PyPI)"
+  nota: "Versão 1.5.2 (PyPI, 30/09/2026), com o GDAL 3.12.2 embutido; grava o COG experimental."
+  conferido: "PyPI (autor, resumo, licença, data); rasterio.__gdal_version__"
+  cit: "GILLIES et al., 2026b"
+- id: pyproj
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "PYPROJ4"
+  titulo: "pyproj"
+  subtitulo: "Python interface to PROJ (cartographic projections and coordinate transformations library)"
+  versao: "3.6.1"
+  local: "[S. l.]"
+  editora: "pyproj4"
+  ano: "2023"
+  url: "https://github.com/pyproj4/pyproj"
+  acesso: "2026-11-26"
+  licenca: "MIT (PyPI e GitHub)"
+  nota: "Versão 3.6.1 (PyPI, 21/09/2023): conversão entre EPSG:4326, 31982 (grade do projeto) e 32722 (tiles Sentinel-2)."
+  conferido: "PyPI e API do GitHub (licença MIT)"
+  cit: "PYPROJ4, 2023"
+- id: gdal
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "ROUAULT, Even et al."
+  titulo: "GDAL"
+  versao: "3.12.2"
+  local: "[S. l.]"
+  editora: "Zenodo"
+  ano: "2026"
+  doi: "10.5281/zenodo.5884351"
+  url: "https://gdal.org/"
+  acesso: "2026-11-26"
+  licenca: "MIT (registro Zenodo)"
+  nota: "Versão 3.12.2 embutida no Rasterio (leitura de COG remotos, driver COG); a ferramenta de linha de comando 3.13.2 foi usada só para inspeção. DOI do conceito (todas as versões)."
+  conferido: "API do Zenodo (conceptdoi 5884351; 19 autores, 1º Rouault); rasterio.__gdal_version__"
+  cit: "ROUAULT et al., 2026"
+- id: matplotlib
+  cat: 10
+  uso: efetiva
+  tipo: artigo
+  autor: "HUNTER, John D."
+  titulo: "Matplotlib: a 2D graphics environment"
+  periodico: "Computing in Science & Engineering"
+  vol: "9"
+  num: "3"
+  pag: "90-95"
+  ano: "2007"
+  doi: "10.1109/MCSE.2007.55"
+  acesso: "2026-11-26"
+  licenca: "Matplotlib: licença própria (PyPI: \"License agreement for matplotlib\")"
+  nota: "Matplotlib 3.11.2 (versão instalada): figuras da GeoAI e dos relatórios."
+  conferido: "doi.org (CSL JSON): Hunter, CiSE 9(3), p. 90-95, 2007"
+  cit: "HUNTER, 2007"
+- id: networkx
+  cat: 10
+  uso: historica
+  tipo: artigo
+  autor: "HAGBERG, Aric A.; SCHULT, Daniel A.; SWART, Pieter J."
+  titulo: "Exploring network structure, dynamics, and function using NetworkX"
+  periodico: "Proceedings of the 7th Python in Science Conference (SciPy 2008)"
+  pag: "11-15"
+  ano: "2008"
+  doi: "10.25080/TCWV9851"
+  acesso: "2026-11-26"
+  licenca: "NetworkX: BSD-3-Clause (PyPI)"
+  nota: "NetworkX 3.7: roteamento da frente de mobilidade (arquivada)."
+  conferido: "doi.org (CSL JSON): Hagberg, Schult e Swart; SciPy proceedings, p. 11-15, 2008-06-28"
+  cit: "HAGBERG; SCHULT; SWART, 2008"
+- id: pyrosm
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "TENKANEN, Henrikki"
+  titulo: "pyrosm"
+  subtitulo: "A Python tool to parse OSM data from Protobuf format into GeoDataFrame"
+  versao: "0.24.0"
+  local: "[S. l.]"
+  editora: "pyrosm"
+  ano: "2026"
+  url: "https://pyrosm.readthedocs.io/"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause AND MIT AND ISC (PyPI)"
+  nota: "Versão 0.24.0 (PyPI, 23/10/2026): leitura das edificações e da rede do OSM."
+  conferido: "PyPI (autor, resumo, licença, data)"
+  cit: "TENKANEN, 2026"
+- id: pyosmium
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "OSMCODE"
+  titulo: "pyosmium"
+  subtitulo: "Python bindings for libosmium, the data processing library for OSM data"
+  versao: "4.3.2"
+  local: "[S. l.]"
+  editora: "osmcode"
+  ano: "2026"
+  url: "https://osmcode.org/pyosmium/"
+  acesso: "2026-11-26"
+  licenca: "BSD-2-Clause (PyPI e GitHub)"
+  nota: "Versão 4.3.2 (módulo osmium, PyPI, 18/10/2026): recorte do OSM."
+  conferido: "PyPI e API do GitHub"
+  cit: "OSMCODE, 2026"
+- id: pyarrow
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "APACHE SOFTWARE FOUNDATION"
+  titulo: "Apache Arrow"
+  subtitulo: "PyArrow, Python library for Apache Arrow"
+  versao: "26.0.0"
+  local: "[S. l.]"
+  editora: "Apache Software Foundation"
+  ano: "2026"
+  url: "https://arrow.apache.org/docs/python/"
+  acesso: "2026-11-26"
+  licenca: "Apache-2.0 (PyPI e GitHub)"
+  nota: "Versão 26.0.0 (PyPI, 09/10/2026): leitura e gravação de Parquet."
+  conferido: "PyPI e API do GitHub"
+  cit: "APACHE SOFTWARE FOUNDATION, 2026"
+- id: joblib
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "JOBLIB DEVELOPERS"
+  titulo: "Joblib"
+  subtitulo: "Lightweight pipelining with Python functions"
+  versao: "1.6.0"
+  local: "[S. l.]"
+  editora: "Joblib"
+  ano: "2026"
+  url: "https://joblib.readthedocs.io/"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause (PyPI e GitHub)"
+  nota: "Versão 1.6.0 (PyPI, 31/08/2026): paralelismo do scikit-learn e serialização de modelos."
+  conferido: "PyPI e API do GitHub"
+  cit: "JOBLIB DEVELOPERS, 2026"
+- id: requests
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "PYTHON SOFTWARE FOUNDATION"
+  titulo: "Requests"
+  subtitulo: "Python HTTP for Humans"
+  versao: "2.34.2"
+  local: "[S. l.]"
+  editora: "Python Software Foundation"
+  ano: "2026"
+  url: "https://requests.readthedocs.io/"
+  acesso: "2026-11-26"
+  licenca: "Apache-2.0 (PyPI e GitHub)"
+  nota: "Versão 2.34.2 (PyPI, 14/05/2026): consultas HTTP e ao catálogo STAC."
+  conferido: "PyPI (versão, data, licença); API do GitHub (psf/requests)"
+  cit: "PYTHON SOFTWARE FOUNDATION, 2026"
+- id: pyyaml
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "SIMONOV, Kirill"
+  titulo: "PyYAML"
+  subtitulo: "YAML parser and emitter for Python"
+  versao: "6.0.3"
+  local: "[S. l.]"
+  editora: "PyYAML"
+  ano: "2025"
+  url: "https://pyyaml.org/"
+  acesso: "2026-11-26"
+  licenca: "MIT (PyPI e GitHub)"
+  nota: "Versão 6.0.3 (PyPI, 25/09/2025): leitura das configurações em YAML."
+  conferido: "PyPI (autor, versão, data, licença)"
+  cit: "SIMONOV, 2025"
+- id: pillow
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "PYTHON-PILLOW"
+  titulo: "Pillow"
+  subtitulo: "Python Imaging Library (fork)"
+  versao: "13.0.0"
+  local: "[S. l.]"
+  editora: "Pillow"
+  ano: "2026"
+  url: "https://python-pillow.org/"
+  acesso: "2026-11-26"
+  licenca: "MIT-CMU (PyPI)"
+  nota: "Versão 13.0.0 (PyPI, 16/10/2026): leitura de dimensões de imagens nas ferramentas da landing."
+  conferido: "PyPI (resumo, versão, data, licença); API do GitHub (organização python-pillow)"
+  cit: "PYTHON-PILLOW, 2026"
+- id: r5py
+  cat: 10
+  uso: historica
+  tipo: software
+  autor: "FINK, Christoph et al."
+  titulo: "r5py: Rapid Realistic Routing with R5 in Python"
+  versao: "1.1.7"
+  local: "[S. l.]"
+  editora: "Zenodo"
+  ano: "2022"
+  doi: "10.5281/zenodo.7060437"
+  url: "https://r5py.readthedocs.io/"
+  acesso: "2026-11-26"
+  licenca: "MIT (registro Zenodo); o PyPI declara \"GPL-3.0-or-later or MIT\""
+  nota: "Versão 1.1.7 instalada; só na frente de mobilidade (arquivada). DOI do conceito (todas as versões); o DOI de versão citado em docs/proposta.md (zenodo.7060438) é o da versão 0.0.4."
+  conferido: "API do Zenodo (conceptdoi 7060437; 5 autores, 1º Fink); PyPI"
+  cit: "FINK et al., 2022"
+- id: pytest
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "PYTEST-DEV"
+  titulo: "pytest"
+  subtitulo: "simple powerful testing with Python"
+  versao: "9.1.1"
+  local: "[S. l.]"
+  editora: "pytest-dev"
+  ano: "2026"
+  url: "https://docs.pytest.org/"
+  acesso: "2026-11-26"
+  licenca: "MIT (PyPI e GitHub)"
+  nota: "Versão 9.1.1 (PyPI, 19/06/2026): suíte de testes do projeto."
+  conferido: "PyPI; API do GitHub (pytest-dev/pytest)"
+  cit: "PYTEST-DEV, 2026"
+- id: playwright
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "MICROSOFT"
+  titulo: "Playwright"
+  versao: "1.63.0"
+  local: "[S. l.]"
+  editora: "Microsoft"
+  ano: "[s. d.]"
+  url: "https://playwright.dev/"
+  acesso: "2026-11-26"
+  licenca: "Apache-2.0 (GitHub: microsoft/playwright)"
+  nota: "playwright-core 1.63.0 (cache do npx), fora das dependências do projeto, com o Chrome 158 instalado: testes de navegador (e2e), acessibilidade e medições."
+  conferido: "API do GitHub (licença); package.json do playwright-core no cache do npx; Chrome --version"
+  cit: "MICROSOFT, [s. d.]"
+- id: python_pptx
+  cat: 10
+  uso: experimento
+  tipo: software
+  autor: "CANNY, Steve"
+  titulo: "python-pptx"
+  local: "[S. l.]"
+  editora: "python-pptx"
+  ano: "[s. d.]"
+  url: "https://python-pptx.readthedocs.io/"
+  acesso: "2026-11-26"
+  licenca: "MIT (PyPI e GitHub)"
+  nota: "Usado só nos geradores da apresentação (tools/gerar_apresentacao*.py); não está instalado no ambiente atual."
+  conferido: "PyPI (autor, licença); imports em tools/"
+  cit: "CANNY, [s. d.]"
+- id: maplibre
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "MAPLIBRE"
+  titulo: "MapLibre GL JS"
+  subtitulo: "BSD licensed community fork of mapbox-gl, a WebGL interactive maps library"
+  versao: "4.7.1"
+  local: "[S. l.]"
+  editora: "MapLibre"
+  ano: "2024"
+  url: "https://maplibre.org/maplibre-gl-js/docs/"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause (npm)"
+  nota: "Versão 4.7.1 (npm, 23/09/2024), fixada com hash de integridade em index.html: mapa 3D."
+  conferido: "registro npm (data, licença, descrição); index.html"
+  cit: "MAPLIBRE, 2024"
+- id: leaflet
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "LEAFLET"
+  titulo: "Leaflet"
+  subtitulo: "JavaScript library for mobile-friendly interactive maps"
+  versao: "1.9.4"
+  local: "[S. l.]"
+  editora: "Leaflet"
+  ano: "2023"
+  url: "https://leafletjs.com/"
+  acesso: "2026-11-26"
+  licenca: "BSD-2-Clause (npm e GitHub)"
+  nota: "Versão 1.9.4 (npm, 18/05/2023), com hash de integridade: mapa 2D de reserva, sem WebGL."
+  conferido: "registro npm (data, licença, descrição); API do GitHub (organização Leaflet); index.html"
+  cit: "LEAFLET, 2023"
+- id: pmtiles
+  cat: 10
+  uso: efetiva
+  tipo: software
+  autor: "PROTOMAPS"
+  titulo: "PMTiles"
+  subtitulo: "PMTiles archive decoder for browsers (pmtiles.js 4.5.0) e formato de arquivo de tiles lido por faixas de bytes"
+  versao: "4.5.0"
+  local: "[S. l.]"
+  editora: "Protomaps"
+  ano: "2026"
+  url: "https://docs.protomaps.com/pmtiles/"
+  acesso: "2026-11-26"
+  licenca: "BSD-3-Clause (npm, pmtiles.js); protomaps-leaflet 5.1.0 também BSD-3-Clause"
+  nota: "pmtiles.js 4.5.0 (npm, 10/08/2026) e protomaps-leaflet 5.1.0 (npm, 18/06/2025), vendorizados em app/static/vendor/mapa/."
+  conferido: "registro npm (datas, licenças); docs/mapa_base.md"
+  cit: "PROTOMAPS, 2026a"
+# ------------------------------------------------------------------------------------------------ 11. Mapas-base, serviços cartográficos e provedores
+- id: protomaps_basemap
+  cat: 11
+  uso: efetiva
+  tipo: web
+  autor: "PROTOMAPS"
+  titulo: "Protomaps basemaps"
+  subtitulo: "build 20261115, extrato do Rio Grande do Sul (rs.pmtiles), zoom 0 a 14, derivado do OpenStreetMap"
+  local: "[S. l.]"
+  editora: "Protomaps"
+  ano: "2026"
+  url: "https://docs.protomaps.com/basemaps/downloads"
+  acesso: "2026-11-26"
+  licenca: "dados © contribuidores do OpenStreetMap (ODbL); os termos próprios do Protomaps não foram lidos nesta revisão"
+  nota: "Mapa-base de todos os mapas do produto, em tons de cinza; arquivo gerado em 16/11/2026 por tools/gerar_mapa_base.sh, fora do Git. Atribuição exibida no mapa: Protomaps e colaboradores do OpenStreetMap."
+  conferido: "tools/gerar_mapa_base.sh; docs/mapa_base.md; mapa-base.js (atribuição)"
+  cit: "PROTOMAPS, 2026b"
+- id: aws_terrain
+  cat: 11
+  uso: efetiva
+  tipo: dataset
+  autor: "MAPZEN"
+  titulo: "Terrain Tiles"
+  subtitulo: "tiles de elevação no formato Terrarium (elevation-tiles-prod), Registry of Open Data on AWS"
+  local: "[S. l.]"
+  editora: "Mapzen, a Linux Foundation project"
+  ano: "[s. d.]"
+  url: "https://registry.opendata.aws/terrain-tiles/"
+  acesso: "2026-11-26"
+  licenca: "atribuição conforme https://github.com/tilezen/joerd/blob/master/docs/attribution.md (indicada no registro AWS)"
+  nota: "Só para o relevo 3D da visualização; não entra em nenhum cálculo. Atribuição exibida no mapa: \"Elevação: AWS Terrain Tiles\"."
+  conferido: "registry.opendata.aws/terrain-tiles/ (licença e gestor Mapzen); mapa-base.js (DEM)"
+  cit: "MAPZEN, [s. d.]"
+- id: earthsearch
+  cat: 11
+  uso: experimento
+  tipo: web
+  autor: "ELEMENT 84"
+  titulo: "Earth Search"
+  subtitulo: "STAC API v1 da coleção sentinel-2-l2a"
+  local: "[S. l.]"
+  editora: "Element 84"
+  ano: "[s. d.]"
+  url: "https://earth-search.aws.element84.com/v1"
+  acesso: "2026-11-26"
+  licenca: "não identificada nesta revisão (serviço de catálogo; os dados seguem a licença do Copernicus)"
+  nota: "Catálogo consultado pela GeoAI para localizar as cenas Sentinel-2 e suas máscaras de nuvem."
+  conferido: "src/flooding_mapping/geoai/imagens.py (consultar_stac); config/geoai.yaml"
+  cit: "ELEMENT 84, [s. d.]"
+# ------------------------------------------------------------------------------------------------ Avaliadas, não utilizadas
+- id: szwarcman2024
+  cat: 9
+  uso: avaliada
+  tipo: preprint
+  autor: "SZWARCMAN, Daniela et al."
+  titulo: "Prithvi-EO-2.0: a versatile multi-temporal foundation model for Earth observation applications"
+  ano: "2024"
+  doi: "10.48550/arXiv.2412.02732"
+  url: "https://arxiv.org/abs/2412.02732"
+  acesso: "2026-11-26"
+  licenca: "pesos Apache-2.0 (cartão do modelo no Hugging Face) e código MIT (repositório): licenças divergentes entre si, conferidas só na página, sem uso"
+  nota: "AVALIADO E NÃO EXECUTADO: cada unidade de entrada do modelo cobre 480 m a 30 m (patch de 16 pixels), a inferência e o ajuste fino exigem GPU, e o ambiente exigiria versões de torch e numpy em conflito com o projeto. Nenhum peso foi baixado."
+  conferido: "doi.org (DataCite): Szwarcman et al., arXiv, 2024, versão 3; config.json do modelo; docs/geoai_fase5.md"
+  cit: "SZWARCMAN et al., 2024"
+- id: cloudflare_pages
+  cat: 11
+  uso: planejada
+  tipo: web
+  autor: "CLOUDFLARE"
+  titulo: "Cloudflare Pages"
+  subtitulo: "documentação"
+  local: "[S. l.]"
+  editora: "Cloudflare"
+  ano: "[s. d.]"
+  url: "https://developers.cloudflare.com/pages/"
+  acesso: "2026-11-26"
+  licenca: "serviço comercial com plano gratuito; termos não analisados"
+  nota: "PLANEJADO, ainda não utilizado: hospedagem prevista da interface estática. Nada foi publicado."
+  conferido: "docs/publicacao_pages_releases.md; endereço respondeu em 26/11/2026"
+  cit: "CLOUDFLARE, [s. d.]a"
+- id: cloudflare_r2
+  cat: 11
+  uso: planejada
+  tipo: web
+  autor: "CLOUDFLARE"
+  titulo: "Cloudflare R2"
+  subtitulo: "documentação"
+  local: "[S. l.]"
+  editora: "Cloudflare"
+  ano: "[s. d.]"
+  url: "https://developers.cloudflare.com/r2/"
+  acesso: "2026-11-26"
+  licenca: "serviço comercial com faixa gratuita; termos não analisados"
+  nota: "PLANEJADO para os dados publicados (tiles, fragmentos, mapa-base). O R2 já é usado pelo coletor e pelo armazenamento do modelo da frente arquivada (src/flooding_mapping/r2.py), com credenciais fora do repositório; nenhum bucket de dados do estudo foi criado."
+  conferido: "src/flooding_mapping/r2.py; docs/publicacao_pages_releases.md; endereço respondeu em 26/11/2026"
+  cit: "CLOUDFLARE, [s. d.]b"
