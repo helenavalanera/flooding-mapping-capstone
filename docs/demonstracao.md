@@ -9,8 +9,6 @@ Esses dados **não são evidência meteorológica nem de eventos reais**, e as t
 Única dependência de rede: os **mapas-base** (tiles do OpenStreetMap). Sem internet, o mapa fica sem fundo, mas dados, rotas, ocorrências e interdições continuam funcionando.
 O assistente com provedor de linguagem é **opcional**: sem chave, ele responde com o texto padrão e diz isso na tela.
 
-## 1. Preparação (uma vez)
-
 ## Dois jeitos de demonstrar
 
 1. **Local** (`make demo`, seções abaixo): o servidor inteiro é a demonstração, com dados sintéticos.
@@ -31,6 +29,8 @@ demonstração (`demo-operador-com-mais-de-24-caracteres`) é pública e **não 
 servidor reinicia. Há também duas ocorrências de demonstração em uma região do centro (uma pendente, uma confirmada), que servem para mostrar os selos e a interdição.
 
 **Celular.** Quem abre o endereço do painel num celular é levado direto ao aplicativo do cidadão; `?painel=1` abre o painel mesmo assim.
+
+## 1. Preparação (uma vez)
 
 1. Ter Python 3.12 e instalar as dependências do servidor: `python -m venv .venv && .venv/bin/pip install -r requirements-servidor.txt` (ou `requirements.lock.txt` para o ambiente completo).
 2. Ter a tabela de ruas `data/processed/rede_poa.parquet` (17 MB). Se faltar, `make rede` a gera (exige o ambiente completo e o recorte do OpenStreetMap; veja o README).
