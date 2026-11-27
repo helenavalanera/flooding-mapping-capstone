@@ -1,0 +1,33 @@
+{
+ "formato": 1,
+ "versao_dos_dados": "d-b7f6f03555d9",
+ "sha256_do_conjunto": "b7f6f03555d918a8f9bdbb1fa6a71a391737dec75573e5cb26bb239f2bebbad3",
+ "camadas": {
+  "fase3": {
+   "versao_da_camada": 1,
+   "meta_sha256": "5bdca6c3e4ef13c4930df881293c819e1679734c7bd3531786323c9e90733ab9",
+   "arquivos": 2059,
+   "bytes": 69742639
+  },
+  "drenagem": {
+   "versao_da_camada": 1,
+   "meta_sha256": "975e58d1b7a9d90a9c412fb5c702425783e965e98e1d1e7739b04bee651b4635",
+   "arquivos": 3536,
+   "bytes": 68590131
+  }
+ },
+ "mapa": {
+  "arquivo": "mapa/poa.pmtiles",
+  "bytes": 6909776,
+  "sha256": "b1f18afbc74b560bc9fb8b995fe830a741251c036fb248a5311642f946509337",
+  "origem": "recorte de Porto Alegre do rs.pmtiles (Protomaps, build de 15/11/2026), pmtiles extract --bbox=-51.35,-30.30,-50.98,-29.90"
+ },
+ "objetos_no_bucket": 5596,
+ "bytes_no_bucket": 35100744,
+ "geoai": null,
+ "fontes_dos_hashes": [
+  "data/processed/publicacao/manifesto_d-b7f6f03555d9.json (tools/gerar_manifesto_publicacao.py, SHA-256 dos arquivos de origem)",
+  "data/interim/r2_preparado/d-b7f6f03555d9/cabecalhos.json (tools/preparar_para_r2.py, SHA-256 do conteúdo original de cada objeto)"
+ ],
+ "observacao": "Resumo versionado do manifesto completo (que lista cada tile e fragmento e fica fora do Git). Os dois hashes de meta.json vieram de duas fontes independentes que concordam; a conferência final é contra o objeto público (tools/verificar_publicacao.py). Esta versão NÃO contém a camada E (GeoAI) e traz os tiles da malha inteira, sem o recorte municipal."
+}

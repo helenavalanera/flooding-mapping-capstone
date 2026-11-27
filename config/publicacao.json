@@ -1,0 +1,13 @@
+{
+ "descricao": "Configuração de PRODUÇÃO dos dados derivados no Cloudflare R2, lida pelo build (python -m flooding_mapping.app.build). Com r2_url nulo o build gera a configuração local (caminhos relativos, sem R2).",
+ "versao": "d-b7f6f03555d9",
+ "r2_url": null,
+ "manifesto": "docs/manifestos/manifesto_d-b7f6f03555d9.json",
+ "camadas_publicadas": [
+  "fase3",
+  "drenagem"
+ ],
+ "geoai_publicada": false,
+ "mapa_arquivo": "mapa/poa.pmtiles",
+ "pages_origem": "https://flooding-mapping-capstone.pages.dev"
+}

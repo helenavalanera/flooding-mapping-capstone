@@ -14,7 +14,7 @@
     relevo: { rotulo: "Relevo sombreado", kind: null, ids: ["sombra"], inicial: true, so3d: true },
     drenagem_cadastro: { rotulo: "Drenagem cadastrada (inventário, só contexto)", kind: "observado", ids: ["dren-rede-halo", "dren-rede-0", "dren-rede-1", "dren-rede-2", "dren-rede-dup", "dren-pocos", "dren-bocas", "dren-bombas", "dren-pt-dup", "dren-sel-rede", "dren-sel-pocos", "dren-sel-bocas", "dren-sel-bombas"], inicial: false, so3d: true },
     escoamento_fase3: { rotulo: "Escoamento potencial por trecho (motor da Fase 3)", kind: "simulado", ids: ["f3-casing", "f3-sem-dados", "f3-sel"], inicial: false, so3d: true },
-    geoai_fracao_construida: { rotulo: "E. Fração construída estimada (GeoAI, experimental)", kind: "experimental", ids: ["geoai-e"], inicial: false, so3d: true }
+    geoai_fracao_construida: { rotulo: "E. Fração construída estimada (GeoAI, experimental)", kind: "experimental", ids: ["geoai-e"], inicial: false, so3d: true, dado: "geoai" }
   };
   M.CAMADAS = CAMADAS;
 
@@ -67,7 +67,9 @@
   M.redimensionar = function () { if (M.motor && M.pronto) M.motor.redimensionar(); };
 
   /* ---------------------------------------------------------------- layers and controls (driven by the capabilities) */
-  function habilitada(nome) { var st = T.camadas()[nome], c = CAMADAS[nome]; return !!(st && st.ativa && !(c && c.so3d && !M.motor.suporta.relevo)); }
+  /* ``dado``: a camada só existe se config-dados.js tiver o endereço dos seus dados. A camada E é experimental e pode não estar publicada: sem ela, as demais funcionam como sempre. */
+  function semDados(c) { return !!(c && c.dado && !window.FM_DADOS[c.dado]); }
+  function habilitada(nome) { var st = T.camadas()[nome], c = CAMADAS[nome]; return !!(st && st.ativa && !(c && c.so3d && !M.motor.suporta.relevo) && !semDados(c)); }
   function visivel(nome) { return habilitada(nome) && (M.marcadas[nome] !== undefined ? M.marcadas[nome] : CAMADAS[nome].inicial); }
   function aplicarCamadas() {
     if (!M.pronto) return;
@@ -197,9 +199,9 @@
   function renderControles() {
     var camadas = T.camadas(), box = el("camadas");
     var html = Object.keys(CAMADAS).filter(function (n) { return camadas[n]; }).map(function (n) {
-      var st = camadas[n], c = CAMADAS[n], semMotor = c.so3d && !M.motor.suporta.relevo, ativa = st.ativa && !semMotor, marcada = visivel(n);
+      var st = camadas[n], c = CAMADAS[n], semMotor = c.so3d && !M.motor.suporta.relevo, ausente = semDados(c), ativa = st.ativa && !semMotor && !ausente, marcada = visivel(n);
       return "<label class='camada" + (ativa ? "" : " inativa") + "'><input type='checkbox' data-camada='" + n + "'" + (marcada ? " checked" : "") + (ativa ? "" : " disabled") + "> " + Lg.esc(c.rotulo) +
-        (c.kind ? " " + Lg.kindBadge(c.kind) : "") + (ativa ? "" : "<span class='small'>" + (semMotor ? "Exige WebGL (indisponível neste navegador)." : Lg.esc(st.rotulo) + ": " + Lg.esc(st.nota)) + "</span>") + "</label>";
+        (c.kind ? " " + Lg.kindBadge(c.kind) : "") + (ativa ? "" : "<span class='small'>" + (semMotor ? "Exige WebGL (indisponível neste navegador)." : ausente ? "Camada experimental ainda não publicada neste ambiente. As demais camadas não dependem dela." : Lg.esc(st.rotulo) + ": " + Lg.esc(st.nota)) + "</span>") + "</label>";
     }).join("");
     box.innerHTML = html || "<p class='muted'>Nenhuma camada descrita.</p>";
     Array.prototype.forEach.call(box.querySelectorAll("input[data-camada]"), function (i) { i.addEventListener("change", function () { M.marcadas[i.dataset.camada] = i.checked; aplicarCamadas(); legenda(); }); });
