@@ -620,6 +620,17 @@ def numeros_geoai() -> dict:
             "GEOAI_BAIRROS": pct(ba["fracao_dentro_do_limite"], 1)}
 
 
+def bloco_geoai(g: dict) -> str:
+    """Resultados e limites do experimento GeoAI (camada E), com os números de ``numeros_geoai``; nada é digitado à mão."""
+    return ("<ul class='lista-simples geoai-lista'>"
+            "<li>Random Forest treinado com 30 cenas Sentinel-2 de 2019 a 2021.</li>"
+            f"<li>Erro médio absoluto (MAE) da fração construída: <b>{g['GEOAI_MAE_P1'].split(' ')[0]}</b> em blocos de 3 km e <b>{g['GEOAI_MAE_P2'].split(' ')[0]}</b> no quadrante externo.</li>"
+            "<li>AlphaEarth 2020 sem ganho sobre o Random Forest: a diferença de MAE tem intervalo que inclui zero.</li>"
+            f"<li>Critério de bairros (80% deles com erro de área de até 10%) <b>não atingido</b>: {g['GEOAI_BAIRROS']}.</li>"
+            "<li>Prithvi (modelo de fundação) não foi executado: há incompatibilidade entre as dependências e a necessidade de GPU.</li></ul>"
+            "<p class='small'><b>Limites.</b> A Profill foi a referência e a fonte dos rótulos; não há validação independente contra verdade de campo; a transferência para outras áreas não foi testada. A camada não é vazão, nem coeficiente de escoamento, nem impermeabilidade medida, e não indica ocorrência de alagamento.</p>")
+
+
 def montar(figuras: bool = True) -> dict:
     lista = numeros()
     pal, _ = paletas_do_app()
@@ -651,6 +662,12 @@ def montar(figuras: bool = True) -> dict:
         "TABELA_METODOS": tabela_de_metodos(),
         **dimensoes(),
         "TOTAL_TRECHOS": br(jcarrega(RECORTE)["trechos_no_municipio"]),
+        "N_DEPRESSAO": br(jcarrega("src/flooding_mapping/app/static/data/mapa_manchas_poa.json")["trechos_com_depressao"]),
+        "PCT_DEPRESSAO": br(100 * jcarrega("src/flooding_mapping/app/static/data/mapa_manchas_poa.json")["trechos_com_depressao"] / jcarrega("src/flooding_mapping/app/static/data/mapa_manchas_poa.json")["trechos_com_dado_de_relevo"]),
+        "PCT_REDE": br(jcarrega(DIMS_JSON)["D"]["trechos_de_rua_em_celula_com_rede_pct"], 1),
+        "MEDIANA_B": br(jcarrega(RECORTE)["no_municipio"]["contrib_m1_max_30mm_m3"]["q50"], 1),
+        "PCT_M1": pct(jcarrega(USO)["cobertura_dos_metodos"]["metodo1_fracao_da_area_classificada"]),
+        "GEOAI_RESULTADOS": bloco_geoai(numeros_geoai()),
         "TOTAL_COM_DADOS": br(jcarrega(F3)["pegadas_dos_trechos"]["com_celulas_com_dados"]),
     }
     tpl = TEMPLATE.read_text(encoding="utf-8")

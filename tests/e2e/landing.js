@@ -7,30 +7,30 @@ const fs = require("fs"), path = require("path");
   await page.goto(BASE + "inicio/");
   assert.match(await page.innerText("h1"), /Dada uma chuva, onde a água tende a se acumular\?/);
   assert.strictEqual(await page.locator("h1").count(), 1);
-  assert.match(await page.innerText(".hero-quadro"), /Geração de escoamento[\s\S]*Concentração do escoamento[\s\S]*Propensão topográfica à retenção[\s\S]*Drenagem cadastrada/); assert.strictEqual(await page.locator(".hero img").count(), 0, "sem mapa derivado de dado restrito no início");
+  assert.match(await page.innerText(".hero-quadro"), /trechos de rua analisados em Porto Alegre[\s\S]*4 dimensões[\s\S]*1 camada experimental/); assert.strictEqual(await page.locator(".hero img").count(), 0);
   // âncoras: cada link leva à sua seção e a atual é marcada
   const hrefs = await page.locator(".ancoras a").evaluateAll((a) => a.map((x) => x.getAttribute("href")));
-  assert.deepStrictEqual(hrefs, ["#apresentacao", "#mapa", "#cenarios", "#resultados", "#contato"]);
+  assert.deepStrictEqual(hrefs, ["#problema", "#dimensoes", "#resultados", "#numeros", "#metodologia", "#interpretacao", "#fontes", "#sobre"]);
   await page.click(".ancoras a[href='#resultados']");
   await page.waitForFunction(() => { const a = document.querySelector(".ancoras a[aria-current=true]"); return a && a.getAttribute("href") === "#resultados"; }, null, { timeout: 15000 });
   await page.waitForFunction(() => { const r = document.getElementById("resultados").getBoundingClientRect(); return r.top >= 0 && r.top < 200; }, null, { timeout: 8000 }).catch(() => {});   // a rolagem é suave e a página ficou mais alta
   assert.ok(await page.evaluate(() => document.getElementById("resultados").getBoundingClientRect().top < 200), "a âncora rolou até a seção");
   // as quatro dimensões: texto de cada uma e um mapa de manchas pré-renderizado por dimensão, escolhido por um seletor (sem WebGL na landing)
-  await page.click(".ancoras a[href='#mapa']"); await page.waitForTimeout(2500);
+  await page.click(".ancoras a[href='#dimensoes']"); await page.waitForTimeout(2500);
   for (const id of ["p-contribuicao", "p-local", "p-topografico", "p-drenagem"]) assert.ok(await page.locator("#" + id).isVisible(), id + " visível");
-  assert.strictEqual(await page.locator(".hero img").count(), 0); assert.strictEqual(await page.locator("#mapa canvas").count(), 0, "sem canvas (WebGL) na landing");
-  assert.strictEqual(await page.locator("#mapa [role=tab]").count(), 4); assert.strictEqual(await page.locator("#mapa [role=tabpanel]:not([hidden])").count(), 1, "um painel por vez");
+  assert.strictEqual(await page.locator(".hero img").count(), 0); assert.strictEqual(await page.locator("#dimensoes canvas").count(), 0, "sem canvas (WebGL) na landing");
+  assert.strictEqual(await page.locator("#dimensoes [role=tab]").count(), 4);   // A a D; a camada E entra na etapa seguinte assert.strictEqual(await page.locator("#dimensoes [role=tabpanel]:not([hidden])").count(), 1, "um painel por vez");
   const ESPERADO = { a: [/mapa-geracao\.webp$/, /m³/, /Profill/], b: [/mapa-concentracao\.webp$/, /m³/, /Não é vazão/], c: [/mapa-propensao\.webp$/, /mais de 0 até 0,5 m/, /ocorrência ou risco de alagamento/], d: [/mapa-drenagem\.webp$/, /200 a 300 m[\s\S]*sem rede cadastrada/, /não o funcionamento nem a capacidade/] };
   for (const k of ["a", "b", "c", "d"]) {
     await page.click("#aba-" + k); await page.waitForFunction((id) => { const i = document.querySelector("#painel-" + id + " img"); return i.complete && i.naturalWidth > 0; }, k, { timeout: 8000 });
-    assert.strictEqual(await page.locator("#mapa [role=tabpanel]:not([hidden])").count(), 1); assert.strictEqual(await page.getAttribute("#aba-" + k, "aria-selected"), "true");
+    assert.strictEqual(await page.locator("#dimensoes [role=tabpanel]:not([hidden])").count(), 1); assert.strictEqual(await page.getAttribute("#aba-" + k, "aria-selected"), "true");
     const [arq, leg, aviso] = ESPERADO[k]; assert.match(await page.getAttribute("#painel-" + k + " img", "src"), arq); assert.match(await page.innerText("#painel-" + k + " .leg"), leg); assert.match(await page.innerText("#painel-" + k), aviso);
     assert.match(await page.innerText("#painel-" + k + " .mapa-lacunas"), /sem dado|sem rede|sem preenchimento/); assert.strictEqual(await page.locator("#painel-" + k + " .mapa-bairros tbody tr").count(), 5);
   }
   await page.keyboard.press("ArrowLeft"); assert.strictEqual(await page.getAttribute("#aba-c", "aria-selected"), "true", "setas trocam de dimensão");
   await page.click("#painel-c .ampliar"); assert.ok(await page.evaluate(() => document.querySelector(".zoom").open), "o mapa amplia"); await page.keyboard.press("Escape"); assert.ok(!(await page.evaluate(() => document.querySelector(".zoom").open)));
-  assert.match(await page.innerText("#p-drenagem"), /não prova capacidade, funcionamento nem conexão/); assert.match(await page.innerText("#p-topografico"), /Não é profundidade, volume nem duração/);
-  assert.match(await page.innerText("#mapa"), /Decreto Municipal nº 20\.315\/2019/); assert.match(await page.innerText("#mapa"), /dependem da publicação dos arquivos derivados/);
+  assert.match(await page.innerText("#p-drenagem"), /não confirma a capacidade nem o funcionamento da rede/); assert.match(await page.innerText("#p-topografico"), /não é a profundidade real de um alagamento/);
+  assert.match(await page.innerText("#dimensoes"), /Decreto Municipal nº 20\.315\/2019/); assert.match(await page.innerText("#dimensoes"), /dependem da publicação dos arquivos derivados/);
   assert.match(await page.innerText("#painel-a"), /Zero não é ausência de dado/); assert.match(await page.innerText("#painel-c"), /Não é a profundidade que a água atingiria/);
   // nenhuma imagem quebrada na página inteira
   await page.evaluate(() => document.querySelectorAll('img[loading=lazy]').forEach((i) => { i.loading = 'eager'; }));   // imagens preguiçosas só carregam ao rolar
@@ -38,7 +38,7 @@ const fs = require("fs"), path = require("path");
   const quebradas = await page.evaluate(() => Array.from(document.images).filter((i) => !i.complete || i.naturalWidth === 0).map((i) => i.src));
   assert.deepStrictEqual(quebradas, [], "imagens quebradas: " + quebradas.join(", "));
   // comparador de cenários: os números mostrados são os das execuções reais
-  await page.click(".ancoras a[href='#cenarios']"); await page.waitForTimeout(2500);
+  await page.click(".ancoras a[href='#numeros']"); await page.waitForTimeout(2500);
   const mi = (v) => new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(v / 1e6);
   for (const p of [10, 20, 30]) {
     await page.click(`.seletor button[data-p='${p}']`);
@@ -48,7 +48,7 @@ const fs = require("fs"), path = require("path");
     const comCamadas = (await page.getAttribute("#cen-link", "data-camadas")) === "1";           // só promete a camada quando os derivados estão publicados
     assert.strictEqual(await page.getAttribute("#cen-link", "href"), comCamadas ? `../?painel=1#poa/mapa?escoamento=1&p=${p}` : "../?painel=1#poa/mapa");
   }
-  assert.match(await page.innerText("#cen-trecho"), /Contribuição potencial acumulada[\s\S]*mediana[\s\S]*percentil 99/); assert.match(await page.innerText("#cenarios"), /e não previsões/);
+  assert.match(await page.innerText("#cen-trecho"), /Contribuição potencial acumulada[\s\S]*mediana[\s\S]*percentil 99/); assert.match(await page.innerText("#numeros"), /e não previsões/);
   // o link do simulador abre o mapa já configurado (camada ligada, chuva e pacote pedidos)
   await page.click(".seletor button[data-p='20']");
   await page.goto(BASE + "?painel=1#poa/mapa?escoamento=1&p=20&pacote=an&modo=l");
@@ -66,8 +66,8 @@ const fs = require("fs"), path = require("path");
   await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(300);
   const nav = await page.evaluate(() => { const f = document.querySelector(".ancoras"); return { rola: f.scrollWidth > f.clientWidth + 4, dir: f.classList.contains("rola-dir"), mask: getComputedStyle(f).maskImage || getComputedStyle(f).webkitMaskImage }; });
   assert.ok(nav.rola && nav.dir && /gradient/.test(nav.mask), "a faixa de seções mostra o esmaecimento de que há mais à direita: " + JSON.stringify(nav));
-  await page.evaluate(() => document.getElementById("mapa").scrollIntoView()); await page.waitForTimeout(1200);
-  assert.ok(await page.evaluate(() => document.querySelector(".ancoras a[aria-current=true]").textContent.trim() === "Mapa"), "a seção atual fica marcada na faixa");
+  await page.evaluate(() => document.getElementById("dimensoes").scrollIntoView()); await page.waitForTimeout(1200);
+  assert.ok(await page.evaluate(() => document.querySelector(".ancoras a[aria-current=true]").textContent.trim() === "Dimensões"), "a seção atual fica marcada na faixa");
   await page.click("#painel-a .ampliar"); const z0 = await page.evaluate(() => document.querySelector(".zoom img").getBoundingClientRect().width);
   for (let i = 0; i < 4; i++) await page.click(".zoom [data-z='+']");
   const z1 = await page.evaluate(() => { const a = document.querySelector(".zoom-area"); return { w: document.querySelector(".zoom img").getBoundingClientRect().width, rola: a.scrollWidth > a.clientWidth }; });

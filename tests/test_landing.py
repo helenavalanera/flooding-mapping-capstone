@@ -53,15 +53,15 @@ def test_the_page_is_structurally_sound_and_loads_nothing_from_outside(pagina):
     assert not re.search(r"\{\{[A-Z_]+\}\}", texto)
 
 
-def test_the_five_sections_exist_in_order_and_every_anchor_resolves(pagina):
+def test_the_eight_sections_exist_in_order_and_every_anchor_resolves(pagina):
     texto, c = pagina
-    ordem = ["hero", "apresentacao", "mapa", "cenarios", "resultados", "contato"]
+    ordem = ["hero", "problema", "dimensoes", "resultados", "numeros", "metodologia", "interpretacao", "fontes", "sobre"]
     pos = [texto.index(f'id="{i}"') for i in ordem]
     assert pos == sorted(pos)
     internos = [h[1:] for h in c.hrefs if h.startswith("#") and len(h) > 1]
     assert internos and all(i in c.ids for i in internos), [i for i in internos if i not in c.ids]
-    assert re.findall(r'<p class="sec-num"><span>(\d\d)</span> ([^<]*)', texto) == [("01", "Apresentação"), ("02", "Mapa"), ("03", "Simulador"), ("04", "Resultados"), ("05", "Contato")]
-    assert re.findall(r'<ol class="ancoras">(.*?)</ol>', texto, re.S)[0].count("<a ") == 5          # só Apresentação, Mapa, Simulador, Resultados e Contato
+    assert re.findall(r'<p class="sec-num"><span>(\d\d)</span> ([^<]*)', texto) == [("01", "O problema"), ("02", "As dimensões"), ("03", "Resultados"), ("04", "Indicadores municipais"), ("05", "Metodologia"), ("06", "Interpretação"), ("07", "Fontes e documentação"), ("08", "Sobre o projeto")]
+    assert re.findall(r'<ol class="ancoras">(.*?)</ol>', texto, re.S)[0].count("<a ") == 8          # problema, dimensões, resultados, números, metodologia, interpretação, fontes e sobre
 
 
 def test_relative_links_and_images_point_to_files_that_exist(pagina):
@@ -101,11 +101,12 @@ def test_the_negative_result_the_caveat_and_the_exploratory_nature_are_stated(pa
         assert t in texto, t
 
 
-def test_the_four_dimensions_are_named_and_explained_in_plain_language(pagina):
+def test_the_dimensions_are_named_and_explained_in_plain_language_with_their_caveats(pagina):
     texto, _ = pagina
-    for t in ("Geração de escoamento", "água da chuva que não é absorvida pelo solo e escoa pela superfície", "Concentração do escoamento", "locais para onde a água da chuva tende a convergir",
-              "Propensão topográfica à retenção", "áreas onde o relevo favorece o acúmulo de água", "Drenagem cadastrada", "rede de estruturas registradas para captar e conduzir a água da chuva",
-              "acúmulo favorecido pelo relevo não é o mesmo que alagamento", "Não é vazão (volume por tempo)"):
+    for t in ("Geração potencial de escoamento", "Para onde a água pode escorrer?", "Contribuição acumulada", "Onde o escoamento que vem de outras áreas pode se concentrar?",
+              "Retenção topográfica", "Onde o formato do terreno pode favorecer a retenção?", "Drenagem cadastrada", "Onde existe rede pluvial registrada?",
+              "GeoAI experimental: fração construída estimada", "As camadas não formam um índice único", "Não é vazão (volume por tempo)",
+              "Esse valor não é a profundidade real de um alagamento", "a ausência de registro não significa que não exista drenagem"):
         assert t in texto, t
 
 
@@ -168,7 +169,7 @@ def test_the_page_uses_the_municipal_cut_and_gives_each_card_one_denominator(pag
     texto, _ = pagina
     rec = json.loads((RAIZ / "src/flooding_mapping/app/static/data/recorte_municipal_poa.json").read_text(encoding="utf-8"))
     total = f"{rec['trechos_no_municipio']:,}".replace(",", ".")
-    assert f"Resultados para {total} trechos de rua" in texto and "176.836 trechos de rua" not in texto.replace(f"{rec['trechos_na_malha']:,}".replace(",", ".") + " trechos do OpenStreetMap", "")
+    assert f"<dt>{total}</dt><dd>trechos de rua analisados em Porto Alegre" in texto and f"<b>{total}</b><span class=\"n-rot\">trechos analisados</span>" in texto and "176.836 trechos de rua" not in texto
     assert "cidades vizinhas" in texto                                                                        # a landing diz que as vias de fora ficam de fora
     for velho in ("2.919", "38.976 de", "98,3%", "57,0%", "2% dos trechos de menor"):
         assert velho not in texto, velho                                                                       # números da malha inteira, que incluía vias de fora
@@ -186,3 +187,18 @@ def test_promises_about_the_interactive_map_follow_what_is_published(pagina):
     publicado = 'fase3: "https://' in cfg
     assert ("Explore o mapa e compare chuvas" in texto) == publicado and ("Abrir o simulador no mapa" in texto) == publicado
     assert publicado or "dependem da publicação dos arquivos derivados, em preparação" in texto
+
+
+def test_the_four_headline_numbers_are_the_current_ones_and_come_from_the_generated_data(pagina):
+    texto, _ = pagina
+    for esperado in ("<b>143.149</b>", "<b>22%</b>", "31.545 trechos apresentam depressões", "<b>70,3%</b>", "<b>49,8 m³</b>", "17,3%"):
+        assert esperado in texto, esperado
+
+
+def test_the_technology_section_names_only_what_the_pipeline_really_uses(pagina):
+    texto, _ = pagina
+    for usado in ("Copernicus DEM GLO-30", "AWS Terrain Tiles", "Profill 2022", "OpenStreetMap e Protomaps", "Open-Meteo", "Python", "MapLibre, Leaflet e PMTiles", "Rasterio", "GDAL (ogr2ogr)", "scikit-learn"):
+        assert usado in texto, usado
+    antes_do_geoai = texto.split("Sentinel-2 e AlphaEarth (só no GeoAI)")[0].split('id="metodologia"')[1]
+    assert "Sentinel" not in antes_do_geoai and "AlphaEarth" not in antes_do_geoai                    # Sentinel-2 e AlphaEarth só aparecem contextualizados como GeoAI
+    assert "não são fontes do motor principal" in texto.lower().replace("não são", "não são")

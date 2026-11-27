@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Flooding Mapping · Como a chuva transforma o território?</title>
+  <title>Flooding Mapping · Onde a água tende a se acumular em Porto Alegre</title>
   <meta name="description" content="Estudo sobre a contribuição potencial de escoamento e a propensão topográfica à retenção nos trechos viários de Porto Alegre: dados, método, resultados, testes e limitações. Projeto final do Space Tech Bootcamp 2026.">
   <meta name="theme-color" content="#0a1c27">
   <meta name="color-scheme" content="light">
@@ -18,11 +18,14 @@
   <nav class="nav" aria-label="Seções do estudo">
     <a class="marca" href="#hero" aria-label="Flooding Mapping, início"><b>FM</b><span>Flooding Mapping</span></a>
     <ol class="ancoras">
-      <li><a href="#apresentacao">Apresentação</a></li>
-      <li><a href="#mapa">Mapa</a></li>
-      <li><a href="#cenarios">Simulador</a></li>
+      <li><a href="#problema">Problema</a></li>
+      <li><a href="#dimensoes">Dimensões</a></li>
       <li><a href="#resultados">Resultados</a></li>
-      <li><a href="#contato">Contato</a></li>
+      <li><a href="#numeros">Números</a></li>
+      <li><a href="#metodologia">Metodologia</a></li>
+      <li><a href="#interpretacao">Interpretação</a></li>
+      <li><a href="#fontes">Fontes</a></li>
+      <li><a href="#sobre">Sobre</a></li>
     </ol>
     <a class="btn btn-sm" href="{{HREF_MAPA}}">Abrir o mapa</a>
   </nav>
@@ -31,48 +34,42 @@
 <main>
 <section class="hero" id="hero" aria-labelledby="titulo">
   <div class="hero-texto">
-    <p class="selo"><span>Space Tech Bootcamp 2026</span><span>Projeto final</span><span>Porto Alegre, RS</span></p>
+    <p class="selo"><span>Porto Alegre, Rio Grande do Sul</span><span>2026</span></p>
     <h1 id="titulo">Dada uma chuva, onde a água tende a se acumular?</h1>
-    <p class="lead"><b>Uma estimativa, trecho a trecho, de como a água da chuva escoa pelas ruas de Porto Alegre e de onde o relevo favorece o seu acúmulo.</b> O estudo usa dados geoespaciais (mapas e informações de localização) de relevo, uso do solo e drenagem. {{HERO_FIM}}</p>
+    <p class="lead"><b>Onde estão as condições (des)favoráveis ao acúmulo de água em Porto Alegre?</b> Em dias de chuva, algumas partes da cidade enfrentam acúmulos de água nas ruas e alagamentos pontuais. Mas o que faz a água encontrar caminhos diferentes pela cidade?</p>
+    <p class="lead lead-2">O relevo, as superfícies urbanas e a infraestrutura de drenagem influenciam o percurso da água da chuva. Algumas características podem favorecer o escoamento; outras podem contribuir para a concentração e a retenção. O <b>Flooding Mapping</b> investiga essas condições com dados geoespaciais, análise do relevo e um método próprio de estimativa do escoamento potencial.</p>
     <p class="hero-acoes">
-      <a class="btn" href="#resultados">Ver os resultados</a>
-      <a class="btn btn-sec" href="{{HREF_MAPA}}">Abrir o mapa</a>
+      <a class="btn" href="{{HREF_MAPA}}">Explorar o mapa interativo</a>
+      <a class="btn btn-sec" href="#resultados">Ver os resultados</a>
     </p>
     <p class="aviso-hero"><b>Leia antes.</b> Este estudo apresenta estimativas geoespaciais do escoamento superficial e das condições topográficas associadas à concentração e à retenção de água. Os resultados apoiam a análise territorial e o planejamento preventivo, mas não constituem previsão de alagamentos nem estimativa de profundidade ou duração da inundação.</p>
   </div>
   <div class="hero-quadro" role="note" aria-labelledby="h-quadro">
-    <h2 id="h-quadro">As quatro dimensões do estudo</h2>
-    <dl>
-      <div><dt>Geração de escoamento</dt><dd>água da chuva que não é absorvida pelo solo e escoa pela superfície.</dd></div>
-      <div><dt>Concentração do escoamento</dt><dd>locais para onde a água da chuva tende a convergir.</dd></div>
-      <div><dt>Propensão topográfica à retenção</dt><dd>áreas onde o relevo favorece o acúmulo de água.</dd></div>
-      <div><dt>Drenagem cadastrada</dt><dd>rede de estruturas registradas para captar e conduzir a água da chuva.</dd></div>
+    <h2 id="h-quadro">O estudo em números</h2>
+    <dl class="hero-numeros">
+      <div><dt>{{TOTAL_TRECHOS}}</dt><dd>trechos de rua analisados em Porto Alegre</dd></div>
+      <div><dt>4 dimensões</dt><dd>geração potencial, contribuição acumulada, retenção topográfica e drenagem cadastrada</dd></div>
+      <div><dt>1 camada experimental</dt><dd>GeoAI: fração construída estimada, independente das quatro dimensões</dd></div>
     </dl>
-    <p>Resultados para {{TOTAL_TRECHOS}} trechos de rua (pedaços de rua entre dois cruzamentos) de Porto Alegre. Nenhuma dimensão, sozinha, indica onde a água de fato alagou.</p>
+    <p>Estimativas com hipóteses declaradas, e não medições. Nenhuma dimensão, sozinha, indica onde a água de fato alagou.</p>
   </div>
-  <ul class="hero-fatos" aria-label="O estudo em resumo">
-    <li><b>Onde</b>Porto Alegre, Rio Grande do Sul</li>
-    <li><b>Unidade</b>{{TOTAL_TRECHOS}} trechos de rua, calculados em células de 30 metros</li>
-    <li><b>Dados</b>relevo (altura do terreno), uso do solo (como cada área é ocupada), ruas do OpenStreetMap e drenagem cadastrada pela Prefeitura</li>
-    <li><b>Natureza</b>estimativas com hipóteses declaradas, não medições</li>
-  </ul>
 </section>
 
-<section class="campo c-seco" id="apresentacao" aria-labelledby="h-apres">
+<section class="campo c-seco" id="problema" aria-labelledby="h-prob">
   <div class="grade">
-    <p class="sec-num"><span>01</span> Apresentação</p>
-    <h2 id="h-apres" class="titulo">Quando a chuva forte desorganiza a cidade</h2>
+    <p class="sec-num"><span>01</span> O problema</p>
+    <h2 id="h-prob" class="titulo">A cidade não recebe a chuva da mesma maneira</h2>
     <div class="duas">
       <div class="prosa">
-        <p>Em chuvas fortes, pontos isolados da cidade podem ficar com água acumulada sobre a rua, o que se costuma chamar de alagamento. Mesmo pontuais, esses acúmulos dificultam a passagem de pedestres e de veículos e afetam a mobilidade urbana.</p>
-        <p>A água segue o relevo, o solo e o que a cidade construiu. Ela escorre pelas superfícies, junta-se nas partes baixas e segue as ruas até encontrar uma saída, como a rede de drenagem, um arroio ou o Guaíba. Onde a saída é menor do que a chegada, a água tende a se acumular.</p>
-        <p>O estudo investiga esse problema urbano. O modelo não observa a rua durante a chuva: ele <b>estima</b>, com dados de relevo, uso do solo e drenagem, onde a água é gerada, para onde converge e onde o relevo favorece o acúmulo. Estimar essas condições é diferente de prever um alagamento.</p>
+        <p>Quando chove, a água percorre caminhos diferentes. Parte infiltra no solo, parte escoa pelas superfícies e parte pode encontrar áreas mais baixas, onde tende a se concentrar.</p>
+        <p>Em uma cidade urbanizada, essas condições variam de uma rua para outra. O formato do terreno, a cobertura das superfícies e a infraestrutura de drenagem registrada ajudam a compreender essas diferenças.</p>
+        <p>Investigar essas características permite observar como o território pode favorecer ou dificultar o caminho da água. Mesmo pontuais, os acúmulos de água sobre a rua dificultam a passagem de pedestres e de veículos e afetam a mobilidade urbana.</p>
       </div>
       <div class="pergunta-cientifica" role="note" aria-labelledby="h-pc">
-        <h3 id="h-pc">O que o estudo faz, e o que não faz</h3>
+        <h3 id="h-pc">A pergunta que orienta o estudo</h3>
+        <p><b>Quais características do território podem favorecer ou dificultar o escoamento e o acúmulo de água da chuva em Porto Alegre?</b></p>
         <p><b>Faz:</b> estima, em cada trecho de rua, a água que uma chuva hipotética pode gerar e concentrar, e indica onde o relevo favorece o acúmulo.</p>
         <p><b>Não faz:</b> não prevê alagamentos (a ocorrência real de água sobre a rua), nem a sua profundidade ou duração.</p>
-        <p class="resp">Resposta curta: a estimativa foi construída e comparada com registros históricos, mas <b>não mostrou ganho robusto</b> sobre a regra de terreno já em uso. Os detalhes estão na <a href="{{REPO}}/blob/develop/docs/metodologia.md">documentação técnica</a>.</p>
       </div>
     </div>
     <ul class="pilares">
@@ -80,50 +77,86 @@
       <li><h3>Uso do solo</h3><p>Como cada área é ocupada, por exemplo telhado, rua ou vegetação: define quanto da chuva escorre em vez de ser absorvida.</p></li>
       <li><h3>Drenagem</h3><p>Rede registrada pela Prefeitura para captar e conduzir a água da chuva. Aparece como contexto, sem capacidade confirmada.</p></li>
     </ul>
-    <div class="graficos">
-      <figure>
-        <img class="grafico" src="img/estudo/grafico-chuva-mensal.svg" {{DIM_GRAFICO_CHUVA_MENSAL}} alt="Gráfico de barras com a média da chuva de cada mês do calendário em Porto Alegre, em milímetros por mês, no período {{PERIODO_CHUVA}}; os valores estão na tabela logo abaixo" loading="lazy">
-        <figcaption><b>Média mensal de chuva em Porto Alegre.</b> Média, entre os anos, do total de cada mês do calendário (mm por mês), no período {{PERIODO_CHUVA}}. Fonte: Open-Meteo, arquivo de reanálise (base ERA5, uma estimativa meteorológica modelada, e não a medição de um pluviômetro), no ponto da grade de Porto Alegre; a grade suaviza e subestima extremos locais. <b>Média mensal não é chuva por evento:</b> os cenários de 10, 20 e 30 mm do simulador são totais por evento (sequência de dias com chuva).</figcaption>
-        <details class="tabela-chuva"><summary>Ver os valores</summary>{{TABELA_CHUVA_MENSAL}}</details>
-      </figure>
-    </div>
   </div>
 </section>
 
-<section class="campo c-fundo" id="mapa" aria-labelledby="h-terr">
+<section class="campo c-fundo" id="dimensoes" aria-labelledby="h-dim">
   <div class="grade">
-    <p class="sec-num"><span>02</span> Mapa</p>
-    <h2 id="h-terr" class="titulo">O mapa de Porto Alegre e as quatro dimensões</h2>
-    <p class="intro">Quatro mapas respondem a <b>quatro perguntas diferentes</b> sobre Porto Alegre: quanta água a superfície gera (A), para onde ela converge (B), onde o relevo favorece o acúmulo (C) e onde há rede de drenagem cadastrada (D). Cada um tem a sua cor, a sua unidade e a sua legenda. <b>Eles não se somam, não formam um índice e nenhum mostra ocorrência de alagamento.</b></p>
-    {{PAINEIS_DIMENSOES}}
-    <p class="acoes mapa-acoes"><a class="btn" href="#resultados">Visualizar resultados</a> <a class="btn btn-sec" href="../?painel=1#poa/mapa">Explorar dados</a></p>
-    <p class="intro mapa-dims">{{MAPA_COMPLETO_TXT}}</p>
+    <p class="sec-num"><span>02</span> As dimensões</p>
+    <h2 id="h-dim" class="titulo">Quatro dimensões para entender o caminho da água</h2>
+    <p class="intro">O estudo organiza a análise em quatro dimensões complementares, mais uma camada experimental. Cada uma representa um aspecto diferente do território e deve ser interpretada conforme o seu próprio significado.</p>
     <div class="dimensoes-texto" id="dimensoes-texto">
       <article id="p-local">
-        <h3><span class="dim-letra">A</span> Geração de escoamento</h3>
-        <p><b>Água da chuva que não é absorvida pelo solo e escoa pela superfície.</b> É calculada só para a superfície sob cada trecho, a partir do uso do solo. Mostra onde a água se origina, não para onde ela vai. É um limite superior: não desconta a infiltração nem a evaporação.</p>
+        <h3><span class="dim-letra">A</span> Geração potencial de escoamento</h3>
+        <p><b>Para onde a água pode escorrer?</b> Estimamos o volume potencial de água que pode escoar pelas superfícies consideradas, a partir de uma precipitação de referência e de coeficientes de escoamento. O cálculo usa coeficientes fundamentados para edificações e vias pavimentadas; outras classes entram por hipóteses exploratórias, com limitações específicas. É um limite superior: não desconta a infiltração nem a evaporação.</p>
       </article>
       <article id="p-contribuicao">
-        <h3><span class="dim-letra">B</span> Concentração do escoamento</h3>
-        <p><b>Locais para onde a água da chuva tende a convergir.</b> Soma a água gerada em toda a área que o relevo encaminha a cada trecho. Mostra por onde pode passar mais água. Não é vazão (volume por tempo) e não se soma entre trechos.</p>
+        <h3><span class="dim-letra">B</span> Contribuição acumulada</h3>
+        <p><b>Onde o escoamento que vem de outras áreas pode se concentrar?</b> Analisamos como a contribuição potencial de áreas mais altas converge ao longo dos caminhos indicados pelo relevo. O resultado é a contribuição acumulada a montante, e não uma medição direta da água presente em cada rua. Não é vazão (volume por tempo) e não se soma entre trechos.</p>
       </article>
       <article id="p-topografico">
-        <h3><span class="dim-letra">C</span> Propensão topográfica à retenção</h3>
-        <p><b>Áreas onde o relevo favorece o acúmulo de água.</b> É uma posição relativa entre trechos, obtida de um modelo do relevo de 30 metros. Não é profundidade, volume nem duração, e não confirma que a água acumulou.</p>
+        <h3><span class="dim-letra">C</span> Retenção topográfica</h3>
+        <p><b>Onde o formato do terreno pode favorecer a retenção?</b> Identificamos partes mais baixas do terreno, as depressões, que podem favorecer a concentração de água. O modelo estima a altura necessária para preencher essas depressões a partir de um relevo de resolução aproximada de 30 metros. Esse valor não é a profundidade real de um alagamento, nem confirma que a água acumulou.</p>
       </article>
       <article id="p-drenagem">
         <h3><span class="dim-letra">D</span> Drenagem cadastrada</h3>
-        <p><b>Rede de estruturas registradas para captar e conduzir a água da chuva.</b> Mostra o que está no cadastro da Prefeitura, como contexto. Estar no cadastro não prova capacidade, funcionamento nem conexão entre as estruturas.</p>
+        <p><b>Onde existe rede pluvial registrada?</b> Mapeamos a distribuição da infraestrutura de drenagem presente nas bases utilizadas. A presença de cadastro não confirma a capacidade nem o funcionamento da rede; da mesma forma, a ausência de registro não significa que não exista drenagem.</p>
+      </article>
+      <article id="p-geoai">
+        <h3><span class="dim-letra dim-letra-e">E</span> GeoAI experimental: fração construída estimada</h3>
+        <p><b>Como a inteligência artificial pode complementar a leitura do território?</b> Uma camada experimental usa inteligência artificial geoespacial para estimar a fração construída por célula de 30 metros, a partir de imagens Sentinel-2, tendo os dados da Profill como referência. É uma informação complementar, independente dos cálculos das dimensões A, B, C e D. Não representa impermeabilidade medida e não tem validação independente contra dados de campo.</p>
       </article>
     </div>
-    <p class="small mapa-nota">Dados da Prefeitura de Porto Alegre (uso do solo Profill 2022, cadastro de drenagem e limites de bairros) usados com base na Política de Dados Abertos do município (Decreto Municipal nº 20.315/2019). Origem, atribuição e condições em <a href="{{REPO}}/blob/develop/docs/base_legal_dados.md">base legal e origem dos dados</a>. No site publicado, as camadas trecho a trecho de escoamento e de drenagem do mapa completo dependem da publicação dos arquivos derivados, em preparação; os quatro mapas acima já trazem as dimensões A a D.</p>
+    <p class="declaracao-fundo" role="note"><b>As camadas não formam um índice único.</b> Elas representam informações diferentes e não devem ser somadas para produzir uma classificação geral de risco.</p>
+    {{PAINEIS_DIMENSOES}}
+    <p class="acoes mapa-acoes"><a class="btn" href="{{HREF_MAPA}}">Explorar o mapa interativo</a> <a class="btn btn-sec" href="#resultados">Ver os resultados</a></p>
+    <p class="intro mapa-dims">{{MAPA_COMPLETO_TXT}}</p>
+    <p class="small mapa-nota">Dados da Prefeitura de Porto Alegre (uso do solo Profill 2022, cadastro de drenagem e limites de bairros) usados com base na Política de Dados Abertos do município (Decreto Municipal nº 20.315/2019). Origem, atribuição e condições em <a href="{{REPO}}/blob/develop/docs/base_legal_dados.md">base legal e origem dos dados</a>. No site publicado, as camadas trecho a trecho de escoamento e de drenagem do mapa completo dependem da publicação dos arquivos derivados, em preparação; os mapas acima já trazem as dimensões A a D.</p>
   </div>
 </section>
 
-<section class="campo c-forte" id="cenarios" aria-labelledby="h-cen" data-cenarios>
+<section class="campo c-leve" id="resultados" aria-labelledby="h-res">
   <div class="grade">
-    <p class="sec-num"><span>03</span> Simulador</p>
-    <h2 id="h-cen" class="titulo">Compare chuvas de 10, 20 e 30 mm</h2>
+    <p class="sec-num"><span>03</span> Resultados</p>
+    <h2 id="h-res" class="titulo">O que os dados revelam?</h2>
+    <p class="intro">Uma leitura do território, dos bairros aos trechos de rua. Os resultados permitem explorar como as características analisadas se distribuem no município e comparar os valores disponíveis em cada dimensão.</p>
+    <p class="declaracao" role="note"><b>Ressalva essencial.</b> Este estudo apresenta estimativas geoespaciais do escoamento superficial e das condições topográficas associadas à concentração e à retenção de água. Os resultados apoiam a análise territorial e o planejamento preventivo, mas não constituem previsão de alagamentos nem estimativa de profundidade ou duração da inundação.</p>
+    <p class="small resp-curta"><b>Resposta curta:</b> a estimativa foi construída e comparada com registros históricos de alagamentos, mas <b>não mostrou ganho robusto</b> sobre a regra de terreno já em uso. Os detalhes estão na <a href="{{REPO}}/blob/develop/docs/metodologia.md">documentação técnica</a>.</p>
+    <ul class="pilares escalas">
+      <li><h3>Município: uma visão geral</h3><p>Indicadores municipais ajudam a compreender a distribuição das condições analisadas no conjunto do território (seção 04).</p></li>
+      <li><h3>Bairros: onde investigar diferenças?</h3><p>As comparações por bairro mostram como os resultados variam entre as unidades territoriais, respeitando a disponibilidade de dados e os critérios de cada dimensão.</p></li>
+      <li><h3>Trechos de rua: onde estão os valores?</h3><p>A consulta individual no mapa localiza trechos e explica o significado do resultado apresentado, com unidade, descrição e limitação.</p></li>
+    </ul>
+    <h3>Cinco bairros com maior propensão topográfica à retenção (áreas onde o relevo favorece o acúmulo de água)</h3>
+    {{TOP5_BAIRROS}}
+    <p class="small">As comparações são feitas separadamente por dimensão. Não existe um ranking único de risco de alagamento. Na dimensão B, a contribuição acumulada se propaga ao longo do caminho do fluxo; por isso, seus valores não devem ser lidos como um ranking de ruas.</p>
+    <h3>Quatro achados</h3>
+    <ol class="achados">
+      <li><b>A água se concentra em poucos eixos.</b> Em um trecho típico, a contribuição estimada é pequena; nos trechos de maior concentração (1% do total), ela é mais de mil vezes maior. Um mapa de médias esconderia isso.</li>
+      <li><b>Só parte da cidade tem coeficiente de escoamento publicado.</b> Por isso os resultados vêm em intervalos, e cada trecho informa quanto da sua área a montante tem esse valor de referência.</li>
+      <li><b>A propensão topográfica distingue só uma minoria de trechos.</b> Na maioria, o modelo de 30 metros não encontra depressão (parte mais baixa) para preencher.</li>
+      <li><b>Nem a física nem o aprendizado de máquina superaram a regra de terreno já em uso</b> na comparação exploratória com alagamentos registrados. Esse resultado negativo é parte do estudo.</li>
+    </ol>
+    <div class="duas">
+      <div class="prosa"><h3>Ranking de ruas e trechos: não publicado</h3><p>{{MOTIVO_TOP10}}</p></div>
+      <div class="prosa"><h3>Ranking de zonas de Porto Alegre: não publicado</h3><p>{{MOTIVO_ZONAS}}</p></div>
+    </div>
+    <p class="acoes"><a class="btn" href="{{HREF_MAPA}}">Explorar os resultados no mapa</a></p>
+  </div>
+</section>
+
+<section class="campo c-forte" id="numeros" aria-labelledby="h-num" data-cenarios>
+  <div class="grade">
+    <p class="sec-num"><span>04</span> Indicadores municipais</p>
+    <h2 id="h-num" class="titulo">Alguns números do território</h2>
+    <ul class="numeros-grandes" aria-label="Indicadores municipais">
+      <li><b>{{TOTAL_TRECHOS}}</b><span class="n-rot">trechos analisados</span><span class="n-txt">Trechos de rua dentro do recorte municipal de Porto Alegre.</span></li>
+      <li><b>{{PCT_DEPRESSAO}}%</b><span class="n-rot">dos trechos com depressões</span><span class="n-txt">{{N_DEPRESSAO}} trechos apresentam depressões no modelo de terreno utilizado.</span></li>
+      <li><b>{{PCT_REDE}}%</b><span class="n-rot">dos trechos em células com rede cadastrada</span><span class="n-txt">Proporção de trechos em células de 100 metros que contêm registros da rede pluvial.</span></li>
+      <li><b>{{MEDIANA_B}} m³</b><span class="n-rot">de mediana na contribuição acumulada</span><span class="n-txt">Valor mediano da dimensão B, considerando também os trechos com valor zero.</span></li>
+    </ul>
+    <p class="small">Esses números descrevem os dados processados. Cada indicador tem critérios próprios de cálculo e deve ser interpretado dentro das limitações da dimensão correspondente.</p>
+    <h3 class="sub-sim">Compare chuvas de 10, 20 e 30 mm</h3>
     <p class="intro">São <b>cenários de cálculo</b> (comparações com hipóteses definidas), e não previsões. A chuva é a mesma em toda a cidade e só multiplica os volumes. Os números vêm das três execuções reais do cálculo.</p>
     <p class="small">Referência de chuva: 30 mm corresponde ao percentil 75 dos totais por evento de 2017 a 2026 (29,9 mm), isto é, três em cada quatro eventos ficam abaixo desse total. A série diária de Porto Alegre é do Open-Meteo, uma estimativa meteorológica modelada (reanálise), e não a medição de um pluviômetro. Evento: dias seguidos com pelo menos 1 mm.</p>
     <p class="small">Método 1 usa coeficientes de escoamento (fração da chuva que escoa) publicados em manuais. Método 2 usa hipóteses declaradas. Os limites físicos são o mínimo (nada escoa) e o máximo (tudo escoa) possíveis.</p>
@@ -146,25 +179,13 @@
     </div>
     <p class="acoes"><a class="btn" id="cen-link" data-camadas="{{CAMADAS_FLAG}}" href="{{HREF_MAPA}}">{{SIM_LINK_TXT}}</a></p>
     <p class="small cen-nota">{{SIM_NOTA}}</p>
-  </div>
-</section>
-<section class="campo c-leve" id="resultados" aria-labelledby="h-res">
-  <div class="grade">
-    <p class="sec-num"><span>04</span> Resultados</p>
-    <h2 id="h-res" class="titulo">O que os resultados mostram, e o que não mostram</h2>
-    <p class="declaracao" role="note"><b>Ressalva essencial.</b> Este estudo apresenta estimativas geoespaciais do escoamento superficial e das condições topográficas associadas à concentração e à retenção de água. Os resultados apoiam a análise territorial e o planejamento preventivo, mas não constituem previsão de alagamentos nem estimativa de profundidade ou duração da inundação.</p>
-    <h3>Cinco bairros com maior propensão topográfica à retenção (áreas onde o relevo favorece o acúmulo de água)</h3>
-    {{TOP5_BAIRROS}}
-    <h3>Quatro achados</h3>
-    <ol class="achados">
-      <li><b>A água se concentra em poucos eixos.</b> Em um trecho típico, a contribuição estimada é pequena; nos trechos de maior concentração (1% do total), ela é mais de mil vezes maior. Um mapa de médias esconderia isso.</li>
-      <li><b>Só parte da cidade tem coeficiente de escoamento publicado.</b> Por isso os resultados vêm em intervalos, e cada trecho informa quanto da sua área a montante tem esse valor de referência.</li>
-      <li><b>A propensão topográfica distingue só uma minoria de trechos.</b> Na maioria, o modelo de 30 metros não encontra depressão (parte mais baixa) para preencher.</li>
-      <li><b>Nem a física nem o aprendizado de máquina superaram a regra de terreno já em uso</b> na comparação exploratória com alagamentos registrados. Esse resultado negativo é parte do estudo.</li>
-    </ol>
-    <div class="duas">
-      <div class="prosa"><h3>Ranking de ruas e trechos: não publicado</h3><p>{{MOTIVO_TOP10}}</p></div>
-      <div class="prosa"><h3>Ranking de zonas de Porto Alegre: não publicado</h3><p>{{MOTIVO_ZONAS}}</p></div>
+
+    <div class="graficos grafico-chuva">
+      <figure>
+        <img class="grafico" src="img/estudo/grafico-chuva-mensal.svg" {{DIM_GRAFICO_CHUVA_MENSAL}} alt="Gráfico de barras com a média da chuva de cada mês do calendário em Porto Alegre, em milímetros por mês, no período {{PERIODO_CHUVA}}; os valores estão na tabela logo abaixo" loading="lazy">
+        <figcaption><b>Média mensal de chuva em Porto Alegre.</b> Média, entre os anos, do total de cada mês do calendário (mm por mês), no período {{PERIODO_CHUVA}}. Fonte: Open-Meteo, arquivo de reanálise (base ERA5, uma estimativa meteorológica modelada, e não a medição de um pluviômetro), no ponto da grade de Porto Alegre; a grade suaviza e subestima extremos locais. <b>Média mensal não é chuva por evento:</b> os cenários de 10, 20 e 30 mm do simulador são totais por evento (sequência de dias com chuva).</figcaption>
+        <details class="tabela-chuva"><summary>Ver os valores</summary>{{TABELA_CHUVA_MENSAL}}</details>
+      </figure>
     </div>
     <details class="numeros-detalhe"><summary>Ver os números do processamento e da validação</summary>
     <p class="legenda-grupos">Os números abaixo são de três tipos, e não se misturam: <b>processamento</b> (o tamanho da base), <b>resultado metodológico</b> (o que o motor produz) e <b>validação</b> (o que a comparação com registros mostrou). Cada cartão traz unidade, definição, origem, contexto e limitação.</p>
@@ -184,22 +205,114 @@
   </div>
 </section>
 
-<section class="campo c-fundo" id="contato" aria-labelledby="h-contato">
+<section class="campo c-seco" id="metodologia" aria-labelledby="h-met">
   <div class="grade">
-    <p class="sec-num"><span>05</span> Contato</p>
-    <h2 id="h-contato" class="titulo">Fale com a autora</h2>
-    <p class="intro">Projeto acadêmico do Space Tech Bootcamp 2026 (FTL Brasil), de Helena de Oliveira Valanera. Dúvidas, comentários e pedidos de informação sobre o estudo podem ser enviados por e-mail.</p>
+    <p class="sec-num"><span>05</span> Metodologia</p>
+    <h2 id="h-met" class="titulo">Como transformamos dados em informação territorial?</h2>
+    <p class="intro">Da observação da Terra à análise das condições de acúmulo de água. O Flooding Mapping integra dados geográficos, informações meteorológicas, modelos de elevação e processamento computacional para investigar condições (des)favoráveis ao escoamento e ao acúmulo de água em Porto Alegre.</p>
+    <h3>1. Fontes de dados</h3>
+    <ul class="fontes-lista">
+      <li><h4>Copernicus DEM GLO-30</h4><p>Modelo digital de elevação usado nos cálculos, com resolução aproximada de 30 metros.</p></li>
+      <li><h4>AWS Terrain Tiles</h4><p>Serviço de distribuição de dados de elevação. No mapa interativo fornece o relevo exibido (sombreado e 3D), sem entrar nos cálculos.</p></li>
+      <li><h4>Prefeitura de Porto Alegre e Profill 2022</h4><p>Dados municipais: uso e ocupação do solo, cadastro de drenagem pluvial e limites de bairros.</p></li>
+      <li><h4>OpenStreetMap e Protomaps</h4><p>Malha viária e dados cartográficos (OpenStreetMap) e o mapa-base que os representa (Protomaps).</p></li>
+      <li><h4>Open-Meteo</h4><p>Séries históricas de precipitação baseadas em reanálise meteorológica, usadas como referência para a chuva do estudo. É uma estimativa modelada, e não a medição de um pluviômetro.</p></li>
+      <li><h4>Sentinel-2 e AlphaEarth (só no GeoAI)</h4><p>Dados usados especificamente nos experimentos de GeoAI da camada E. Não são fontes do motor principal.</p></li>
+    </ul>
+    <h3>2. Processamento geoespacial</h3>
+    <p>Os dados são organizados, tratados e combinados por programação e técnicas de geoprocessamento.</p>
+    <ul class="fontes-lista">
+      <li><h4>Python</h4><p>Linguagem principal do processamento, dos cálculos e da geração dos resultados, com pandas, NumPy e SciPy.</p></li>
+      <li><h4>GeoPandas, Shapely e PyProj</h4><p>Cruzamento de ruas, limites territoriais e superfícies, recortes e mudanças de sistema de coordenadas.</p></li>
+      <li><h4>Rasterio</h4><p>Leitura e gravação de dados matriciais, como o modelo de elevação e o uso do solo em células.</p></li>
+      <li><h4>GDAL (ogr2ogr)</h4><p>Geração dos tiles vetoriais das camadas de escoamento e de drenagem exibidas no mapa.</p></li>
+      <li><h4>scikit-learn</h4><p>Modelos de aprendizado de máquina dos experimentos de validação e do GeoAI.</p></li>
+      <li><h4>MapLibre, Leaflet e PMTiles</h4><p>Visualização geoespacial: o mapa 3D com WebGL (MapLibre), o mapa 2D simples quando não há WebGL (Leaflet) e a leitura do mapa-base por faixas de bytes (PMTiles).</p></li>
+    </ul>
+    <h3>3. Modelagem e método próprio</h3>
+    <p>O projeto desenvolveu uma metodologia para estimar a geração potencial de escoamento e investigar como essa contribuição pode se concentrar no território. A estimativa de volume usa a relação:</p>
+    <p class="formula" role="math" aria-label="V igual a P vezes A vezes C, dividido por mil">V = P × A × C ÷ 1000</p>
+    <ul class="legenda-formula">
+      <li><b>V:</b> volume potencial de escoamento, em metros cúbicos (m³).</li>
+      <li><b>P:</b> precipitação considerada, em milímetros (mm).</li>
+      <li><b>A:</b> área analisada, em metros quadrados (m²).</li>
+      <li><b>C:</b> coeficiente de escoamento, a parcela da chuva considerada como escoamento.</li>
+    </ul>
+    <div class="duas">
+      <div class="prosa"><h4>Método 1: coeficientes fundamentados</h4><p>Usa coeficientes de escoamento publicados para edificações e vias pavimentadas, as classes para as quais há parâmetros fundamentados no estudo.</p></div>
+      <div class="prosa"><h4>Método 2: hipóteses exploratórias</h4><p>Usa hipóteses declaradas para outras classes de superfície, sem o mesmo nível de fundamentação e validação do Método 1. Os limites físicos (nada escoa ou tudo escoa) completam o intervalo.</p></div>
+    </div>
+    <p>O Método 1 abrange {{PCT_M1}} da área classificada. Portanto, os resultados não são uma estimativa completa de todo o escoamento gerado no município. A modelagem do terreno complementa a análise com a direção do fluxo, a contribuição acumulada e as depressões topográficas.</p>
+    <h3>4. GeoAI e aprendizado de máquina</h3>
+    <div class="duas">
+      <div class="prosa"><h4>GeoAI: inteligência artificial geoespacial</h4><p>O projeto explorou inteligência artificial geoespacial para estimar a fração construída por célula, com imagens de satélite (Sentinel-2) e dados de referência da Profill. O resultado é uma camada experimental complementar, sem participação no cálculo principal de escoamento.</p>{{GEOAI_RESULTADOS}}</div>
+      <div class="prosa"><h4>Aprendizado de máquina</h4><p>Foram feitos experimentos com modelos de aprendizado de máquina para investigar características territoriais e a sua relação com registros de alagamentos. As abordagens testadas não superaram a referência baseada na regra do terreno. Os resultados não comprovam capacidade de prever alagamentos, de generalizar para outras cidades ou de substituir levantamentos de referência.</p></div>
+    </div>
+    <h3>5. Da análise ao mapa</h3>
+    <div class="tabela-rolagem"><table class="tab-fontes tab-camadas"><caption>As cinco camadas do mapa</caption><thead><tr><th scope="col">Camada</th><th scope="col">Informação apresentada</th></tr></thead><tbody>
+      <tr><th scope="row">A</th><td>Geração potencial de escoamento</td></tr><tr><th scope="row">B</th><td>Contribuição acumulada</td></tr><tr><th scope="row">C</th><td>Retenção topográfica</td></tr><tr><th scope="row">D</th><td>Drenagem cadastrada</td></tr><tr><th scope="row">E</th><td>Fração construída estimada (GeoAI, experimental)</td></tr></tbody></table></div>
+    <p>Os resultados vão para um mapa interativo, com controles de visualização, legendas e consulta aos trechos. O diferencial do projeto está na combinação de fontes geoespaciais, modelagem do relevo e um método próprio de estimativa para investigar as condições territoriais associadas ao escoamento e ao acúmulo de água.</p>
+  </div>
+</section>
+
+<section class="campo c-leve" id="interpretacao" aria-labelledby="h-int">
+  <div class="grade">
+    <p class="sec-num"><span>06</span> Interpretação</p>
+    <h2 id="h-int" class="titulo">O que significa encontrar condições (des)favoráveis?</h2>
+    <p class="intro">Uma condição favorável ao escoamento não é necessariamente favorável ao acúmulo. Da mesma forma, uma área mais baixa pode ter características de retenção sem que isso signifique que haverá um alagamento. Por isso as dimensões devem ser lidas de forma complementar, sem serem somadas em um índice único.</p>
+    <div class="duas">
+      <div class="prosa"><h3>O estudo permite</h3><ul class="lista-simples">
+        <li>Identificar características territoriais que podem favorecer a concentração e a retenção de água.</li>
+        <li>Comparar resultados entre bairros e trechos, conforme os dados disponíveis em cada dimensão.</li>
+        <li>Investigar relações entre relevo, superfícies urbanas e drenagem cadastrada.</li>
+        <li>Apoiar estudos e discussões sobre planejamento urbano.</li>
+        <li>Explorar informações complementares sobre a superfície construída, por meio da camada experimental de GeoAI.</li></ul></div>
+      <div class="prosa"><h3>O estudo não permite</h3><ul class="lista-simples">
+        <li>Prever quando e onde ocorrerão alagamentos.</li>
+        <li>Interpretar a altura de preenchimento das depressões como a profundidade real da água.</li>
+        <li>Confirmar a capacidade ou o funcionamento da rede de drenagem: o cadastro mostra o que está registrado.</li>
+        <li>Concluir que um trecho sem registro de drenagem não tem infraestrutura.</li>
+        <li>Obter um índice composto ou um ranking único de risco: ele não existe.</li></ul></div>
+    </div>
+    <p class="small">Os resultados são estimativas e indicadores territoriais. A sua interpretação depende das fontes, dos parâmetros e das limitações documentadas.</p>
+  </div>
+</section>
+
+<section class="campo c-seco" id="fontes" aria-labelledby="h-fon">
+  <div class="grade">
+    <p class="sec-num"><span>07</span> Fontes e documentação</p>
+    <h2 id="h-fon" class="titulo">Conheça os dados por trás da análise</h2>
+    <p class="intro">A investigação usa diferentes bases geográficas, meteorológicas e de observação da Terra. Consulte a documentação para conhecer as fontes, os critérios de processamento, as hipóteses e as limitações dos dados.</p>
+    <ul class="fontes-lista docs-lista">
+      <li><h4><a href="{{REPO}}/blob/develop/docs/inventario_fontes.md">Inventário de dados</a></h4><p>Origem e características das bases utilizadas.</p></li>
+      <li><h4><a href="{{REPO}}/blob/develop/docs/metodologia.md">Metodologia</a></h4><p>Fórmulas, parâmetros, hipóteses e procedimentos.</p></li>
+      <li><h4><a href="{{REPO}}/blob/develop/docs/recorte_municipal.md">Recorte municipal</a></h4><p>Critérios de inclusão dos trechos analisados.</p></li>
+      <li><h4><a href="{{REPO}}/blob/develop/docs/geoai_fase5.md">GeoAI</a></h4><p>Dados, experimentos, resultados e limitações da camada E.</p></li>
+      <li><h4><a href="{{REPO}}/blob/develop/docs/base_legal_dados.md">Base legal e licenças</a></h4><p>Referências, atribuições e condições de uso identificadas para cada conjunto.</p></li>
+      <li><h4><a href="{{REPO}}/blob/develop/docs/referencias_bibliograficas.md">Bibliografia</a> e <a href="{{REPO}}/blob/develop/docs/glossario.md">glossário</a></h4><p>Bibliografia do estudo e definição dos termos técnicos.</p></li>
+      <li><h4><a href="{{REPO}}">Repositório</a></h4><p>Código-fonte e histórico de desenvolvimento.</p></li>
+    </ul>
+    <p class="acoes"><a class="btn" href="{{REPO}}/blob/develop/docs/README.md">Consultar a documentação</a> <a class="btn btn-sec" href="{{REPO}}">Acessar o repositório</a></p>
+  </div>
+</section>
+
+<section class="campo c-fundo" id="sobre" aria-labelledby="h-sobre">
+  <div class="grade">
+    <p class="sec-num"><span>08</span> Sobre o projeto</p>
+    <h2 id="h-sobre" class="titulo">Tecnologia geoespacial aplicada a problemas urbanos</h2>
+    <p class="intro">O Flooding Mapping foi desenvolvido no contexto do <b>FTL Brasil 2026 Space Tech Bootcamp</b>, por Helena de Oliveira Valanera. O projeto aplica análise geoespacial, processamento de dados e modelagem territorial para investigar condições que podem favorecer ou dificultar o escoamento e o acúmulo de água da chuva em Porto Alegre.</p>
+    <p class="intro">A proposta é transformar diferentes fontes de dados em informações territoriais que contribuam para a compreensão de um problema urbano complexo.</p>
     <p class="acoes"><a class="btn" href="mailto:helena.valanera@gmail.com">helena.valanera@gmail.com</a> <a class="btn btn-sec" href="{{REPO}}">Código e documentação</a></p>
-    <p class="small">Esta página não tem formulário e não coleta dados.</p>
+    <p class="small">Contato: helena.valanera@gmail.com. Esta página não tem formulário e não coleta dados.</p>
   </div>
 </section>
 
 </main>
 
 <footer class="rodape">
-  <p><b>Documentação técnica:</b> <a href="{{REPO}}/blob/develop/docs/metodologia.md">metodologia completa</a> · <a href="{{REPO}}/blob/develop/docs/inventario_fontes.md">fontes e licenças</a> · <a href="{{REPO}}/blob/develop/docs/referencias_bibliograficas.md">referências bibliográficas</a> · <a href="{{REPO}}/blob/develop/docs/glossario.md">glossário</a> · <a href="{{REPO}}/blob/develop/docs/geoai_fase5.md">GeoAI (frente experimental)</a>.</p>
-  <p>O estudo utiliza dados geoespaciais públicos, provenientes de bases governamentais e iniciativas de dados abertos, reutilizados para fins de pesquisa, análise e desenvolvimento de produtos geoespaciais. As fontes originais são referenciadas na documentação técnica. Isso não significa que todas as bases tenham licença aberta irrestrita: a condição de cada fonte está no inventário.</p>
-  <p>Flooding Mapping · Space Tech Bootcamp 2026 · projeto acadêmico de código aberto. <b>Estimativa, não previsão:</b> não substitui os alertas oficiais da Defesa Civil (199).</p>
+  <p><b>FLOODING MAPPING</b> · Porto Alegre · Rio Grande do Sul · 2026</p>
+  <p>O estudo utiliza dados geoespaciais públicos, provenientes de bases governamentais e iniciativas de dados abertos, reutilizados para fins de pesquisa, análise e desenvolvimento de produtos geoespaciais. As fontes originais são referenciadas na documentação técnica. Isso não significa que todas as bases tenham licença aberta irrestrita: a condição de cada fonte está no <a href="{{REPO}}/blob/develop/docs/inventario_fontes.md">inventário</a>.</p>
+  <p><b>Estimativa, não previsão:</b> não substitui os alertas oficiais da Defesa Civil (199).</p>
 </footer>
 
 <script type="application/json" id="dados-cenarios">{{CENARIOS_JSON}}</script>

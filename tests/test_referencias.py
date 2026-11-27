@@ -81,10 +81,10 @@ def test_a_citation_marker_that_matches_nothing_fails_loudly(refs):
         g.substituir_citacoes("texto {{cite:nao_existe}}", refs)
 
 
-def test_the_landing_navigation_has_exactly_the_five_tabs():
+def test_the_landing_navigation_has_exactly_the_eight_sections():
     t = LANDING.read_text(encoding="utf-8")
     nav = re.findall(r'<ol class="ancoras">(.*?)</ol>', t, re.S)[0]
-    assert re.findall(r'href="#([a-z]+)">([^<]+)<', nav) == [("apresentacao", "Apresentação"), ("mapa", "Mapa"), ("cenarios", "Simulador"), ("resultados", "Resultados"), ("contato", "Contato")]
+    assert re.findall(r'href="#([a-z]+)">([^<]+)<', nav) == [("problema", "Problema"), ("dimensoes", "Dimensões"), ("resultados", "Resultados"), ("numeros", "Números"), ("metodologia", "Metodologia"), ("interpretacao", "Interpretação"), ("fontes", "Fontes"), ("sobre", "Sobre")]
 
 
 def test_the_contact_is_the_address_registered_in_the_project_and_there_is_no_form():
@@ -101,9 +101,13 @@ def test_the_open_data_statement_is_verbatim_with_its_caveat_on_landing_readme_a
     assert "Isso não significa que todas as bases tenham licença aberta irrestrita" in landing
 
 
-def test_geoai_is_only_a_documentation_link_marked_as_experimental_on_the_landing():
+def test_geoai_is_a_labelled_experimental_layer_with_its_results_limits_and_a_documentation_link():
     t = LANDING.read_text(encoding="utf-8")
-    assert "GeoAI (frente experimental)" in t and "docs/geoai_fase5.md" in t and "estimador" not in t.lower()
+    texto = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", t))
+    assert "docs/geoai_fase5.md" in t and "estimador" not in t.lower() and "GeoAI experimental" in texto
+    for obrigatorio in ("camada experimental", "independente dos cálculos das dimensões A, B, C e D", "a Profill foi a referência e a fonte dos rótulos", "não há validação independente",
+                        "a transferência para outras áreas não foi testada", "não indica ocorrência de alagamento", "Prithvi (modelo de fundação) não foi executado", "não atingido"):
+        assert obrigatorio.lower() in texto.lower(), obrigatorio
 
 
 def test_the_published_text_avoids_the_terms_the_glossary_forbids():

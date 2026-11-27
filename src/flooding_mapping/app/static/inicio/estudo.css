@@ -246,3 +246,27 @@ th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--li
 @media (max-width: 900px) { .mapa-manchas, .dim-baixo { grid-template-columns: 1fr; } .mapa-fig img { max-height: none; } }
 @media (max-width: 700px) { .dim-abas { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nav { gap: 10px; } .marca span { display: none; } .ancoras a { padding: 10px 10px; } }
 @media (max-width: 480px) { .dim-aba { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 12px; } .dim-aba .dim-letra { width: 28px; height: 28px; font-size: .9rem; } }
+
+/* Revisão editorial (27/11/2026): oito seções, indicadores grandes, fontes e tecnologias em lista, fórmula e listas simples. */
+.lead-2 { margin-top: 14px; font-size: clamp(1.02rem, .98rem + .3vw, 1.18rem); }
+.dim-letra-e { background: transparent; color: var(--acento); border: 2px dashed var(--acento); }       /* a camada E é experimental: contorno tracejado, e não o preenchimento das quatro dimensões */
+.declaracao-fundo { margin-top: 28px; padding: 14px 18px; border-left: 4px solid var(--acento); background: rgba(234, 242, 246, .08); max-width: 52em; }
+.escalas { margin-top: 32px; }
+.sub-sim { margin-top: 48px; font-size: 1.35rem; }
+.numeros-grandes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-top: 34px; border-top: 1px solid var(--linha-clara); }
+.numeros-grandes li { padding: 22px 22px 22px 0; display: flex; flex-direction: column; gap: 6px; }
+.numeros-grandes b { font-size: clamp(2rem, 1.3rem + 2.4vw, 3.3rem); line-height: 1; letter-spacing: -.02em; color: var(--acento); }
+.numeros-grandes .n-rot { font-weight: 700; } .numeros-grandes .n-txt { font-size: var(--pequeno); opacity: .92; max-width: 24em; }
+.grafico-chuva { margin-top: 44px; }
+.fontes-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 4vw, 56px); margin: 18px 0 8px; }
+.fontes-lista li { padding: 14px 0; border-top: 1px solid var(--linha); } .fontes-lista h4 { font-size: 1.02rem; margin-bottom: 4px; } .fontes-lista p { font-size: var(--pequeno); max-width: 36em; }
+.docs-lista h4 a { text-underline-offset: 3px; }
+.formula { margin: 16px 0 10px; padding: 18px 22px; font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem); font-weight: 700; letter-spacing: .02em; border: 2px solid var(--forte); border-radius: 12px; display: inline-block; max-width: 100%; overflow-wrap: anywhere; }
+.legenda-formula { display: grid; gap: 6px; margin-bottom: 26px; font-size: var(--pequeno); }
+.lista-simples { display: grid; gap: 10px; margin-top: 12px; } .lista-simples li { padding-left: 18px; position: relative; } .lista-simples li::before { content: ""; position: absolute; left: 0; top: .65em; width: 7px; height: 7px; border-radius: 50%; background: var(--forte); }
+.tab-camadas { width: 100%; max-width: 40em; border-collapse: collapse; } .tab-camadas th, .tab-camadas td { padding: 8px 12px; border-top: 1px solid var(--linha); text-align: left; }
+.geoai-lista { font-size: var(--pequeno); }
+#metodologia h3, #interpretacao h3 { margin-top: 34px; } #metodologia .duas h4 { margin-bottom: 6px; }
+@media (max-width: 900px) { .numeros-grandes { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fontes-lista { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .numeros-grandes { grid-template-columns: 1fr; } }
+.hero-numeros dt { font-size: clamp(1.6rem, 1.1rem + 1.8vw, 2.6rem); line-height: 1.05; letter-spacing: -.02em; } .hero-numeros { gap: 22px !important; }
