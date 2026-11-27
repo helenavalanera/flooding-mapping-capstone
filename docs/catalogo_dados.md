@@ -13,7 +13,7 @@ Guardar um arquivo no R2 **não** o torna público. Cada conjunto tem dois estad
 | **Armazenado** (privado) | Está no bucket, sem URL pública; só o projeto lê |
 | **Publicado** (público) | Tem URL pública, com CORS e `Range`; só depois de a licença estar registrada e a redistribuição identificada |
 
-Conjuntos derivados da Profill e da drenagem cadastrada da Prefeitura, e os demais com licença não confirmada, **podem ser armazenados, mas só são publicados quando a condição de redistribuição estiver registrada** (coluna "Acesso público"). Até lá a aplicação mostra o relevo e o mapa-base, e as dimensões de escoamento e de drenagem avisam que faltam dados.
+Os conjuntos derivados da Profill, da drenagem cadastrada e dos limites de bairros da Prefeitura são publicados **com atribuição**, com base na autorização de uso de 27/11/2026 e na Política de Dados Abertos do município (`base_legal_dados.md`); a regularização documental de cada conjunto é conduzida à parte pela responsável, e este catálogo não faz conclusão jurídica. Até o envio ao R2, a aplicação mostra o relevo e o mapa-base, e as camadas de escoamento, de drenagem e a experimental E avisam que faltam dados.
 
 ## Layout previsto no R2
 
@@ -22,7 +22,7 @@ Um bucket de dados (nome a definir), com prefixos por natureza. Os de acesso pú
 | Prefixo | Conteúdo | Acesso |
 |---|---|---|
 | `publico/d-<hash>/mapa/` | `rs.pmtiles` | Público |
-| `publico/d-<hash>/fase3/` | tiles e fragmentos do escoamento | Público só após a licença da Profill |
+| `publico/d-<hash>/fase3/` | tiles e fragmentos do escoamento | Público, com atribuição (autorização de 27/11/2026) |
 | `publico/d-<hash>/drenagem/` | tiles e fragmentos da drenagem cadastrada | Público só após a licença da drenagem |
 | `bruto/` | dados originais baixados, com o SHA-256 do manifesto | Privado |
 | `processado/` | derivados em Parquet, JSON e GeoTIFF | Privado |

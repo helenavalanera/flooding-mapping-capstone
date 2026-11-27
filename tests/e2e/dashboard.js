@@ -29,7 +29,7 @@ const ESTADUAL = /rodovia|bloqueio|S2iD|DAER|CPRv|munic[ií]pio|Rio Grande do Su
   // proveniência: só as fontes do estudo, com a condição de uso, e o que cada dimensão é e não é
   await page.click("[data-aba=proveniencia]"); await page.waitForSelector("#vista-proveniencia table");
   const prov = await page.innerText("#vista-proveniencia");
-  for (const t of ["Profill 2022", "Licença não confirmada", "Copernicus DEM GLO-30", "OpenStreetMap", "Open-Meteo", "O que cada dimensão do mapa é, e o que não é", "não afirma que as bases tenham licença aberta irrestrita", "não prevê alagamentos"]) assert.ok(prov.includes(t), t);
+  for (const t of ["Profill 2022", "Licença não declarada pelo serviço", "Copernicus DEM GLO-30", "OpenStreetMap", "Open-Meteo", "O que cada dimensão do mapa é, e o que não é", "não afirma que as bases tenham licença aberta irrestrita", "não prevê alagamentos"]) assert.ok(prov.includes(t), t);
   assert.doesNotMatch(prov, /S2iD|DAER|CPRv|bloqueio|rodovia|Rio Grande do Sul/i);
   // endereço antigo de uma área que não existe mais cai em Resultados
   await page.goto(BASE + "#poa/mobilidade"); await page.reload(); await page.waitForSelector("#vista-resultados .rs-achado", { timeout: 60000 });

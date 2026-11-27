@@ -29,7 +29,7 @@ Esta matriz usou os 14 requisitos da Matriz A de `docs/qa_relatorio_final.md` e 
 | Requisito | Evidência existente | Situação | Ação necessária |
 |---|---|---|---|
 | Problema e justificativa | `README.md`, `docs/fase3_motor.md`, `docs/resultados_executivos.md` | **Parcial** | `docs/proposta.md` e os `.docx` descrevem só o escopo de mobilidade e não foram realinhados |
-| Dados geoespaciais | `docs/inventario_fontes_poa.md`, tabela de fontes do README, manifestos de dados | **Parcial** | Licença de reuso da Profill e do DAER não confirmada; impede publicar derivados |
+| Dados geoespaciais | `docs/inventario_fontes_poa.md`, tabela de fontes do README, manifestos de dados | **Parcial** | A regularização documental da Profill e do DAER é conduzida à parte pela responsável (`docs/base_legal_dados.md`); a camada E (derivada da Profill) é publicada com atribuição |
 | GIS e sensoriamento remoto | Motor GIS (Fase 3); pipeline de Sentinel-2 executado (Fase 5) | Concluído | — |
 | GeoAI | `src/flooding_mapping/geoai/`, `docs/geoai_resultados.md` | Concluído (experimental) | Validação independente e teste de transferência pendentes |
 | Pipeline funcional | `tools/executar_geoai.py` (seis etapas), duas execuções idênticas, 27 testes | Concluído | — |
@@ -38,7 +38,7 @@ Esta matriz usou os 14 requisitos da Matriz A de `docs/qa_relatorio_final.md` e 
 | Validação | Validação espacial por blocos contra a Profill (P1 e P2) | **Parcial** | Referência independente e validação hidrológica do motor não existem |
 | Limitações | Seção 9 deste documento; `docs/mapa_simulador_pwa.md` | Concluído | — |
 | Produto demonstrável | WebGIS, PWA, simulador (Fases 4 e 4.1); a GeoAI **não** está na interface, por decisão | Concluído | — |
-| Código aberto | Licença MIT em `LICENSE`; código local | **Parcial** | Nada foi commitado nem enviado: o repositório remoto não tem as Fases 3 a 5 |
+| Código aberto | Licença MIT em `LICENSE`; código local | **Cumprido** | O código das Fases 3 a 5 e a camada E estão no repositório (`develop`); os dados volumosos ficam fora do Git |
 | README e reprodução | Seção "Escoamento superficial e GeoAI" com comandos | **Parcial** | A introdução do README ainda trata só de mobilidade; a reprodução da Fase 3 remete a `docs/fase3_motor.md` |
 | Documentação técnica | Este documento, `docs/geoai_resultados.md`, `docs/publicacao_pages_releases.md` | Concluído | — |
 | Apresentação | `docs/apresentacao/Flooding_Mapping_Capstone_FTL_v2.pptx` (13 slides) | **Parcial** | Os slides e o roteiro não cobrem a Fase 3 a 5 nem a GeoAI |
@@ -54,7 +54,7 @@ Reconferido diretamente nos arquivos e nas fontes: Apple M1, 8 núcleos, 8 GB de
 | 1 | Fonte com cobertura suficiente | **Sentinel-2 L2A**, tile MGRS 22JDM: o footprint STAC contém o município inteiro (cobertura 1,0). HLS não foi usado (exige login Earthdata) e a cobertura do tile HLS não foi verificada |
 | 2 | Período comparável com a Profill | **2019 a 2021** (a ortoimagem é de 2018 a 2021). 2018 foi excluído: o arquivo L2A global começa em dez/2018 e há só 14 cenas |
 | 3 | Cenas válidas | 866 itens no catálogo (2019 a 2021), 646 aquisições distintas após deduplicar reprocessamentos, 356 com nuvem do tile ≤ 60%, **138 com ≥ 85% do município válido** pela SCL (após 40 m de folga em torno de nuvem e sombra). Usadas: **30** (10 por ano; válido médio 99,5%, mínimo 95,6%) |
-| 4 | Licença da referência municipal | **Não confirmada** (`docs/inventario_fontes_poa.md`; direitos "PROFILL, 2023"). Uso analítico interno; derivados ficam fora do Git; sem redistribuição. Impede também usar ortoimagem municipal para a validação manual |
+| 4 | Licença da referência municipal | **Em regularização documental, conduzida à parte pela responsável** (`docs/base_legal_dados.md`; direitos "PROFILL, 2023"). A autorização de uso e de publicação de derivados, com atribuição, é de 27/11/2026; este documento não faz conclusão jurídica. A ortoimagem municipal, que serviria à validação manual, ainda não foi obtida |
 | 5 | Atributos confiáveis | Seis bandas, quatro índices, três atributos temporais e dois de mistura intra-célula. Cada passo de S1 a S4 reduziu o MAE com intervalo que exclui zero (regra fixada antes), então o desvio intra-célula (textura) se justificou, com ganho pequeno (0,055 para 0,049) |
 | 6 | Resolução efetiva | Pixels de 10 m agregados em células de 30 m (9 pixels). As bandas SWIR são de 20 m repetidas para 10 m; índices com SWIR têm resolução efetiva de 20 m |
 | 7 | Modelos executáveis | Random Forest: sim (1 a 3 min por modelo). AlphaEarth: sim (RF de 21 min; a "inferência" é só leitura de rasters). Prithvi: **não executado** (seção 7) |
@@ -70,7 +70,7 @@ Reconferido diretamente nos arquivos e nas fontes: Apple M1, 8 núcleos, 8 GB de
 |---|---|---|---|---|
 | Sentinel-2 L2A | Copernicus; COG em AWS Open Data (`sentinel-cogs`), catálogo Element 84 Earth Search; sem credencial | 10/20 m, 2019 a 2021, 30 cenas; COG | "Livres, completos e abertos" (aviso legal do Copernicus, citado pelo registro AWS) | Janela do município, máscara SCL, mediana, 4 índices, média 3 × 3 por célula |
 | AlphaEarth, Satellite Embedding V1 anual | Google e Google DeepMind; `gs://alphaearth_foundations`, leitura anônima (a documentação diz que o bucket é "provider pays" desde julho de 2026) | 10 m, ano 2020, 64 bandas int8, COG, UTM 22S | **CC BY 4.0.** Atribuição obrigatória: "The AlphaEarth Foundations Satellite Embedding dataset is produced by Google and Google DeepMind." | Recorte do município, desquantização oficial, média 3 × 3 por célula |
-| Profill 2022 | Prefeitura de Porto Alegre; `data/processed/uso_solo/` | Ortoimagem de 30 cm (2018 a 2021), 1:2.500; 605.245 polígonos | **Licença de reuso não confirmada** | Rótulos (frações por grupo) e referência |
+| Profill 2022 | Prefeitura de Porto Alegre; `data/processed/uso_solo/` | Ortoimagem de 30 cm (2018 a 2021), 1:2.500; 605.245 polígonos | Regularização documental à parte (`docs/base_legal_dados.md`); uso e derivados autorizados com atribuição | Rótulos (frações por grupo) e referência |
 | Edificações do OpenStreetMap | `data/interim/poa.osm.pbf` (Geofabrik) | Polígonos | ODbL | Verificação cruzada (não é independente) |
 | Bairros de Porto Alegre | `data/processed/territorio_poa.json` | Polígonos | Fonte municipal (mesma ressalva) | Erro de área por bairro |
 
@@ -200,10 +200,10 @@ A camada pode servir a: (a) **caracterização independente** do território e *
 
 ## 13. Trabalho futuro e pendências
 
-1. Validação independente: amostra estratificada interpretada manualmente em ortoimagem com licença confirmada.
+1. Validação independente: amostra estratificada interpretada manualmente em ortoimagem municipal (ainda não obtida).
 2. Teste de transferência em município com referência equivalente.
 3. Seleção de cenas balanceada por estação (incluindo janeiro a março) e repetição do experimento.
-4. Confirmar a licença de reuso da Profill e do DAER.
+4. Concluir a regularização documental da Profill e do DAER (conduzida à parte pela responsável).
 5. Investigar a origem da divergência do deslocamento radiométrico com o provedor.
 6. Só então reavaliar o Prithvi (ou outro modelo de 30 m) com ajuste fino em GPU.
 
@@ -213,3 +213,7 @@ A camada pode servir a: (a) **caracterização independente** do território e *
 - Prithvi-EO-2.0: arXiv:2412.02732; cartões de modelo e `config.json` no Hugging Face (`ibm-nasa-geospatial/Prithvi-EO-2.0-300M`); repositório `NASA-IMPACT/Prithvi-EO-2.0`.
 - Sentinel-2: SentiWiki (`sentiwiki.copernicus.eu`); registro AWS Open Data `sentinel-2-l2a-cogs`.
 - Não foi feita revisão sistemática de literatura. Práticas usadas sem consulta nesta sessão e, portanto, não citadas como evidência: amostragem e estimação de área para validação de mapas de cobertura (Olofsson e colegas, 2014) e Random Forest (Breiman, 2001).
+
+
+## 15. Integração ao produto: a camada E (27/11/2026)
+O resultado da Fase 5 entra no produto como uma **quinta camada, experimental e independente**: *E. Fração construída estimada (GeoAI)*. Detalhes, arquivos, números e limites em [`geoai_camada_e.md`](geoai_camada_e.md). Nenhum modelo foi retreinado, nenhum experimento novo foi executado e nada do que a camada mostra entra no motor nem nas dimensões A a D.

@@ -7,7 +7,7 @@ Escreve: src/flooding_mapping/app/static/inicio/{index.html, dados.json, img/est
 
 Os números dos cartões saem de ``INDICADORES`` (cada um com o caminho do JSON de origem); o teste ``tests/test_landing.py`` confere o HTML contra as fontes.
 Os gráficos (SVG, só números agregados) são desenhados dos mesmos dados e vão para static/inicio/img/estudo. Os MAPAS de trechos e de drenagem derivam da Profill e do cadastro de
-drenagem da Prefeitura, cuja redistribuição não foi confirmada: por isso a landing publicada não os usa, e ``--mapas-locais`` os desenha só em data/interim/landing_mapas_historicos
+drenagem da Prefeitura. A landing publicada usa, no lugar deles, os mapas de manchas WebP (``tools/gerar_mapas_dimensoes.py``); ``--mapas-locais`` desenha os mapas antigos só em data/interim/landing_mapas_historicos
 (ignorado pelo Git). ``--sem-figuras`` só refaz o HTML e o dados.json.
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ import gerar_referencias as refs  # noqa: E402  (registro único das referência
 ESTATICO = RAIZ / "src/flooding_mapping/app/static"
 SAIDA = ESTATICO / "inicio"
 FIG = SAIDA / "img" / "estudo"
-FIG_MAPAS_LOCAIS = RAIZ / "data/interim/landing_mapas_historicos"   # fora do Git e da publicação (licença da Profill e da drenagem não confirmada)
+FIG_MAPAS_LOCAIS = RAIZ / "data/interim/landing_mapas_historicos"   # mapas antigos: fora do Git e da publicação; substituídos pelos mapas de manchas WebP
 TEMPLATE = RAIZ / "tools/landing/estudo.template.html"
 REPO = "https://github.com/helenavalanera/flooding-mapping-capstone"
 

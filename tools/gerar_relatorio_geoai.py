@@ -44,7 +44,7 @@ def figura_dos_mapas(man: dict, cfg_rotulos: dict) -> None:
         fig.colorbar(im, ax=a, fraction=0.04)
     fig.suptitle("Só as células com rótulo utilizável da Profill; fora delas o produto é extrapolação sem validação (banda origem_da_previsao = 2)", fontsize=8)
     fig.tight_layout()
-    (RAIZ / "data/interim/geoai/figuras_locais").mkdir(parents=True, exist_ok=True)   # deriva da Profill: fora do Git e da publicação
+    (RAIZ / "data/interim/geoai/figuras_locais").mkdir(parents=True, exist_ok=True)   # figura local: fora do Git por tamanho; a camada E publicada é gerada por tools/preparar_camada_geoai.py
     fig.savefig(RAIZ / "data/interim/geoai/figuras_locais/geoai_mapas_fracao_construida.png", dpi=130)
     plt.close(fig)
 
@@ -96,7 +96,7 @@ def main() -> None:
         L.append(f"| {n(e['de'], 2)} a {n(e['ate'], 2)} | {mil(e['n'])} | {n(e['mae'])} | {n(e['vies'], 3)} |")
     est = prim["estabilidade_entre_blocos"]
     L += ["", "## 5. Estabilidade entre blocos", "", f"{est['blocos']} blocos de 3 km: MAE mediano {n(est['mae_mediano'])}; percentis 10 e 90: {n(est['mae_p10_p90'][0])} e {n(est['mae_p10_p90'][1])}; pior bloco {n(est['mae_pior'])}. "
-          f"**{n(100 * est['fracao_de_blocos_dentro_do_limite'], 1)}% dos blocos** têm MAE de até {n(lim['mae_fracao_construida'], 2)}.", "", "_Figura não publicada: deriva da Profill, cuja redistribuição não foi confirmada. Ela é gerada localmente em `data/interim/geoai/figuras_locais/` (fora do Git) por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`._", ""]
+          f"**{n(100 * est['fracao_de_blocos_dentro_do_limite'], 1)}% dos blocos** têm MAE de até {n(lim['mae_fracao_construida'], 2)}.", "", "_Figura gerada só localmente, em `data/interim/geoai/figuras_locais/` (fora do Git, por tamanho), por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`. A fração construída estimada está publicada como a camada E do mapa interativo e como o mapa de manchas da landing (`docs/geoai_camada_e.md`)._", ""]
     ba = prim["erro_de_area_por_bairro"]
     L += ["## 6. Erro da área construída por bairro", "", f"{ba['bairros_avaliados']} bairros com ao menos 200 células. Erro relativo total: {n(100 * ba['erro_relativo_total'], 2)}%. Erro relativo absoluto mediano: {n(100 * ba['erro_relativo_mediano_abs'], 1)}%. "
           f"**{n(100 * ba['fracao_dentro_do_limite'], 1)}% dos bairros** ficam dentro de {n(100 * lim['erro_de_area_por_bairro'], 0)}%.", "", "Os cinco maiores erros relativos:", "", "| Bairro | Células | Área construída Profill (km²) | Estimada (km²) | Erro relativo |", "|---|---|---|---|---|"]
@@ -108,7 +108,7 @@ def main() -> None:
     for i, q in enumerate(inc["erro_por_quintil_de_desvio"], 1):
         L.append(f"| {i} | {n(q['desvio_de'])} | {n(q['desvio_ate'])} | {n(q['erro_abs_medio'])} |")
     cob = [c["cobertura"] for c in inc["cobertura_por_dobra"]]
-    L += ["", f"Intervalo conforme de 90% (resíduos das outras dobras): cobertura observada por dobra de {n(100 * min(cob), 1)}% a {n(100 * max(cob), 1)}% (alvo: 90%). Calibração aproximada: " + inc["nota"] + ".", "", "_Figura não publicada: deriva da Profill, cuja redistribuição não foi confirmada. Ela é gerada localmente em `data/interim/geoai/figuras_locais/` (fora do Git) por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`._", "", "_Figura não publicada: deriva da Profill, cuja redistribuição não foi confirmada. Ela é gerada localmente em `data/interim/geoai/figuras_locais/` (fora do Git) por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`._", ""]
+    L += ["", f"Intervalo conforme de 90% (resíduos das outras dobras): cobertura observada por dobra de {n(100 * min(cob), 1)}% a {n(100 * max(cob), 1)}% (alvo: 90%). Calibração aproximada: " + inc["nota"] + ".", "", "_Figura gerada só localmente, em `data/interim/geoai/figuras_locais/` (fora do Git, por tamanho), por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`. A fração construída estimada está publicada como a camada E do mapa interativo e como o mapa de manchas da landing (`docs/geoai_camada_e.md`)._", "", "_Figura gerada só localmente, em `data/interim/geoai/figuras_locais/` (fora do Git, por tamanho), por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`. A fração construída estimada está publicada como a camada E do mapa interativo e como o mapa de manchas da landing (`docs/geoai_camada_e.md`)._", ""]
     o = r["verificacao_osm"]
     L += ["## 8. Verificação cruzada com edificações do OpenStreetMap", "", o["nota"] + ".", "",
           f"- Área de edificações do OSM nas {o['celulas']:,} células: {n(o['soma_osm_km2'], 1)} km²; Profill (Edificação): {n(o['soma_profill_edificacao_km2'], 1)} km² (razão {n(o['razao_osm_sobre_profill_edificacao'], 3)}).".replace(",", "."),

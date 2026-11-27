@@ -52,3 +52,18 @@ E `tests/e2e/estatico.js` (topologia Pages mais bucket) contra as URLs reais.
 
 ## Carregamento progressivo
 Os tiles de escoamento existem só nos zooms 13 a 15 (abaixo disso passam de 1,9 MB e perdem trechos curtos), então a camada só é pedida de perto; o detalhe de cada trecho vem em fragmentos sob demanda; o relevo e o mapa-base são lidos por faixas. As bibliotecas do mapa só carregam ao abrir a aba Mapa. **Pendente:** regenerar os tiles de escoamento sem as vias de fora do município (19% dos trechos), que reduz o peso na mesma proporção.
+
+## Medições da rodada final (27/11/2026): cache do mapa, antes e depois
+Medido no servidor local, com Chrome e a GPU real do computador (Apple M1, ANGLE Metal; as medições anteriores deste documento usaram WebGL por software), três visitas seguidas ao mapa com a camada de escoamento ligada (30 mm), no mesmo contexto do navegador. "Rede" é o que o navegador de fato baixou.
+
+| Parte do mapa | Antes: 1ª visita | Antes: 2ª e 3ª visitas | Depois: 1ª visita | Depois: 2ª e 3ª visitas |
+|---|---|---|---|---|
+| Mapa-base (PMTiles, faixas `Range`, resposta 206) | 51 pedidos, 1.268 KB | 50 e 51 pedidos, 1.244 e 1.270 KB (nenhum do cache) | 50 pedidos, 1.244 KB | **0 pedidos** (Cache API) |
+| Relevo (tiles da AWS, 200) | 89 pedidos, 48 na rede, 1.704 KB | 0 na rede | igual | 0 na rede |
+| Tiles de escoamento (z13, com recorte municipal) | 32 pedidos (25 com 200, 7 vazios com 204), 20 na rede, 1.595 KB, 19 com gzip | 0 na rede | igual | 0 na rede |
+| Mapa pronto | 2,0 s | 1,2 s | 2,1 s | 0,8 a 1,1 s |
+
+- **Tiles de escoamento isolados:** os arquivos saem com `Content-Encoding: gzip` (19 dos 25 tiles com conteúdo; os demais são menores que o limite de compressão) e `Cache-Control: public, max-age=3600, must-revalidate`; na segunda visita todos vêm do cache do navegador. No R2 o cabeçalho passa a ser `immutable` por causa do caminho `d-<hash>` (`tools/preparar_para_r2.py`), e o teste dos arquivos preparados confere isso.
+- **PMTiles:** o navegador não guarda respostas parciais (206) no cache HTTP, e o cache de borda do R2 ainda não foi investigado, porque o bucket só será configurado na última etapa. Para não depender dele, o mapa guarda cada faixa lida na **Cache API** (`mapa-base.js`, `FonteComCache`), chaveada pela URL versionada do arquivo e pela faixa, com ETag conferido, sem Service Worker e sem baixar os 6,6 MB inteiros. Sem a Cache API, o mapa volta ao pedido normal. **Depois do envio ao R2**, medir com `curl -sI -H "Range: bytes=0-16383" ...` duas vezes e conferir `cf-cache-status`; se o CDN guardar as faixas, a Cache API continua útil como segunda camada; se não guardar, ela já cobre as visitas repetidas.
+- **Baixar o arquivo inteiro** (6,6 MB, contra cerca de 1,2 MB lidos por faixas na primeira visita) não foi implementado: custaria cerca de 5 vezes mais bytes na primeira visita, e a Cache API entrega o mesmo ganho nas seguintes.
+- **WebGL:** o computador usa GPU real por padrão (WebGL2, tamanho máximo de textura 16.384, contra 8.192 do SwiftShader). Quando não há WebGL ou as bibliotecas não carregam, o mapa cai no 2D simples (Leaflet) e, se nem isso for possível, a aba Mapa explica o motivo e leva aos mapas de manchas da landing, que não usam WebGL (`tests/e2e/mapa_indisponivel.js`).

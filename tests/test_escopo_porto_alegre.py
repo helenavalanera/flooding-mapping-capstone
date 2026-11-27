@@ -53,7 +53,7 @@ def test_raw_third_party_data_and_unconfirmed_coordinates_are_not_in_the_version
 def test_the_landing_gives_the_legal_basis_and_says_why_the_trecho_layers_are_pending():
     h = texto(STATIC / "inicio/index.html")
     assert "Decreto Municipal nº 20.315/2019" in h and "base_legal_dados.md" in h and "dependem da publicação dos arquivos derivados" in h
-    assert "Figura não publicada" in texto(RAIZ / "docs/geoai_resultados.md")
+    assert "Figura gerada só localmente" in texto(RAIZ / "docs/geoai_resultados.md") and "redistribuição não foi confirmada" not in texto(RAIZ / "docs/geoai_resultados.md")
     assert "mapas de trechos" in texto(RAIZ / "tools/gerar_landing.py") and "--mapas-locais" in texto(RAIZ / "tools/gerar_landing.py")
 
 

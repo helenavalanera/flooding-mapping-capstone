@@ -86,7 +86,7 @@ Fração da célula em "Jardins, Passeios ou Áreas semi urbanizadas", que a Pro
 
 79 blocos de 3 km: MAE mediano 0,038; percentis 10 e 90: 0,006 e 0,119; pior bloco 0,156. **83,5% dos blocos** têm MAE de até 0,10.
 
-_Figura não publicada: deriva da Profill, cuja redistribuição não foi confirmada. Ela é gerada localmente em `data/interim/geoai/figuras_locais/` (fora do Git) por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`._
+_Figura gerada só localmente, em `data/interim/geoai/figuras_locais/` (fora do Git, por tamanho), por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`. A fração construída estimada está publicada como a camada E do mapa interativo e como o mapa de manchas da landing (`docs/geoai_camada_e.md`)._
 
 ## 6. Erro da área construída por bairro
 
@@ -116,9 +116,9 @@ Indicador: desvio entre as 200 árvores na fração construída (incerteza do **
 
 Intervalo conforme de 90% (resíduos das outras dobras): cobertura observada por dobra de 87,7% a 91,2% (alvo: 90%). Calibração aproximada: intervalo conforme de 90% com resíduos das outras dobras (modelos dessas dobras viram a dobra testada no treino: calibração aproximada).
 
-_Figura não publicada: deriva da Profill, cuja redistribuição não foi confirmada. Ela é gerada localmente em `data/interim/geoai/figuras_locais/` (fora do Git) por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`._
+_Figura gerada só localmente, em `data/interim/geoai/figuras_locais/` (fora do Git, por tamanho), por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`. A fração construída estimada está publicada como a camada E do mapa interativo e como o mapa de manchas da landing (`docs/geoai_camada_e.md`)._
 
-_Figura não publicada: deriva da Profill, cuja redistribuição não foi confirmada. Ela é gerada localmente em `data/interim/geoai/figuras_locais/` (fora do Git) por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`._
+_Figura gerada só localmente, em `data/interim/geoai/figuras_locais/` (fora do Git, por tamanho), por `tools/gerar_relatorio_geoai.py` e `tools/executar_geoai.py`. A fração construída estimada está publicada como a camada E do mapa interativo e como o mapa de manchas da landing (`docs/geoai_camada_e.md`)._
 
 ## 8. Verificação cruzada com edificações do OpenStreetMap
 

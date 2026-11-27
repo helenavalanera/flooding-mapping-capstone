@@ -60,8 +60,8 @@
     box.innerHTML = "<h2 class='titulo'>Proveniência dos dados</h2>" +
       "<p class='small'>Fontes efetivamente usadas na análise de Porto Alegre e a condição de uso conhecida de cada uma. Esta lista não afirma que as bases tenham licença aberta irrestrita nem que possam ser redistribuídas: onde a licença não foi confirmada, isso é dito. As referências completas, em ABNT, estão na <a href='inicio/#referencias'>landing</a>, e o inventário em <code>docs/inventario_fontes.md</code>.</p>" +
       "<div class='rolagem'><table><caption class='small'>Fontes e condições de uso</caption><thead><tr><th scope='col'>Fonte</th><th scope='col'>Uso na análise</th><th scope='col'>Condição de uso</th></tr></thead><tbody>" +
-      linha("Uso e ocupação do solo, Profill 2022 (Prefeitura de Porto Alegre)", "Área por classe em cada célula de 30 m (geração de escoamento)", "Licença não confirmada; derivados não são publicados") +
-      linha("Drenagem cadastrada (Prefeitura de Porto Alegre)", "Camada de contexto, fora do cálculo", "Licença não confirmada; a camada só aparece quando os dados são disponibilizados") +
+      linha("Uso e ocupação do solo, Profill 2022 (Prefeitura de Porto Alegre)", "Área por classe em cada célula de 30 m (geração de escoamento)", "Licença não declarada pelo serviço; regularização documental à parte; derivados publicados com atribuição") +
+      linha("Drenagem cadastrada (Prefeitura de Porto Alegre)", "Camada de contexto, fora do cálculo", "Licença não declarada pelo serviço; regularização documental à parte; a camada só aparece quando os dados são publicados") +
       linha("Copernicus DEM GLO-30", "Relevo: fluxo, depressões e indicador topográfico", "Gratuito, com atribuição; termos a reler antes de publicar derivados") +
       linha("OpenStreetMap (Geofabrik)", "Rede de ruas (trechos) e água", "ODbL, com atribuição") +
       linha("Coeficientes de escoamento (TxDOT; County of San Diego)", "Faixas de C por classe", "Documentos públicos; faixas citadas com a fonte") +

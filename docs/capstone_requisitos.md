@@ -38,7 +38,7 @@ Estados: **Concluído**, **Parcial**, **Pendente**. Cada linha diz o que existe,
 
 - A lista anterior (14 itens) tinha critérios que o texto oficial não cita separadamente (limitações, validação, GIS e sensoriamento remoto) e **não** tinha dois dos sete requisitos mínimos como itens próprios: **revisão da literatura com ao menos 2 artigos** e **apresentação oral ou em vídeo** (o último constava como "apresentação"). Ao aplicar a lista oficial, a revisão da literatura passa de "não avaliada" a **parcial**.
 - O texto oficial pede **tabela de hiperparâmetros** (3.4) e **perguntas sobre publicação dos dados** (3.1): a primeira foi acrescentada à documentação da GeoAI; a segunda depende de decisão da autora.
-- Entre os formatos de produto final, o projeto já cumpre WebGIS e relatório com página HTML. **Dataset** em Hugging Face ou Zenodo seria outro caminho, mas esbarra na licença da Profill.
+- Entre os formatos de produto final, o projeto já cumpre WebGIS e relatório com página HTML. **Dataset** em Hugging Face ou Zenodo seria outro caminho; a regularização documental da Profill é conduzida à parte pela responsável.
 
 ## 4. Ações priorizadas (nenhuma foi executada)
 
@@ -47,4 +47,4 @@ Estados: **Concluído**, **Parcial**, **Pendente**. Cada linha diz o que existe,
 3. **Realinhar introdução e README** ao escopo de escoamento e GeoAI (requisitos 1 e documentação).
 4. **Publicar** o que for possível: decisão da hospedagem (`docs/publicacao_pages_releases.md`), com medição do prazo do Pages.
 5. **Atualizar os slides ou gravar o vídeo** com as Fases 3 a 5 e a GeoAI, e confirmar a data da apresentação.
-6. Confirmar a licença da Profill antes de qualquer publicação de dado derivado.
+6. Concluir, à parte e pela responsável, a regularização documental da Profill (derivados agregados já publicados com atribuição).
