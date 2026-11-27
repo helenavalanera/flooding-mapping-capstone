@@ -193,7 +193,7 @@
  },
  "D": {
   "nome": "Drenagem cadastrada",
-  "unidade": "metros de rede pluvial cadastrada por célula de 100 m (1 hectare)",
+  "unidade": "metros de rede pluvial cadastrada por célula de 100 m, ou 1 hectare",
   "natureza": "cadastro municipal: registro, não funcionamento nem capacidade",
   "imagem": {
    "arquivo": "img/estudo/mapa-drenagem.webp",

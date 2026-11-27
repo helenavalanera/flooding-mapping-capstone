@@ -31,7 +31,7 @@ CONFIG = {
           "fonte": "Escoamento potencial (Método 1): uso do solo Profill 2022, Prefeitura de Porto Alegre"},
     "B": {"arquivo": "mapa-concentracao.webp", "bordas": [0, 10, 100, 1000, 10000, MAX], "cores": ["#dcd9f2", "#b3aee0", "#857bc7", "#5547a3", "#2d2166"], "unidade": "m³ de escoamento potencial que converge ao trecho, em um evento de 30 mm",
           "fonte": "Escoamento potencial (Método 1): Profill 2022, Copernicus DEM"},
-    "D": {"arquivo": "mapa-drenagem.webp", "bordas": [0, 50, 100, 200, 300, MAX], "cores": ["#d4ecd9", "#9fd4b0", "#5fb383", "#2d8a5d", "#0e5236"], "unidade": "metros de rede pluvial cadastrada por célula de 100 m (1 hectare)",
+    "D": {"arquivo": "mapa-drenagem.webp", "bordas": [0, 50, 100, 200, 300, MAX], "cores": ["#d4ecd9", "#9fd4b0", "#5fb383", "#2d8a5d", "#0e5236"], "unidade": "metros de rede pluvial cadastrada por célula de 100 m, ou 1 hectare",
           "fonte": "Cadastro de drenagem pluvial: Prefeitura de Porto Alegre (GeoPOA)"},
 }
 
