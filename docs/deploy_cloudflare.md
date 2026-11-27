@@ -1,5 +1,7 @@
 # Publicação: Cloudflare Pages (aplicação) e R2 (dados)
 
+O acervo completo, o layout previsto no R2 e a migração controlada estão em [`catalogo_dados.md`](catalogo_dados.md). Armazenar um dado no R2 não o torna público.
+
 Estado em 26/11/2026: **nada foi publicado**. O build está pronto e foi verificado localmente; faltam as credenciais da Cloudflare, que não estão neste ambiente (`wrangler whoami`: não autenticado; nenhuma variável `CLOUDFLARE_*` nem `R2_*`).
 
 ## Aplicação (Pages)
@@ -18,7 +20,7 @@ Em `dist/_headers`, a política de conteúdo que o servidor local aplica (`servi
 | Objeto | Pode ir? |
 |---|---|
 | `mapa/rs.pmtiles` (217 MB, OpenStreetMap, ODbL) | Sim, com a atribuição já exibida no mapa |
-| `fase3/` (escoamento, derivado da Profill) e `drenagem/` (cadastro) | **Não, até a Prefeitura confirmar a redistribuição.** Sem eles o mapa mostra o relevo e o mapa-base, e as dimensões A a D avisam que faltam dados |
+| `fase3/` (escoamento, derivado da Profill) e `drenagem/` (cadastro) | **Armazenar no R2: sim. Acesso público: só depois de a licença estar registrada e a redistribuição identificada.** Até lá o mapa mostra o relevo e o mapa-base, e as dimensões A a D avisam que faltam dados |
 
 CORS do bucket: origens = a URL do Pages; métodos `GET` e `HEAD`; cabeçalhos permitidos `Range`; expostos `Content-Range`, `Accept-Ranges`, `Content-Length`; `MaxAgeSeconds` alto. O PMTiles é lido por faixas de bytes, então o bucket precisa responder `206`.
 

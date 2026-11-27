@@ -6,7 +6,7 @@ Como a chuva transforma o território? O Flooding Mapping é um **estudo** de co
 
 **Dados:** O estudo utiliza dados geoespaciais públicos, provenientes de bases governamentais e iniciativas de dados abertos, reutilizados para fins de pesquisa, análise e desenvolvimento de produtos geoespaciais. As fontes originais são referenciadas na documentação técnica. Isso descreve a abordagem do estudo e **não** significa que todas as bases, dados derivados ou produtos processados tenham licença aberta irrestrita: a condição de cada fonte (inclusive as licenças ainda por confirmar) está em [`docs/inventario_fontes.md`](docs/inventario_fontes.md). A licença MIT cobre o código do projeto, não os dados de terceiros.
 
-**Documentação:** [metodologia](docs/metodologia.md) · [glossário](docs/glossario.md) · [inventário de fontes](docs/inventario_fontes.md) · [referências bibliográficas](docs/referencias_bibliograficas.md) · [aderência ao Capstone](docs/capstone_requisitos.md).
+**Documentação:** [metodologia](docs/metodologia.md) · [glossário](docs/glossario.md) · [catálogo de dados](docs/catalogo_dados.md) · [inventário de fontes](docs/inventario_fontes.md) · [referências bibliográficas](docs/referencias_bibliograficas.md) · [aderência ao Capstone](docs/capstone_requisitos.md).
 
 ## Território e escopo
 

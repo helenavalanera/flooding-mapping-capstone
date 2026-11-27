@@ -13,6 +13,8 @@ Essa declaração descreve a **abordagem** do estudo. Ela **não** afirma que to
 - **nenhuma licença (MIT, CC BY ou outra) é atribuída a dados de terceiros sem fundamento documental**; a licença MIT do repositório vale para o **código** do projeto;
 - distinguem-se quatro naturezas: **dado original** (de terceiros), **dado derivado** (processado pelo projeto), **resultado agregado** (números e figuras) e **código**.
 
+> **Fora do Git não significa descartado.** Todo o acervo está catalogado, com tamanho, processamento, local previsto no R2 e condição de acesso, em [`catalogo_dados.md`](catalogo_dados.md). Armazenar no R2 não torna o dado público: Profill, drenagem e demais conjuntos com licença não confirmada só ganham acesso público depois de a licença estar registrada.
+
 ## 1. Dados de terceiros (originais)
 
 "Uso" classifica a situação: **utilizada** no estudo de escoamento; **experimento** (só na frente experimental de GeoAI); **frente arquivada** (mobilidade e painel estadual, fora do estudo atual).
