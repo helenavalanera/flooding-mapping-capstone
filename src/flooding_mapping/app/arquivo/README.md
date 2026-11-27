@@ -44,7 +44,7 @@ O produto atual não os carrega: `app/build.py` não importa nenhum deles (há u
 | `servico.py`, `servidor.py`, `demonstracao.py`, `aprendizado.py`, `bolsoes.py`, `pois.py`, `territorio.py`, `ocorrencias.py` | Servidor de mobilidade, ocorrências e avisos (API histórica) |
 | `app/static/logic.js` | Biblioteca de funções puras compartilhada com o PWA arquivado; traz rótulos de rodovia e S2iD em funções que o painel atual não chama |
 
-A coleta agendada dos bloqueios (`.github/workflows/coletor-crbm.yml`, a cada 30 minutos, para o R2) **continua habilitada** no repositório: desligá-la é uma decisão operacional sua (variável `COLETOR_ATIVO = false` nas configurações do GitHub). Workflows só valem a partir da branch padrão.
+A coleta agendada dos bloqueios (`.github/workflows/coletor-crbm.yml`) foi **desativada**: o agendamento de 30 minutos foi removido e o workflow só roda se disparado à mão. A mudança vale quando chegar à branch padrão (workflows agendados só rodam nela); até lá, a variável `COLETOR_ATIVO = false` nas configurações do GitHub pausa a coleta. O que já foi coletado continua no R2.
 
 ## Como o app arquivado volta a ser servido (testes e retomada)
 

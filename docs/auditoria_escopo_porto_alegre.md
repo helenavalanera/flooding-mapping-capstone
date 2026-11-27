@@ -39,6 +39,6 @@ Ver `docs/inventario_fontes.md` e `app/arquivo/README.md`: derivados da Profill 
 - **Continuam no histórico do Git** (commits já publicados) os arquivos que saíram da árvore atual: retirá-los do histórico exigiria reescrever a história publicada, o que não foi feito.
 - **Capturas de tela antigas em `docs/figuras/`** (`painel_rio_grande_do_sul_mapa.png` e outras do painel estadual) ainda estão rastreadas desde antes desta auditoria; a mais sensível mostra a malha do DAER. Recomenda-se retirá-las da árvore em um commit à parte.
 - **Módulos Python da frente estadual** ficam nos lugares originais (o servidor histórico e os testes os importam); o produto atual não os carrega. Mover para um pacote de arquivo é uma refatoração ampla, deixada para depois.
-- **Coleta agendada dos bloqueios** (`coletor-crbm.yml`): continua habilitada; desligar é decisão operacional (`COLETOR_ATIVO = false`).
+- **Coleta agendada dos bloqueios** (`coletor-crbm.yml`): desativada (agendamento removido); vale ao chegar à branch padrão. Até lá, `COLETOR_ATIVO = false` a pausa.
 - **A API do servidor histórico** (`/api/previsao`, ocorrências, rotas) continua no código, sem interface.
 - O produto atual não opera em tempo real, não prevê alagamentos e não mostra rodovias, bloqueios nem indicadores estaduais como funcionalidade.

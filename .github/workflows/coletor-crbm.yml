@@ -1,12 +1,13 @@
 name: coletor-crbm
 
-# Arquiva os bloqueios ativos das rodovias do RS (CPRv BM) no Cloudflare R2.
-# Só grava quando algo muda. Detalhes e controle de custo: docs/coletor_crbm.md
+# DESATIVADO (frente estadual arquivada): arquivava os bloqueios ativos das rodovias do RS (CPRv BM) no Cloudflare R2.
+# O produto atual é só Porto Alegre e não usa esses dados. O agendamento (a cada 30 minutos) foi removido; o workflow só roda
+# se for disparado à mão. O que já foi coletado continua no R2. Para retomar, restaure o bloco "schedule" abaixo:
+#   schedule:
+#     - cron: "7,37 * * * *"
+# Detalhes e controle de custo: docs/coletor_crbm.md
 
 on:
-  schedule:
-    # Minutos 7 e 37 evitam o congestionamento do início de cada hora no GitHub.
-    - cron: "7,37 * * * *"
   workflow_dispatch:
 
 # Uma execução por vez; nunca cancelar uma que esteja gravando.
