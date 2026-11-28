@@ -26,6 +26,8 @@
   function show(aba) {
     if (ABAS.indexOf(aba) < 0) aba = "resultados";
     st.aba = aba;
+    document.body.classList.toggle("modo-mapa", aba === "mapa");
+    document.documentElement.classList.remove("modo-mapa-inicial");
     Array.prototype.forEach.call(document.querySelectorAll("#abas button"), function (b) {
       b.setAttribute("aria-selected", String(b.dataset.aba === aba));
       if (b.dataset.aba === aba && b.scrollIntoView) { var barra = el("abas"); if (barra && barra.scrollWidth > barra.clientWidth) barra.scrollLeft = b.offsetLeft - (barra.clientWidth - b.offsetWidth) / 2; }
