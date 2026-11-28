@@ -18,9 +18,10 @@ class Falso:
     def head_object(self, Bucket, Key):
         if Key in self.objetos:
             o = self.objetos[Key]
-            return {"ContentLength": len(o["Body"]), "CacheControl": o["CacheControl"], "ContentType": o["ContentType"], "ContentEncoding": o.get("ContentEncoding")}
+            return {"ContentLength": len(o["Body"]), "CacheControl": o["CacheControl"], "ContentType": o["ContentType"], "ContentEncoding": o.get("ContentEncoding"), "Metadata": o.get("Metadata", {})}
         if Key in self.existentes:
-            return {"ContentLength": self.existentes[Key]}
+            existente = self.existentes[Key]
+            return existente if isinstance(existente, dict) else {"ContentLength": existente}
         err = Exception("404")
         err.response = {"Error": {"Code": "404"}}
         raise err
@@ -50,12 +51,36 @@ def test_the_plan_prefixes_every_key_with_the_versioned_path_and_carries_the_hea
 
 def test_upload_sends_each_object_with_its_headers_skips_the_existing_and_verifies(pasta):
     itens = e.plano(pasta)
-    cli = Falso(existentes={itens[0]["chave"]: itens[0]["bytes"]})
+    primeiro = itens[0]
+    cli = Falso(existentes={primeiro["chave"]: {
+        "ContentLength": primeiro["bytes"],
+        "Metadata": {"sha256": primeiro["sha256"]},
+        "ContentType": primeiro["content_type"],
+        "ContentEncoding": primeiro["content_encoding"],
+        "CacheControl": primeiro["cache_control"],
+    }})
     r = e.enviar(cli, "bucket", itens)
     assert r == {"enviados": len(itens) - 1, "pulados": 1} and itens[0]["chave"] not in cli.objetos
     tile = cli.objetos[next(i["chave"] for i in itens if i["chave"].endswith("fase3/tiles/13/1/2.pbf"))]
     assert tile["ContentEncoding"] == "gzip" and tile["ContentType"] == "application/x-protobuf" and "immutable" in tile["CacheControl"]
+    assert tile["Metadata"]["sha256"]
     assert e.conferir(cli, "bucket", itens[1:]) == []
+
+
+def test_same_size_object_with_wrong_hash_is_uploaded_again(pasta):
+    item = e.plano(pasta)[0]
+    cli = Falso(existentes={item["chave"]: {
+        "ContentLength": item["bytes"],
+        "Metadata": {"sha256": "0" * 64},
+        "ContentType": item["content_type"],
+        "ContentEncoding": item["content_encoding"],
+        "CacheControl": item["cache_control"],
+    }})
+
+    resultado = e.enviar(cli, "bucket", [item])
+
+    assert resultado == {"enviados": 1, "pulados": 0}
+    assert cli.objetos[item["chave"]]["Metadata"]["sha256"] == item["sha256"]
 
 
 def test_credentials_come_only_from_the_environment_and_are_required(monkeypatch):

@@ -4,7 +4,7 @@
 
 As credenciais vêm só das variáveis de ambiente do SEU terminal (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET), nunca de argumento, arquivo do repositório nem chat.
 Precisa de ``boto3`` (``pip install boto3``, importado só ao enviar). Usa o bucket que existe (R2_BUCKET); não cria bucket nem domínio: o domínio público e a regra de cache da Cloudflare
-se configuram no painel. Cada objeto sobe com Content-Type, Content-Encoding e Cache-Control do ``cabecalhos.json``; objetos que já existem com o mesmo tamanho são pulados
+se configuram no painel. Cada objeto sobe com Content-Type, Content-Encoding e Cache-Control do ``cabecalhos.json``; objetos existentes só são pulados quando tamanho, SHA-256, Content-Type, Content-Encoding e Cache-Control coincidem
 (caminho com hash: o mesmo caminho é o mesmo conteúdo). ``--cors`` aplica a política de CORS com ``Range`` para as origens dadas. Ao fim, confere cada objeto por HeadObject.
 """
 from __future__ import annotations
@@ -30,7 +30,7 @@ def plano(pasta: Path, prefixo: str | None = None) -> list[dict]:
         arq = pasta / chave
         if not arq.is_file() or arq.stat().st_size != h["bytes"]:
             raise SystemExit(f"{chave}: arquivo ausente ou com tamanho diferente do cabecalhos.json")
-        itens.append({"chave": f"{prefixo}/{chave}", "arquivo": arq, "bytes": h["bytes"], "content_type": h["content_type"], "content_encoding": h.get("content_encoding"), "cache_control": h["cache_control"]})
+        itens.append({"chave": f"{prefixo}/{chave}", "arquivo": arq, "bytes": h["bytes"], "sha256": hashlib.sha256(arq.read_bytes()).hexdigest(), "content_type": h["content_type"], "content_encoding": h.get("content_encoding"), "cache_control": h["cache_control"]})
     return itens
 
 
@@ -82,13 +82,19 @@ def enviar(cliente, bucket: str, itens: list[dict], simultaneos: int = 8) -> dic
     def um(it):
         try:
             existente = cliente.head_object(Bucket=bucket, Key=it["chave"])
-            if existente["ContentLength"] == it["bytes"]:
+            if (
+                existente["ContentLength"] == it["bytes"]
+                and existente.get("Metadata", {}).get("sha256") == it["sha256"]
+                and existente.get("ContentType") == it["content_type"]
+                and existente.get("ContentEncoding") == it["content_encoding"]
+                and existente.get("CacheControl") == it["cache_control"]
+            ):
                 return "pulado"
         except Exception as e:   # 404: ainda não existe
             if getattr(e, "response", {}).get("Error", {}).get("Code") not in ("404", "NoSuchKey", "NotFound"):
                 raise
         extra = {"ContentEncoding": it["content_encoding"]} if it["content_encoding"] else {}
-        cliente.put_object(Bucket=bucket, Key=it["chave"], Body=it["arquivo"].read_bytes(), ContentType=it["content_type"], CacheControl=it["cache_control"], **extra)
+        cliente.put_object(Bucket=bucket, Key=it["chave"], Body=it["arquivo"].read_bytes(), ContentType=it["content_type"], CacheControl=it["cache_control"], Metadata={"sha256": it["sha256"]}, **extra)
         return "enviado"
     with ThreadPoolExecutor(simultaneos) as ex:
         res = list(ex.map(um, itens))
@@ -99,7 +105,7 @@ def conferir(cliente, bucket: str, itens: list[dict]) -> list[str]:
     erros = []
     for it in itens:
         h = cliente.head_object(Bucket=bucket, Key=it["chave"])
-        if h["ContentLength"] != it["bytes"] or h.get("CacheControl") != it["cache_control"] or h.get("ContentType") != it["content_type"] or h.get("ContentEncoding") != it["content_encoding"]:
+        if (h["ContentLength"] != it["bytes"] or h.get("Metadata", {}).get("sha256") != it["sha256"] or h.get("CacheControl") != it["cache_control"] or h.get("ContentType") != it["content_type"] or h.get("ContentEncoding") != it["content_encoding"]):
             erros.append(it["chave"])
     return erros
 
