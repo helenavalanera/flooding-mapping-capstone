@@ -93,6 +93,6 @@
     var h = Lg.parseHash(location.hash, ABAS, T.ids, "poa");
     marcarTerritorio();
     if (h.consulta && window.Mapa) window.Mapa.pedido = h.consulta;
-    show(h.aba || "resultados");
+    show(h.aba || (/\/\w+/.test(location.hash) ? "resultados" : "mapa"));      // abre direto no mapa; Resultados e Simulador seguem acessíveis por link (#poa/resultados)
   }).catch(function (e) { aviso("Não foi possível carregar a configuração do território: " + e.message); });
 })();
