@@ -18,7 +18,7 @@ from pathlib import Path
 STATIC = Path(__file__).parent / "static"
 RAIZ = Path(__file__).resolve().parents[3]
 PUBLICACAO = RAIZ / "config/publicacao.json"   # produção: onde estão os dados derivados no R2 (r2_url nulo = build local, sem R2)
-ASSETS = ("index.html", "painel.js", "territorio.js", "fase3-dados.js", "fase3.js", "drenagem.js", "geoai.js", "resultados.js", "simulador.js", "mapa.js", "mapa2d.js", "mapa-base.js", "carregar-mapa.js", "modo-mapa.js", "logic.js", "style.css", "config-dados.js", "icone-192.png", "icone-512.png")
+ASSETS = ("index.html", "painel.js", "territorio.js", "fase3-dados.js", "fase3.js", "drenagem.js", "geoai.js", "resultados.js", "simulador.js", "mapa.js", "mapa2d.js", "mapa-base.js", "carregar-mapa.js", "modo-mapa.js", "logic.js", "style.css", "config-dados.js", "icone-192.png", "icone-512.png", "favicon-32.png", "marca-logo.png")
 ENTRADA = Path(__file__).parent / "entrada"   # raiz da versão estática: leva à landing (ou ao painel, quando o endereço pede)
 # O PWA de rotas, o painel estadual e a aplicação instalável estão arquivados em app/arquivo/ e não entram no site.
 

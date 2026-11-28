@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Flooding Mapping · Onde a água tende a se acumular em Porto Alegre</title>
   <meta name="description" content="Estudo sobre a contribuição potencial de escoamento e a propensão topográfica à retenção nos trechos viários de Porto Alegre: dados, método, resultados, testes e limitações. Projeto final do Space Tech Bootcamp 2026.">
-  <meta name="theme-color" content="#0a1c27">
+  <meta name="theme-color" content="#fff9ea">
   <meta name="color-scheme" content="light">
-  <link rel="icon" href="data:,">
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icone-192.png">
+  <link rel="apple-touch-icon" href="../icone-192.png">
   <link rel="stylesheet" href="estudo.css">
   <script src="marca-js.js"></script>
 </head>
@@ -16,7 +18,7 @@
 
 <header class="topo" id="topo">
   <nav class="nav" aria-label="Seções do estudo">
-    <a class="marca" href="#hero" aria-label="Flooding Mapping, início"><b>FM</b><span>Flooding Mapping</span></a>
+    <a class="marca" href="#hero" aria-label="Flooding Mapping, início"><img src="../marca-logo.png" width="900" height="277" alt="Flooding Mapping"></a>
     <ol class="ancoras">
       <li><a href="#problema">Problema</a></li>
       <li><a href="#dimensoes">Dimensões</a></li>
@@ -44,15 +46,10 @@
     </p>
     <p class="aviso-hero"><b>Leia antes.</b> Este estudo apresenta estimativas geoespaciais do escoamento superficial e das condições topográficas associadas à concentração e à retenção de água. Os resultados apoiam a análise territorial e o planejamento preventivo, mas não constituem previsão de alagamentos nem estimativa de profundidade ou duração da inundação.</p>
   </div>
-  <div class="hero-quadro" role="note" aria-labelledby="h-quadro">
-    <h2 id="h-quadro">O estudo em números</h2>
-    <dl class="hero-numeros">
-      <div><dt>{{TOTAL_TRECHOS}}</dt><dd>trechos de rua analisados em Porto Alegre</dd></div>
-      <div><dt>4 dimensões</dt><dd>geração potencial, contribuição acumulada, retenção topográfica e drenagem cadastrada</dd></div>
-      <div><dt>1 camada experimental</dt><dd>GeoAI: fração construída estimada, independente das quatro dimensões</dd></div>
-    </dl>
-    <p>Estimativas com hipóteses declaradas, e não medições. Nenhuma dimensão, sozinha, indica onde a água de fato alagou.</p>
-  </div>
+  <figure class="hero-mapa">
+    <img src="img/mapa-porto-alegre.png" width="900" height="1898" alt="Mapa das ruas de Porto Alegre coloridas por trecho a partir do resultado do estudo; as ruas das cidades vizinhas aparecem esmaecidas" fetchpriority="high">
+    <figcaption>As ruas de Porto Alegre no mapa do estudo, trecho a trecho. No mapa interativo estão a legenda, os filtros e os valores de cada trecho.</figcaption>
+  </figure>
 </section>
 
 <section class="campo c-seco" id="problema" aria-labelledby="h-prob">

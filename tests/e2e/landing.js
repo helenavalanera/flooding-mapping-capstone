@@ -7,7 +7,7 @@ const fs = require("fs"), path = require("path");
   await page.goto(BASE + "inicio/");
   assert.match(await page.innerText("h1"), /Dada uma chuva, onde a água tende a se acumular\?/);
   assert.strictEqual(await page.locator("h1").count(), 1);
-  assert.match(await page.innerText(".hero-quadro"), /trechos de rua analisados em Porto Alegre[\s\S]*4 dimensões[\s\S]*1 camada experimental/); assert.strictEqual(await page.locator(".hero img").count(), 0);
+  assert.strictEqual(await page.locator(".hero-mapa img").count(), 1, "o mapa de Porto Alegre ocupa o lugar do quadro de números"); assert.ok(await page.locator(".hero-mapa img").evaluate((i) => i.complete && i.naturalWidth > 0), "o mapa carrega"); assert.strictEqual(await page.locator(".hero-quadro").count(), 0); assert.ok(await page.locator(".marca img").evaluate((i) => i.complete && i.naturalWidth > 0), "o logotipo carrega no cabeçalho");
   // âncoras: cada link leva à sua seção e a atual é marcada
   const hrefs = await page.locator(".ancoras a").evaluateAll((a) => a.map((x) => x.getAttribute("href")));
   assert.deepStrictEqual(hrefs, ["#problema", "#dimensoes", "#resultados", "#numeros", "#metodologia", "#interpretacao", "#fontes", "#sobre"]);
@@ -18,7 +18,7 @@ const fs = require("fs"), path = require("path");
   // as quatro dimensões: texto de cada uma e um mapa de manchas pré-renderizado por dimensão, escolhido por um seletor (sem WebGL na landing)
   await page.click(".ancoras a[href='#dimensoes']"); await page.waitForTimeout(2500);
   for (const id of ["p-contribuicao", "p-local", "p-topografico", "p-drenagem"]) assert.ok(await page.locator("#" + id).isVisible(), id + " visível");
-  assert.strictEqual(await page.locator(".hero img").count(), 0); assert.strictEqual(await page.locator("#dimensoes canvas").count(), 0, "sem canvas (WebGL) na landing");
+  assert.strictEqual(await page.locator(".hero img").count(), 1, "só o mapa de Porto Alegre no hero"); assert.strictEqual(await page.locator("#dimensoes canvas").count(), 0, "sem canvas (WebGL) na landing");
   assert.strictEqual(await page.locator("#dimensoes [role=tab]").count(), 5);   // A a D e a camada experimental E assert.strictEqual(await page.locator("#dimensoes [role=tabpanel]:not([hidden])").count(), 1, "um painel por vez");
   const ESPERADO = { a: [/mapa-geracao\.webp$/, /m³/, /Profill/], b: [/mapa-concentracao\.webp$/, /m³/, /Não é vazão/], c: [/mapa-propensao\.webp$/, /mais de 0 até 0,5 m/, /ocorrência ou risco de alagamento/], d: [/mapa-drenagem\.webp$/, /200 a 300 m[\s\S]*sem rede cadastrada/, /não o funcionamento nem a capacidade/] , e: [/mapa-geoai\.webp$/, /80% a 100% da célula construída|mais de 80%/, /Não é impermeabilidade medida/]};
   for (const k of ["a", "b", "c", "d", "e"]) {
@@ -54,7 +54,7 @@ const fs = require("fs"), path = require("path");
   await page.goto(BASE + "?painel=1#poa/mapa?escoamento=1&p=20&pacote=an&modo=l");
   await page.waitForFunction(() => window.Mapa && window.Mapa.pronto, null, { timeout: 120000 });
   await page.waitForFunction(() => window.Fase3 && window.Fase3.meta, null, { timeout: 60000 });
-  const e = await page.evaluate(() => ({ ...window.Fase3.estado, marcada: window.Mapa.marcadas.escoamento_fase3, camada: document.querySelector("input[data-camada=escoamento_fase3]").checked }));
+  const e = await page.evaluate(() => ({ ...window.Fase3.estado, marcada: window.Mapa.marcadas.escoamento_fase3, camada: document.querySelector("button[data-dim=A]").getAttribute("aria-pressed") === "true" }));
   assert.deepStrictEqual([e.p, e.pacote, e.modo, e.marcada, e.camada], [20, "an", "l", true, true], "o mapa abriu como a landing pediu");
   assert.match(await page.innerText("#legenda-gl"), /Geração potencial local[\s\S]*Método 2[\s\S]*20 mm/);
   // responsividade da landing

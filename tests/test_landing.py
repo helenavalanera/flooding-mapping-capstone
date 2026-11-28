@@ -169,7 +169,7 @@ def test_the_page_uses_the_municipal_cut_and_gives_each_card_one_denominator(pag
     texto, _ = pagina
     rec = json.loads((RAIZ / "src/flooding_mapping/app/static/data/recorte_municipal_poa.json").read_text(encoding="utf-8"))
     total = f"{rec['trechos_no_municipio']:,}".replace(",", ".")
-    assert f"<dt>{total}</dt><dd>trechos de rua analisados em Porto Alegre" in texto and f"<b>{total}</b><span class=\"n-rot\">trechos analisados</span>" in texto and "176.836 trechos de rua" not in texto
+    assert f"<b>{total}</b><span class=\"n-rot\">trechos analisados</span>" in texto and "176.836 trechos de rua" not in texto
     assert "cidades vizinhas" in texto                                                                        # a landing diz que as vias de fora ficam de fora
     for velho in ("2.919", "38.976 de", "98,3%", "57,0%", "2% dos trechos de menor"):
         assert velho not in texto, velho                                                                       # números da malha inteira, que incluía vias de fora
