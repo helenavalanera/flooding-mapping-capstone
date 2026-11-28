@@ -21,6 +21,10 @@ RAIZ = Path(__file__).resolve().parents[1]
 ORIGEM_PADRAO = "https://flooding-mapping-capstone.pages.dev"
 
 
+def eh_r2dev(base: str) -> bool:
+    return base.split("//", 1)[-1].split("/", 1)[0].lower().endswith(".r2.dev")
+
+
 def pedir(url: str, metodo: str = "GET", cabecalhos: dict | None = None, gzip_ok: bool = True) -> tuple[int, dict, bytes]:
     h = {"User-Agent": "flooding-mapping-verificador", **(cabecalhos or {})}
     if gzip_ok:
@@ -98,13 +102,35 @@ def verificar(base: str, versao: str, origem: str, pacote: Path | None = None, a
             a = pedir(f"{raiz}/{k}")[1]
             b = pedir(f"{raiz}/{k}")[1]
             r.info("CDN: cf-cache-status na 1ª e na 2ª leitura do mesmo objeto", f"{a.get('cf-cache-status', 'ausente')} e {b.get('cf-cache-status', 'ausente')} (age: {b.get('age', 'ausente')})")
-            r.ok("CDN: a 2ª leitura veio do cache de borda (HIT)", b.get("cf-cache-status") == "HIT", f"cf-cache-status {b.get('cf-cache-status', 'ausente')}: se não for HIT, a regra de cache do domínio ainda não cobre este caminho")
+            if eh_r2dev(base) and b.get("cf-cache-status") != "HIT":
+                r.info("CDN: sem cache de borda no endereço r2.dev (limitação conhecida, não defeito dos dados)", f"cf-cache-status {b.get('cf-cache-status', 'ausente')}: o endereço r2.dev é para uso fora de produção, tem limite de taxa e não passa pelas regras de cache da Cloudflare; para cache de borda use um domínio próprio ligado ao bucket, com regra de cache")
+            else:
+                r.ok("CDN: a 2ª leitura veio do cache de borda (HIT)", b.get("cf-cache-status") == "HIT", f"cf-cache-status {b.get('cf-cache-status', 'ausente')}: se não for HIT, a regra de cache do domínio ainda não cobre este caminho")
         st, h, _ = pedir(url_pm, "GET", {"Range": "bytes=0-16383"}, gzip_ok=False)
         st2, h2, _ = pedir(url_pm, "GET", {"Range": "bytes=0-16383"}, gzip_ok=False)
         r.info("CDN: cf-cache-status das faixas do PMTiles (1ª e 2ª leitura)", f"{h.get('cf-cache-status', 'ausente')} e {h2.get('cf-cache-status', 'ausente')}")
     # 6. a camada E não faz parte desta versão e não pode ser requisito
     st, _, _ = pedir(f"{raiz}/geoai/meta.json", "HEAD")
     r.info("camada E (GeoAI) nesta versão", f"HTTP {st} em geoai/meta.json ({'ausente, como previsto' if st == 404 else 'presente'})")
+    return r
+
+
+def verificar_geoai(base: str, prefixo: str, origem: str) -> Relatorio:
+    """A camada E, no prefixo próprio (geoai-<hash>/): meta.json e imagem conferem com o manifesto, cabeçalhos de cache/gzip, CORS e a versão principal intacta."""
+    r, raiz = Relatorio(), f"{base}/{prefixo}/geoai"
+    man = json.loads((RAIZ / "docs/manifestos" / f"manifesto_{prefixo}.json").read_text(encoding="utf-8"))["geoai"]
+    st, h, corpo = pedir(f"{raiz}/meta.json", "GET", {"Origin": origem})
+    meta_b = decodificar(h, corpo) if st == 200 else b""
+    r.ok("GeoAI meta.json: HTTP 200 e SHA-256 igual ao do manifesto", st == 200 and hashlib.sha256(meta_b).hexdigest() == man["meta_sha256"], f"HTTP {st}")
+    r.ok("GeoAI meta.json: cache revalidável ou imutável, com CORS", "cache-control" in h and h.get("access-control-allow-origin") in (origem, "*"), f"{h.get('cache-control')} | ACAO {h.get('access-control-allow-origin')}")
+    st, h, corpo = pedir(f"{raiz}/fracao_construida.webp", "GET", {"Origin": origem})
+    img = decodificar(h, corpo) if st == 200 else b""
+    r.ok("GeoAI imagem: HTTP 200, SHA-256 e tamanho iguais ao manifesto", st == 200 and hashlib.sha256(img).hexdigest() == man["imagem_sha256"] and len(img) == man["imagem_bytes"], f"HTTP {st}, {len(img)} bytes")
+    r.ok("GeoAI imagem: tipo image/webp, cache imutável e CORS para o site", h.get("content-type") == "image/webp" and "immutable" in h.get("cache-control", "") and h.get("access-control-allow-origin") in (origem, "*"), f"{h.get('content-type')} | {h.get('cache-control')}")
+    st, h, _ = pedir(f"{raiz}/fracao_construida.webp", "OPTIONS", {"Origin": origem, "Access-Control-Request-Method": "GET"})
+    r.ok("GeoAI CORS: preflight libera a origem do site", st in (200, 204) and h.get("access-control-allow-origin") in (origem, "*"), f"HTTP {st}")
+    st, _, _ = pedir(f"{base}/d-b7f6f03555d9/fase3/meta.json", "HEAD", {"Origin": origem})
+    r.ok("versão principal continua no ar, intacta", st == 200, f"HTTP {st}")
     return r
 
 
@@ -115,8 +141,9 @@ def main() -> None:
     ap.add_argument("--origem", default=ORIGEM_PADRAO)
     ap.add_argument("--pacote", type=Path, default=None)
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--geoai-prefixo", default=None, help="verifica só a camada E, no prefixo próprio (por exemplo geoai-f11490d2ef1a)")
     a = ap.parse_args()
-    r = verificar(a.base.rstrip("/"), a.versao, a.origem, a.pacote)
+    r = verificar_geoai(a.base.rstrip("/"), a.geoai_prefixo, a.origem) if a.geoai_prefixo else verificar(a.base.rstrip("/"), a.versao, a.origem, a.pacote)
     if a.json:
         print(json.dumps(r.itens, ensure_ascii=False, indent=1))
     else:

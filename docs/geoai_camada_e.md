@@ -33,10 +33,34 @@ Não é impermeabilidade medida, coeficiente de escoamento, vazão nem ocorrênc
 ```
 PYTHONPATH=src .venv/bin/python tools/preparar_camada_geoai.py          # imagem e meta.json do mapa interativo
 PYTHONPATH=src .venv/bin/python tools/gerar_mapas_dimensoes.py --so E   # mapa de manchas da landing
-PYTHONPATH=src .venv/bin/python tools/preparar_para_r2.py --mapa-poa    # objetos do R2, com o GeoAI
+PYTHONPATH=src .venv/bin/python tools/preparar_para_r2.py --so-geoai --saida data/interim/r2_preparado   # só a camada E, no prefixo próprio geoai-<hash>/, e o manifesto em docs/manifestos/
 ```
 
 ## No produto
 - **Mapa interativo:** checkbox *E. Fração construída estimada (GeoAI, experimental)*, selo Experimental, controle de opacidade, legenda de cinco classes e os avisos acima. A imagem só é baixada ao ligar a camada, fica logo acima do relevo e abaixo das ruas e das análises, e não carrega os dados de A a D. Exige WebGL.
 - **Landing:** quinta aba do seletor de dimensões, com mapa, legenda, números, os cinco bairros de maior fração estimada (descrição da estimativa, e não ranking de risco), o que o mapa não mostra e as lacunas.
 - **Dados de origem:** Sentinel-2 L2A (Copernicus, via AWS Open Data) e AlphaEarth (CC BY 4.0, só no experimento); referência Profill 2022 (Prefeitura de Porto Alegre).
+
+## Compatibilidade com o mapa (conferida por testes)
+`tests/test_camada_geoai.py` confere, com os dados reais:
+- a imagem contém o raster de origem inteiro (cantos convertidos de EPSG:31982 para graus) e fica dentro da caixa do mapa-base `poa.pmtiles`;
+- 3.000 pixels visíveis sorteados da imagem têm a classe (cor) da célula de origem que está embaixo, com menos de 2% de discordância (só as bordas da reamostragem);
+- o raster está alinhado com dados independentes do OpenStreetMap: fração média de 0,014 sobre a água contra 0,246 fora dela, e a correlação com a fração de edificações do OSM é máxima sem deslocamento (0,597; qualquer deslocamento de uma célula, 30 m, a reduz).
+
+`tests/e2e/mapa_integrado.js` confere no navegador: os cantos da fonte da imagem no MapLibre são exatamente os do `meta.json`, a camada é semitransparente (a base continua visível), fica abaixo das ruas e do sombreado fora de Porto Alegre, e ligar a E não desliga o escoamento nem a drenagem nem altera os filtros.
+
+## Publicação (prefixo próprio, sem tocar a versão principal)
+A camada E usa o prefixo `geoai-<12 hex do conteúdo>/geoai/` no mesmo bucket; a versão principal `d-b7f6f03555d9` não é lida nem alterada. O prefixo atual é `geoai-f11490d2ef1a` (2 objetos, 83 KB; hashes em `docs/manifestos/manifesto_geoai-f11490d2ef1a.json`).
+```
+# 1. conferir o pacote, sem rede (já feito: 0 erros)
+PYTHONPATH=src .venv/bin/python tools/enviar_para_r2.py data/interim/r2_preparado/geoai-f11490d2ef1a --validar
+# 2. enviar, no SEU terminal, com R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY e R2_BUCKET definidos
+PYTHONPATH=src .venv/bin/python tools/enviar_para_r2.py data/interim/r2_preparado/geoai-f11490d2ef1a --enviar --esperar-versao geoai-f11490d2ef1a --esperar-objetos 2
+# 3. verificar pela URL pública
+python tools/verificar_publicacao.py https://pub-66f5a12eb6834ef2b736fc85c89ca28c.r2.dev --geoai-prefixo geoai-f11490d2ef1a
+# 4. só com o passo 3 sem reprovação: ligar a camada em config/publicacao.json ("geoai_publicada": true) e reconstruir o site
+```
+O site só aponta para a camada E quando `geoai_publicada` é verdadeiro; antes disso a camada aparece desabilitada com o aviso "Camada experimental ainda não publicada neste ambiente", e as demais camadas não dependem dela.
+
+## Interpretação
+Leia a camada como uma estimativa da fração da célula de 30 m ocupada por construção, para comparar áreas entre si. Não é impermeabilidade medida, coeficiente de escoamento, risco nem previsão de alagamento, e não entra no motor nem em nenhum número do estudo.

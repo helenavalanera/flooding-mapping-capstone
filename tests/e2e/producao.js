@@ -5,7 +5,11 @@ const { chromium } = require(process.env.PLAYWRIGHT_CORE); const assert = requir
 const PAGES = process.env.PAGES, R2 = process.env.R2, VERSAO = process.env.VERSAO;
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME_PATH, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
-  const page = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); page.setDefaultTimeout(120000);
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  if (process.env.PAGES_LOCAL) {   // o site (build de produção) é servido localmente, mas o navegador o enxerga na origem pública: o CORS e a CSP valem como em produção, e o R2 é o real
+    await ctx.route(PAGES + "/**", async (route) => { const u = new URL(route.request().url()); const resp = await route.fetch({ url: process.env.PAGES_LOCAL + u.pathname + u.search }); await route.fulfill({ response: resp }); });
+  }
+  const page = await ctx.newPage(); page.setDefaultTimeout(120000);
   const erros = [], falhas = [], r2 = [], pend = [];
   await page.addInitScript(() => { window.__csp = []; document.addEventListener("securitypolicyviolation", (e) => window.__csp.push(e.violatedDirective + " " + e.blockedURI)); });
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));

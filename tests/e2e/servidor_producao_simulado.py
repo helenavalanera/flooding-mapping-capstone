@@ -78,9 +78,13 @@ class R2(http.server.BaseHTTPRequestHandler):
     def _servir(self, corpo_ao_fim: bool):
         chave = self.path.split("?")[0].lstrip("/")
         obj = self.server.objetos.get(chave)
+        pasta, prefixo = self.server.pasta, self.server.prefixo
+        outro = self.server.extras.get(chave.split("/", 1)[0])           # prefixo adicional (a camada E, geoai-<hash>/), servido do mesmo bucket simulado
+        if outro:
+            pasta, prefixo, obj = outro[0], chave.split("/", 1)[0], outro[1].get(chave)
         if obj is None:
             self.send_response(404); self._cors(); self.send_header("Content-Length", "0"); self.end_headers(); return
-        dados = (self.server.pasta / chave[len(self.server.prefixo) + 1:]).read_bytes()
+        dados = (pasta / chave[len(prefixo) + 1:]).read_bytes()
         etag = '"' + hashlib.md5(dados).hexdigest() + '"'
         if self.headers.get("If-None-Match") == etag:
             self.send_response(304); self._cors(); self.send_header("ETag", etag); self.end_headers(); return
@@ -102,9 +106,10 @@ class R2(http.server.BaseHTTPRequestHandler):
     def do_HEAD(self): self._servir(False)
 
 
-def servidor_r2(porta: int, pasta: Path, origem_permitida: str):
+def servidor_r2(porta: int, pasta: Path, origem_permitida: str, extras: tuple = ()):
     s = http.server.ThreadingHTTPServer(("127.0.0.1", porta), R2)
     s.pasta, s.prefixo, s.origem_permitida = pasta, pasta.name, origem_permitida
+    s.extras = {Path(e).name: (Path(e), {f"{Path(e).name}/{k}": v for k, v in json.loads((Path(e) / "cabecalhos.json").read_text(encoding="utf-8"))["objetos"].items()}) for e in extras}
     s.objetos = {f"{pasta.name}/{k}": v for k, v in json.loads((pasta / "cabecalhos.json").read_text(encoding="utf-8"))["objetos"].items()}
     return s
 
@@ -116,4 +121,4 @@ def servidor_pages(porta: int, pasta: Path):
 
 if __name__ == "__main__":
     modo, porta, pasta = sys.argv[1], int(sys.argv[2]), Path(sys.argv[3])
-    (servidor_r2(porta, pasta, sys.argv[4]) if modo == "r2" else servidor_pages(porta, pasta)).serve_forever()
+    (servidor_r2(porta, pasta, sys.argv[4], tuple(sys.argv[5:])) if modo == "r2" else servidor_pages(porta, pasta)).serve_forever()

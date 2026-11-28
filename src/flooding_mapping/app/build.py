@@ -67,9 +67,16 @@ def carregar_publicacao(caminho: Path = PUBLICACAO, local: bool = False) -> dict
     hashes = {c: man["camadas"][c]["meta_sha256"] for c in pub["camadas_publicadas"]}
     if not all(HASH.match(h) for h in hashes.values()) or set(hashes) < {"fase3", "drenagem"}:
         raise SystemExit("hashes de integridade ausentes ou malformados no manifesto")
-    if pub.get("geoai_publicada") and not (man.get("geoai") and HASH.match(man["geoai"].get("meta_sha256", ""))):
-        raise SystemExit("geoai_publicada exige o hash do meta.json da camada E no manifesto")
-    return {**pub, "hashes": hashes, "manifesto_dados": man}
+    geoai = None
+    if pub.get("geoai_publicada"):   # camada E (experimental): prefixo PRÓPRIO no bucket, manifesto próprio, sem tocar a versão principal
+        g = pub.get("geoai") or {}
+        if not re.fullmatch(r"geoai-[0-9a-f]{12}", g.get("prefixo", "")):
+            raise SystemExit("geoai_publicada exige geoai.prefixo no formato geoai-<12 hex> em config/publicacao.json")
+        gman = json.loads((RAIZ / g["manifesto"]).read_text(encoding="utf-8"))
+        if gman["versao_dos_dados"] != g["prefixo"] or not HASH.match(gman["geoai"]["meta_sha256"]):
+            raise SystemExit("o manifesto da camada E não corresponde ao prefixo ou não traz o hash do meta.json")
+        geoai = {"url": f"{url}/{g['prefixo']}/geoai/", "meta_sha256": gman["geoai"]["meta_sha256"]}
+    return {**pub, "hashes": hashes, "manifesto_dados": man, "geoai_cfg": geoai}
 
 
 def origem_do_r2(pub: dict) -> str:
@@ -80,9 +87,9 @@ def config_de_producao(texto: str, pub: dict) -> str:
     """``config-dados.js`` de produção: URLs do R2 da versão, hashes esperados dos meta.json (a página recusa dados que não conferem) e a camada E só se estiver publicada."""
     base = f"{pub['r2_url']}/{pub['versao']}"
     h = pub["hashes"]
-    geoai = pub.get("geoai_publicada")
-    novo = (f'  fase3: "{base}/fase3/", drenagem: "{base}/drenagem/", geoai: {json.dumps(base + "/geoai/") if geoai else "null"}, versao: "{pub["versao"]}", '
-            f'meta_sha256: {{ fase3: "{h["fase3"]}", drenagem: "{h["drenagem"]}", geoai: {json.dumps(pub["manifesto_dados"]["geoai"]["meta_sha256"]) if geoai else "null"} }},')
+    geoai = pub.get("geoai_cfg")
+    novo = (f'  fase3: "{base}/fase3/", drenagem: "{base}/drenagem/", geoai: {json.dumps(geoai["url"]) if geoai else "null"}, versao: "{pub["versao"]}", '
+            f'meta_sha256: {{ fase3: "{h["fase3"]}", drenagem: "{h["drenagem"]}", geoai: {json.dumps(geoai["meta_sha256"]) if geoai else "null"} }},')
     for antigo in CONFIG_LOCAL:
         if antigo not in texto:
             raise SystemExit(f"config-dados.js mudou e o build não achou: {antigo[:50]}")
@@ -132,7 +139,7 @@ def build_site(out: Path, fase3: Path | None = None, drenagem: Path | None = Non
         r2_origem = r2_origem or origem_do_r2(publicacao)
     published = {"territorio": "poa"}
     if publicacao:
-        published["producao"] = {"versao": publicacao["versao"], "r2_url": publicacao["r2_url"], "geoai": bool(publicacao.get("geoai_publicada"))}
+        published["producao"] = {"versao": publicacao["versao"], "r2_url": publicacao["r2_url"], "geoai": bool(publicacao.get("geoai_publicada")), "geoai_prefixo": (publicacao.get("geoai") or {}).get("prefixo") if publicacao.get("geoai_publicada") else None}
     if fase3 is not None:   # opt-in (--fase3): tiles e detalhe da camada da Fase 3, dado derivado que nunca vai ao Git
         shutil.copytree(fase3, out / "fase3")
         published["fase3"] = True

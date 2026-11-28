@@ -40,7 +40,7 @@ def test_the_production_configuration_works_in_a_real_browser_against_simulated_
     from flooding_mapping.app import build
     pa, pb = porta(), porta()
     origem_site, r2_url = f"http://127.0.0.1:{pa}", f"http://127.0.0.1:{pb}"
-    pub = build.carregar_publicacao(pub_local(tmp_path, r2_url), local=True)
+    pub = build.carregar_publicacao(pub_local(tmp_path, r2_url, geoai_publicada=False), local=True)
     site = tmp_path / "site"
     build.build_site(site, publicacao=pub)
     procs = [subprocess.Popen([sys.executable, str(E2E / "servidor_producao_simulado.py"), "pages", str(pa), str(site)]),
@@ -110,3 +110,39 @@ def test_the_public_verifier_passes_against_the_simulated_r2_and_catches_a_missi
         assert any(i["resultado"] == "REPROVADO" and "CORS" in i["teste"] for i in errado.itens)
     finally:
         srv.shutdown()
+
+
+def test_r2dev_addresses_are_reported_as_a_known_limitation_for_edge_caching_and_custom_domains_are_not():
+    sys.path.insert(0, str(RAIZ / "tools"))
+    import verificar_publicacao as v
+    assert v.eh_r2dev("https://pub-66f5a12eb6834ef2b736fc85c89ca28c.r2.dev") and v.eh_r2dev("https://pub-x.r2.dev/")
+    assert not v.eh_r2dev("https://dados.exemplo.org") and not v.eh_r2dev("https://r2.dev.exemplo.org") and not v.eh_r2dev("http://127.0.0.1:8000")
+
+
+@nav
+@pytest.mark.skipif(not (RAIZ / "data/interim/r2_preparado/geoai-f11490d2ef1a/cabecalhos.json").exists(), reason="falta o pacote geoai (tools/preparar_para_r2.py --so-geoai)")
+def test_the_geoai_layer_loads_from_its_own_prefix_in_production_without_touching_the_main_version(tmp_path):
+    """Com geoai_publicada ligado, a camada E vem de geoai-<hash>/ (hash do meta conferido pela página) e funciona junto com a versão principal; sem erros de CSP, CORS ou hash."""
+    from flooding_mapping.app import build
+    gpac = RAIZ / "data/interim/r2_preparado/geoai-f11490d2ef1a"
+    pa, pb = porta(), porta()
+    origem_site, r2_url = f"http://127.0.0.1:{pa}", f"http://127.0.0.1:{pb}"
+    pub = build.carregar_publicacao(pub_local(tmp_path, r2_url, geoai_publicada=True), local=True)
+    site = tmp_path / "site"
+    build.build_site(site, publicacao=pub)
+    procs = [subprocess.Popen([sys.executable, str(E2E / "servidor_producao_simulado.py"), "pages", str(pa), str(site)]),
+             subprocess.Popen([sys.executable, str(E2E / "servidor_producao_simulado.py"), "r2", str(pb), str(PACOTE), origem_site, str(gpac)])]
+    try:
+        for p in (pa, pb):
+            for _ in range(40):
+                try:
+                    requests.get(f"http://127.0.0.1:{p}/", timeout=1)
+                    break
+                except requests.RequestException:
+                    time.sleep(0.25)
+        r = subprocess.run(["node", str(E2E / "producao_geoai.js")], env={**os.environ, "PAGES": origem_site, "R2": r2_url, "VERSAO": VERSAO, "GEOAI": "geoai-f11490d2ef1a"}, capture_output=True, text=True, timeout=600)
+        assert r.returncode == 0, (r.stdout + r.stderr)[-2500:]
+        assert "producao_geoai ok" in r.stdout
+    finally:
+        for proc in procs:
+            proc.terminate()

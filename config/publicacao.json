@@ -1,13 +1,17 @@
 {
- "descricao": "Configuração de PRODUÇÃO dos dados derivados no Cloudflare R2, lida pelo build (python -m flooding_mapping.app.build). Com r2_url nulo o build gera a configuração local (caminhos relativos, sem R2).",
+ "descricao": "Configuração de PRODUÇÃO dos dados derivados no Cloudflare R2, lida pelo build (python -m flooding_mapping.app.build). Com r2_url nulo o build gera a configuração local (caminhos relativos, sem R2). A camada E (GeoAI) tem prefixo próprio no bucket (geoai.prefixo) e só é ligada quando geoai_publicada é verdadeiro, depois de enviada e verificada (tools/verificar_publicacao.py <url> --geoai-prefixo geoai-...).",
  "versao": "d-b7f6f03555d9",
- "r2_url": null,
+ "r2_url": "https://pub-66f5a12eb6834ef2b736fc85c89ca28c.r2.dev",
  "manifesto": "docs/manifestos/manifesto_d-b7f6f03555d9.json",
  "camadas_publicadas": [
   "fase3",
   "drenagem"
  ],
- "geoai_publicada": false,
+ "geoai_publicada": true,
  "mapa_arquivo": "mapa/poa.pmtiles",
- "pages_origem": "https://flooding-mapping-capstone.pages.dev"
+ "pages_origem": "https://flooding-mapping-capstone.pages.dev",
+ "geoai": {
+  "prefixo": "geoai-f11490d2ef1a",
+  "manifesto": "docs/manifestos/manifesto_geoai-f11490d2ef1a.json"
+ }
 }

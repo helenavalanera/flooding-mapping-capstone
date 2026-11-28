@@ -1,0 +1,23 @@
+{
+ "formato": 1,
+ "versao_dos_dados": "geoai-f11490d2ef1a",
+ "camada": "geoai",
+ "natureza": "EXPERIMENTAL: estimativa de fração construída por célula de 30 m (Edificação + Vias Pavimentadas da Profill), independente das dimensões A a D",
+ "experimento": "geoai-fase5-f082089c4c59",
+ "geoai": {
+  "meta_sha256": "bca0ee84d6865cf3a63eceda1ab886d7a4f5a596245d06eed7c014808b6bf6fe",
+  "imagem": "geoai/fracao_construida.webp",
+  "imagem_sha256": "a84a8708ca7c6e83be92902f8f5c10b1bd17366371cf53c506686e15fdcfb47f",
+  "imagem_bytes": 83352,
+  "meta_bytes": 2545,
+  "raster_de_origem_sha256": "04b968a90ed7ccd9bbde139614a4a639953ae351c59e07fd2df4569329d21e4c"
+ },
+ "objetos_no_bucket": 2,
+ "bytes_no_bucket": 84672,
+ "fontes_dos_hashes": [
+  "data/processed/geoai_web/meta.json e fracao_construida.webp (tools/preparar_camada_geoai.py)",
+  "data/interim/r2_preparado/geoai-f11490d2ef1a/cabecalhos.json (este script)",
+  "data/processed/geoai/manifesto_geoai-fase5-f082089c4c59.json (SHA-256 do COG de origem)"
+ ],
+ "observacao": "Prefixo próprio da camada E: não faz parte da versão principal dos dados (d-b7f6f03555d9) e não a substitui. Camada experimental, sem validação independente."
+}

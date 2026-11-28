@@ -72,15 +72,51 @@ def preparar(fase3: Path, drenagem: Path, saida: Path, comprimir: bool = True, m
     return resumo
 
 
+def preparar_geoai(geoai: Path, saida: Path, manifestos: Path | None = None) -> dict:
+    """A camada E (GeoAI, experimental) num prefixo PRÓPRIO, ``geoai-<hash>/``, sem tocar a versão principal dos dados. O hash vem do conteúdo (meta.json e imagem). Escreve a pasta
+    preparada (com cabecalhos.json, no mesmo formato) e, em ``manifestos``, o resumo versionado com os hashes que a página confere."""
+    meta_b, img_b = (geoai / "meta.json").read_bytes(), (geoai / "fracao_construida.webp").read_bytes()
+    meta = json.loads(meta_b)
+    if hashlib.sha256(img_b).hexdigest() != meta["sha256_da_imagem"]:
+        raise SystemExit("a imagem não corresponde ao sha256_da_imagem do meta.json: refaça tools/preparar_camada_geoai.py")
+    prefixo = "geoai-" + hashlib.sha256(meta_b + img_b).hexdigest()[:12]
+    raiz = saida / prefixo
+    shutil.rmtree(raiz, ignore_errors=True)
+    (raiz / "geoai").mkdir(parents=True)
+    objetos = {}
+    for nome, original in (("meta.json", meta_b), ("fracao_construida.webp", img_b)):
+        chave = f"geoai/{nome}"
+        h = cabecalhos_do_objeto(chave, True)
+        corpo = gzip.compress(original, 9, mtime=0) if h.get("content_encoding") == "gzip" else original
+        (raiz / chave).write_bytes(corpo)
+        objetos[chave] = {**h, "bytes": len(corpo), "bytes_originais": len(original), "sha256_do_original": hashlib.sha256(original).hexdigest()}
+    resumo = {"versao_dos_dados": prefixo, "objetos": len(objetos), "bytes": sum(o["bytes"] for o in objetos.values()), "bytes_originais": sum(o["bytes_originais"] for o in objetos.values())}
+    (raiz / "cabecalhos.json").write_text(json.dumps({"resumo": resumo, "objetos": objetos}, ensure_ascii=False, indent=1), encoding="utf-8")
+    if manifestos:
+        man = {"formato": 1, "versao_dos_dados": prefixo, "camada": "geoai", "natureza": meta["natureza"], "experimento": meta["experimento"],
+               "geoai": {"meta_sha256": objetos["geoai/meta.json"]["sha256_do_original"], "imagem": "geoai/fracao_construida.webp", "imagem_sha256": meta["sha256_da_imagem"], "imagem_bytes": len(img_b), "meta_bytes": len(meta_b),
+                         "raster_de_origem_sha256": meta["origem"]["sha256"]},
+               "objetos_no_bucket": len(objetos), "bytes_no_bucket": resumo["bytes"],
+               "fontes_dos_hashes": ["data/processed/geoai_web/meta.json e fracao_construida.webp (tools/preparar_camada_geoai.py)", f"data/interim/r2_preparado/{prefixo}/cabecalhos.json (este script)", "data/processed/geoai/manifesto_" + meta["experimento"] + ".json (SHA-256 do COG de origem)"],
+               "observacao": "Prefixo próprio da camada E: não faz parte da versão principal dos dados (d-b7f6f03555d9) e não a substitui. Camada experimental, sem validação independente."}
+        (manifestos / f"manifesto_{prefixo}.json").write_text(json.dumps(man, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return resumo
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--fase3", type=Path, default=RAIZ / "data/processed/fase3_web")
     ap.add_argument("--drenagem", type=Path, default=RAIZ / "data/processed/drenagem_web")
     ap.add_argument("--saida", type=Path, default=RAIZ / "data/interim/r2_preparado")
     ap.add_argument("--geoai", type=Path, default=RAIZ / "data/processed/geoai_web", help="a camada E (experimental) entra se a pasta existir")
+    ap.add_argument("--so-geoai", action="store_true", help="prepara só a camada E, num prefixo próprio geoai-<hash>, e grava o resumo do manifesto em docs/manifestos/")
     ap.add_argument("--mapa-poa", action="store_true")
     ap.add_argument("--sem-compressao", action="store_true")
     a = ap.parse_args()
+    if a.so_geoai:
+        r = preparar_geoai(a.geoai, a.saida, RAIZ / "docs/manifestos")
+        print(json.dumps(r | {"saida": str(a.saida / r["versao_dos_dados"])}, ensure_ascii=False, indent=1))
+        return
     r = preparar(a.fase3, a.drenagem, a.saida, not a.sem_compressao, a.mapa_poa, geoai=a.geoai if a.geoai.exists() else None)
     print(json.dumps(r | {"mb": round(r["bytes"] / 1e6, 1), "mb_originais": round(r["bytes_originais"] / 1e6, 1), "saida": str(a.saida / r["versao_dos_dados"])}, ensure_ascii=False, indent=1))
 
