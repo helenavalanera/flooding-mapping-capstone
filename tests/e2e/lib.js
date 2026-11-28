@@ -8,6 +8,9 @@ async function abrir(opts, semWebgl) {
   const ctx = await browser.newContext(opts);
   const page = await ctx.newPage(), erros = [];
   page.setDefaultTimeout(90000);
+  // O painel real abre no mapa e esconde as abas no modo mapa; os testes que partem de Resultados usam o endereço explícito, e o clique numa aba (escondida) é feito no DOM.
+  const goto0 = page.goto.bind(page); page.goto = (u, o) => goto0(u === BASE ? BASE + "#poa/resultados" : u, o);
+  const click0 = page.click.bind(page); page.click = (s, o) => (typeof s === "string" && /^\[data-aba=/.test(s) ? page.evaluate((q) => document.querySelector(q).click(), s) : click0(s, o));
   if (process.env.TRACE) for (const m of ["click", "fill", "selectOption", "waitForSelector", "waitForFunction", "goto"]) { const o = page[m].bind(page); page[m] = (...a) => { console.error(new Date().toISOString().slice(14, 23), m, String(a[0]).slice(0, 70)); return o(...a); }; }   // software WebGL (no GPU) renders the 3D map slowly
   page.on("console", (m) => { if (m.type() === "error" && !/tile\.openstreetmap|amazonaws|ERR_|Failed to load resource/.test(m.text())) erros.push(m.text().slice(0, 200)); });
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
@@ -31,7 +34,7 @@ const pontoDe = (page, camada) => page.evaluate((c) => {
     const g = f[(Math.floor(f.length / 2) + k) % f.length].geometry, flat = []; (function w(a) { typeof a[0] === "number" ? flat.push(a) : a.forEach(w); })(g.coordinates);
     for (let j = 0; j < Math.min(flat.length, 12); j++) {
       const p = m.project(flat[Math.floor((flat.length * (j + 1)) / 13)]), x = r.left + p.x, y = r.top + p.y;
-      if (x > 4 && y > 4 && x < innerWidth - 4 && y < innerHeight - 4 && p.x > 0 && p.y > 0 && p.x < r.width && p.y < r.height && document.elementFromPoint(x, y) === cv) return { x, y };
+      if (p.x > r.width * 0.08 && p.y > r.height * 0.12 && p.x < r.width * 0.92 && p.y < r.height * 0.9 && x > 4 && y > 4 && x < innerWidth - 4 && y < innerHeight - 4 && document.elementFromPoint(x, y) === cv) return { x, y };      // longe das bordas: controles flutuantes e o rodapé do mapa não interceptam
     }
   }
   return null; }, camada);

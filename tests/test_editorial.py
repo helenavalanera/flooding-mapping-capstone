@@ -33,8 +33,8 @@ def test_the_four_dimensions_use_the_official_sentences_and_stay_independent():
 
 
 def test_the_methodological_detail_sits_in_a_secondary_disclosure_not_in_the_controls():
-    js = ler("mapa.js")
-    assert "<details class='dim-nota small'>" in js and "Como ler" in js
+    js = ler("fase3.js")
+    assert "<details id='f3-metodo' class='mais'>" in js and "Como ler e limitações" in js and "notaDim" in js
 
 
 @pytest.mark.skipif(not FASE3_META.exists(), reason="camada da Fase 3 não gerada (data/processed fica fora do Git; tools/preparar_camada_fase3.py)")
@@ -61,7 +61,7 @@ def test_the_reference_rain_is_described_as_the_75th_percentile_and_not_the_mean
     assert "percentil 75" in c["leitura_da_referencia"] and "Não é a média histórica" in c["leitura_da_referencia"]
     assert abs(c["total_por_evento_mm"]["p75"] - 29.9) < 0.15 and abs(c["total_por_evento_mm"]["media"] - 22.8) < 0.15
     assert "reanálise" in c["fonte"].lower() or "era5" in c["fonte"].lower()
-    js = ler("mapa.js")
+    js = ler("fase3.js")
     assert "percentil 75" in js and "uniforme" in ler("simulador.js").lower() and "uniforme" in ler("fase3.js").lower()
 
 

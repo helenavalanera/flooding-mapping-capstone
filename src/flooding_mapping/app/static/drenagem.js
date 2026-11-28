@@ -54,7 +54,7 @@
   }
   function li(sw, texto, tipo) { return "<li>" + sw + "<span>" + esc(texto) + " <span class='small'>(" + tipo + ")</span></span></li>"; }
   Dr.legenda = function () {
-    var g = Dr.grupos, h = "<li class='f3-tit'><b>Drenagem cadastrada</b> " + Lg.kindBadge("observado") + " <span class='small'>contexto, fora do cálculo</span></li>";
+    var g = Dr.grupos, h = "<li class='f3-tit'><b>Drenagem cadastrada</b> <span class='small'>contexto, fora do cálculo</span></li>";
     if (g.rede) h += li(swatch(COR.cadastro, "linha"), "Cadastro existente", "linha") + li(swatch(COR.sem_acesso, "linha"), "Registro sem acesso", "linha") + li(swatch(COR.nao_interligada, "linha", "dashed"), "Cadastrado como não interligado", "linha") +
       li(swatch(COR.duplicado, "linha", "dotted"), "Registro duplicado (fora do inventário)", "linha");
     if (g.pocos) h += li(swatch(COR.poco, "ponto"), "Poço de visita", "ponto");
@@ -67,12 +67,12 @@
   };
   Dr.montarPainel = function () {
     var box = el("dren-opcoes"); if (!box) return;
-    if (!Dr.meta) { box.innerHTML = "<h2>Drenagem cadastrada</h2>" + (Dr.erro ? "<p class='small' role='status'>Os dados da drenagem não estão disponíveis neste ambiente (" + esc(Dr.erro) + "). Gere-os com tools/preparar_camada_drenagem.py.</p>" : "<p class='small' role='status'>Carregando...</p>"); return; }
+    if (!Dr.meta) { box.innerHTML = "<p class='sr-only' id='h-dren'>Drenagem cadastrada</p>" + (Dr.erro ? "<p class='small' role='status'>Os dados da drenagem não estão disponíveis neste ambiente (" + esc(Dr.erro) + "). Gere-os com tools/preparar_camada_drenagem.py.</p>" : "<p class='small' role='status'>Carregando...</p>"); return; }
     var cont = Dr.meta.camadas;
-    box.innerHTML = "<h2 id='h-dren'>Drenagem cadastrada " + Lg.kindBadge("observado") + "</h2><p class='small f3-aviso' role='note'>" + esc(TEXTOS.aviso) + "</p>" +
-      "<fieldset class='f3-modos'><legend>O que mostrar</legend>" + Object.keys(NOME).map(function (k) {
-        return "<label class='f3-radio'><input type='checkbox' data-dren='" + k + "'" + (Dr.grupos[k] ? " checked" : "") + "> " + esc(NOME[k]) + " <span class='small'>(" + cont[k].registros.toLocaleString("pt-BR") + " registros)</span></label>"; }).join("") + "</fieldset>" +
-      "<p class='small'>" + esc(TEXTOS.pontual) + "</p><p class='small'>" + esc(TEXTOS.fonte) + "</p>";
+    box.innerHTML = "<p class='sr-only' id='h-dren'>Drenagem cadastrada</p>" +
+      "<fieldset class='f3-modos'><legend>Mostrar</legend>" + Object.keys(NOME).map(function (k) {
+        return "<label class='f3-radio'><input type='checkbox' data-dren='" + k + "'" + (Dr.grupos[k] ? " checked" : "") + "> " + esc(NOME[k]) + " <span class='small'>(" + cont[k].registros.toLocaleString("pt-BR") + ")</span></label>"; }).join("") + "</fieldset>" +
+      "<details class='mais'><summary>Sobre esta camada</summary>" + (window.Mapa && window.Mapa.notaDim ? window.Mapa.notaDim("D") : "") + "<p class='small f3-aviso' role='note'>" + esc(TEXTOS.aviso) + "</p><p class='small'>" + esc(TEXTOS.pontual) + "</p><p class='small'>" + esc(TEXTOS.fonte) + "</p></details>";
     box.querySelectorAll("input[data-dren]").forEach(function (i) { i.addEventListener("change", function () { Dr.grupos[i.dataset.dren] = i.checked; Dr.ouvintes.forEach(function (f) { f(); }); }); });
   };
 
@@ -107,7 +107,7 @@
     var linhas = Object.keys(r).map(function (c) {
       var m = rotuloDoCampo(camada, c);
       return "<tr><th scope='row'>" + esc(c) + (m.original ? " <span class='small'>(" + esc(m.original) + (m.unidade ? ", " + esc(m.unidade) + (m.inferida ? ", unidade inferida" : "") : "") + ")</span>" : "") + "</th><td>" + valorTexto(r[c]) + "</td></tr>"; }).join("");
-    return "<h3>" + esc(cab) + " " + Lg.kindBadge("observado") + "</h3><p class='small'>Registro do cadastro, não funcionamento.</p>" +
+    return "<h3>" + esc(cab) + "</h3><p class='small'>Registro do cadastro, não funcionamento.</p>" +
       "<dl class='dren-resumo'>" + resumo.map(function (x) { return "<dt>" + esc(x[0]) + "</dt><dd>" + (x[1] == null ? "<span class='muted'>não informado</span>" : esc(x[1])) + "</dd>"; }).join("") + "</dl>" + q + evid +
       "<details><summary>Todos os atributos do cadastro, como na fonte</summary><table><tbody>" + linhas + "</tbody></table></details>" +
       "<p class='small'>" + esc(TEXTOS.aviso) + "</p>";

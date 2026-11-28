@@ -18,11 +18,11 @@ const PAGES = process.env.PAGES, R2 = process.env.R2, VERSAO = process.env.VERSA
   await page.waitForFunction(() => window.Mapa && window.Mapa.pronto, null, { timeout: 150000 });
   const cfg = await page.evaluate(() => ({ geoai: FM_DADOS.geoai, h: FM_DADOS.meta_sha256.geoai, fase3: FM_DADOS.fase3 }));
   assert.strictEqual(cfg.geoai, `${R2}/${GEOAI}/geoai/`, "a camada E vem do prefixo próprio"); assert.ok(/^[0-9a-f]{64}$/.test(cfg.h)); assert.strictEqual(cfg.fase3, `${R2}/${VERSAO}/fase3/`, "a versão principal não muda");
-  await page.waitForFunction(() => /GeoAI/.test(document.getElementById("camadas").textContent));
-  assert.ok(!(await page.evaluate(() => /ainda não publicada/.test(document.getElementById("camadas").textContent))), "com a camada publicada, o aviso de ausência some");
-  await page.click("#dimensoes button[data-dim=B]"); await page.waitForFunction(() => window.Fase3 && window.Fase3.meta);
-  await page.click("#dimensoes button[data-dim=D]"); await page.waitForFunction(() => window.Drenagem && window.Drenagem.meta);
-  await page.click("input[data-camada=geoai_fracao_construida]");
+  await page.waitForSelector("button[data-dim=E]");
+  assert.ok(await page.isEnabled("button[data-dim=E]") && !/ainda não publicada/.test(await page.getAttribute("button[data-dim=E]", "title")), "com a camada publicada, o botão fica ativo e sem aviso de ausência");
+  await page.click("button[data-dim=B]"); await page.waitForFunction(() => window.Fase3 && window.Fase3.meta);
+  await page.click("button[data-dim=D]"); await page.waitForFunction(() => window.Drenagem && window.Drenagem.meta);
+  await page.click("button[data-dim=E]");
   await page.waitForFunction(() => window.Geoai && window.Geoai.meta && window.Mapa.map.getLayer("geoai-e") && window.Mapa.map.getLayoutProperty("geoai-e", "visibility") === "visible");
   await page.waitForTimeout(2500); await Promise.all(pend);
   const g = r2.filter((x) => x.u.startsWith("/" + GEOAI + "/"));

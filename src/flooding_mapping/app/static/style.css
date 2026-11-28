@@ -303,3 +303,69 @@ body.modo-mapa #abas, html.modo-mapa-inicial #abas { margin-top: 6px; }
 body.modo-mapa, html.modo-mapa-inicial body { --cab: 96px; }
 body.modo-mapa .mapa-layout, html.modo-mapa-inicial .mapa-layout { height: calc(100vh - var(--cab)); height: calc(100svh - var(--cab)); }
 @media (max-width: 820px) { body.modo-mapa, html.modo-mapa-inicial body { --cab: 92px; } }
+
+/* Marca (logotipo) no cabeçalho */
+h1 .marca-painel { display: block; height: 34px; width: auto; }
+h1 a { display: inline-block; }
+
+/* Cabeçalho do mapa: só o logotipo (as abas voltam fora do mapa, para quem chega a Resultados ou Simulador por link). */
+body.modo-mapa #abas, html.modo-mapa-inicial #abas { display: none; }
+body.modo-mapa, html.modo-mapa-inicial body { --cab: 56px; }
+@media (max-width: 820px) { body.modo-mapa, html.modo-mapa-inicial body { --cab: 52px; } }
+
+/* ===== Painel do mapa em quatro grupos (Análise principal, Sobreposições, Visualização, Legenda) e painel do trecho em grade 2 × 2 ===== */
+#painel-mapa { padding:10px 16px 14px; }
+#painel-mapa .grupo { margin:0 0 14px; }
+#painel-mapa h2.grupo-tit { margin:0 0 6px; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+#painel-mapa h2.grupo-tit span { text-transform:none; letter-spacing:0; font-weight:500; font-size:.75rem; }
+.seg { display:flex; gap:2px; background:var(--seg); padding:3px; border-radius:14px; }
+.seg button, .seg .dim { flex:1 1 0; min-width:0; width:auto; min-height:40px; border:0; background:transparent; border-radius:11px; padding:6px 4px; font:inherit; font-size:.84rem; font-weight:500; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; text-align:center; box-shadow:none; }
+.seg.col button { flex-direction:column; gap:3px; min-height:56px; }
+.seg.col button b { display:grid; place-items:center; flex:none; width:22px; height:22px; margin:0; border-radius:50%; background:rgba(10,28,39,.10); color:var(--ink); font-size:.74rem; }
+.seg button[aria-pressed="true"], .seg .dim.on { background:var(--card,#fff); color:var(--ink); font-weight:600; box-shadow:0 1px 3px rgba(10,28,39,.22); }
+.seg button[aria-pressed="true"] b { background:var(--accent); color:#fff; }
+.seg button:disabled { opacity:.5; cursor:not-allowed; }
+.seg button:focus-visible { outline:3px solid #f0a830; outline-offset:1px; }
+.ctl-grade { display:grid; gap:8px; margin-top:10px; grid-template-columns:repeat(3, minmax(0, 1fr)); } .ctl-grade.n1 { grid-template-columns:1fr; } .ctl-grade.n2 { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+.ctl { display:flex; flex-direction:column; gap:2px; min-width:0; } .ctl label { font-size:.72rem; color:var(--muted); }
+.ctl select, .ctl-linha select { width:100%; min-height:38px; font:inherit; font-size:.88rem; padding:4px 8px; border:1px solid var(--line); border-radius:10px; background:var(--card,#fff); color:var(--ink); }
+.ctl-linha { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; font-size:.85rem; } .ctl-linha select { width:auto; min-width:110px; } .ctl-linha input[type=range] { flex:1; min-width:80px; }
+#camadas .camada { margin:10px 0 0; } #camadas p { margin:4px 0 0 22px; }
+.mais { margin:8px 0 0; font-size:.85rem; } .mais summary { cursor:pointer; color:var(--muted); font-weight:600; font-size:.8rem; padding:6px 0; } .mais summary:focus-visible { outline:3px solid #f0a830; outline-offset:2px; }
+.mais > p, .mais > h3 { margin:6px 0; } .mais h3 { font-size:.85rem; }
+#painel-mapa .opcoes-camada { margin-top:10px; padding-top:0; border-top:0; }
+#f3-zoom:empty { display:none; }
+#painel-mapa .f3-modos { border:0; padding:0; margin:10px 0 6px; }
+.sobre-mapa { margin-top:4px; } .sobre-links { display:flex; flex-wrap:wrap; gap:6px 16px; }
+#painel-mapa .legend li { margin:4px 0; }
+/* seleção */
+.sel-card { position:relative; margin:0 0 14px; padding:12px 14px 10px; border-radius:16px; background:var(--card,#fff); border:1px solid var(--line); box-shadow:0 2px 8px rgba(10,28,39,.14); }
+.sel-card h2 { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.sel-fechar { position:absolute; top:6px; right:6px; width:34px; height:34px; border:0; border-radius:50%; background:transparent; color:var(--muted); font-size:1.4rem; line-height:1; cursor:pointer; } .sel-fechar:hover { background:var(--seg); } .sel-fechar:focus-visible { outline:3px solid #f0a830; outline-offset:1px; }
+.sel-topo { display:flex; align-items:center; flex-wrap:wrap; gap:4px 8px; padding-right:34px; }
+.sel-rua { margin:0; font-size:1.15rem; line-height:1.25; color:var(--ink); overflow-wrap:anywhere; }
+.sel-grade { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin:10px 0 6px; }
+.sel-ind { margin:0; padding:9px 10px 8px; border:0; border-radius:12px; background:var(--seg); min-width:0; }
+.sel-ind dt { display:flex; align-items:center; gap:6px; margin:0; font-size:.76rem; color:var(--muted); }
+.sel-ind dt b { display:grid; place-items:center; flex:none; width:18px; height:18px; border-radius:50%; background:var(--accent); color:#fff; font-size:.68rem; }
+.sel-ind dd { margin:4px 0 0; } .sel-ind .v { display:block; font-size:1.2rem; font-weight:700; line-height:1.15; color:var(--ink); overflow-wrap:anywhere; } .sel-ind .u { font-size:.78rem; color:var(--muted); }
+.sel-ind.sem .v { font-size:.95rem; font-weight:600; color:var(--muted); }
+.sel-ctx { margin:2px 0 0; color:var(--muted); }
+.sel-mais { margin-top:6px; }
+.sel-card section { margin:0 !important; } .sel-ind.estado .v { font-size:1rem; font-weight:600; }
+
+/* Tipografia (design system "Quem já faz?"): SK Concretika em títulos, subtítulos e botões; Inter (OFL, hospedada em vendor/fonts) em textos e legendas.
+   A SK Concretika é licenciada e os arquivos não estão no projeto: usa a fonte instalada na máquina (local) e, sem ela, a pilha de reserva. Para embutir, ver docs/guia_de_uso.md. */
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 400; font-display: swap; src: url("vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 400; font-display: swap; src: url("vendor/fonts/inter-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 600; font-display: swap; src: url("vendor/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 700; font-display: swap; src: url("vendor/fonts/inter-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "SK Concretika"; font-weight: 400; src: local("SK Concretika"), local("SKConcretika-Regular"), local("SK Concretika Regular"); }
+@font-face { font-family: "SK Concretika"; font-weight: 700; src: local("SK Concretika Bold"), local("SKConcretika-Bold"); }
+
+:root { --f-titulo: "SK Concretika", "Space Grotesk", "DM Sans", system-ui, sans-serif; --f-texto: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+body, input, select, textarea, .link, summary { font-family: var(--f-texto); }
+h1, h2, h3, h4, .sub, .grupo-tit, .sel-rua, button:not(.link), .btn, .seg button, .alca, #abas button, .sel-ind dt, .ctl label { font-family: var(--f-titulo); }
+.legend, .legend li, figcaption { font-family: var(--f-texto); font-style: italic; }
+.legend li.f3-tit { font-style: normal; font-weight: 600; }
+#painel-mapa .seg button, #painel-mapa .seg .dim, #painel-mapa .alca, #abas button { font-family: var(--f-titulo); }

@@ -19,7 +19,7 @@ const { assert, abrir, BASE } = require("./lib");
   await abre("simulador", "#vista-simulador .rs-seletor", /./);
   const camadas = await abre("camadas", "#legenda-gl", /Geração potencial local/);
   const consulta = await abre("consulta", "#f3-trecho", /Rua Álvaro Chaves/);
-  assert.match(await consulta.innerText("#f3-trecho"), /Contribuição potencial estimada associada ao trecho/); assert.match(await consulta.innerText("#f3-trecho"), /Não somar com outros trechos/);
+  assert.match(await consulta.textContent("#f3-trecho"), /Contribuição potencial estimada associada ao trecho/); assert.match(await consulta.textContent("#f3-trecho"), /Não somar com outros trechos/);
   assert.match(await page.innerText(".cel-nota"), /./);
   // a moldura não é uma imagem: não há img do aplicativo na página
   assert.strictEqual(await page.locator(".cel-corpo img").count(), 0);

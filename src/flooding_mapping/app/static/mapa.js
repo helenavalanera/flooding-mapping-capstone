@@ -58,7 +58,7 @@
     var so3d = M.motor.suporta.tres_d;
     M.tres_d = ligado && so3d;
     el("vista-3d").setAttribute("aria-pressed", String(M.tres_d)); el("vista-2d").setAttribute("aria-pressed", String(!M.tres_d));
-    el("vista-3d").disabled = !so3d; el("exagero").disabled = !M.tres_d;
+    el("vista-3d").disabled = !so3d; el("exagero").disabled = !M.tres_d; el("exagero-linha").hidden = !M.tres_d;
     M.motor.tres_d(M.tres_d, M.exagero, T.territorio().vista, animar !== false && !reduzido());
     el("nota-relevo").textContent = !so3d ? "Este navegador não tem WebGL: o mapa está em 2D simples. O relevo e a vista inclinada exigem WebGL; as demais funções são as mesmas."
       : M.tres_d ? "Relevo com exagero vertical de " + String(M.exagero).replace(".", ",") + "× apenas para visualização; não entra em nenhum cálculo de risco. O modelo de elevação pode ter artefatos sobre água e vegetação."
@@ -153,25 +153,27 @@
      Quatro perguntas, cada uma ligada a uma grandeza que já existe: A, B e C usam a camada de escoamento (a cor das linhas mostra uma por vez);
      D, a drenagem cadastrada, é outra camada e pode ser sobreposta. Nenhuma combina as outras em índice. */
   var DIMENSOES = [
-    { id: "A", modo: "l", camada: "escoamento_fase3", nome: "Geração", pergunta: "Quanto da chuva pode se transformar em água que escoa pela superfície (geração de escoamento superficial).",
+    { id: "A", modo: "l", camada: "escoamento_fase3", nome: "Geração", curto: "Geração", pergunta: "Quanto da chuva pode se transformar em água que escoa pela superfície (geração de escoamento superficial).",
       nota: "Escoamento potencial só da superfície sob o trecho, pelo uso do solo e pelos coeficientes de escoamento do pacote escolhido. Não inclui o que vem de montante." },
-    { id: "B", modo: "c", camada: "escoamento_fase3", nome: "Concentração", pergunta: "Para onde a água que escoa tende a convergir pelo território (concentração de escoamento superficial).",
+    { id: "B", modo: "c", camada: "escoamento_fase3", nome: "Concentração", curto: "Concentração", pergunta: "Para onde a água que escoa tende a convergir pelo território (concentração de escoamento superficial).",
       nota: "Escoamento potencial somado sobre a área a montante que o relevo encaminha ao trecho. É contribuição potencial, não vazão, e não se soma entre trechos." },
-    { id: "C", modo: "tp", camada: "escoamento_fase3", nome: "Topografia", pergunta: "Onde o relevo apresenta condições mais favoráveis à retenção de água (propensão topográfica à retenção).",
+    { id: "C", modo: "tp", camada: "escoamento_fase3", nome: "Topografia", curto: "Topografia", pergunta: "Onde o relevo apresenta condições mais favoráveis à retenção de água (propensão topográfica à retenção).",
       nota: "Posto relativo entre trechos pelo preenchimento de depressões no Copernicus GLO-30 (30 m). Não é profundidade de alagamento, e o modelo não resolve depressões urbanas pequenas." },
-    { id: "D", camada: "drenagem_cadastro", nome: "Drenagem", pergunta: "Onde estão localizados os dispositivos e as redes de drenagem cadastrados (infraestrutura de drenagem).",
+    { id: "D", camada: "drenagem_cadastro", nome: "Drenagem", curto: "Drenagem", pergunta: "Onde estão localizados os dispositivos e as redes de drenagem cadastrados (infraestrutura de drenagem).",
       nota: "Presença no cadastro não comprova conexão hidráulica, capacidade nem funcionamento. Fica fora do cálculo." },
-    { id: "E", camada: "geoai_fracao_construida", nome: "GeoAI (experimental)", pergunta: "Qual a fração construída por célula estimada por inteligência artificial geoespacial (camada experimental).",
+    { id: "E", camada: "geoai_fracao_construida", nome: "GeoAI (experimental)", curto: "GeoAI", pergunta: "Qual a fração construída por célula estimada por inteligência artificial geoespacial (camada experimental).",
       nota: "Estimativa experimental, com a Profill como referência e fonte dos rótulos e sem validação independente. Não é impermeabilidade medida, coeficiente de escoamento nem alagamento, e não entra no cálculo das dimensões A a D." }
   ];
   M.DIMENSOES = DIMENSOES;
+  /* Texto "o que é" de uma dimensão, para o "Como ler" de cada grupo de opções (uma única fonte). */
+  M.notaDim = function (id) { var d = DIMENSOES.filter(function (x) { return x.id === id; })[0]; return d ? "<p class='small'><b>" + d.id + " · " + Lg.esc(d.nome) + ".</b> " + Lg.esc(d.pergunta) + " " + Lg.esc(d.nota) + "</p>" : ""; };
   function dimensaoAtiva(d) {
     if (d.modo) return visivel(d.camada) && window.Fase3.estado.modo === d.modo;
     return visivel(d.camada);
   }
   function alternarDimensao(d) {
     var F = window.Fase3;
-    if (dimensaoAtiva(d)) M.marcadas[d.camada] = false;
+    if (dimensaoAtiva(d)) M.marcadas[d.camada] = false;                                   // A, B e C compartilham a mesma camada: ligar uma troca a outra
     else { M.marcadas[d.camada] = true; if (d.modo) F.estado.modo = d.modo; }
     renderControles(); aplicarCamadas(); legenda();
   }
@@ -180,65 +182,56 @@
     if (!M.pronto) return;
     limparSelecao(); M.motor.voar(T.territorio().vista, M.tres_d, reduzido());
   };
+  function botaoDim(d, on, desabilitada, extra) {
+    return "<button type='button' class='dim" + (on ? " on" : "") + "' data-dim='" + d.id + "' aria-pressed='" + on + "'" + (desabilitada ? " disabled" : "") + " title='" + Lg.esc(extra || d.pergunta) + "'" + "><b>" + d.id + "</b><span>" + Lg.esc(d.curto) + "</span></button>";
+  }
+  /* Análise principal (A, B, C: uma por vez) e sobreposições (D, E: independentes) em dois grupos; a explicação de cada dimensão fica em "Como ler". */
   function renderDimensoes() {
-    var box = el("dimensoes"), F = window.Fase3;
-    if (!box) return;
+    var box = el("dimensoes"), sob = el("sobreposicoes");
+    if (!box || !sob) return;
     var foco = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.dim;
-    var poa = M.pronto && (habilitada("escoamento_fase3") || habilitada("drenagem_cadastro") || habilitada("geoai_fracao_construida"));
-    box.hidden = !poa; el("camadas-sub").textContent = poa ? "(outras)" : "";
-    if (!poa) { box.innerHTML = ""; return; }
-    var ativas = DIMENSOES.filter(dimensaoAtiva);
-    var botoes = DIMENSOES.filter(function (d) { return habilitada(d.camada); }).map(function (d) {
-      var on = dimensaoAtiva(d);
-      return "<li><button type='button' class='dim" + (on ? " on" : "") + "' data-dim='" + d.id + "' aria-pressed='" + on + "'><span class='dim-id'>" + d.id + "</span><span><b>" + Lg.esc(d.nome) + "</b><span class='small'>" + Lg.esc(d.pergunta) + "</span></span></button></li>";
+    var cam = T.camadas(), semWebgl = M.pronto && !M.motor.suporta.relevo;
+    var temF3 = M.pronto && !!cam.escoamento_fase3, temD = M.pronto && !!cam.drenagem_cadastro, temE = M.pronto && !!cam.geoai_fracao_construida;
+    el("grupo-analise").hidden = !temF3; el("grupo-sobre").hidden = !(temD || temE); el("aviso-webgl").hidden = !semWebgl;
+    var principais = DIMENSOES.filter(function (d) { return d.modo; }), sobrep = DIMENSOES.filter(function (d) { return !d.modo; });
+    box.innerHTML = temF3 ? principais.map(function (d) { return botaoDim(d, dimensaoAtiva(d), !habilitada(d.camada)); }).join("") : "";
+    sob.innerHTML = sobrep.filter(function (d) { return cam[d.camada]; }).map(function (d) {
+      var ausente = semDados(CAMADAS[d.camada]);
+      return botaoDim(d, dimensaoAtiva(d), !habilitada(d.camada), ausente ? "Camada experimental ainda não publicada neste ambiente. As demais camadas não dependem dela." : "");
     }).join("");
-    var f3on = visivel("escoamento_fase3") && F.meta && F.estado.modo !== "tp", p = F.estado.p;
-    var chuva = f3on && p != null ? "<p class='small dim-chuva' id='dim-chuva'><b>Chuva de referência: " + String(p).replace(".", ",") + " mm</b>, igual em toda a cidade. " +
-      (p === 30 ? "É o percentil 75 dos totais por evento de 2017 a 2026 (reanálise ERA5), não a média. " : "") + "Cenário de cálculo, não previsão.</p>" : "";
-    var erro = F.erro && visivel("escoamento_fase3") ? "<p class='small f3-sem' role='status'>Os dados de escoamento não estão disponíveis (" + Lg.esc(F.erro) + "); esta dimensão não pode ser mostrada. <button type='button' class='link' id='dim-tentar'>Tentar de novo</button></p>" : "";
-    var versao = F.meta && visivel("escoamento_fase3") ? "<p class='small' id='dim-versao'>Dados de escoamento: camada v" + Lg.esc(F.meta.versao) + (window.FM_DADOS.versao ? ", conjunto " + Lg.esc(window.FM_DADOS.versao) : "") + ".</p>" : "";
-    box.innerHTML = "<h2 id='h-dim'>O que você quer ver?</h2><p class='small'>Cada item é independente, sem índice único. A, B e C pintam as linhas, um por vez. D e a camada experimental E podem ficar por cima.</p>" +
-      "<ul class='dim-lista'>" + botoes + "</ul>" +
-      (ativas.length ? "<details class='dim-nota small'><summary>Como ler " + (ativas.length > 1 ? "estas dimensões" : "esta dimensão") + "</summary>" + ativas.map(function (d) { return "<p><b>" + d.id + ".</b> " + Lg.esc(d.nota) + "</p>"; }).join("") + "</details>" : "<p class='small muted'>Nenhuma dimensão ligada. Escolha uma acima para colorir os trechos.</p>") +
-      chuva + erro + versao +
-      "<p class='dim-nav small'><a href='#poa/resultados'>Ler os resultados por contexto territorial</a> · <button type='button' class='link' id='dim-geral'>Voltar à visão geral da cidade</button></p>";
-    Array.prototype.forEach.call(box.querySelectorAll("button[data-dim]"), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll("button[data-dim]"), function (b) {
       b.addEventListener("click", function () { alternarDimensao(DIMENSOES.filter(function (d) { return d.id === b.dataset.dim; })[0]); });
     });
-    el("dim-geral").addEventListener("click", M.voltarVisaoGeral);
-    if (el("dim-tentar")) el("dim-tentar").addEventListener("click", M.tentarFase3);
-    if (foco) { var f = box.querySelector("button[data-dim=" + foco + "]"); if (f) f.focus(); }
+    if (foco) { var f = document.querySelector("button[data-dim=" + foco + "]"); if (f && f !== document.activeElement) f.focus(); }
   }
+  /* Só o relevo sombreado é controle de camada à parte (independente da vista 2D/3D); as demais camadas são as dimensões. */
   function renderControles() {
-    var camadas = T.camadas(), box = el("camadas");
-    var html = Object.keys(CAMADAS).filter(function (n) { return camadas[n]; }).map(function (n) {
-      var st = camadas[n], c = CAMADAS[n], semMotor = c.so3d && !M.motor.suporta.relevo, ausente = semDados(c), ativa = st.ativa && !semMotor && !ausente, marcada = visivel(n);
-      return "<label class='camada" + (ativa ? "" : " inativa") + "'><input type='checkbox' data-camada='" + n + "'" + (marcada ? " checked" : "") + (ativa ? "" : " disabled") + "> " + Lg.esc(c.rotulo) +
-        (c.kind ? " " + Lg.kindBadge(c.kind) : "") + (ativa ? "" : "<span class='small'>" + (semMotor ? "Exige WebGL (indisponível neste navegador)." : ausente ? "Camada experimental ainda não publicada neste ambiente. As demais camadas não dependem dela." : Lg.esc(st.rotulo) + ": " + Lg.esc(st.nota)) + "</span>") + "</label>";
-    }).join("");
-    box.innerHTML = html || "<p class='muted'>Nenhuma camada descrita.</p>";
+    var camadas = T.camadas(), box = el("camadas"), n = "relevo";
+    if (!camadas[n]) { box.innerHTML = ""; renderDimensoes(); return; }
+    var st = camadas[n], c = CAMADAS[n], semMotor = c.so3d && !M.motor.suporta.relevo, ativa = st.ativa && !semMotor, marcada = visivel(n);
+    box.innerHTML = "<label class='camada" + (ativa ? "" : " inativa") + "'><input type='checkbox' data-camada='" + n + "'" + (marcada ? " checked" : "") + (ativa ? "" : " disabled") + "> " + Lg.esc(c.rotulo) + "</label>" +
+      (ativa ? "" : "<p class='small'>" + (semMotor ? "Exige WebGL (indisponível neste navegador)." : Lg.esc(st.rotulo) + ": " + Lg.esc(st.nota)) + "</p>");
     Array.prototype.forEach.call(box.querySelectorAll("input[data-camada]"), function (i) { i.addEventListener("change", function () { M.marcadas[i.dataset.camada] = i.checked; aplicarCamadas(); legenda(); }); });
     renderDimensoes();
   }
-  function item(cor, texto, forma, kind) { return "<li><span class='sw" + (forma === "linha" ? " line" : "") + "' style='" + (forma === "linha" ? "border-color:" : "background:") + cor + (forma === "ponto" ? ";border-radius:50%" : "") + "'></span><span>" + Lg.esc(texto) + (kind ? " " + Lg.kindBadge(kind) : "") + "</span></li>"; }
+  function item(cor, texto, forma, kind) { return "<li><span class='sw" + (forma === "linha" ? " line" : "") + "' style='" + (forma === "linha" ? "border-color:" : "background:") + cor + (forma === "ponto" ? ";border-radius:50%" : "") + "'></span><span>" + Lg.esc(texto) + "</span></li>"; }
   function legenda() {
     var h = "";
     if (visivel("escoamento_fase3")) h += window.Fase3.legenda();
-    if (visivel("escoamento_fase3")) h += "<li class='f3-nota small'>Área sombreada, com contorno tracejado: fora de Porto Alegre (cidade vizinha), fora da análise.</li>";
     if (visivel("drenagem_cadastro")) h += window.Drenagem.legenda();
     if (visivel("geoai_fracao_construida")) h += window.Geoai.legenda();
-    el("legenda-gl").innerHTML = h || "<li class='muted'>Nenhuma camada ativa.</li>";
+    el("legenda-gl").innerHTML = h; el("grupo-legenda").hidden = !h;                        // sem camada ativa, sem legenda (nada de estado vazio)
   }
 
   /* ---------------------------------------------------------------- selection */
   function limparSelecao() {
     M.selecionado = null; if (M.motor && M.pronto) M.motor.selecionar({});
-    el("contexto").innerHTML = "<h2 id='h-contexto'>Seleção</h2><p class='muted' id='contexto-vazio'>Ligue uma dimensão e clique em um trecho de rua, ou um item da drenagem cadastrada.</p>";
+    el("contexto").innerHTML = "<h2 id='h-contexto'>Seleção</h2>"; el("sel-card").hidden = true;
   }
   M.limparSelecao = limparSelecao;
   function mostrarContexto() {
     var p = el("painel-mapa"); if (!p) return;
-    p.scrollTop = 0; p.classList.add("aberto"); p.classList.remove("recolhido");
+    el("sel-card").hidden = false; p.scrollTop = 0; p.classList.add("aberto"); p.classList.remove("recolhido");
     el("painel-alca").setAttribute("aria-expanded", "true"); el("painel-alca").textContent = "Recolher painel";
   }
   function aoClicar(alvo) {
@@ -246,7 +239,7 @@
       M.selecionado = { tipo: "dren", id: alvo.camada + ":" + alvo.n }; M.motor.selecionar({ dren: { camada: alvo.camada, n: alvo.n } });
       window.Drenagem.detalhe(alvo.camada, alvo.n, el("contexto")); mostrarContexto();
     } else if (alvo.tipo === "trecho_f3" && alvo.lngLat && !M.dentroDePoa(alvo.lngLat.lng, alvo.lngLat.lat)) {
-      M.selecionado = null; M.motor.selecionar({}); el("contexto").innerHTML = "<h2 id='h-contexto'>Seleção</h2><div id='f3-trecho' class='fora-de-poa' role='status'><p><b>Trecho fora de Porto Alegre.</b> Este trecho é de uma cidade vizinha: a malha do mapa vem de uma caixa em volta de Porto Alegre, e a análise (uso do solo, escoamento, resultados) vale só para as ruas de Porto Alegre. Os valores deste trecho não fazem parte do estudo.</p></div>"; mostrarContexto();
+      M.selecionado = null; M.motor.selecionar({}); el("contexto").innerHTML = "<h2 id='h-contexto'>Seleção</h2><div id='f3-trecho' class='fora-de-poa' role='status'><h3 class='sel-rua'>Fora de Porto Alegre</h3><p class='small'>Este trecho é de uma cidade vizinha e não faz parte da análise.</p></div>"; mostrarContexto();
     } else if (alvo.tipo === "trecho_f3") {
       M.selecionado = { tipo: "trecho_f3", id: alvo.props.n }; M.motor.selecionar({ f3: alvo.props.n });
       window.Fase3.detalhe(alvo.props.n, el("contexto")); mostrarContexto();
@@ -254,6 +247,8 @@
   }
   /* ---------------------------------------------------------------- controles gerais */
   function ligarControles() {
+    el("sel-fechar").addEventListener("click", function () { limparSelecao(); });
+    el("dim-geral").addEventListener("click", M.voltarVisaoGeral);
     el("vista-3d").addEventListener("click", function () { if (M.pronto) definir3D(true); });
     el("vista-2d").addEventListener("click", function () { if (M.pronto) definir3D(false); });
     el("exagero").addEventListener("change", function (e) { M.exagero = Number(e.target.value); if (M.pronto && M.tres_d) definir3D(true, false); });

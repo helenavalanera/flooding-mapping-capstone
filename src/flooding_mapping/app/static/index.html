@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Flooding Mapping · análise do escoamento superficial em Porto Alegre</title>
   <meta name="description" content="Como a chuva transforma o território: geração e concentração potencial de escoamento superficial, indicadores topográficos e drenagem cadastrada em Porto Alegre. Estimativas de estudo, não previsão de alagamentos.">
-  <link rel="icon" href="icone-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
+  <link rel="apple-touch-icon" href="icone-192.png">
   <meta name="theme-color" content="#161B26">
   <meta name="color-scheme" content="light">
   <link rel="stylesheet" href="style.css">
@@ -15,7 +17,7 @@
   <header>
     <div class="topo">
       <div>
-        <h1><a href="inicio/" title="Página inicial">Flooding Mapping</a></h1>
+        <h1><a href="inicio/" title="Página inicial"><img class="marca-painel" src="marca-logo.png" width="900" height="277" alt="Flooding Mapping"></a></h1>
         <p class="sub" id="sub-territorio">Análise do escoamento superficial</p>
       </div>
     </div>
@@ -36,30 +38,41 @@
       <div id="mapa-gl" role="application" aria-label="Mapa interativo. Use as setas para mover; no mapa 3D, Shift com as setas gira e inclina."></div>
       <aside id="painel-mapa" aria-label="Controles, legenda e informações do mapa">
         <div class="alca-linha"><button type="button" class="alca" id="painel-alca" aria-expanded="true" aria-controls="painel-mapa">Recolher painel</button></div>
-        <section id="contexto" aria-live="polite" aria-labelledby="h-contexto">
-          <h2 id="h-contexto">Seleção</h2>
-          <p class="muted" id="contexto-vazio">Ligue uma dimensão e clique em um trecho de rua, ou um item da drenagem cadastrada.</p>
+        <div id="sel-card" class="sel-card" hidden>
+          <button type="button" class="sel-fechar" id="sel-fechar" aria-label="Limpar a seleção">×</button>
+          <section id="contexto" aria-live="polite" aria-labelledby="h-contexto"><h2 id="h-contexto">Seleção</h2></section>
+        </div>
+        <section class="grupo" id="grupo-analise" aria-labelledby="h-analise" hidden>
+          <h2 id="h-analise" class="grupo-tit">Análise principal <span>uma por vez</span></h2>
+          <div id="dimensoes" class="seg col tres" role="group" aria-label="Análise principal: uma dimensão por vez"></div>
+          <div id="f3-opcoes" class="opcoes-camada" aria-label="Opções da análise" hidden></div>
         </section>
-        <section id="dimensoes" class="dimensoes" aria-labelledby="h-dim" hidden></section>
-        <section aria-labelledby="h-vista">
-          <h2 id="h-vista">Vista</h2>
-          <div class="escopo" role="group" aria-label="Dimensão do mapa">
-            <button type="button" id="vista-3d" aria-pressed="true">3D com relevo</button>
-            <button type="button" id="vista-2d" aria-pressed="false">2D</button>
-          </div>
-          <label for="exagero">Exagero vertical do relevo <em>(só visual)</em></label>
-          <select id="exagero"><option value="1">1× (real)</option><option value="1.5" selected>1,5×</option><option value="2">2×</option><option value="3">3×</option></select>
-          <p class="small" id="nota-relevo">O relevo é elevação pública apenas para visualização: não entra em nenhum cálculo de risco, e o modelo pode ter artefatos sobre água e vegetação.</p>
-        </section>
-        <section aria-labelledby="h-camadas">
-          <h2 id="h-camadas">Camadas <span class="small" id="camadas-sub"></span></h2>
-          <div id="camadas"></div>
-          <div id="f3-opcoes" class="opcoes-camada" role="group" aria-labelledby="h-f3" hidden></div>
+        <section class="grupo" id="grupo-sobre" aria-labelledby="h-sobre" hidden>
+          <h2 id="h-sobre" class="grupo-tit">Sobreposições <span>independentes</span></h2>
+          <div id="sobreposicoes" class="seg col dois" role="group" aria-label="Sobreposições independentes"></div>
           <div id="dren-opcoes" class="opcoes-camada" role="group" aria-labelledby="h-dren" hidden></div>
           <div id="geoai-opcoes" class="opcoes-camada" role="group" aria-labelledby="h-geoai" hidden></div>
         </section>
-        <section aria-labelledby="h-legenda"><h2 id="h-legenda">Legenda</h2><ul class="legend" id="legenda-gl"></ul></section>
-        <p class="small"><button type="button" class="link" id="btn-motor">Usar o mapa 2D simples (sem WebGL)</button></p>
+        <section class="grupo" aria-labelledby="h-vista">
+          <h2 id="h-vista" class="grupo-tit">Visualização</h2>
+          <div class="seg dois" role="group" aria-label="Modo do mapa">
+            <button type="button" id="vista-3d" aria-pressed="true">3D</button>
+            <button type="button" id="vista-2d" aria-pressed="false">2D</button>
+          </div>
+          <div class="ctl-linha" id="exagero-linha"><label for="exagero">Exagero vertical <em>(só visual)</em></label>
+            <select id="exagero"><option value="1">1× (real)</option><option value="1.5" selected>1,5×</option><option value="2">2×</option><option value="3">3×</option></select></div>
+          <div id="camadas"></div>
+          <p class="small" id="aviso-webgl" hidden>Exige WebGL (indisponível neste navegador): as análises A a E ficam desativadas.</p>
+          <p class="small"><button type="button" class="link" id="dim-geral">Voltar à visão geral da cidade</button></p>
+        </section>
+        <section class="grupo" id="grupo-legenda" aria-labelledby="h-legenda" hidden>
+          <h2 id="h-legenda" class="grupo-tit">Legenda</h2><ul class="legend" id="legenda-gl"></ul>
+        </section>
+        <details class="mais sobre-mapa"><summary>Sobre o mapa</summary>
+          <p class="small">As dimensões são independentes, sem índice único: nada aqui combina A a E em risco.</p>
+          <p class="small" id="nota-relevo">O relevo é elevação pública apenas para visualização: não entra em nenhum cálculo de risco, e o modelo pode ter artefatos sobre água e vegetação.</p>
+          <p class="small sobre-links"><a href="#poa/resultados">Resultados por contexto</a><button type="button" class="link" id="btn-motor">Usar o mapa 2D simples (sem WebGL)</button></p>
+        </details>
       </aside>
     </div>
   </div>

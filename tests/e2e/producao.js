@@ -31,10 +31,10 @@ const PAGES = process.env.PAGES, R2 = process.env.R2, VERSAO = process.env.VERSA
   const pm = r2.filter((x) => /\.pmtiles/.test(x.u));
   assert.ok(pm.length > 10 && pm.every((x) => x.s === 206 && /^bytes \d+-\d+\/\d+$/.test(x.h["content-range"]) && x.h["accept-ranges"] === "bytes" && x.h["etag"] && x.h["access-control-allow-origin"] === PAGES), "PMTiles: " + JSON.stringify(pm.slice(0, 2)));
   // a camada E, ausente: desabilitada, com aviso, sem pedidos, e sem tirar as demais
-  assert.strictEqual(await page.isDisabled("input[data-camada=geoai_fracao_construida]"), true); assert.match(await page.innerText("label.camada:has(input[data-camada=geoai_fracao_construida])"), /ainda não publicada neste ambiente/);
-  assert.strictEqual(await page.locator("#dimensoes button[data-dim=E]").count(), 0);
+  assert.strictEqual(await page.isDisabled("button[data-dim=E]"), true); assert.match(await page.getAttribute("button[data-dim=E]", "title"), /ainda não publicada neste ambiente/);
+  assert.strictEqual(await page.locator("button[data-dim=E]:not([disabled])").count(), 0);
   // escoamento: metadados conferidos por hash, tiles e fragmentos
-  await page.click("#dimensoes button[data-dim=B]"); await page.waitForFunction(() => window.Fase3 && window.Fase3.meta, null, { timeout: 150000 });
+  await page.click("button[data-dim=B]"); await page.waitForFunction(() => window.Fase3 && window.Fase3.meta, null, { timeout: 150000 });
   assert.strictEqual(await page.evaluate(() => window.Fase3.erro), null);
   await page.waitForFunction(() => window.Mapa.map.isStyleLoaded() && window.Mapa.map.queryRenderedFeatures({ layers: ["f3-p-c_m1_max"] }).length > 20, null, { timeout: 150000 });
   await Promise.all(pend);
@@ -53,16 +53,16 @@ const PAGES = process.env.PAGES, R2 = process.env.R2, VERSAO = process.env.VERSA
   await page.selectOption("#f3-p", "10"); await page.waitForFunction(() => window.Fase3.estado.p === 10, null, { timeout: 15000 }); const e10 = await estado();
   await page.selectOption("#f3-p", "30"); await page.waitForFunction(() => window.Fase3.estado.p === 30, null, { timeout: 15000 }); const e30 = await estado();
   assert.ok(/10 mm/.test(e10.leg) && /30 mm/.test(e30.leg), "a legenda acompanha a chuva"); assert.notStrictEqual(e10.ctx, e30.ctx, "o resultado do trecho muda com a chuva");
-  const v = (t) => Number(((t.match(/Contribuição potencial estimada[\s\S]*?([\d.]+(?:,\d+)?)\s*a\s*([\d.]+(?:,\d+)?)/) || [])[2] || "0").replace(/\./g, "").replace(",", "."));
+  const v = (t) => Number(((t.match(/Concentração[\s\S]*?([\d.]+(?:,\d+)?)\s*a\s*([\d.]+(?:,\d+)?)/) || [])[2] || "0").replace(/\./g, "").replace(",", "."));
   assert.ok(v(e10.ctx) > 0 && Math.abs(v(e30.ctx) / v(e10.ctx) - 3) < 0.05, "30 mm = 3 x 10 mm no mesmo trecho: " + v(e10.ctx) + " e " + v(e30.ctx) + " | " + JSON.stringify(e10.ctx.slice(0, 400)));
   await page.selectOption("#f3-pacote", "an"); await page.waitForFunction(() => window.Fase3.estado.pacote === "an", null, { timeout: 15000 }); const ean = await estado();
   assert.ok(ean.op.length === 1 && /c_an_max/.test(ean.op[0]), "o pacote muda a camada desenhada: " + JSON.stringify(ean.op));
   await page.selectOption("#f3-limite", "min"); await page.waitForFunction(() => window.Fase3.estado.limite === "min", null, { timeout: 15000 }); const emin = await estado();
   assert.ok(emin.op.length === 1 && /c_an_min/.test(emin.op[0]), "o limite muda a camada desenhada: " + JSON.stringify(emin.op));
-  await page.click("#dimensoes button[data-dim=C]"); await page.waitForFunction(() => window.Fase3.estado.modo === "tp", null, { timeout: 15000 }); const etp = await estado();
+  await page.click("button[data-dim=C]"); await page.waitForFunction(() => window.Fase3.estado.modo === "tp", null, { timeout: 15000 }); const etp = await estado();
   assert.ok(etp.op.length === 1 && /topo|tp/.test(etp.op[0]) && /retenção|topogr/i.test(etp.leg), "a dimensão C muda o desenho e a legenda: " + JSON.stringify(etp.op));
   // drenagem
-  await page.click("#dimensoes button[data-dim=D]"); await page.waitForFunction(() => window.Drenagem && window.Drenagem.meta, null, { timeout: 150000 }); assert.strictEqual(await page.evaluate(() => window.Drenagem.erro), null);
+  await page.click("button[data-dim=D]"); await page.waitForFunction(() => window.Drenagem && window.Drenagem.meta, null, { timeout: 150000 }); assert.strictEqual(await page.evaluate(() => window.Drenagem.erro), null);
   await page.waitForFunction(() => window.Mapa.map.isStyleLoaded(), null, { timeout: 60000 }); await page.waitForTimeout(3000); await Promise.all(pend);
   assert.ok(r2.some((x) => /\/drenagem\/tiles\//.test(x.u) && x.s === 200) || r2.some((x) => /\/drenagem\/meta\.json$/.test(x.u) && x.s === 200), "drenagem do R2");
   // nada da camada E, nenhuma falha, nenhuma violação de CSP, nenhum erro

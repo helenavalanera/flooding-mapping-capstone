@@ -94,7 +94,7 @@
   }
   F.legenda = function () {
     if (!F.meta) return "<li class='muted'>Escoamento potencial: dados ainda não carregados.</li>";
-    var s = F.estado, pal = D.PALETAS[s.modo], h = "<li class='f3-tit'><b>" + esc(tituloAtual()) + "</b> " + Lg.kindBadge("simulado") + "</li>";
+    var s = F.estado, pal = D.PALETAS[s.modo], h = "<li class='f3-tit'><b>" + esc(tituloAtual()) + "</b></li>";
     if (s.modo === "c" || s.modo === "l") {
       var cortes = F.meta.cortes_das_classes_aeq_m2[D.propriedade(s.modo, s.pacote, s.limite)];
       h += li(pal[0], "Zero (nada escoa neste limite)");
@@ -108,8 +108,6 @@
       h += li(pal[0], "Nenhuma parte da área a montante coberta") + li(pal[1], "Até 25% coberta") + li(pal[2], "De 25% a 50%") + li(pal[3], "De 50% a 75%") + li(pal[4], "Mais de 75% coberta");
     }
     h += li(D.COR_SEM_DADOS, "Trecho sem dados disponíveis (não é valor zero)", true);
-    if (s.modo === "c" || s.modo === "l") h += "<li class='small f3-nota'>A cor é a posição do trecho entre os trechos com valor positivo (quantis); as faixas em m³ mudam com a chuva de referência.</li>";
-    if (s.modo === "tp") h += "<li class='small f3-nota'>Posto relativo entre os trechos. O modelo de elevação de 30 m não resolve depressões urbanas pequenas: não é profundidade, volume nem duração.</li>";
     return h;
   };
 
@@ -129,33 +127,38 @@
       "<table><thead><tr><th>Classe</th><th>C (analogia)</th></tr></thead><tbody>" + hp.referencia_analoga.map(function (r) { return "<tr><td>" + esc(r.classe) + "</td><td>" + num(r.c_min) + " a " + num(r.c_max) + "</td></tr>"; }).join("") + "</tbody></table>" +
       "<p class='small'>Hipótese: " + esc(j.hipotese) + "</p>";
   }
+  function campo(id, rotulo, opts) { return "<div class='ctl'><label for='" + id + "'>" + rotulo + "</label><select id='" + id + "'>" + opts + "</select></div>"; }
+  /* Opções da análise: três seletores curtos (chuva, pacote, limite, só os que valem para a dimensão ligada). Tudo o que explica fica em "Como ler e limitações". */
   F.montarPainel = function () {
     var box = el("f3-opcoes"); if (!box) return;
     if (!F.meta) {
-      box.innerHTML = "<h2>Escoamento potencial por trecho</h2>" + (F.erro ? "<p class='small' role='status'>Os dados de escoamento não estão disponíveis (" + esc(F.erro) + "). Em desenvolvimento, gere-os com tools/preparar_camada_fase3.py. <button type='button' class='link' id='f3-tentar'>Tentar de novo</button></p>" : "<p class='small' role='status'>Carregando...</p>");
+      box.innerHTML = F.erro ? "<p class='small f3-sem' role='status'>Os dados de escoamento não estão disponíveis (" + esc(F.erro) + "). <button type='button' class='link' id='f3-tentar'>Tentar de novo</button></p>" : "<p class='small' role='status'>Carregando…</p>";
       var tentar = el("f3-tentar"); if (tentar) tentar.addEventListener("click", function () { if (window.Mapa) window.Mapa.tentarFase3(); });
       return;
     }
-    var s = F.estado, volumes = s.modo === "c" || s.modo === "l", pacotes = s.modo !== "tp";
+    var s = F.estado, volumes = s.modo === "c" || s.modo === "l", pacotes = s.modo !== "tp", sel = [];
+    var det = el("f3-metodo"), hip = el("f3-hipoteses"); if (det) { F._abertoMetodo = det.open; F._abertoHipoteses = !!(hip && hip.open); }
+    if (volumes) sel.push(campo("f3-p", "Chuva", opcoes(F.meta.precipitacoes_mm.map(function (p) { return [p, D.formatar(p) + " mm"]; }), s.p)));
+    if (pacotes) sel.push(campo("f3-pacote", "Pacote", opcoes(Object.keys(D.PACOTES).map(function (k) { return [k, D.PACOTES[k].curto]; }), s.pacote)));
+    if (volumes) sel.push(campo("f3-limite", "Limite", opcoes([["max", "Superior"], ["min", "Inferior"]], s.limite)));
     var modos = Object.keys(D.MODOS).map(function (k) {
       return "<label class='f3-radio'><input type='radio' name='f3-modo' id='f3-modo-" + k + "' value='" + k + "'" + (s.modo === k ? " checked" : "") + "> " + esc(D.MODOS[k].nome) + "</label>"; }).join("");
-    box.innerHTML = "<h2 id='h-f3'>Escoamento potencial por trecho " + Lg.kindBadge("simulado") + "</h2>" +
-      "<p class='small f3-aviso' role='note'>" + esc(TEXTOS.aviso) + "</p>" +
-      "<p class='small' id='f3-recorte'>" + notaDoRecorte() + "</p><p class='small' id='f3-dica'>" + esc(TEXTOS.dica) + "</p>" +
-      "<fieldset class='f3-modos'><legend>O que mostrar</legend>" + modos + "</fieldset>" +
-      (pacotes ? "<label for='f3-pacote'>Pacote de coeficientes <em>(alternativas, nunca somadas)</em></label><select id='f3-pacote'>" + opcoes(Object.keys(D.PACOTES).map(function (k) { return [k, D.PACOTES[k].nome]; }), s.pacote) + "</select>" +
-        "<p class='small' id='f3-pacote-nota'><b>" + esc(D.PACOTES[s.pacote].natureza.charAt(0).toUpperCase() + D.PACOTES[s.pacote].natureza.slice(1)) + ".</b> " + esc(D.PACOTES[s.pacote].nota) + "</p>" +
-        "<details id='f3-hipoteses'><summary>Coeficientes e hipóteses deste pacote</summary>" + tabelaDeHipoteses() + "</details>" : "") +
-      (volumes ? "<label for='f3-limite'>Limite do intervalo exibido no mapa</label><select id='f3-limite'>" + opcoes([["max", "Limite superior"], ["min", "Limite inferior"]], s.limite) + "</select>" +
-        "<label for='f3-p'>Chuva de referência (hipotética)</label><select id='f3-p'>" + opcoes(F.meta.precipitacoes_mm.map(function (p) { return [p, D.formatar(p) + " mm"]; }), s.p) + "</select>" +
-        "<p class='small'>" + esc(TEXTOS.chuva) + "</p>" : "") +
-      (s.modo === "tp" ? "<p class='small'>Posição de cada trecho pela altura que o preenchimento de depressões soma ao relevo. É um indicador relativo de propensão topográfica à retenção, calculado sobre um modelo de elevação de 30 m. Não é profundidade, volume nem duração. Não depende de pacote nem de chuva.</p>" : "") +
-      (TEXTOS.modos[s.modo] ? "<p class='small' id='f3-modo-nota'>" + esc(TEXTOS.modos[s.modo]) + "</p>" : "") +
+    box.innerHTML = (sel.length ? "<div class='ctl-grade n" + sel.length + "'>" + sel.join("") + "</div>" : "") +
       "<p class='small' id='f3-zoom' aria-live='polite'></p>" +
-      "<details id='f3-metodo'><summary>Metodologia e limitações</summary>" + TEXTOS.metodologia.map(function (m) { return "<h3>" + esc(m[0]) + "</h3><p class='small'>" + esc(m[1]) + "</p>"; }).join("") +
-      "<p class='small'>Detalhes: docs/fase3_motor.md e docs/fase3_resultados.md do repositório.</p></details>";
+      "<details id='f3-metodo' class='mais'><summary>Como ler e limitações</summary>" +
+      (window.Mapa && window.Mapa.notaDim ? window.Mapa.notaDim({ l: "A", c: "B", tp: "C" }[s.modo] || "") : "") +
+      "<p class='small f3-aviso' role='note'>" + esc(TEXTOS.aviso) + "</p>" +
+      (TEXTOS.modos[s.modo] ? "<p class='small' id='f3-modo-nota'>" + esc(TEXTOS.modos[s.modo]) + "</p>" : "") +
+      (s.modo === "tp" ? "<p class='small'>Posição de cada trecho pela altura que o preenchimento de depressões soma ao relevo, em um modelo de elevação de 30 m. Indicador relativo: não é profundidade, volume nem duração, e não depende de pacote nem de chuva.</p>" : "") +
+      (volumes ? "<p class='small' id='f3-chuva-nota'><b>Chuva de referência: " + D.formatar(s.p) + " mm</b>, igual em toda a cidade. " + (s.p === 30 ? "É o percentil 75 dos totais por evento de 2017 a 2026 (reanálise ERA5), não a média. " : "") + "Cenário de cálculo, não previsão.</p><p class='small'>" + esc(TEXTOS.chuva) + "</p><p class='small f3-nota'>A cor é a posição do trecho entre os trechos com valor positivo (quantis); as faixas em m³ mudam com a chuva de referência.</p>" : "") +
+      (pacotes ? "<p class='small' id='f3-pacote-nota'><b>" + esc(D.PACOTES[s.pacote].nome) + " (" + esc(D.PACOTES[s.pacote].natureza) + ").</b> " + esc(D.PACOTES[s.pacote].nota) + "</p><details id='f3-hipoteses'><summary>Coeficientes e hipóteses deste pacote</summary>" + tabelaDeHipoteses() + "</details>" : "") +
+      "<p class='small' id='f3-recorte'>" + notaDoRecorte() + (foraDePoa() ? " " : "") + "Área sombreada, com contorno tracejado: fora de Porto Alegre, fora da análise.</p>" +
+      "<fieldset class='f3-modos'><legend>Modo de cor (avançado)</legend>" + modos + "</fieldset>" +
+      TEXTOS.metodologia.map(function (m) { return "<h3>" + esc(m[0]) + "</h3><p class='small'>" + esc(m[1]) + "</p>"; }).join("") +
+      "<p class='small' id='f3-versao'>Dados de escoamento: camada v" + esc(F.meta.versao) + (window.FM_DADOS && window.FM_DADOS.versao ? ", conjunto " + esc(window.FM_DADOS.versao) : "") + ". Detalhes em docs/fase3_motor.md e docs/fase3_resultados.md.</p></details>";
+    if (F._abertoMetodo && el("f3-metodo")) el("f3-metodo").open = true; if (F._abertoHipoteses && el("f3-hipoteses")) el("f3-hipoteses").open = true;      // redesenhar não fecha o que a pessoa abriu
     Array.prototype.forEach.call(box.querySelectorAll("input[name=f3-modo]"), function (i) { i.addEventListener("change", function () { s.modo = i.value; F.montarPainel(); mudou(); }); });
-    var liga = function (id, campo, num) { var e = el(id); if (e) e.addEventListener("change", function () { s[campo] = num ? Number(e.value) : e.value; F.montarPainel(); mudou(); }); };
+    var liga = function (id, campoNome, num) { var e = el(id); if (e) e.addEventListener("change", function () { s[campoNome] = num ? Number(e.value) : e.value; F.montarPainel(); mudou(); }); };
     liga("f3-pacote", "pacote"); liga("f3-limite", "limite"); liga("f3-p", "p", true);
     if (F._zoom != null) F.avisarZoom(F._zoom);
     var foco = document.activeElement && document.activeElement.id;
@@ -167,36 +170,37 @@
   };
 
   /* ------------------------------------------------------------------ painel do trecho */
-  function indicador(chave, valor, extra) {
-    var t = TEXTOS.indicadores[chave];
-    return "<div class='f3-ind'><div class='f3-rot'>" + esc(t[0]) + " <span class='small'>(" + esc(t[1]) + ")</span></div><div class='f3-val'>" + valor + "</div>" +
-      (extra ? "<div class='small'>" + extra + "</div>" : "") +
-      "<details><summary>O que é e como ler</summary><p class='small'><b>O que é:</b> " + esc(t[2]) + "</p><p class='small'><b>Como ler:</b> " + esc(t[3]) + "</p></details></div>";
+  /* Nome da rua e quatro indicadores em grade 2 x 2 (A, B, C, D). "Sem dado" nunca é zero; zero aparece como 0. Detalhes e métodos ficam em "Detalhes e como ler". */
+  function celula(id, rotulo, valor, un, sem, estado) {
+    var v = sem ? "<span class='v' role='img' aria-label='Sem dado' title='Sem dado'>—</span>" : "<span class='v'>" + valor + "</span>";   // travessão = sem dado (nunca zero); leitores de tela ouvem "Sem dado"
+    return "<div class='f3-ind sel-ind" + (sem ? " sem" : estado ? " estado" : "") + "' data-dim='" + id + "'><dt><b>" + id + "</b>" + esc(rotulo) + "</dt><dd class='f3-val'>" + v + (un ? "<span class='u'>" + esc(un) + "</span>" : "") + "</dd></div>";
   }
+  var SEM = "—";
+  function ajuda(chave) { var t = TEXTOS.indicadores[chave]; return "<p class='small'><b>" + esc(t[0]) + ".</b> " + esc(t[2]) + " " + esc(t[3]) + "</p>"; }
   F.corpoDoTrecho = function (r) {
-    var s = F.estado, pk = D.PACOTES[s.pacote], nome = r.nome || "Trecho sem nome no OpenStreetMap";
-    var cab = "<h3>Trecho viário selecionado " + Lg.kindBadge("simulado") + "</h3><p><b>" + esc(nome) + "</b>" + (r.via ? " <span class='small'>(" + esc(r.via) + ")</span>" : "") + "<br><span class='small'>Identificador: <code>" + esc(r.id) + "</code></span></p>";
+    var s = F.estado, pk = D.PACOTES[s.pacote], nome = r.nome || "Trecho sem nome";
+    var cab = "<div class='sel-topo'><h3 class='sel-rua'>" + esc(nome) + "</h3></div>";
+    var drenagem = celula("D", "Drenagem", SEM, "", true);
+    var mais = "<details class='mais sel-mais'><summary>Detalhes e como ler</summary>" + "<p class='small'>Identificador: <code>" + esc(r.id) + "</code>" + (r.via ? " · via " + esc(r.via) : "") + ".</p>";
     if (r.l_m1_max == null) {
-      return cab + "<p class='f3-sem' role='status'><b>Trecho sem dados disponíveis.</b> Ele está fora da grade de 30 m do modelo ou passa só por células sem dado ou de água. Isso não significa contribuição zero.</p>" +
-        indicador("topo", "sem dados disponíveis") + "<p class='small'>" + esc(TEXTOS.aviso) + "</p>";
+      return cab + "<dl class='sel-grade'>" + celula("A", "Geração", SEM, "", true) + celula("B", "Concentração", SEM, "", true) + celula("C", "Topografia", SEM, "", true) + drenagem + "</dl>" +
+        "<p class='small sel-ctx'>— indica sem dado, que não é zero: o trecho está fora da grade de 30 m do modelo ou passa só por células sem dado ou de água.</p>" +
+        mais + "<p class='small'>O cadastro de drenagem não está associado aos trechos; para ver um dispositivo, ligue D e clique nele no mapa.</p><p class='small'>" + esc(TEXTOS.aviso) + "</p></details>";
     }
-    var p = s.p, ctx = "Chuva de referência hipotética de " + D.formatar(p) + " mm · " + pk.curto + " (" + pk.natureza + ")";
+    var p = s.p;
     var l = D.intervalo(r["l_" + s.pacote + "_min"], r["l_" + s.pacote + "_max"], p), c = D.intervalo(r["c_" + s.pacote + "_min"], r["c_" + s.pacote + "_max"], p);
+    var faixa = function (x) { return x.min === x.max ? D.formatar(x.min) : D.formatar(x.min) + " a " + D.formatar(x.max); };
+    var topo = r.topo_altura_max_m > 0 ? celula("C", "Topografia", "posto " + D.formatar(r.topo_posto), "de 100") : celula("C", "Topografia", "Sem depressão", "no modelo", false, true);
     var fcob = { m1: r.f_m1, li: r.f_li, an: r.f_an }[s.pacote];
-    var topo = r.topo_altura_max_m > 0 ? "posto " + D.formatar(r.topo_posto) + " de 100" : "sem preenchimento de depressão no modelo";
-    var avisoCob = fcob < 0.25 ? "<p class='f3-sem small' role='note'>Menos de 25% da área a montante tem coeficiente neste pacote: o intervalo considera só uma parte da área. Leia como parcial.</p>" : "";
-    var aviso_li = s.pacote === "li" ? "<p class='small'>Limites matemáticos (C = 0 e C = 1): referência, não previsão.</p>" : "";
-    return cab + "<p class='small f3-ctx'>" + esc(ctx) + "</p>" +
-      indicador("contrib", c ? "<b>" + esc(c.texto) + "</b>" : "sem valor", "Inclui o volume gerado sob o trecho. Não somar com outros trechos.") +
-      indicador("local", l ? "<b>" + esc(l.texto) + "</b>" : "sem valor") + aviso_li +
-      indicador("area", "<b>" + esc(D.area(r.area_montante_m2)) + "</b>") +
-      indicador("cobertura", "<b>" + esc(D.pct(fcob)) + "</b>", "Método 1: " + esc(D.pct(r.f_m1)) + " · Analogia: " + esc(D.pct(r.f_an)) + " · Limites físicos: " + esc(D.pct(r.f_li)) + ". Sem valor na analogia: " + esc(D.pct(r.f_an_sem)) + "; fora do cálculo: " + esc(D.pct(r.f_fora)) + "; sem classe: " + esc(D.pct(r.f_sem_classe)) + ".") + avisoCob +
-      indicador("topo", "<b>" + esc(topo) + "</b>", "Altura de preenchimento no modelo de elevação: " + esc(D.formatar(r.topo_altura_max_m)) + " m (grandeza do modelo, não é profundidade).") +
-      "<p class='small'><b>Qualidade:</b> " + r.n_cel + " células de 30 m sob o trecho, " + r.n_cheg + " de chegada. Valores do Parquet da Fase 3, com 9 algarismos significativos; a tela mostra 3.</p>" +
-      "<p class='small'>" + esc(TEXTOS.aviso) + "</p>";
+    mais += "<p class='small'>Contribuição de trechos diferentes não se soma: as áreas a montante se sobrepõem. Não somar com outros trechos.</p><p class='small'>Valores para o pacote <b>" + esc(pk.curto) + "</b> (" + esc(pk.natureza) + "), chuva de " + esc(D.formatar(p)) + " mm. Área contribuinte: " + esc(D.area(r.area_montante_m2)) + "; cobertura do pacote: " + esc(D.pct(fcob)) + " da área a montante" + (fcob < 0.25 ? " (parcial: o intervalo considera só uma parte da área)" : "") + ". Altura de preenchimento no modelo: " + esc(D.formatar(r.topo_altura_max_m)) + " m (grandeza do modelo, não é profundidade). " + r.n_cel + " células de 30 m sob o trecho.</p>" +
+      ajuda("local") + ajuda("contrib") + ajuda("topo") +
+      "<p class='small'>O cadastro de drenagem não está associado aos trechos; para ver um dispositivo, ligue D e clique nele no mapa.</p><p class='small'>" + esc(TEXTOS.aviso) + "</p></details>";
+    var un = fcob < 0.25 ? "m³ · parcial" : "m³";                                       // pouca área a montante com coeficiente neste pacote: o intervalo é parcial
+    return cab + "<dl class='sel-grade'>" + celula("A", "Geração", l ? faixa(l) : SEM, l ? un : "", !l) + celula("B", "Concentração", c ? faixa(c) : SEM, c ? un : "", !c) + topo + drenagem + "</dl>" +
+      "<p class='small sel-ctx'>Chuva de referência de " + esc(D.formatar(p)) + " mm · valores potenciais estimados, não observados.</p>" + mais;
   };
   F.detalhe = function (n, alvo) {
-    F.selecionado = n; alvo.innerHTML = "<h2 id='h-contexto'>Seleção</h2><p class='small' role='status'>Carregando o trecho...</p>";
+    F.selecionado = n; alvo.innerHTML = "<h2 id='h-contexto'>Seleção</h2><p class='small' role='status'>Carregando o trecho…</p>";
     return F.carregar().then(function () { return F.fragmento(n); }).then(function (r) {
       if (F.selecionado !== n) return;
       if (!r) throw new Error("trecho " + n + " fora do fragmento");

@@ -10,11 +10,11 @@ const pontoSobre = (page, camadas, evitar = []) => page.evaluate(([cs, ev]) => {
   const { browser, page, erros } = await abrir({ viewport: { width: 1400, height: 900 } });
   await page.goto(BASE); await page.waitForSelector("#vista-resultados .rs-achado", { timeout: 60000 });
   await page.click("[data-aba=mapa]"); await page.waitForFunction(() => window.Mapa && window.Mapa.pronto, null, { timeout: 90000 });
-  await page.waitForFunction(() => /Drenagem cadastrada/.test(document.getElementById("camadas").textContent), null, { timeout: 30000 });
-  assert.strictEqual(await page.isChecked("input[data-camada=drenagem_cadastro]"), false); assert.ok(await page.isHidden("#dren-opcoes"));
-  await page.click("input[data-camada=drenagem_cadastro]"); await page.waitForSelector("#dren-opcoes input[data-dren]", { timeout: 30000 });
-  const painel = await page.innerText("#dren-opcoes");
-  assert.match(painel, /mostra o que está registrado, não o que funciona/); assert.match(painel, /não entra no cálculo de escoamento potencial/); assert.match(painel, /Rede pluvial[\s\S]*135\.856 registros/);
+  await page.waitForSelector("button[data-dim=D]", { timeout: 30000 });
+  assert.strictEqual(await page.getAttribute("button[data-dim=D]", "aria-pressed"), "false"); assert.ok(await page.isHidden("#dren-opcoes"));
+  await page.click("button[data-dim=D]"); await page.waitForSelector("#dren-opcoes input[data-dren]", { timeout: 30000 });
+  const painel = await page.textContent("#dren-opcoes");
+  assert.match(painel, /mostra o que está registrado, não o que funciona/); assert.match(painel, /não entra no cálculo de escoamento potencial/); assert.match(painel, /Rede pluvial[\s\S]*135\.856/);
   const leg = await page.innerText("#legenda-gl");
   for (const r of [/Cadastro existente \(linha\)/, /Registro sem acesso \(linha\)/, /Cadastrado como não interligado \(linha\)/, /Registro duplicado \(fora do inventário\)/, /Poço de visita \(ponto\)/, /Boca de lobo \(ponto\)/, /Casa de bomba \(ponto\)/, /nunca como zero/]) assert.match(leg, r);
   // a camada e a da Fase 3 convivem sem se misturar: a legenda de uma não aparece na outra
@@ -41,7 +41,7 @@ const pontoSobre = (page, camadas, evitar = []) => page.evaluate(([cs, ev]) => {
   await page.waitForFunction(() => /Poço de visita|Boca de lobo|Trecho de rede/.test(document.getElementById("contexto").textContent), null, { timeout: 20000 });
   // responsividade e desligar
   await semTransbordo(page, [360, 768, 1280], [async () => { await page.evaluate(() => document.getElementById("dren-opcoes").scrollIntoView()); }]);
-  await page.setViewportSize({ width: 1400, height: 900 }); await page.click("input[data-camada=drenagem_cadastro]"); assert.ok(await page.isHidden("#dren-opcoes"));
+  await page.setViewportSize({ width: 1400, height: 900 }); await page.click("button[data-dim=D]"); assert.ok(await page.isHidden("#dren-opcoes"));
   assert.strictEqual(JSON.stringify(erros), "[]", "sem erros no console nem 4xx/5xx de arquivos nossos: " + JSON.stringify(erros));
   await browser.close(); console.log("drenagem ok");
 })().catch((e) => { console.error(e); process.exit(1); });

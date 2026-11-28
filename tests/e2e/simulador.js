@@ -18,7 +18,7 @@ const { assert, abrir, BASE, semTransbordo } = require("./lib");
   // simulador -> mapa: a chuva escolhida chega ao mapa, com a camada de contribuição ligada
   await page.click("#sim-mapa"); await page.waitForFunction(() => window.Mapa && window.Mapa.pronto, null, { timeout: 90000 });
   await page.waitForFunction(() => window.Fase3.meta && window.Fase3.estado.p === 20 && window.Mapa.marcadas.escoamento_fase3 === true, null, { timeout: 60000 });
-  assert.match(await page.innerText("#dim-chuva"), /20 mm/); assert.match(await page.innerText("#legenda-gl"), /chuva de referência de 20 mm/);
+  assert.strictEqual(await page.inputValue("#f3-p"), "20"); assert.match(await page.innerText("#legenda-gl"), /chuva de referência de 20 mm/);
   // mapa -> simulador: trocar a chuva no mapa muda a do simulador
   await page.selectOption("#f3-p", "10");
   await page.click("[data-aba=simulador]"); await page.waitForSelector("#vista-simulador [data-p='10'][aria-pressed=true]");

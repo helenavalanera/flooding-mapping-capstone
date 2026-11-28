@@ -16,16 +16,18 @@ const ESTADUAL = /rodovia|bloqueio|S2iD|DAER|CPRv|munic[ií]pio|Rio Grande do Su
   assert.ok(await page.evaluate(() => !!window.Mapa.map.getTerrain()), "relevo 3D ligado");
   assert.ok(await page.evaluate(() => window.Mapa.map.getPitch()) > 20, "mapa inclinado");
   const centro = await page.evaluate(() => window.Mapa.map.getCenter().toArray()); assert.ok(Math.abs(centro[0] + 51.22) < 0.1 && Math.abs(centro[1] + 30.03) < 0.1, "o mapa abre em Porto Alegre");
-  const camadas = (await page.locator("#camadas label").allInnerTexts()).join(" | ");
-  assert.match(camadas, /Relevo sombreado/); assert.match(camadas, /Drenagem cadastrada/); assert.match(camadas, /Escoamento potencial/); assert.doesNotMatch(camadas, ESTADUAL);
-  assert.strictEqual(await page.locator("#camadas input[data-camada]").count(), 4, "só as camadas do estudo: relevo, drenagem, escoamento e a camada experimental E");
-  assert.match(await page.innerText("#contexto"), /Ligue uma dimensão e clique em um trecho de rua/); assert.doesNotMatch(await page.innerText("#contexto"), ESTADUAL);
+  const painelMapa = await page.innerText("#painel-mapa");
+  assert.match(await page.innerText("#camadas"), /Relevo sombreado/); assert.doesNotMatch(painelMapa, ESTADUAL);
+  assert.deepStrictEqual(await page.locator("#painel-mapa h2.grupo-tit").evaluateAll((h) => h.filter((x) => x.offsetParent).map((x) => x.firstChild.textContent.trim())), ["Análise principal", "Sobreposições", "Visualização"], "grupos do painel (a legenda só aparece com camada ativa)");
+  assert.deepStrictEqual(await page.locator("button[data-dim]").evaluateAll((b) => b.map((x) => x.dataset.dim)), ["A", "B", "C", "D", "E"]);
+  assert.strictEqual(await page.locator("#camadas input[data-camada]").count(), 1, "só o relevo é camada à parte; as demais são as dimensões");
+  assert.ok(await page.isHidden("#sel-card") && await page.isHidden("#grupo-legenda"), "sem seleção e sem camada ativa, nada de estado vazio");
   assert.strictEqual(await page.locator("#poa-opcoes, #cores, #poa-hora").count(), 0, "sem controle de hora à frente nem de cores estaduais");
   // 2D sem relevo, 3D com exagero declarado
   await page.click("#vista-2d"); await page.waitForTimeout(1000);
   assert.strictEqual(await page.evaluate(() => window.Mapa.map.getTerrain()), null, "2D sem relevo"); assert.ok(await page.isDisabled("#exagero"));
   await page.click("#vista-3d"); await page.waitForTimeout(600); await page.selectOption("#exagero", "3");
-  assert.strictEqual(await page.evaluate(() => window.Mapa.map.getTerrain().exaggeration), 3); assert.match(await page.innerText("#nota-relevo"), /apenas para visualização/);
+  assert.strictEqual(await page.evaluate(() => window.Mapa.map.getTerrain().exaggeration), 3); assert.match(await page.textContent("#nota-relevo"), /apenas para visualização/);
   // proveniência: só as fontes do estudo, com a condição de uso, e o que cada dimensão é e não é
   await page.click("[data-aba=proveniencia]"); await page.waitForSelector("#vista-proveniencia table");
   const prov = await page.innerText("#vista-proveniencia");

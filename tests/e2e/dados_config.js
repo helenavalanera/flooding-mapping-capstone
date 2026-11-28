@@ -11,17 +11,17 @@ const { assert, abrir, BASE } = require("./lib");
   await page.goto(BASE + "#poa/mapa"); await page.waitForFunction(() => window.Mapa && window.Mapa.pronto, null, { timeout: 90000 });
   assert.strictEqual(await page.evaluate(() => window.FM_DADOS.base("fase3").endsWith("/copia-dos-dados/fase3/")), true, "a base vem da configuração, não do código");
   // hash errado: a camada é recusada, com o motivo, e nada de dado é mostrado
-  await page.click("[data-dim=A]"); await page.waitForSelector("#dim-tentar", { timeout: 30000 });
-  assert.match(await page.innerText("#dimensoes"), /não corresponde à versão esperada dos dados/); assert.strictEqual(await page.evaluate(() => !!window.Fase3.meta), false);
-  assert.strictEqual(await page.locator("#dim-chuva").count(), 0, "sem dados, sem valores");
+  await page.click("[data-dim=A]"); await page.waitForSelector("#f3-tentar", { timeout: 30000 });
+  assert.match(await page.innerText("#f3-opcoes"), /não corresponde à versão esperada dos dados/); assert.strictEqual(await page.evaluate(() => !!window.Fase3.meta), false);
+  assert.strictEqual(await page.locator("#f3-p").count(), 0, "sem dados, sem valores");
   // hash certo: carrega e mostra a versão do conjunto
-  modo = "certo"; await page.evaluate((h) => { window.FM_DADOS.meta_sha256.fase3 = h; }, hashCerto); await page.click("#dim-tentar"); await page.waitForSelector("#dim-versao", { timeout: 30000 });
-  assert.match(await page.innerText("#dim-versao"), /camada v1, conjunto d-teste/);
+  modo = "certo"; await page.evaluate((h) => { window.FM_DADOS.meta_sha256.fase3 = h; }, hashCerto); await page.click("#f3-tentar"); await page.waitForSelector("#f3-versao", { state: "attached", timeout: 30000 });
+  assert.match(await page.textContent("#f3-versao"), /camada v1, conjunto d-teste/);
   // indisponível: mensagem e nova tentativa
   modo = "fora"; await page.evaluate(() => { window.Fase3.meta = null; window.Fase3._meta = null; });
-  await page.click("[data-dim=A]"); await page.click("[data-dim=A]"); await page.waitForSelector("#dim-tentar", { timeout: 30000 });
-  assert.match(await page.innerText("#dimensoes"), /não estão disponíveis \(HTTP 503/);
-  modo = "certo"; await page.click("#dim-tentar"); await page.waitForSelector("#dim-versao", { timeout: 30000 });
+  await page.click("[data-dim=A]"); await page.click("[data-dim=A]"); await page.waitForSelector("#f3-tentar", { timeout: 30000 });
+  assert.match(await page.innerText("#f3-opcoes"), /não estão disponíveis \(HTTP 503/);
+  modo = "certo"; await page.click("#f3-tentar"); await page.waitForSelector("#f3-versao", { state: "attached", timeout: 30000 });
   assert.ok(pedidos >= 3);
   assert.deepStrictEqual(erros.filter((e) => !/503|net::|Failed to load/.test(e)), [], "console: " + erros.join(" | "));
   await browser.close(); console.log("dados_config ok");

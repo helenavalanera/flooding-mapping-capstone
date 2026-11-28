@@ -83,47 +83,53 @@ def painel(modo="c", pacote="m1", limite="max", p=30, linha="LINHA"):
     return run(f'(F.estado.modo = "{modo}", F.estado.pacote = "{pacote}", F.estado.limite = "{limite}", F.estado.p = {p}, F.corpoDoTrecho({linha}))')
 
 
-def test_the_stretch_panel_shows_each_indicator_with_unit_and_explanation_and_never_a_transported_volume():
+def test_the_stretch_panel_shows_street_name_and_four_indicators_with_unit_and_keeps_explanations_secondary():
     h = painel()
-    for rotulo in ("Contribuição potencial estimada associada ao trecho", "Volume potencial gerado localmente", "Área contribuinte estimada", "Cobertura do pacote selecionado", "Indicador topográfico de retenção"):
+    for rotulo in ("Geração", "Concentração", "Topografia", "Drenagem"):
         assert rotulo in h, rotulo
-    assert h.count("O que é e como ler") == 5 and "<code>a:b:c</code>" in h and "Rua Exemplo" in h
-    assert "30 a 60 m³" in h and "3 a 6 m³" in h and "12.600 m²" in h        # 2000 m² x 30 mm / 1000 = 60 m³; a área 12.600 m² aparece como está
-    assert "30%" in h and "Não somar com outros trechos" in h
+    assert h.count("sel-ind") >= 4 and h.count("<details") == 1 and "<code>a:b:c</code>" in h and "Rua Exemplo" in h and "sel-rua" in h
+    assert "<span class='v'>30 a 60</span><span class='u'>m³</span>" in h and "<span class='v'>3 a 6</span><span class='u'>m³</span>" in h      # B: 2000 m² x 30 mm / 1000 = 60 m³; A idem
+    assert "12.600 m²" in h and "30%" in h and "Não somar com outros trechos" in h                      # área e cobertura ficam no detalhe secundário
+    for rotulo in ("Contribuição potencial estimada associada ao trecho", "Volume potencial gerado localmente", "Indicador topográfico de retenção"):
+        assert rotulo in h.split("<details")[1], rotulo
+    assert "title='Sem dado'>—</span>" in h and "Sem dado</span>" not in h and "estimados, não observados" in h                                  # D: nenhuma associação inventada entre trecho e drenagem
     assert "transportado" not in h.lower()                                  # a tela nunca apresenta (nem cita) volume efetivamente transportado como indicador
 
 
 def test_the_panel_follows_the_selected_package_and_never_mixes_them():
     m1, an, li = painel(pacote="m1"), painel(pacote="an"), painel(pacote="li")
-    assert "30 a 60 m³" in m1 and "15 a 120 m³" in an and "0 a 270 m³" in li                  # c_an 500..4000 e c_li 0..9000 x 30/1000
-    assert "Método 1" in m1 and "Método 2" in an and "Limites físicos" in li and "Limites matemáticos" in li and "Limites matemáticos" not in m1
-    assert "Método 2" not in m1.split("Cobertura do pacote selecionado")[0]
+    assert "<span class='v'>30 a 60</span>" in m1 and "<span class='v'>15 a 120</span>" in an and "<span class='v'>0 a 270</span>" in li      # c_an 500..4000 e c_li 0..9000 x 30/1000
+    assert "Método 1" in m1 and "Método 2" in an and "Limites físicos" in li and "limite matemático" in li and "limite matemático" not in m1
+    assert "Método 2" not in m1
 
 
 def test_the_rainfall_changes_the_volumes_by_the_same_factor():
-    assert "30 a 60 m³" in painel(p=30) and "10 a 20 m³" in painel(p=10) and "60 a 120 m³" in painel(p=60)
+    assert "<span class='v'>30 a 60</span>" in painel(p=30) and "<span class='v'>10 a 20</span>" in painel(p=10) and "<span class='v'>60 a 120</span>" in painel(p=60)
 
 
 def test_a_stretch_without_data_says_so_and_does_not_show_zero():
     sem = '{"id": "x", "nome": null, "via": null, "n_cel": 0, "n_cheg": 0, "l_m1_max": null, "area_montante_m2": null, "topo_altura_max_m": null}'
     h = painel(linha=sem)
-    assert "Trecho sem dados disponíveis" in h and "não significa contribuição zero" in h and "0 m³" not in h and "Trecho sem nome" in h
+    assert h.count("title='Sem dado'>—</span>") == 4 and "que não é zero" in h and "0 m³" not in h and "Trecho sem nome" in h
 
 
-def test_a_low_coverage_warns_that_the_interval_is_partial():
-    assert "Leia como parcial" not in painel()                                                   # f_m1 = 30%: acima do limiar de 25%
+def test_zero_is_shown_as_zero_and_is_not_confused_with_no_data():
+    zero = run('(F.estado.pacote = "m1", F.corpoDoTrecho(Object.assign({}, LINHA, { l_m1_min: 0, l_m1_max: 0, c_m1_min: 0, c_m1_max: 0 })))')
+    assert "<span class='v'>0</span><span class='u'>m³" in zero and zero.count("title='Sem dado'>—</span>") == 1         # só a drenagem segue sem dado
+
+
+def test_a_low_coverage_marks_the_interval_as_partial_without_showing_percentages():
+    assert "m³ · parcial" not in painel()                                                       # f_m1 = 30%: acima do limiar de 25%
     baixa = run('(F.estado.pacote = "m1", F.corpoDoTrecho(Object.assign({}, LINHA, { f_m1: 0.1 })))')
-    assert "Leia como parcial" in baixa
+    assert "m³ · parcial" in baixa and "parcial: o intervalo considera só uma parte da área" in baixa
     alta = run('(F.estado.pacote = "m1", F.corpoDoTrecho(Object.assign({}, LINHA, { f_m1: 0.9 })))')
-    assert "Leia como parcial" not in alta
+    assert "m³ · parcial" not in alta
 
 
 def test_the_topographic_indicator_is_a_rank_never_a_depth_or_volume():
     com = run('(F.estado.pacote = "m1", F.corpoDoTrecho(Object.assign({}, LINHA, { topo_altura_max_m: 4.2, topo_posto: 91.5 })))')
-    assert "posto 91,5 de 100" in com and "não é profundidade" in com.lower() and "grandeza do modelo" in com
-    sem = painel()
-    valor = sem.split("Indicador topográfico de retenção")[1].split("<div class='f3-val'>")[1].split("</div>")[0]
-    assert valor == "<b>sem preenchimento de depressão no modelo</b>"          # altura zero: não vira posto nem profundidade
+    assert "posto 91,5</span><span class='u'>de 100" in com and "não é profundidade" in com.lower() and "grandeza do modelo" in com
+    assert "<span class='v'>Sem depressão</span><span class='u'>no modelo" in painel()          # altura zero: não vira posto nem profundidade
 
 
 def test_every_user_visible_text_avoids_forbidden_words():

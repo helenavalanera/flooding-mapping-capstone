@@ -27,7 +27,7 @@
 
   /* Legenda: cinco classes de fração construída, claro a escuro, e o que a camada NÃO é. */
   G.legenda = function () {
-    var h = "<li class='f3-tit'><b>E. Fração construída estimada (GeoAI)</b> " + Lg.kindBadge("experimental") + " <span class='small'>experimental, fora do cálculo</span></li>";
+    var h = "<li class='f3-tit'><b>E. Fração construída estimada (GeoAI)</b> <span class='small'>fora do cálculo</span></li>";
     if (G.meta) {
       G.meta.classes.forEach(function (c) {
         h += "<li><span class='sw' style='background:" + esc(c.cor) + "'></span><span>" + esc(pct(c.de) + " a " + pct(c.ate)) + " da célula construída</span></li>";
@@ -45,10 +45,11 @@
   G.montarPainel = function () {
     var box = el("geoai-opcoes"); if (!box) return;
     var m = G.meta;
-    box.innerHTML = "<h3 id='h-geoai'>E. Fração construída estimada <span class='small'>(GeoAI, experimental)</span></h3>" +
-      "<p class='small geoai-aviso' role='note'><b>Experimental.</b> " + esc(TEXTOS.aviso) + "</p>" +
-      "<label class='small' for='geoai-opac'>Opacidade da camada</label> <input type='range' id='geoai-opac' min='20' max='100' step='5' value='" + Math.round(G.opacidade * 100) + "' aria-describedby='geoai-opac-v'> <output id='geoai-opac-v' class='small'>" + Math.round(G.opacidade * 100) + "%</output>" +
+    box.innerHTML = "<p class='sr-only' id='h-geoai'>E. Fração construída estimada (GeoAI, experimental)</p>" +
+      "<div class='ctl-linha'><label for='geoai-opac'>Opacidade</label><input type='range' id='geoai-opac' min='20' max='100' step='5' value='" + Math.round(G.opacidade * 100) + "' aria-describedby='geoai-opac-v'><output id='geoai-opac-v' class='small'>" + Math.round(G.opacidade * 100) + "%</output></div>" +
+      "<details class='mais'><summary>Sobre esta camada</summary>" + (window.Mapa && window.Mapa.notaDim ? window.Mapa.notaDim("E") : "") + "<p class='small geoai-aviso' role='note'><b>Experimental.</b> " + esc(TEXTOS.aviso) + "</p>" +
       (m ? "<p class='small'>Origem: " + esc(m.fonte_da_imagem || "") + "; período " + esc(m.periodo || "") + "; referência: " + esc(m.referencia || "") + ". Erro médio absoluto da fração construída: " + String(m.resultados.mae_blocos_3km).replace(".", ",") + " em blocos de 3 km e " + String(m.resultados.mae_quadrante_externo).replace(".", ",") + " no quadrante externo; critério de bairros (80% com erro de área de até 10%) não atingido: " + pct(m.resultados.bairros_com_erro_de_area_ate_10pct) + ".</p>" : "") +
+      "</details>" +
       (G.erro ? "<p class='small f3-sem' role='status'>Os dados da camada não estão disponíveis (" + esc(G.erro) + "). <button type='button' class='link' id='geoai-tentar'>Tentar de novo</button></p>" : "");
     var r = el("geoai-opac");
     r.addEventListener("input", function () { G.opacidade = Number(r.value) / 100; el("geoai-opac-v").textContent = r.value + "%"; avisar(); });
