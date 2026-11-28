@@ -180,13 +180,36 @@
     <p class="acoes"><a class="btn" id="cen-link" data-camadas="{{CAMADAS_FLAG}}" href="{{HREF_MAPA}}">{{SIM_LINK_TXT}}</a></p>
     <p class="small cen-nota">{{SIM_NOTA}}</p>
 
-    <div class="graficos grafico-chuva cartao-claro">
-      <figure>
+    <div class="chuva-bloco cartao-claro">
+      <h3>Chuva mensal em Porto Alegre</h3>
+      <p>Além das simulações por evento, o estudo também apresenta o comportamento histórico da precipitação mensal em Porto Alegre.</p>
+      <figure tabindex="0" aria-label="Gráfico da média mensal de chuva; role para o lado se necessário">
         <img class="grafico" src="img/estudo/grafico-chuva-mensal.svg" {{DIM_GRAFICO_CHUVA_MENSAL}} alt="Gráfico de barras com a média da chuva de cada mês do calendário em Porto Alegre, em milímetros por mês, no período {{PERIODO_CHUVA}}; os valores estão na tabela logo abaixo" loading="lazy">
-        <figcaption><b>Média mensal de chuva em Porto Alegre.</b> Média, entre os anos, do total de cada mês do calendário (mm por mês), no período {{PERIODO_CHUVA}}. Fonte: Open-Meteo, arquivo de reanálise (base ERA5, uma estimativa meteorológica modelada, e não a medição de um pluviômetro), no ponto da grade de Porto Alegre; a grade suaviza e subestima extremos locais. <b>Média mensal não é chuva por evento:</b> os cenários de 10, 20 e 30 mm do simulador são totais por evento (sequência de dias com chuva).</figcaption>
-        <details class="tabela-chuva"><summary>Ver os valores</summary>{{TABELA_CHUVA_MENSAL}}</details>
+        <figcaption>O gráfico mostra a média do volume total de chuva de cada mês do calendário, considerando os anos {{PERIODO_CHUVA}}. Isso permite identificar quais períodos do ano costumam apresentar maiores acumulados de precipitação.</figcaption>
       </figure>
+      <p class="aviso-chuva"><b>Atenção:</b> chuva mensal e chuva por evento são informações diferentes. A média mensal representa a soma da chuva ao longo de um mês, enquanto os cenários de 10, 20 e 30 mm representam o acumulado de um evento específico.</p>
+      <p class="small">Fonte: Open-Meteo, dados de reanálise meteorológica baseados no ERA5. Os valores são estimativas modeladas, não medições diretas de pluviômetros. A resolução da grade também pode suavizar os extremos locais.</p>
+      <details class="tabela-chuva"><summary>Ver os valores mensais</summary>{{TABELA_CHUVA_MENSAL}}</details>
     </div>
+
+    <h3 class="sub-sim">O que os resultados ajudam a compreender</h3>
+    <p class="intro">Os resultados ajudam a compreender três aspectos fundamentais da drenagem urbana:</p>
+    <ol class="tres-aspectos">
+      <li><h4>A dimensão do território analisado</h4><p>Os indicadores mostram quantos trechos foram estudados, quais características do relevo foram identificadas e onde existem registros cadastrados da infraestrutura de drenagem.</p></li>
+      <li><h4>O volume potencial de água gerado pela chuva</h4><p>As simulações permitem comparar diferentes volumes de precipitação e estimar quanto dessa água pode se transformar em escoamento, de acordo com as características das superfícies e as hipóteses adotadas.</p></li>
+      <li><h4>Como a água pode se distribuir pela cidade</h4><p>A análise por trechos permite diferenciar a água gerada localmente daquela que chega de outras regiões, ajudando a identificar áreas com maiores contribuições potenciais.</p></li>
+    </ol>
+    <div class="sintese">
+      <p><b>Em síntese:</b> o estudo transforma dados geográficos, informações de infraestrutura e cenários de chuva em indicadores que ajudam a entender como a água pode percorrer o território urbano.</p>
+      <p>Esses resultados podem apoiar análises, orientar investigações e contribuir para o planejamento da drenagem municipal. Eles não representam, isoladamente, previsões de alagamentos ou enchentes.</p>
+    </div>
+    <h3 class="sub-sim">Como interpretar os resultados</h3>
+    <p class="intro">Para interpretar corretamente os resultados, o estudo organiza as informações em três categorias:</p>
+    <ul class="tres-categorias">
+      <li><span class="cat-rot">Processamento</span><h4>O que foi analisado?</h4><p>Apresenta o tamanho da base de dados, a quantidade de trechos processados, as fontes utilizadas e a cobertura das informações disponíveis.</p></li>
+      <li><span class="cat-rot">Resultados metodológicos</span><h4>O que os cálculos produziram?</h4><p>Apresenta os volumes estimados, os indicadores de contribuição e geração local e os resultados obtidos pelas diferentes metodologias.</p></li>
+      <li><span class="cat-rot">Validação exploratória</span><h4>Como os resultados foram comparados com registros reais?</h4><p>Apresenta a comparação exploratória com registros históricos de alagamentos. Essa análise permite observar possíveis relações entre os resultados do modelo e as ocorrências registradas, mas não representa uma validação definitiva da capacidade preditiva do motor.</p></li>
+    </ul>
     <details class="numeros-detalhe"><summary>Ver os números do processamento e da validação</summary>
     <p class="legenda-grupos">Os números abaixo são de três tipos, e não se misturam: <b>processamento</b> (o tamanho da base), <b>resultado metodológico</b> (o que o motor produz) e <b>validação</b> (o que a comparação com registros mostrou). Cada cartão traz unidade, definição, origem, contexto e limitação.</p>
     {{NUMEROS}}
@@ -201,7 +224,7 @@
       </figure>
     </div>
     </details>
-    <p class="mais">Validações, hipóteses, limitações e fontes completas: <a href="{{REPO}}/blob/develop/docs/metodologia.md">documentação técnica</a>.</p>
+    <p class="mais">Para conhecer os critérios de cálculo, as hipóteses adotadas, as limitações, as validações e as fontes utilizadas, consulte a <a href="{{REPO}}/blob/develop/docs/metodologia.md">documentação técnica completa</a>.</p>
   </div>
 </section>
 
@@ -212,22 +235,22 @@
     <p class="intro">Da observação da Terra à análise das condições de acúmulo de água. O Flooding Mapping integra dados geográficos, informações meteorológicas, modelos de elevação e processamento computacional para investigar condições (des)favoráveis ao escoamento e ao acúmulo de água em Porto Alegre.</p>
     <h3>1. Fontes de dados</h3>
     <ul class="fontes-lista">
-      <li><h4>Copernicus DEM GLO-30</h4><p>Modelo digital de elevação usado nos cálculos, com resolução aproximada de 30 metros.</p></li>
-      <li><h4>AWS Terrain Tiles</h4><p>Serviço de distribuição de dados de elevação. No mapa interativo fornece o relevo exibido (sombreado e 3D), sem entrar nos cálculos.</p></li>
-      <li><h4>Prefeitura de Porto Alegre e Profill 2022</h4><p>Dados municipais: uso e ocupação do solo, cadastro de drenagem pluvial e limites de bairros.</p></li>
-      <li><h4>OpenStreetMap e Protomaps</h4><p>Malha viária e dados cartográficos (OpenStreetMap) e o mapa-base que os representa (Protomaps).</p></li>
-      <li><h4>Open-Meteo</h4><p>Séries históricas de precipitação baseadas em reanálise meteorológica, usadas como referência para a chuva do estudo. É uma estimativa modelada, e não a medição de um pluviômetro.</p></li>
-      <li><h4>Sentinel-2 e AlphaEarth (só no GeoAI)</h4><p>Dados usados especificamente nos experimentos de GeoAI da camada E. Não são fontes do motor principal.</p></li>
+      <li><h4>Copernicus DEM GLO-30</h4><p>Elevação de 30 m usada nos cálculos.</p></li>
+      <li><h4>AWS Terrain Tiles</h4><p>Relevo exibido no mapa (sombreado e 3D). Não entra nos cálculos.</p></li>
+      <li><h4>Prefeitura de Porto Alegre e Profill 2022</h4><p>Uso do solo, drenagem pluvial e bairros.</p></li>
+      <li><h4>OpenStreetMap e Protomaps</h4><p>Malha viária (OpenStreetMap) e mapa-base (Protomaps).</p></li>
+      <li><h4>Open-Meteo</h4><p>Séries de chuva (reanálise ERA5, estimativa modelada) usadas como referência.</p></li>
+      <li><h4>Sentinel-2 e AlphaEarth (só no GeoAI)</h4><p>Só nos experimentos de GeoAI (camada E); não são fontes do motor principal.</p></li>
     </ul>
     <h3>2. Processamento geoespacial</h3>
     <p>Os dados são organizados, tratados e combinados por programação e técnicas de geoprocessamento.</p>
     <ul class="fontes-lista">
-      <li><h4>Python</h4><p>Linguagem principal do processamento, dos cálculos e da geração dos resultados, com pandas, NumPy e SciPy.</p></li>
-      <li><h4>GeoPandas, Shapely e PyProj</h4><p>Cruzamento de ruas, limites territoriais e superfícies, recortes e mudanças de sistema de coordenadas.</p></li>
-      <li><h4>Rasterio</h4><p>Leitura e gravação de dados matriciais, como o modelo de elevação e o uso do solo em células.</p></li>
-      <li><h4>GDAL (ogr2ogr)</h4><p>Geração dos tiles vetoriais das camadas de escoamento e de drenagem exibidas no mapa.</p></li>
-      <li><h4>scikit-learn</h4><p>Modelos de aprendizado de máquina dos experimentos de validação e do GeoAI.</p></li>
-      <li><h4>MapLibre, Leaflet e PMTiles</h4><p>Visualização geoespacial: o mapa 3D com WebGL (MapLibre), o mapa 2D simples quando não há WebGL (Leaflet) e a leitura do mapa-base por faixas de bytes (PMTiles).</p></li>
+      <li><h4>Python</h4><p>Processamento e cálculos (pandas, NumPy, SciPy).</p></li>
+      <li><h4>GeoPandas, Shapely e PyProj</h4><p>Cruzamento de ruas, limites e superfícies.</p></li>
+      <li><h4>Rasterio</h4><p>Leitura de dados matriciais (elevação, uso do solo).</p></li>
+      <li><h4>GDAL (ogr2ogr)</h4><p>Tiles vetoriais de escoamento e drenagem.</p></li>
+      <li><h4>scikit-learn</h4><p>Aprendizado de máquina dos experimentos.</p></li>
+      <li><h4>MapLibre, Leaflet e PMTiles</h4><p>Mapa 3D (MapLibre), mapa 2D de reserva (Leaflet) e leitura do mapa-base (PMTiles).</p></li>
     </ul>
     <h3>3. Modelagem e método próprio</h3>
     <p>O projeto desenvolveu uma metodologia para estimar a geração potencial de escoamento e investigar como essa contribuição pode se concentrar no território. A estimativa de volume usa a relação:</p>

@@ -276,3 +276,21 @@ th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--li
 .fontes-lista h3 { font-size: 1.02rem; margin: 0 0 4px; font-weight: 700; }
 .cartao-claro { background: var(--seco); color: var(--seco-ink); padding: clamp(14px, 2vw, 26px); border-radius: 12px; }
 .cartao-claro figure figcaption, .cartao-claro .small { color: var(--seco-ink); }
+
+/* Lista de tópicos sem bolinha dupla: .prosa ul traz marcador nativo e .lista-simples desenha o seu */
+.prosa .lista-simples { list-style: none; padding-left: 0; }
+/* Seção de resultados do simulador: cartões com sombra e espaçamento, no padrão dos demais cartões da página */
+.chuva-bloco { margin-top: 44px; display: grid; gap: 16px; box-shadow: 0 10px 30px rgba(10, 28, 39, .18), 0 2px 6px rgba(10, 28, 39, .10); border: 1px solid var(--linha); }
+.chuva-bloco h3 { margin: 0; } .chuva-bloco figure { margin: 4px 0; } .chuva-bloco figcaption { margin-top: 10px; font-size: var(--pequeno); }
+.aviso-chuva { border-left: 5px solid var(--acento); background: rgba(242, 163, 58, .16); padding: 14px 18px; border-radius: 0 10px 10px 0; }
+.tres-aspectos, .tres-categorias { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-top: 22px; counter-reset: asp; }
+.tres-aspectos li, .tres-categorias li { position: relative; background: var(--seco); color: var(--seco-ink); border-radius: 14px; padding: 26px 24px 24px; border: 1px solid var(--linha); box-shadow: 0 10px 28px rgba(0, 0, 0, .28), 0 2px 6px rgba(0, 0, 0, .16); display: flex; flex-direction: column; gap: 10px; }
+.tres-aspectos li::before { counter-increment: asp; content: counter(asp); display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--forte); color: #fff; font-weight: 700; box-shadow: 0 3px 8px rgba(11, 93, 143, .45); }
+.tres-aspectos h4, .tres-categorias h4 { margin: 0; font-size: 1.1rem; line-height: 1.3; } .tres-aspectos p, .tres-categorias p { font-size: var(--pequeno); }
+.tres-categorias li { border-top: 5px solid var(--forte); } .tres-categorias li:nth-child(2) { border-top-color: var(--acento); } .tres-categorias li:nth-child(3) { border-top-color: #5aa6cf; }
+.cat-rot { align-self: flex-start; font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--leve); color: var(--seco-ink); border-radius: 999px; padding: 4px 12px; }
+.sintese { margin-top: 30px; display: grid; gap: 10px; background: rgba(234, 242, 246, .08); border: 1px solid var(--linha-clara); border-left: 6px solid var(--acento); border-radius: 12px; padding: 22px 26px; box-shadow: 0 10px 28px rgba(0, 0, 0, .28); max-width: 62em; }
+@media (max-width: 900px) { .tres-aspectos, .tres-categorias { grid-template-columns: 1fr; } }
+.chuva-bloco .grafico { display: block; width: 100%; max-width: 100%; height: auto; } .chuva-bloco figcaption { max-width: none; }
+.chuva-bloco { grid-template-columns: minmax(0, 1fr); } .chuva-bloco .tabela-rolagem { max-width: 100%; overflow-x: auto; }
+.chuva-bloco figure { overflow-x: auto; min-width: 0; } .chuva-bloco figure:focus-visible { outline: 3px solid #f0a830; outline-offset: 2px; }

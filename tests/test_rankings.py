@@ -14,7 +14,7 @@ def test_the_monthly_mean_is_by_calendar_month_with_its_source_and_period_and_is
     assert [x["mes"] for x in m["meses"]][0] == "janeiro" and len(m["meses"]) == 12 and all(x["anos"] >= 9 and x["media_mm"] > 0 for x in m["meses"])
     assert m["periodo_da_serie"] == RES["chuva"]["periodo"] and "ERA5" in m["fonte"] and "Não é chuva por evento" in m["o_que_e"]
     assert abs(m["media_dos_meses_mm"] - RES["chuva"]["media_mensal_mm"]) < 2          # o mesmo nível da média mensal dos resultados (esta só descarta o mês incompleto)
-    assert "Média mensal não é chuva por evento" in HTML and "grafico-chuva-mensal.svg" in HTML
+    assert "chuva mensal e chuva por evento são informações diferentes" in HTML and "grafico-chuva-mensal.svg" in HTML
 
 
 def test_the_top5_districts_are_the_five_highest_among_districts_with_enough_stretches_and_sorted():
