@@ -44,7 +44,21 @@
   /* ------------------------------------------------------------------ dados */
   F.base = function () { return window.FM_DADOS.base("fase3"); };
   F.urlTiles = function () { return F.base() + "tiles/{z}/{x}/{y}.pbf"; };
+  /* Os tiles trazem a malha inteira da caixa em volta de Porto Alegre, inclusive vias de cidades vizinhas. Os números do estudo valem só para as ruas dentro da cidade
+     (data/limite_poa.json); o mapa as sombreia e diz quantas são. */
+  F.carregarRecorte = function () {
+    if (F._rec) return F._rec;
+    F._rec = fetch("data/limite_poa.json").then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function (j) { F.recorte = j.properties; if (F.avisarZoom && F._zoom != null) F.avisarZoom(F._zoom); var n = el("f3-recorte"); if (n) n.innerHTML = notaDoRecorte(); return j; }).catch(function () { F._rec = null; });
+    return F._rec;
+  };
+  var EXATO = new Intl.NumberFormat("pt-BR");
+  function foraDePoa() { var r = F.recorte; return r && F.meta && F.meta.trechos > r.trechos_dentro ? F.meta.trechos - r.trechos_dentro : 0; }   // só quando os tiles ainda trazem as vias de fora
+  function notaDoRecorte() {
+    var r = F.recorte, fora = foraDePoa(); if (!fora) return "";
+    return "<b>Malha e limite de Porto Alegre.</b> O mapa traz " + EXATO.format(F.meta.trechos) + " trechos de rua, dos quais " + EXATO.format(fora) + " são de cidades vizinhas e aparecem sombreados. Os resultados e os números do estudo valem para os " + EXATO.format(r.trechos_dentro) + " trechos dentro de Porto Alegre.";
+  }
   F.carregar = function () {
+    F.carregarRecorte();
     if (F._meta) return F._meta;
     F._meta = window.FM_DADOS.lerMeta("fase3").then(function (m) {
       F.meta = m; if (F.estado.p == null) F.estado.p = m.precipitacoes_mm.indexOf(F.pedidoP) >= 0 ? F.pedidoP : (m.precipitacoes_mm.indexOf(30) >= 0 ? 30 : m.precipitacoes_mm[0]);
@@ -127,7 +141,7 @@
       return "<label class='f3-radio'><input type='radio' name='f3-modo' id='f3-modo-" + k + "' value='" + k + "'" + (s.modo === k ? " checked" : "") + "> " + esc(D.MODOS[k].nome) + "</label>"; }).join("");
     box.innerHTML = "<h2 id='h-f3'>Escoamento potencial por trecho " + Lg.kindBadge("simulado") + "</h2>" +
       "<p class='small f3-aviso' role='note'>" + esc(TEXTOS.aviso) + "</p>" +
-      "<p class='small' id='f3-dica'>" + esc(TEXTOS.dica) + "</p>" +
+      "<p class='small' id='f3-recorte'>" + notaDoRecorte() + "</p><p class='small' id='f3-dica'>" + esc(TEXTOS.dica) + "</p>" +
       "<fieldset class='f3-modos'><legend>O que mostrar</legend>" + modos + "</fieldset>" +
       (pacotes ? "<label for='f3-pacote'>Pacote de coeficientes <em>(alternativas, nunca somadas)</em></label><select id='f3-pacote'>" + opcoes(Object.keys(D.PACOTES).map(function (k) { return [k, D.PACOTES[k].nome]; }), s.pacote) + "</select>" +
         "<p class='small' id='f3-pacote-nota'><b>" + esc(D.PACOTES[s.pacote].natureza.charAt(0).toUpperCase() + D.PACOTES[s.pacote].natureza.slice(1)) + ".</b> " + esc(D.PACOTES[s.pacote].nota) + "</p>" +
@@ -149,7 +163,7 @@
   };
   F.avisarZoom = function (zoom) {
     F._zoom = zoom; var e = el("f3-zoom"); if (!e || !F.meta) return;
-    e.textContent = zoom < F.meta.zoom[0] ? "Aproxime o mapa (zoom " + F.meta.zoom[0] + " ou mais): são " + D.formatar(F.meta.trechos) + " trechos e eles só são desenhados de perto." : "";
+    e.textContent = zoom < F.meta.zoom[0] ? "Aproxime o mapa (zoom " + F.meta.zoom[0] + " ou mais): são " + EXATO.format(F.meta.trechos) + " trechos na malha" + (foraDePoa() ? " (" + EXATO.format(F.recorte.trechos_dentro) + " em Porto Alegre)" : "") + " e eles só são desenhados de perto." : "";
   };
 
   /* ------------------------------------------------------------------ painel do trecho */

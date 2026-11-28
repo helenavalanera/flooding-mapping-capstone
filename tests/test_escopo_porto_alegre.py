@@ -24,7 +24,7 @@ def test_the_landing_never_offers_a_state_front():
 
 
 def test_the_published_static_folder_has_only_porto_alegre_data_and_no_state_layers():
-    assert sorted(p.name for p in (STATIC / "data").iterdir()) == ["mapa_dimensoes_poa.json", "mapa_manchas_poa.json", "rankings_poa.json", "recorte_municipal_poa.json", "resultados_poa.json", "territorio_poa.json"]
+    assert sorted(p.name for p in (STATIC / "data").iterdir()) == ["limite_poa.json", "mapa_dimensoes_poa.json", "mapa_manchas_poa.json", "rankings_poa.json", "recorte_municipal_poa.json", "resultados_poa.json", "territorio_poa.json"]
     for nome in ("rodovias.geojson", "municipios.geojson", "cobertura_rs.json", "impacto_rs.json", "ocorrencias.json", "territorios.json"):
         assert not (STATIC / "data" / nome).exists(), nome
     assert not list(STATIC.rglob("*.geojson")) and not list(STATIC.rglob("*.parquet"))

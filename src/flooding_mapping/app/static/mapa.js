@@ -13,7 +13,7 @@
   var CAMADAS = {
     relevo: { rotulo: "Relevo sombreado", kind: null, ids: ["sombra"], inicial: true, so3d: true },
     drenagem_cadastro: { rotulo: "Drenagem cadastrada (inventário, só contexto)", kind: "observado", ids: ["dren-rede-halo", "dren-rede-0", "dren-rede-1", "dren-rede-2", "dren-rede-dup", "dren-pocos", "dren-bocas", "dren-bombas", "dren-pt-dup", "dren-sel-rede", "dren-sel-pocos", "dren-sel-bocas", "dren-sel-bombas"], inicial: false, so3d: true },
-    escoamento_fase3: { rotulo: "Escoamento potencial por trecho (motor da Fase 3)", kind: "simulado", ids: ["f3-casing", "f3-sem-dados", "f3-sel"], inicial: false, so3d: true },
+    escoamento_fase3: { rotulo: "Escoamento potencial por trecho (motor da Fase 3)", kind: "simulado", ids: ["f3-casing", "f3-sem-dados", "f3-sel", "limite-mascara", "limite-linha"], inicial: false, so3d: true },
     geoai_fracao_construida: { rotulo: "E. Fração construída estimada (GeoAI, experimental)", kind: "experimental", ids: ["geoai-e"], inicial: false, so3d: true, dado: "geoai" }
   };
   M.CAMADAS = CAMADAS;
@@ -120,8 +120,21 @@
   /* A chuva escolhida no mapa é a mesma do simulador e dos resultados. */
   function sincronizarChuva() { var F = window.Fase3; if (window.Resultados && F.estado.p != null) window.Resultados.P = F.estado.p; }
   /* Camada da Fase 3: os dados são carregados só quando ela é ligada; o desenho e a legenda seguem os controles do painel. */
+  /* Limite de Porto Alegre: sombreia o que está fora dela e permite avisar, no clique, que o trecho é de uma cidade vizinha (não faz parte da análise). Só desenho e aviso. */
+  function dentroDoAnel(x, y, anel) { var d = false; for (var i = 0, j = anel.length - 1; i < anel.length; j = i++) { var xi = anel[i][0], yi = anel[i][1], xj = anel[j][0], yj = anel[j][1]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) d = !d; } return d; }
+  M.dentroDePoa = function (lng, lat) {
+    var g = M.limite && M.limite.geometry; if (!g) return true;
+    var polis = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+    return polis.some(function (p) { return dentroDoAnel(lng, lat, p[0]) && !p.slice(1).some(function (b) { return dentroDoAnel(lng, lat, b); }); });
+  };
+  function ligarLimite() {
+    if (M._limite) return;
+    M._limite = fetch("data/limite_poa.json").then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function (gj) {
+      M.limite = gj; if (M.motor && M.motor.limite_adicionar) { M.motor.limite_adicionar(gj); aplicarCamadas(); }
+    }).catch(function () { M._limite = null; });
+  }
   function ligarFase3() {
-    var F = window.Fase3;
+    var F = window.Fase3; ligarLimite();
     if (!M._f3ouvindo) {
       M._f3ouvindo = true; F.aoMudar(function () { sincronizarChuva(); pintarFase3(); legenda(); renderDimensoes(); });
       if (M.map) M.map.on("zoomend", function () { F.avisarZoom(M.map.getZoom()); });
@@ -211,6 +224,7 @@
   function legenda() {
     var h = "";
     if (visivel("escoamento_fase3")) h += window.Fase3.legenda();
+    if (visivel("escoamento_fase3")) h += "<li class='f3-nota small'>Área sombreada, com contorno tracejado: fora de Porto Alegre (cidade vizinha), fora da análise.</li>";
     if (visivel("drenagem_cadastro")) h += window.Drenagem.legenda();
     if (visivel("geoai_fracao_construida")) h += window.Geoai.legenda();
     el("legenda-gl").innerHTML = h || "<li class='muted'>Nenhuma camada ativa.</li>";
@@ -231,6 +245,8 @@
     if (alvo.tipo === "dren") {
       M.selecionado = { tipo: "dren", id: alvo.camada + ":" + alvo.n }; M.motor.selecionar({ dren: { camada: alvo.camada, n: alvo.n } });
       window.Drenagem.detalhe(alvo.camada, alvo.n, el("contexto")); mostrarContexto();
+    } else if (alvo.tipo === "trecho_f3" && alvo.lngLat && !M.dentroDePoa(alvo.lngLat.lng, alvo.lngLat.lat)) {
+      M.selecionado = null; M.motor.selecionar({}); el("contexto").innerHTML = "<h2 id='h-contexto'>Seleção</h2><div id='f3-trecho' class='fora-de-poa' role='status'><p><b>Trecho fora de Porto Alegre.</b> Este trecho é de uma cidade vizinha: a malha do mapa vem de uma caixa em volta de Porto Alegre, e a análise (uso do solo, escoamento, resultados) vale só para as ruas de Porto Alegre. Os valores deste trecho não fazem parte do estudo.</p></div>"; mostrarContexto();
     } else if (alvo.tipo === "trecho_f3") {
       M.selecionado = { tipo: "trecho_f3", id: alvo.props.n }; M.motor.selecionar({ f3: alvo.props.n });
       window.Fase3.detalhe(alvo.props.n, el("contexto")); mostrarContexto();
@@ -303,6 +319,17 @@
       } else map.setPaintProperty("geoai-e", "raster-opacity", opacidade);
       map.setLayoutProperty("geoai-e", "visibility", "visible");
     };
+    /* Sombra sobre tudo o que está fora de Porto Alegre (acima das linhas de escoamento, abaixo da drenagem e da seleção) e o contorno do limite. */
+    m.limite_adicionar = function (gj) {
+      if (map.getSource("limite-poa")) return;
+      var polis = gj.geometry.type === "Polygon" ? [gj.geometry.coordinates] : gj.geometry.coordinates;
+      var mundo = [[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]];
+      map.addSource("limite-poa", { type: "geojson", data: gj });
+      map.addSource("limite-mascara", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [mundo].concat(polis.map(function (p) { return p[0]; })) } } });
+      var antes = map.getLayer("dren-rede-halo") ? "dren-rede-halo" : undefined;
+      map.addLayer({ id: "limite-mascara", type: "fill", source: "limite-mascara", layout: { visibility: "none" }, paint: { "fill-color": "#ffffff", "fill-opacity": 0.72 } }, antes);
+      map.addLayer({ id: "limite-linha", type: "line", source: "limite-poa", layout: { visibility: "none" }, paint: { "line-color": "#1b2630", "line-width": 1.3, "line-dasharray": [3, 2] } }, antes);
+    };
     m.visibilidade = function (nome, ligado) {
       CAMADAS[nome].ids.concat(nome === "escoamento_fase3" ? f3Camadas : []).forEach(function (id) { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", ligado ? "visible" : "none"); });
     };
@@ -347,7 +374,7 @@
         var caixa = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
         if (map.getLayoutProperty("f3-sem-dados", "visibility") === "visible") {
           var f = map.queryRenderedFeatures(caixa, { layers: ["f3-casing"] });
-          if (f.length) return cb({ tipo: "trecho_f3", props: f[0].properties });
+          if (f.length) return cb({ tipo: "trecho_f3", props: f[0].properties, lngLat: e.lngLat });
         }
         if (map.getLayoutProperty("dren-rede-0", "visibility") === "visible" || map.getLayoutProperty("dren-pocos", "visibility") === "visible") {
           var ordem = [["bombas", "dren-bombas"], ["bocas", "dren-bocas"], ["pocos", "dren-pocos"], ["rede", "dren-rede-0"]];
