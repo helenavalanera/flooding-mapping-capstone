@@ -20,6 +20,7 @@ DOCS = RAIZ / "docs"
 CATEGORIAS = ["Produto, método e resultados", "Dados, fontes e base legal", "GeoAI (camada E)", "Publicação, infraestrutura e cache", "Qualidade, auditorias e requisitos", "Apresentação e proposta", "Histórico: frentes arquivadas"]
 # nome do arquivo -> (categoria, finalidade)
 CATALOGO = {
+    "documentacao_tecnica_final.md": (0, "Documentação técnica final: arquitetura, camadas, fontes, publicação, limitações, o que foi feito, o que ficou em espera e o que não deu certo."),
     "metodologia.md": (0, "Metodologia consolidada: fórmula, métodos 1 e 2, limites físicos, hipóteses e validações."),
     "fase3_motor.md": (0, "O motor de contribuição potencial e o indicador topográfico (dimensões A, B e C)."),
     "fase3_entradas_e_saidas.md": (0, "Entradas e saídas da Fase 3: proposta original e o que foi implementado."),

@@ -6,6 +6,7 @@ Nome, finalidade e localização de cada documento do Flooding Mapping. Os docum
 
 | Documento | Finalidade | Localização |
 |---|---|---|
+| [Flooding Mapping: documentação técnica final](documentacao_tecnica_final.md) | Documentação técnica final: arquitetura, camadas, fontes, publicação, limitações, o que foi feito, o que ficou em espera e o que não deu certo. | `docs/documentacao_tecnica_final.md` |
 | [Fase 3: entradas e saídas (proposta original e o que foi implementado)](fase3_entradas_e_saidas.md) | Entradas e saídas da Fase 3: proposta original e o que foi implementado. | `docs/fase3_entradas_e_saidas.md` |
 | [Fase 3: o motor de contribuição potencial e o indicador topográfico](fase3_motor.md) | O motor de contribuição potencial e o indicador topográfico (dimensões A, B e C). | `docs/fase3_motor.md` |
 | [Fase 3: resultados da execução](fase3_resultados.md) | Resultados da execução da Fase 3 (gerado). | `docs/fase3_resultados.md` |
