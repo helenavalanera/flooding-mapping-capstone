@@ -39,3 +39,6 @@ Carregando; localização negada ou indisponível (escolha no mapa); ponto fora 
 ### Origem e destino por endereço
 
 A PWA **não** busca endereços digitados: isso exigiria enviar o texto a um serviço de geocodificação de terceiros, com impacto de privacidade e de licença que não foi avaliado. Origem e destino vêm de lugares salvos, da localização ou do mapa. Por isso o estado "origem não encontrada" aparece como **ponto fora da cobertura** ou **sem via próxima**.
+
+## Tipografia (SK Concretika e Inter)
+Títulos, subtítulos e botões usam a **SK Concretika**; textos usam a **Inter**, e as legendas (do mapa e das figuras) saem em itálico. A Inter (licença OFL) está hospedada em `src/flooding_mapping/app/static/vendor/fonts/` (com a licença). A SK Concretika é uma fonte licenciada e **os arquivos não estão no projeto**: hoje ela só aparece nas máquinas que a têm instalada, e as demais usam a fonte de sistema. Para embutir, coloque os `.woff2` em `vendor/fonts/` (por exemplo `SKConcretika-Regular.woff2` e `SKConcretika-Bold.woff2`) e troque, nas duas folhas (`style.css` e `inicio/estudo.css`), `src: local(...)` por `src: url("vendor/fonts/SKConcretika-Regular.woff2") format("woff2")` (com `../` na landing).
